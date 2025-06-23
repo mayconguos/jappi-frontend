@@ -1,52 +1,59 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
 import { useRouter } from 'next/navigation';
+import secureLocalStorage from 'react-secure-storage';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import Sidebar from '@/components/layout/Sidebar';
+import Header from '@/components/layout/Header';
+
+interface UserData {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
+    const storedUser = secureLocalStorage.getItem('user');
+    if (!token || !storedUser) {
       router.replace('/login');
     } else {
+      if (typeof storedUser === 'object' && storedUser !== null) {
+        setUser(storedUser as UserData);
+      } else {
+        router.replace('/login');
+        return;
+      }
       setChecking(false);
     }
   }, [router]);
 
   if (checking) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-400">Cargando sesión...</p>
+      <main className='min-h-screen flex items-center justify-center bg-gray-50'>
+        <p className='text-gray-400'>Cargando sesión...</p>
       </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
-      {/* Header */}
-      <header className="bg-white shadow p-4 flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Panel de administración</h1>
-        <button
-          onClick={() => {
-            localStorage.removeItem('token');
-            router.push('/login');
-          }}
-          className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-        >
-          Cerrar sesión
-        </button>
-      </header>
-
-      {/* Contenido */}
-      <main className="p-6">{children}</main>
+    <div className='min-h-screen flex'>
+      <Sidebar
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={() => setIsMobileSidebarOpen(false)}
+      />
+      <div className='flex-1 flex flex-col'>
+        <Header user={user} onOpenSidebarMobile={() => setIsMobileSidebarOpen(true)} />
+        <main>{children}</main>
+      </div>
     </div>
   );
 }

@@ -13,14 +13,14 @@
       "type": "http",
       "documentation": "",
       "method": "post",
-      "endpoint": "login",
+      "endpoint": "usuario/login",
       "responses": [
         {
           "uuid": "500843ef-10d4-4715-8b76-3252fd40a3be",
-          "body": "{\n  \"token\": \"mock-jwt-token\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"test@delivery.com\",\n    \"role\": \"customer\"\n  }\n}",
-          "latency": 0,
+          "body": "{\n  \"user\": {\n    \"id\": 18,\n    \"name\": \"alma\",\n    \"email\": \"almacen@japiexpress.com\",\n    \"type\": 2\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImlhdCI6MTc1MDk5NTkwMCwiZXhwIjoxNzUxMDgyMzAwfQ.jJFmoQLqza-vRizeUkXiUrkff7ECHNnW6akukQsp4Pw\"\n}",
+          "latency": 2000,
           "statusCode": 200,
-          "label": "",
+          "label": "Login exitoso",
           "headers": [],
           "bodyType": "INLINE",
           "filePath": "",
@@ -33,23 +33,13 @@
           "default": true,
           "crudKey": "id",
           "callbacks": []
-        }
-      ],
-      "responseMode": null
-    },
-    {
-      "uuid": "f39b7391-e5bc-49d5-9a68-f12d74e9100d",
-      "type": "http",
-      "documentation": "",
-      "method": "post",
-      "endpoint": "register",
-      "responses": [
+        },
         {
-          "uuid": "3e5c9b9f-0622-4d4e-960b-80fe9af98fc1",
-          "body": "{\n  \"message\": \"Usuario creado correctamente\"\n}",
+          "uuid": "5ee65689-6488-4719-8710-f70a89ed8426",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"Correo no registrado\",\n  \"stack\": \"Error\\n    at new HttpError (/var/task/node_modules/routing-controllers/cjs/http-error/HttpError.js:17:22)\\n    at new UserError (/var/task/dist/domain/util/UserError.js:7:9)\\n    at LoginUseCase.execute (/var/task/dist/application/UseCase/LoginUseCase.js:17:19)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at async UserService.authenticateUser (/var/task/dist/application/Service/UserService.js:12:16)\\n    at async UserController.login (/var/task/dist/infraestructura/Controller/UserController.js:38:33)\",\n  \"statusCode\": 401\n}",
           "latency": 0,
-          "statusCode": 201,
-          "label": "",
+          "statusCode": 401,
+          "label": "Error de credenciales",
           "headers": [],
           "bodyType": "INLINE",
           "filePath": "",
@@ -59,7 +49,26 @@
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
-          "default": true,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "03c9fdc2-2dbd-4423-a9ad-be9f6a08aaf2",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "Error de servidor",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
           "crudKey": "id",
           "callbacks": []
         }
@@ -67,15 +76,15 @@
       "responseMode": null
     },
     {
-      "uuid": "7826ab68-6015-4e52-8466-a39c567126b6",
+      "uuid": "82ba347d-7c44-4bd0-ac5a-5e7d9f41ecb1",
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "me",
+      "endpoint": "empresa/enviosFechas",
       "responses": [
         {
-          "uuid": "185a52c8-c2c6-411f-9a5b-73f0cde26134",
-          "body": "{\n  \"id\": 1,\n  \"email\": \"test@delivery.com\",\n  \"role\": \"customer\"\n}",
+          "uuid": "6fd6fdf2-9752-45bd-8736-ec8db7e7f9d7",
+          "body": "{\n  \"success\": true,\n  \"message\": \"succesfully !!\",\n  \"data\": [\n    {\n      \"id\": 105005,\n      \"nombre\": \"Novaris\",\n      \"direccion\": \"Santa Elena no. 193\",\n      \"distrito\": 13,\n      \"latitud\": \"-11.9459733\",\n      \"longitud\": \"-77.0696896\",\n      \"telefono\": \"929241172\",\n      \"banco\": \"BCP\",\n      \"cuenta\": \"19239793289039\",\n      \"titular\": \"Sirley Berenice Escribano Caycay \",\n      \"ruc\": null,\n      \"id_duenio\": 2801,\n      \"nombres\": \"SIRLEY BERENICE ESCRIBANO CAYCAY\",\n      \"d_entrega\": \"CALLE SANTA ELENA NO. 190 COMAS (REF. ALTURA OVALO INFANTA DETRÁS DE LA POLLERÍA SALAZAR)\",\n      \"distrito_entrega\": 13,\n      \"tele_entrega\": \"929241172\",\n      \"laentrega\": \"-11.9458567\",\n      \"loentrega\": \"-77.0722878\",\n      \"id_envio\": 140982,\n      \"cantidad\": 1,\n      \"modo_entrega\": \"solo Entregar\",\n      \"metodo_pago\": null,\n      \"tipo_servicio\": \"Regular\",\n      \"monto_total\": 0,\n      \"delivery\": 9,\n      \"horario\": \"9:00am -6:00pm\",\n      \"fecha_entrega\": \"26-06-2025\",\n      \"estado\": 0,\n      \"observacion\": \"HOLA, ANTES DE LAS 6PM POR FAVOR\",\n      \"motivo\": null,\n      \"descripcion\": \"8067  01 reloj para damas\",\n      \"precio\": 77.9,\n      \"id_empresa\": 2801,\n      \"nombre_motorizado\": null\n    },\n    {\n      \"id\": 105347,\n      \"nombre\": \"Duty plus \",\n      \"direccion\": \"Jr libertad 730\",\n      \"distrito\": 43,\n      \"latitud\": \"-12.159286686157031\",\n      \"longitud\": \"-76.94102912844349\",\n      \"telefono\": \"965394113\",\n      \"banco\": \"BCP\",\n      \"cuenta\": \"19490096820087\",\n      \"titular\": \"Paul patiño florindez \",\n      \"ruc\": null,\n      \"id_duenio\": 2084,\n      \"nombres\": \"Adriana ronceros \",\n      \"d_entrega\": \"Av. tupac Amaru Mz. 186DLt10 paradero 4  José Gálvez Villa María del triunfo Lima Referencia: Entre \",\n      \"distrito_entrega\": 43,\n      \"tele_entrega\": \"978289633\",\n      \"laentrega\": \"0\",\n      \"loentrega\": \"0\",\n      \"id_envio\": 140989,\n      \"cantidad\": 1,\n      \"modo_entrega\": \"contra-entrega\",\n      \"metodo_pago\": \"Abono a vendedor\",\n      \"tipo_servicio\": \"Regular\",\n      \"monto_total\": 254,\n      \"delivery\": 9,\n      \"horario\": \"9:00am -6:00pm\",\n      \"fecha_entrega\": \"26-06-2025\",\n      \"estado\": 0,\n      \"observacion\": \"Paul Patiño 965394113 ( abono vendedor )\",\n      \"motivo\": null,\n      \"descripcion\": \"1 AirPods 4ta generación y 1 Smartwatch beige\",\n      \"precio\": 245,\n      \"id_empresa\": 2084,\n      \"nombre_motorizado\": null\n    }\n  ]\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "",
@@ -89,6 +98,102 @@
           "disableTemplating": false,
           "fallbackTo404": false,
           "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "57a21d72-d205-4874-a68b-7453273e4815",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "empresa/listarUsuarios",
+      "responses": [
+        {
+          "uuid": "29ee4507-7d07-41a0-aeaa-793228025d01",
+          "body": "{\n  \"success\": true,\n  \"message\": \"Successfully !!\",\n  \"data\": [\n    {\n      \"id_persona\": 27,\n      \"id_duenio\": 10,\n      \"id_empresa\": 10,\n      \"correo\": \"velia.guerra@gmail.com\",\n      \"pass\": \"administracion2015\",\n      \"duenio\": \"Velia guerra saquiray\",\n      \"dni\": \"43585694\",  \n      \"nombre\": \"sakira's collection\",\n      \"telefono\": \"987025139\",\n      \"direccion\": \"Calle palomares 292 dpto 502 torre p\",\n      \"banco\": \"BCP\",\n      \"cuenta\": \"19104558327069\",\n      \"titular\": \"Velia guerra saquiray\",\n      \"distrito\": 30\n    },\n    {\n      \"id_persona\": 28,\n      \"id_duenio\": 11,\n      \"id_empresa\": 11,\n      \"correo\": \"evlopez.mas@gmail.com\",\n      \"pass\": \"s997590\",\n      \"duenio\": \"Evelin López \",\n      \"dni\": \"47578562\",\n      \"nombre\": \"Samzepol Perú \",\n      \"telefono\": \"997456631\",\n      \"direccion\": \"Jr Bulgaria MZ o lt 27 Urb San Elías \",\n      \"banco\": \"INTERBANK\",\n      \"cuenta\": \"1503065148527\",\n      \"titular\": \"Evelin López\",\n      \"distrito\": 24\n    },\n    {\n      \"id_persona\": 29,\n      \"id_duenio\": 12,\n      \"id_empresa\": 12,\n      \"correo\": \"keila.mena@gmail.com\",\n      \"pass\": \"Kbpe071129\",\n      \"duenio\": \"Emilio Manuel Hinostroza Mena \",\n      \"dni\": \"47147350\",\n      \"nombre\": \"San Cosme \",\n      \"telefono\": \"915334717\",\n      \"direccion\": \"Av Canadá 3150 dpto 401 torres de San Borja \",\n      \"banco\": \"BCP\",\n      \"cuenta\": \"19435606674035\",\n      \"titular\": \"Emilio Manuel Hinostroza Mena\",\n      \"distrito\": 31\n    },\n    {\n      \"id_persona\": 30,\n      \"id_duenio\": 13,\n      \"id_empresa\": 13,\n      \"correo\": \"nicoleceron@hotmail.com\",\n      \"pass\": \"niconico3061\",\n      \"duenio\": \"Nicole Stacy Cerón Albuquerque\",\n      \"dni\": \"73646208\",\n      \"nombre\": \"Saori peru villa\",\n      \"telefono\": \"922409946\",\n      \"direccion\": \"Asent h. Brisas de Pachacámacz l lt 30 \",\n      \"banco\": \"BCP\",\n      \"cuenta\": \"19105301538088\",\n      \"titular\": \"Nicole Stacy Cerón Albuquerque\",\n      \"distrito\": 42\n    },\n    {\n      \"id_persona\": 31,\n      \"id_duenio\": 14,\n      \"id_empresa\": 14,\n      \"correo\": \"dactilart.kids@gmail.com\",\n      \"pass\": \"yaha1990\",\n      \"duenio\": \"yahaira\",\n      \"dni\": \"46531855\",\n      \"nombre\": \"DACTILART KIDS\",\n      \"telefono\": \"963201360\",\n      \"direccion\": \"Calle yen esc garro 745-747 urb. La viña\",\n      \"banco\": \"BBVA\",\n      \"cuenta\": \"1108140211827820\",\n      \"titular\": \"Yahaira puente arnao\",\n      \"distrito\": 35\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "usuario/registro",
+      "responses": [
+        {
+          "uuid": "81629666-7051-4684-8cd3-2e18235da426",
+          "body": "",
+          "latency": 2000,
+          "statusCode": 200,
+          "label": "Registro exitoso",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "348ba409-0d56-45a3-811d-0f1156f5fcfc",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"Correo no registrado\",\n  \"stack\": \"Error\\n    at new HttpError (/var/task/node_modules/routing-controllers/cjs/http-error/HttpError.js:17:22)\\n    at new UserError (/var/task/dist/domain/util/UserError.js:7:9)\\n    at LoginUseCase.execute (/var/task/dist/application/UseCase/LoginUseCase.js:17:19)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at async UserService.authenticateUser (/var/task/dist/application/Service/UserService.js:12:16)\\n    at async UserController.login (/var/task/dist/infraestructura/Controller/UserController.js:38:33)\",\n  \"statusCode\": 401\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Error de credenciales",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "518d30ed-885c-4a22-bc1e-bc6a39fbe28a",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "Error de servidor",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
           "crudKey": "id",
           "callbacks": []
         }
@@ -103,11 +208,15 @@
     },
     {
       "type": "route",
-      "uuid": "f39b7391-e5bc-49d5-9a68-f12d74e9100d"
+      "uuid": "82ba347d-7c44-4bd0-ac5a-5e7d9f41ecb1"
     },
     {
       "type": "route",
-      "uuid": "7826ab68-6015-4e52-8466-a39c567126b6"
+      "uuid": "57a21d72-d205-4874-a68b-7453273e4815"
+    },
+    {
+      "type": "route",
+      "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081"
     }
   ],
   "proxyMode": false,
