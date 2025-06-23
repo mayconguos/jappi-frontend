@@ -1,0 +1,154 @@
+{
+  "uuid": "b4f12f9a-c836-4f8d-ad2c-76d507bcc5f0",
+  "lastMigration": 32,
+  "name": "Jappi server",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 4041,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "5680e541-8d4d-4464-8430-6af9651118a0",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "login",
+      "responses": [
+        {
+          "uuid": "500843ef-10d4-4715-8b76-3252fd40a3be",
+          "body": "{\n  \"token\": \"mock-jwt-token\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"test@delivery.com\",\n    \"role\": \"customer\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "f39b7391-e5bc-49d5-9a68-f12d74e9100d",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "register",
+      "responses": [
+        {
+          "uuid": "3e5c9b9f-0622-4d4e-960b-80fe9af98fc1",
+          "body": "{\n  \"message\": \"Usuario creado correctamente\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "7826ab68-6015-4e52-8466-a39c567126b6",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "me",
+      "responses": [
+        {
+          "uuid": "185a52c8-c2c6-411f-9a5b-73f0cde26134",
+          "body": "{\n  \"id\": 1,\n  \"email\": \"test@delivery.com\",\n  \"role\": \"customer\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "5680e541-8d4d-4464-8430-6af9651118a0"
+    },
+    {
+      "type": "route",
+      "uuid": "f39b7391-e5bc-49d5-9a68-f12d74e9100d"
+    },
+    {
+      "type": "route",
+      "uuid": "7826ab68-6015-4e52-8466-a39c567126b6"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "*"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
