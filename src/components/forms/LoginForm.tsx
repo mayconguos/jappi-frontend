@@ -26,7 +26,7 @@ export default function LoginForm() {
     setIsServerError(false);
     
     try {
-      const res = await api.post('/usuario/login', data);
+      const res = await api.post('/user/login', data);
       const token = res.data.token;
       const user = res.data.user;
 

@@ -60,8 +60,16 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
           {/* Logo y botones */}
           <div className='flex items-center justify-between px-4 py-4 border-b border-white/10'>
             <div className={`flex items-center gap-2 ${isCollapsed ? 'justify-center w-full' : ''}`}>
-              <Image src='/logo.png' alt='Logo' width={isCollapsed ? 32 : 48} height={48} />
-              {!isCollapsed && <span className='font-bold text-lg'>JAPI EXPRESS</span>}
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                className={`${isCollapsed ? 'w-8 h-8' : 'w-12 h-12'}`}
+                fill={false}
+                width={0}
+                height={0}
+                sizes="auto"
+              />
+              {!isCollapsed && <span className='font-bold text-lg'>Japi Express</span>}
             </div>
 
             {/* Cerrar mobile */}
@@ -76,7 +84,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
             {/* Collapse en desktop */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className='hidden md:block text-white hover:text-gray-300 transition-transform duration-300'
+              className='hidden md:block text-white hover:text-gray-300 transition-transform duration-300 cursor-pointer'
               title={isCollapsed ? 'Expandir' : 'Colapsar'}
             >
               {isCollapsed ? (

@@ -6,9 +6,11 @@ export default function DashboardPage() {
       <Image
         src='/images/404.jpg'
         alt='404 Error'
-        width={500}
-        height={300}
-        className='mb-4'
+        className='mb-4 w-[480px] h-[600px]'
+        width={0} 
+        height={0}
+        sizes='auto'
+        priority
       />
     </div>
   );

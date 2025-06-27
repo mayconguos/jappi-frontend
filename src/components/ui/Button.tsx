@@ -9,7 +9,9 @@ const buttonVariants = cva(
         default: 'text-white hover:opacity-80 [background-color:var(--button-hover-color)]',
         outline: 'border border-gray-300 text-gray-900 hover:bg-gray-100',
         ghost: 'bg-transparent hover:bg-gray-100 text-gray-900',
-        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        destructive: 'text-white hover:opacity-80 [background-color:var(--button-destructive-color)]',
+        warning: 'bg-yellow-600 text-white hover:bg-yellow-700',
+        info: 'bg-blue-600 text-white hover:bg-blue-700',
       },
       size: {
         default: 'h-10 px-4 py-2',

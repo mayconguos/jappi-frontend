@@ -9,6 +9,7 @@ import api from "@/app/services/api";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
 interface UsuarioExterno {
   id_persona: number;
@@ -99,41 +100,39 @@ export default function ListaExternosPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto border rounded">
-        <table className="min-w-full table-auto text-sm">
-          <thead className="bg-gray-100 text-left">
-            <tr>
-              <th className="px-4 py-2">Nombre</th>
-              <th className="px-4 py-2">Correo</th>
-              <th className="px-4 py-2">Teléfono</th>
-              <th className="px-4 py-2">DNI</th>
-              <th className="px-4 py-2">Dirección</th>
-              <th className="px-4 py-2">Banco</th>
-              <th className="px-4 py-2">Titular</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtrados.map((u) => (
-              <tr key={u.id_persona} className="border-t">
-                <td className="px-4 py-2">{u.nombre}</td>
-                <td className="px-4 py-2">{u.correo}</td>
-                <td className="px-4 py-2">{u.telefono}</td>
-                <td className="px-4 py-2">{u.dni}</td>
-                <td className="px-4 py-2">{u.direccion}</td>
-                <td className="px-4 py-2">{u.banco}</td>
-                <td className="px-4 py-2">{u.titular}</td>
-              </tr>
-            ))}
-            {filtrados.length === 0 && (
-              <tr>
-                <td colSpan={7} className="text-center py-4 text-gray-500">
-                  No hay resultados
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Correo</TableHead>
+            <TableHead>Teléfono</TableHead>
+            <TableHead>DNI</TableHead>
+            <TableHead>Dirección</TableHead>
+            <TableHead>Banco</TableHead>
+            <TableHead>Titular</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filtrados.map((u) => (
+            <TableRow key={u.id_persona}>
+              <TableCell>{u.nombre}</TableCell>
+              <TableCell>{u.correo}</TableCell>
+              <TableCell>{u.telefono}</TableCell>
+              <TableCell>{u.dni}</TableCell>
+              <TableCell>{u.direccion}</TableCell>
+              <TableCell>{u.banco}</TableCell>
+              <TableCell>{u.titular}</TableCell>
+            </TableRow>
+          ))}
+          {filtrados.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                No hay resultados
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </section>
   );
 }

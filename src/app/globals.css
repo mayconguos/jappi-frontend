@@ -6,7 +6,12 @@
   --primary: #0ea5e9;
 
   --surface-dark: #031F31;
+    /* --surface-dark: #0D8F75;
+      amarillo-claro #FECC2B;
+      amarilo-oscuro #DEAF16; */
+
   --button-hover-color: #3CBEA9;
+  --button-destructive-color: #F95C68;
 }
 
 @keyframes fade-in {

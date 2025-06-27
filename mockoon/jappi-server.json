@@ -13,7 +13,7 @@
       "type": "http",
       "documentation": "",
       "method": "post",
-      "endpoint": "usuario/login",
+      "endpoint": "user/login",
       "responses": [
         {
           "uuid": "500843ef-10d4-4715-8b76-3252fd40a3be",
@@ -138,11 +138,11 @@
       "type": "http",
       "documentation": "",
       "method": "post",
-      "endpoint": "usuario/registro",
+      "endpoint": "user/create",
       "responses": [
         {
           "uuid": "81629666-7051-4684-8cd3-2e18235da426",
-          "body": "",
+          "body": "{\r\n  \"id\": 999\r\n}",
           "latency": 2000,
           "statusCode": 200,
           "label": "Registro exitoso",
@@ -199,12 +199,158 @@
         }
       ],
       "responseMode": null
+    },
+    {
+      "uuid": "1c0aedf8-7e9a-4ed9-b780-74dcf6793caf",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "user/list",
+      "responses": [
+        {
+          "uuid": "cbb3eb2c-329a-4336-a3df-99ce06e6a01a",
+          "body": "[\n  {\n    \"id\": 2802,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"admin@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2803,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"almacen@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 4\n  },\n  {\n    \"id\": 2804,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"coordinacion@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 5\n  },\n  {\n    \"id\": 2810,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"test@test.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 5\n  },\n  {\n    \"id\": 2811,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"a@a.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2812,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"maycon@sura.pe\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 4\n  },\n  {\n    \"id\": 2813,\n    \"first_name\": \"maycon\",\n    \"last_name\": \"guzman\",\n    \"email\": \"a@asda.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2814,\n    \"first_name\": \"asdas\",\n    \"last_name\": \"asdasd\",\n    \"email\": \"a@as.com\",\n    \"document_type\": 1,\n    \"document_number\": \"44444444\",\n    \"type\": 2\n  }\n]",
+          "latency": 2000,
+          "statusCode": 200,
+          "label": "Listado exitoso",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "c623d671-019d-4a30-98a1-0b03d6a5426e",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"Correo no registrado\",\n  \"stack\": \"Error\\n    at new HttpError (/var/task/node_modules/routing-controllers/cjs/http-error/HttpError.js:17:22)\\n    at new UserError (/var/task/dist/domain/util/UserError.js:7:9)\\n    at LoginUseCase.execute (/var/task/dist/application/UseCase/LoginUseCase.js:17:19)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at async UserService.authenticateUser (/var/task/dist/application/Service/UserService.js:12:16)\\n    at async UserController.login (/var/task/dist/infraestructura/Controller/UserController.js:38:33)\",\n  \"statusCode\": 401\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Error de credenciales",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "1776ee65-e46f-4a7d-b9be-f937ecf0c824",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "Error de servidor",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "e595b41c-30e6-4d66-a94e-14ff4167994a",
+      "type": "http",
+      "documentation": "",
+      "method": "put",
+      "endpoint": "user/update/:id",
+      "responses": [
+        {
+          "uuid": "0a310277-1782-4f9f-97bf-fef74269d803",
+          "body": "{}",
+          "latency": 2000,
+          "statusCode": 200,
+          "label": "Actualización exitosa",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "b9c4b3e0-782a-4ae6-91de-128a645477d1",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"Correo no registrado\",\n  \"stack\": \"Error\\n    at new HttpError (/var/task/node_modules/routing-controllers/cjs/http-error/HttpError.js:17:22)\\n    at new UserError (/var/task/dist/domain/util/UserError.js:7:9)\\n    at LoginUseCase.execute (/var/task/dist/application/UseCase/LoginUseCase.js:17:19)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at async UserService.authenticateUser (/var/task/dist/application/Service/UserService.js:12:16)\\n    at async UserController.login (/var/task/dist/infraestructura/Controller/UserController.js:38:33)\",\n  \"statusCode\": 401\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Error de credenciales",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "34d01549-b8a6-412d-bea0-1d8282a38b68",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "Error de servidor",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
     }
   ],
   "rootChildren": [
     {
       "type": "route",
+      "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081"
+    },
+    {
+      "type": "route",
+      "uuid": "1c0aedf8-7e9a-4ed9-b780-74dcf6793caf"
+    },
+    {
+      "type": "route",
       "uuid": "5680e541-8d4d-4464-8430-6af9651118a0"
+    },
+    {
+      "type": "route",
+      "uuid": "e595b41c-30e6-4d66-a94e-14ff4167994a"
     },
     {
       "type": "route",
@@ -213,10 +359,6 @@
     {
       "type": "route",
       "uuid": "57a21d72-d205-4874-a68b-7453273e4815"
-    },
-    {
-      "type": "route",
-      "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081"
     }
   ],
   "proxyMode": false,
