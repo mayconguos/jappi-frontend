@@ -159,6 +159,19 @@ export default function LoginForm() {
           'Ingresar'
         )}
       </button>
+
+      <div className='text-center'>
+        <p className='text-sm text-gray-600'>
+          ¿No tienes una cuenta?{' '}
+          <button
+            type="button"
+            onClick={() => router.push('/registro')}
+            className='text-blue-600 hover:text-blue-800 hover:underline font-medium'
+          >
+            Regístrate aquí
+          </button>
+        </p>
+      </div>
     </form>
   );
 }
