@@ -68,12 +68,14 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z
     .string()
+    .min(1, 'El correo es obligatorio')
     .email('Ingresa un correo válido')
-    .min(1, 'El correo es obligatorio'),
-  
+    .max(255, 'El correo es demasiado largo'),
   password: z
     .string()
     .min(1, 'La contraseña es obligatoria')
+    .min(6, 'La contraseña debe tener al menos 6 caracteres')
+    .max(100, 'La contraseña es demasiado larga'),
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;

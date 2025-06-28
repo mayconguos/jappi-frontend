@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import api from '@/app/services/api';
 
@@ -10,6 +12,12 @@ import { Select } from '@/components/ui/select';
 
 import { DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
 import { USER_TYPES, DEFAULT_USER_TYPE } from '@/constants/userTypes';
+import {
+  administratorSchema,
+  administratorEditSchema,
+  type AdministratorFormData,
+  type AdministratorEditFormData
+} from '@/lib/validations/administrator';
 
 interface AxiosError {
   response?: {
@@ -47,46 +55,37 @@ interface AdministradorModalProps {
 }
 
 export default function AdministradorModal({ isOpen, onClose, onSubmit, editingAdministrador }: AdministradorModalProps) {
-  const [formData, setFormData] = useState<Administrador>({
-    first_name: '',
-    last_name: '',
-    document_type: DEFAULT_DOCUMENT_TYPE,
-    document_number: '',
-    email: '',
-    password: '',
-    type: DEFAULT_USER_TYPE,
+  const isEditing = !!editingAdministrador;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, dirtyFields },
+    reset,
+    setValue,
+    watch,
+    clearErrors
+  } = useForm<AdministratorFormData | AdministratorEditFormData>({
+    resolver: zodResolver(isEditing ? administratorEditSchema : administratorSchema),
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      document_type: DEFAULT_DOCUMENT_TYPE,
+      document_number: '',
+      email: '',
+      password: '',
+      type: DEFAULT_USER_TYPE,
+    }
   });
 
-  const [errors, setErrors] = useState<Partial<Administrador>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string>('');
-  const [changedFields, setChangedFields] = useState<Set<keyof Administrador>>(new Set());
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  const handleChange = (field: keyof Administrador, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: field === 'type' ? parseInt(value) : value
-    }));
-
-    // Marcar el campo como cambiado si es que estamos editando
-    if (editingAdministrador) {
-      setChangedFields(prev => new Set(prev).add(field));
-    }
-
-    // Limpiar error del campo cuando el usuario empiece a escribir
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
-    }
-  };
 
   // Llenar el formulario cuando se está editando
   useEffect(() => {
     if (editingAdministrador) {
-      setFormData({
+      reset({
         first_name: editingAdministrador.first_name || '',
         last_name: editingAdministrador.last_name || '',
         document_type: (editingAdministrador.document_type || DEFAULT_DOCUMENT_TYPE).toString(),
@@ -96,7 +95,7 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
         type: editingAdministrador.type || DEFAULT_USER_TYPE,
       });
     } else {
-      setFormData({
+      reset({
         first_name: '',
         last_name: '',
         document_type: DEFAULT_DOCUMENT_TYPE,
@@ -106,166 +105,92 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
         type: DEFAULT_USER_TYPE,
       });
     }
-    setErrors({});
     setApiError('');
-    setChangedFields(new Set());
-  }, [editingAdministrador, isOpen]);
+  }, [editingAdministrador, isOpen, reset]);
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<Administrador> = {};
+  const onFormSubmit: SubmitHandler<AdministratorFormData | AdministratorEditFormData> = async (data) => {
+    setIsLoading(true);
+    setApiError('');
 
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'El nombre es requerido';
-    }
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = 'El apellido es requerido';
-    }
-    if (!formData.document_number.trim()) {
-      newErrors.document_number = 'El número de documento es requerido';
-    } else {
-      // Validaciones específicas por tipo de documento
-      if (formData.document_type === '1') { // DNI
-        const dniPattern = /^\d{8}$/;
-        if (!dniPattern.test(formData.document_number)) {
-          newErrors.document_number = 'El DNI debe tener exactamente 8 dígitos numéricos';
-        }
-      } else if (formData.document_type === '6') { // RUC
-        const rucPattern = /^\d{11}$/;
-        if (!rucPattern.test(formData.document_number)) {
-          newErrors.document_number = 'El RUC debe tener exactamente 11 dígitos numéricos';
-        }
-      } else if (formData.document_type === '4' || formData.document_type === '7') { // Carnet de extranjería o Pasaporte
-        const cePassportPattern = /^[A-Za-z0-9]{1,12}$/;
-        if (!cePassportPattern.test(formData.document_number)) {
-          const docType = formData.document_type === '4' ? 'Carnet de extranjería' : 'Pasaporte';
-          newErrors.document_number = `El ${docType} debe tener máximo 12 caracteres alfanuméricos`;
-        }
-      } else if (formData.document_type === '0' || formData.document_type === 'A') { // Otros o Cédula Diplomática
-        const generalPattern = /^[A-Za-z0-9\-\s]{1,15}$/;
-        if (!generalPattern.test(formData.document_number)) {
-          const docType = formData.document_type === '0' ? 'documento' : 'Cédula Diplomática';
-          newErrors.document_number = `El ${docType} debe tener máximo 15 caracteres alfanuméricos`;
-        }
+    try {
+      const token = localStorage.getItem('token');
+
+      let requestBody: { [key in keyof Administrador]?: string | number };
+
+      if (editingAdministrador) {
+        // Solo enviar los campos que han cambiado
+        requestBody = {};
+        Object.keys(dirtyFields).forEach(field => {
+          const key = field as keyof Administrador;
+          requestBody[key] = data[key as keyof typeof data];
+        });
+      } else {
+        // Para crear, enviar todos los campos necesarios
+        const createData = data as AdministratorFormData;
+        requestBody = {
+          first_name: createData.first_name,
+          last_name: createData.last_name,
+          document_type: createData.document_type,
+          document_number: createData.document_number,
+          type: createData.type,
+          email: createData.email,
+          password: createData.password
+        };
       }
-    }
 
-    // Solo validar email si no estamos editando
-    if (!editingAdministrador) {
-      if (!formData.email.trim()) {
-        newErrors.email = 'El correo electrónico es requerido';
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = 'El correo electrónico no es válido';
+      let response;
+      if (editingAdministrador) {
+        // Actualizar administrador existente
+        response = await api.put(`/user/update/${editingAdministrador.id}`, requestBody, {
+          headers: {
+            authorization: `${token}`,
+          },
+        });
+      } else {
+        // Crear nuevo administrador
+        response = await api.post('/user/create', requestBody, {
+          headers: {
+            authorization: `${token}`,
+          },
+        });
       }
-    }
 
-    // Solo validar contraseña si no estamos editando
-    if (!editingAdministrador) {
-      if (!formData.password.trim()) {
-        newErrors.password = 'La contraseña es requerida';
-      } else if (formData.password.length < 6) {
-        newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
-      }
-    }
+      if (response.status === 200 || response.status === 201) {
+        onSubmit(data as Omit<Administrador, 'id'>);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+        // Resetear formulario
+        reset();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      setIsLoading(true);
-      setApiError('');
-
-      try {
-        const token = localStorage.getItem('token');
-
-        let requestBody: { [key in keyof Administrador]?: string | number };
-
+        // Mostrar modal de éxito solo para actualizaciones
         if (editingAdministrador) {
-          // Solo enviar los campos que han cambiado
-          requestBody = {};
-          changedFields.forEach(field => {
-            requestBody[field] = formData[field];
-          });
+          setShowSuccessModal(true);
         } else {
-          // Para crear, enviar todos los campos necesarios
-          requestBody = {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            document_type: formData.document_type,
-            document_number: formData.document_number,
-            type: formData.type,
-            email: formData.email,
-            password: formData.password
-          };
+          onClose();
         }
+      } else {
+        const action = editingAdministrador ? 'actualizar' : 'crear';
+        setApiError(response.data?.message || `Error al ${action} el administrador`);
+      }
+    } catch (error: unknown) {
+      console.error('Error al procesar administrador:', error);
 
-        let response;
-        if (editingAdministrador) {
-          // Actualizar administrador existente
-          response = await api.put(`/user/update/${editingAdministrador.id}`, requestBody, {
-            headers: {
-              authorization: `${token}`,
-            },
-          });
-        } else {
-          // Crear nuevo administrador
-          response = await api.post('/user/create', requestBody, {
-            headers: {
-              authorization: `${token}`,
-            },
-          });
-        }
-
-        if (response.status === 200 || response.status === 201) {
-          onSubmit(formData);
-
-          // Resetear formulario
-          setFormData({
-            first_name: '',
-            last_name: '',
-            document_type: DEFAULT_DOCUMENT_TYPE,
-            document_number: '',
-            email: '',
-            password: '',
-            type: DEFAULT_USER_TYPE,
-          });
-          setErrors({});
-          setChangedFields(new Set());
-
-          // Mostrar modal de éxito solo para actualizaciones
-          if (editingAdministrador) {
-            setShowSuccessModal(true);
-          } else {
-            onClose();
-          }
-        } else {
-          const action = editingAdministrador ? 'actualizar' : 'crear';
-          setApiError(response.data?.message || `Error al ${action} el administrador`);
-        }
-      } catch (error: unknown) {
-        console.error('Error al procesar administrador:', error);
-
-        // Manejar diferentes tipos de errores
-        if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as AxiosError;
-          if (axiosError.response?.status === 400) {
-            setApiError(axiosError.response.data?.message || 'Datos inválidos');
-          } else if (axiosError.response?.status === 401) {
-            setApiError('No autorizado. Por favor, inicie sesión nuevamente');
-          } else if (axiosError.response?.status === 409) {
-            setApiError('Ya existe un usuario con este correo');
-          } else {
-            setApiError('Error del servidor. Intente nuevamente');
-          }
+      // Manejar diferentes tipos de errores
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response?.status === 400) {
+          setApiError(axiosError.response.data?.message || 'Datos inválidos');
+        } else if (axiosError.response?.status === 401) {
+          setApiError('No autorizado. Por favor, inicie sesión nuevamente');
+        } else if (axiosError.response?.status === 409) {
+          setApiError('Ya existe un usuario con este correo');
         } else {
           setApiError('Error del servidor. Intente nuevamente');
         }
-      } finally {
-        setIsLoading(false);
+      } else {
+        setApiError('Error del servidor. Intente nuevamente');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -275,18 +200,8 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
   };
 
   const handleClose = () => {
-    setFormData({
-      first_name: '',
-      last_name: '',
-      document_type: DEFAULT_DOCUMENT_TYPE,
-      document_number: '',
-      email: '',
-      password: '',
-      type: DEFAULT_USER_TYPE,
-    });
-    setErrors({});
+    reset();
     setApiError('');
-    setChangedFields(new Set());
     onClose();
   };
 
@@ -346,7 +261,7 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
           {apiError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {apiError}
@@ -358,10 +273,16 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               Tipo de usuario *
             </label>
             <Select
-              value={formData.type.toString()}
-              onChange={(value: string) => handleChange('type', value)}
+              value={watch('type').toString()}
               options={ADMIN_USER_TYPES}
+              onChange={(value: string) => {
+                setValue('type', parseInt(value));
+                clearErrors('type');
+              }}
             />
+            {errors.type && (
+              <p className="text-red-500 text-xs mt-1">{errors.type.message}</p>
+            )}
           </div>
 
           <div>
@@ -369,13 +290,12 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               Nombre *
             </label>
             <Input
-              value={formData.first_name}
-              onChange={(e) => handleChange('first_name', e.target.value)}
+              {...register('first_name')}
               placeholder="Ingrese el nombre"
               className={errors.first_name ? 'border-red-500' : ''}
             />
             {errors.first_name && (
-              <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>
             )}
           </div>
 
@@ -384,13 +304,12 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               Apellido *
             </label>
             <Input
-              value={formData.last_name}
-              onChange={(e) => handleChange('last_name', e.target.value)}
+              {...register('last_name')}
               placeholder="Ingrese el apellido"
               className={errors.last_name ? 'border-red-500' : ''}
             />
             {errors.last_name && (
-              <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>
             )}
           </div>
 
@@ -399,10 +318,19 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               Tipo de documento *
             </label>
             <Select
-              value={formData.document_type}
-              onChange={(value: string) => handleChange('document_type', value)}
+              value={watch('document_type')}
               options={DOCUMENT_TYPES}
+              onChange={(value: string) => {
+                setValue('document_type', value);
+                clearErrors('document_type');
+                // Limpiar el número de documento cuando cambie el tipo
+                setValue('document_number', '');
+                clearErrors('document_number');
+              }}
             />
+            {errors.document_type && (
+              <p className="text-red-500 text-xs mt-1">{errors.document_type.message}</p>
+            )}
           </div>
 
           <div>
@@ -410,13 +338,12 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               Número de documento *
             </label>
             <Input
-              value={formData.document_number}
-              onChange={(e) => handleChange('document_number', e.target.value)}
+              {...register('document_number')}
               placeholder="Ingrese el número de documento"
               className={errors.document_number ? 'border-red-500' : ''}
             />
             {errors.document_number && (
-              <p className="text-red-500 text-xs mt-1">{errors.document_number}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.document_number.message}</p>
             )}
           </div>
 
@@ -426,15 +353,14 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
             </label>
             <Input
               type="email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
+              {...register('email')}
               placeholder="Ingrese el correo electrónico"
               className={errors.email ? 'border-red-500' : ''}
               autoComplete="username"
               disabled={!!editingAdministrador}
             />
             {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
             )}
             {editingAdministrador && (
               <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
@@ -448,14 +374,13 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               </label>
               <Input
                 type="password"
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
+                {...register('password')}
                 placeholder="Ingrese la contraseña"
                 className={errors.password ? 'border-red-500' : ''}
                 autoComplete="new-password"
               />
               {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
               )}
             </div>
           )}

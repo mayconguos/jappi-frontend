@@ -1,30 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+
 import secureLocalStorage from 'react-secure-storage';
 
 import api from '@/app/services/api';
+import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 
-type FormValues = {
-  email: string;
-  password: string;
-};
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function LoginForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isServerError, setIsServerError] = useState(false);
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError('');
     setIsServerError(false);
-    
+
     try {
       const res = await api.post('/user/login', data);
       const token = res.data.token;
@@ -54,11 +56,9 @@ export default function LoginForm() {
       secureLocalStorage.setItem('user', userWithRole);
       router.push('/dashboard');
     } catch (err: unknown) {
-      
       // Type guard para verificar si es un error de axios
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { status: number } };
-        
         if (axiosError.response) {
           // El servidor respondió con un código de estado fuera del rango 2xx
           switch (axiosError.response.status) {
@@ -97,55 +97,58 @@ export default function LoginForm() {
       <h2 className='text-2xl font-semibold text-center'>Iniciar sesión</h2>
 
       <div>
-        <label className='block mb-1 text-sm'>Correo</label>
-        <input
-          {...register('email', { required: true })}
+        <label className='block mb-1 text-sm font-medium text-gray-700'>Correo</label>
+        <Input
+          {...register('email')}
           type='email'
           autoComplete='email'
-          value='almacen@japiexpress.com'
+          defaultValue='almacen@japiexpress.com'
           disabled={isLoading}
-          className='w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed'
+          placeholder="Ingresa tu correo electrónico"
         />
-        {errors.email && <span className='text-red-500 text-xs'>Este campo es obligatorio</span>}
+        {errors.email && <span className='text-red-500 text-xs mt-1 block'>{errors.email.message}</span>}
       </div>
 
       <div>
-        <label className='block mb-1 text-sm'>Contraseña</label>
-        <input
-          {...register('password', { required: true })}
+        <label className='block mb-1 text-sm font-medium text-gray-700'>Contraseña</label>
+        <Input
+          {...register('password')}
           type='password'
           autoComplete='current-password'
-          value='japientregas24680'
+          defaultValue='japientregas24680'
           disabled={isLoading}
-          className='w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed'
+          placeholder="Ingresa tu contraseña"
         />
-        {errors.password && <span className='text-red-500 text-xs'>Este campo es obligatorio</span>}
+        {errors.password && <span className='text-red-500 text-xs mt-1 block'>{errors.password.message}</span>}
       </div>
 
       {error && (
-        <div className='text-red-600 text-sm text-center'>
+        <div className='text-red-600 text-sm text-center p-3 bg-red-50 border border-red-200 rounded-md'>
           {error}
           {isServerError && (
             <div className='mt-2'>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setError('');
                   setIsServerError(false);
                 }}
-                className='text-blue-600 hover:text-blue-800 underline text-xs'
+                className='text-blue-600 hover:text-blue-800 underline text-xs h-auto p-0'
               >
                 Limpiar error
-              </button>
+              </Button>
             </div>
           )}
         </div>
       )}
 
-      <button 
-        type='submit' 
+      <Button
+        type='submit'
         disabled={isLoading}
-        className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded flex items-center justify-center'
+        className='w-full'
+        size="lg"
       >
         {isLoading ? (
           <>
@@ -158,18 +161,19 @@ export default function LoginForm() {
         ) : (
           'Ingresar'
         )}
-      </button>
+      </Button>
 
       <div className='text-center'>
         <p className='text-sm text-gray-600'>
           ¿No tienes una cuenta?{' '}
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={() => router.push('/registro')}
-            className='text-blue-600 hover:text-blue-800 hover:underline font-medium'
+            className='text-blue-600 hover:text-blue-800 hover:underline font-medium h-auto p-0'
           >
             Regístrate aquí
-          </button>
+          </Button>
         </p>
       </div>
     </form>
