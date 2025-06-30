@@ -12,11 +12,23 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 
 export default function LoginForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'almacen@japiexpress.com',
+      password: 'japientregas24680'
+    }
   });
+
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,27 +43,7 @@ export default function LoginForm() {
       const res = await api.post('/user/login', data);
       const token = res.data.token;
       const user = res.data.user;
-
-      let role;
-      switch (user.type) {
-        case 1:
-          role = 'cliente';
-          break;
-        case 2:
-          role = 'empresa';
-          break;
-        case 3:
-          role = 'motorizado';
-          break;
-        case 4:
-          role = 'almacen';
-        case 5:
-          role = 'coordinacion';
-        default:
-          role = '';
-      }
-
-      const userWithRole = { ...user, role };
+      const userWithRole = { ...user };
       localStorage.setItem('token', token);
       secureLocalStorage.setItem('user', userWithRole);
       router.push('/dashboard');
@@ -102,7 +94,6 @@ export default function LoginForm() {
           {...register('email')}
           type='email'
           autoComplete='email'
-          defaultValue='almacen@japiexpress.com'
           disabled={isLoading}
           placeholder="Ingresa tu correo electrónico"
         />
@@ -110,16 +101,14 @@ export default function LoginForm() {
       </div>
 
       <div>
-        <label className='block mb-1 text-sm font-medium text-gray-700'>Contraseña</label>
-        <Input
-          {...register('password')}
-          type='password'
-          autoComplete='current-password'
-          defaultValue='japientregas24680'
-          disabled={isLoading}
+        <PasswordInput
+          value={watch('password') || ''}
+          onChange={(value) => setValue('password', value)}
+          label="Contraseña"
           placeholder="Ingresa tu contraseña"
+          disabled={isLoading}
+          error={errors.password?.message}
         />
-        {errors.password && <span className='text-red-500 text-xs mt-1 block'>{errors.password.message}</span>}
       </div>
 
       {error && (

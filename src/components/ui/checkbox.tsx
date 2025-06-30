@@ -7,7 +7,7 @@ import { clsx } from 'clsx';
 interface CheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  label?: string;
+  label?: string | React.ReactNode;
   disabled?: boolean;
   className?: string;
 }
@@ -31,7 +31,7 @@ export const Checkbox = ({ checked, onChange, label, disabled = false, className
         {checked && <Check className="h-3 w-3" />}
       </button>
       {label && (
-        <label
+        <div
           className={clsx(
             'text-sm text-gray-700 cursor-pointer',
             disabled && 'opacity-50 cursor-not-allowed'
@@ -39,7 +39,7 @@ export const Checkbox = ({ checked, onChange, label, disabled = false, className
           onClick={() => !disabled && onChange(!checked)}
         >
           {label}
-        </label>
+        </div>
       )}
     </div>
   );

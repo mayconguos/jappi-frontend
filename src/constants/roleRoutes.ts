@@ -13,11 +13,11 @@ import {
 } from 'lucide-react';
 
 export type Role =
-  | 'usuario'
-  | 'empresa'
-  | 'motorizado'
+  | 'admin'
+  | 'coordinacion'
   | 'almacen'
-  | 'coordinacion';
+  | 'empresa'
+  | 'motorizado';
 
 export interface RouteItem {
   path: string;
@@ -26,44 +26,51 @@ export interface RouteItem {
 }
 
 export const roleRoutes: Record<Role, RouteItem[]> = {
-  usuario: [
-    { path: '/almacen', label: 'Almacén', icon: Warehouse },
-    { path: '/mis-envios', label: 'Mis envíos', icon: Package },
-    { path: '/perfil', label: 'Perfil', icon: User },
-    { path: '/registro-envio', label: 'Registrar envíos', icon: Send },
+  admin: [
+    { path: '/dashboard/deliveries-by-date', label: 'Envíos por fecha', icon: Calendar },
+    { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
+    { path: '/dashboard/deliveries', label: 'Entregas', icon: Package },
+    { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    { path: '/dashboard/warehouse', label: 'Almacén Japi', icon: Warehouse },
+    { path: '/dashboard/clients', label: 'Empresas clientes', icon: Users },
+    { path: '/dashboard/couriers', label: 'Motorizados', icon: Truck },
+    { path: '/dashboard/users', label: 'Usuarios internos', icon: ShieldCheck },
+    { path: '/dashboard/activations', label: 'Activación de cuentas', icon: ShieldCheck },
+    { path: '/dashboard/pickup-history', label: 'Historial de recojos', icon: History },
+    { path: '/dashboard/warehouse-requests', label: 'Solicitudes de almacén', icon: FileText },
   ],
-  empresa: [
-    // { path: '/envios-fecha', label: 'Envíos por fecha', icon: Calendar },
-    // { path: '/recojos', label: 'Administrar recojos', icon: Truck },
-    // { path: '/entregas-almacen', label: 'Administrar entregas', icon: ClipboardCheck },
-    // { path: '/solicitudes-almacen', label: 'Solicitud de almacén', icon: FileText },
-    // { path: '/almacen-japi', label: 'Almacén Japi', icon: Warehouse },
-    // { path: '/entregas', label: 'Entregas almacén', icon: ClipboardCheck },
-    // { path: '/activacion', label: 'Activación de cuentas', icon: ShieldCheck },
-    { path: '/dashboard/lista-externo', label: 'Usuarios externos', icon: Users },
-    // { path: '/registro-motorizado', label: 'Registro motorizado', icon: Truck },
-    // { path: '/lista-interno', label: 'Motorizados internos', icon: Users },
-    { path: '/dashboard/administradores', label: 'Administradores', icon: ShieldCheck },
-    // { path: '/historial-recojos', label: 'Historial de recojos', icon: History },
-  ],
-  motorizado: [
-    { path: '/historial-entregas', label: 'Historial de entregas', icon: History },
-    { path: '/historial-recojos', label: 'Historial de recojos', icon: History },
-    { path: '/entregas-motorizado', label: 'Entregas', icon: Package },
-    { path: '/recojos-motorizado', label: 'Recojos', icon: Truck },
-  ],
-  almacen: [
-    { path: '/envios-fecha', label: 'Envíos por fecha', icon: Calendar },
-    { path: '/recojos', label: 'Administrar recojos', icon: Truck },
-    { path: '/solicitudes-almacen', label: 'Solicitud de almacén', icon: FileText },
-    { path: '/almacen-japi', label: 'Almacén Japi', icon: Warehouse },
-    { path: '/entregas', label: 'Preparación', icon: ClipboardCheck },
-  ],
+
   coordinacion: [
-    { path: '/envios-fecha', label: 'Envíos por fecha', icon: Calendar },
-    { path: '/recojos', label: 'Administrar recojos', icon: Truck },
-    { path: '/solicitudes-almacen', label: 'Solicitud de almacén', icon: FileText },
-    { path: '/lista-interno', label: 'Motorizados internos', icon: Users },
-    { path: '/dashboard/lista-externo', label: 'Usuarios externos', icon: Users },
+    { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
+    { path: '/dashboard/deliveries', label: 'Entregas', icon: Package },
+    { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    { path: '/dashboard/deliveries-by-date', label: 'Envíos por fecha', icon: Calendar },
+    { path: '/dashboard/warehouse', label: 'Almacén Japi', icon: Warehouse },
+    { path: '/dashboard/couriers', label: 'Motorizados', icon: Truck },
+    { path: '/dashboard/clients', label: 'Empresas clientes', icon: Users },
+    { path: '/dashboard/pickup-history', label: 'Historial de recojos', icon: History },
+    { path: '/dashboard/warehouse-requests', label: 'Solicitudes de almacén', icon: FileText },
+  ],
+
+  almacen: [
+    { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    { path: '/dashboard/warehouse', label: 'Almacén Japi', icon: Warehouse },
+    { path: '/dashboard/deliveries-by-date', label: 'Envíos por fecha', icon: Calendar },
+    { path: '/dashboard/pickups', label: 'Recojos', icon:  Truck },
+    { path: '/dashboard/warehouse-requests', label: 'Solicitudes de almacén', icon: FileText },
+  ],
+
+  empresa: [
+    { path: '/dashboard/company/create-shipment', label: 'Registrar envío', icon: Send },
+    { path: '/dashboard/company/shipments', label: 'Mis envíos', icon: Package },
+    { path: '/dashboard/company/warehouse', label: 'Mi almacén', icon: Warehouse },
+    { path: '/dashboard/company/profile', label: 'Perfil de empresa', icon: User },
+  ],
+
+  motorizado: [
+    { path: '/dashboard/courier/deliveries', label: 'Entregas asignadas', icon: Package },
+    { path: '/dashboard/courier/pickups', label: 'Recojos asignados', icon: Truck },
+    { path: '/dashboard/courier/history', label: 'Historial de entregas', icon: History },
+    { path: '/dashboard/courier/pickup-history', label: 'Historial de recojos', icon: History },
   ],
 };

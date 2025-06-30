@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, ChevronLeft, ChevronRight, X } from 'lucide-react';
+
 import secureLocalStorage from 'react-secure-storage';
+import { ChevronLeft, ChevronRight, LogOut, X } from 'lucide-react';
 
 import { roleRoutes, Role, RouteItem } from '@/constants/roleRoutes';
 
@@ -20,14 +22,30 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
   const [routes, setRoutes] = useState<RouteItem[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  type StoredUser = { role: Role };
+  type StoredUser = { type: number };
+
+  // Mapeo de roles numéricos a nombres
+  const getRoleNameFromNumber = (roleNumber: number): Role | null => {
+    const roleMap: Record<number, Role> = {
+      1: 'empresa',
+      2: 'admin',
+      3: 'motorizado',
+      4: 'almacen',
+      5: 'coordinacion'
+    };
+    return roleMap[roleNumber] || null;
+  };
 
   useEffect(() => {
     const storedUser = secureLocalStorage.getItem('user');
     if (storedUser && typeof storedUser === 'object') {
-      const userRole = (storedUser as StoredUser).role;
-      const matchedRoutes = roleRoutes[userRole] ?? [];
-      setRoutes(matchedRoutes);
+      const numericRole = (storedUser as StoredUser).type;
+      const userRole = getRoleNameFromNumber(numericRole);
+
+      if (userRole) {
+        const matchedRoutes = roleRoutes[userRole] ?? [];
+        setRoutes(matchedRoutes);
+      }
     }
   }, []);
 

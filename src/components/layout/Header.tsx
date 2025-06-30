@@ -12,7 +12,7 @@ interface UserData {
   id: number;
   email: string;
   name: string;
-  role: string;
+  type: string;
 }
 
 interface HeaderProps {
@@ -31,7 +31,7 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   useEffect(() => {
     const storedUser = secureLocalStorage.getItem('user');
     if (storedUser && typeof storedUser === 'object') {
-      const userRole = (storedUser as { role: Role }).role;
+      const userRole = (storedUser as { type: Role }).type;
       const routes = roleRoutes[userRole] || [];
       const currentRoute = routes.find(route => route.path === pathname);
       setPageTitle(currentRoute?.label || 'Dashboard');
@@ -44,7 +44,7 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
     router.push('/login');
   };
 
-  const avatarSrc = `/avatars/${user?.role || 'default'}.png`;
+  const avatarSrc = `/avatars/${user?.type || 'default'}.png`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
