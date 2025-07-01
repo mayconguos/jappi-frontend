@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 
-import secureLocalStorage from 'react-secure-storage';
-
-import { roleRoutes, Role } from '@/constants/roleRoutes';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRoutes } from '@/hooks/useUserRoutes';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 interface UserData {
   id: number;
@@ -20,63 +18,12 @@ interface HeaderProps {
   onOpenSidebarMobile?: () => void;
 }
 
-// Mapeo de roles numéricos a nombres
-const getRoleNameFromNumber = (roleNumber: number): Role | null => {
-  const roleMap: Record<number, Role> = {
-    1: 'empresa',
-    2: 'admin',
-    3: 'motorizado',
-    4: 'almacen',
-    5: 'coordinacion'
-  };
-  return roleMap[roleNumber] || null;
-};
-
 export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [showMenu, setShowMenu] = useState(false);
-  const [pageTitle, setPageTitle] = useState('Dashboard');
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  type StoredUser = { type: number };
-
-  // Obtener el título de la página actual basado en la ruta
-  useEffect(() => {
-    const storedUser = secureLocalStorage.getItem('user');
-    if (storedUser && typeof storedUser === 'object') {
-      const numericRole = (storedUser as StoredUser).type;
-      const userRole = getRoleNameFromNumber(numericRole);
-
-      if (userRole) {
-        const routes = roleRoutes[userRole] || [];
-        const currentRoute = routes.find(route => route.path === pathname);
-        setPageTitle(currentRoute?.label || 'Dashboard');
-      }
-    }
-  }, [pathname]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    secureLocalStorage.removeItem('user');
-    router.push('/login');
-  };
+  const { logout } = useAuth();
+  const { pageTitle } = useUserRoutes();
+  const { isOpen: showMenu, setIsOpen: setShowMenu, ref: menuRef } = useClickOutside<HTMLDivElement>();
 
   const avatarSrc = `/avatars/${user?.type || 'default'}.png`;
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-    if (showMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showMenu]);
 
   return (
     <header className='bg-[color:var(--background)] shadow p-4 flex justify-between items-center'>
@@ -143,7 +90,7 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
             </div>
 
             <button
-              onClick={handleLogout}
+              onClick={logout}
               className='w-full mt-2 bg-red-500 text-white py-2 rounded hover:bg-red-600 transition'
             >
               Cerrar sesión

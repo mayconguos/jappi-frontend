@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
-import secureLocalStorage from 'react-secure-storage';
 import { ChevronLeft, ChevronRight, LogOut, X } from 'lucide-react';
 
-import { roleRoutes, Role, RouteItem } from '@/constants/roleRoutes';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRoutes } from '@/hooks/useUserRoutes';
 
 interface SidebarProps {
   isMobileOpen: boolean;
@@ -18,42 +18,9 @@ interface SidebarProps {
 
 export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [routes, setRoutes] = useState<RouteItem[]>([]);
+  const { logout } = useAuth();
+  const { routes } = useUserRoutes();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  type StoredUser = { type: number };
-
-  // Mapeo de roles numéricos a nombres
-  const getRoleNameFromNumber = (roleNumber: number): Role | null => {
-    const roleMap: Record<number, Role> = {
-      1: 'empresa',
-      2: 'admin',
-      3: 'motorizado',
-      4: 'almacen',
-      5: 'coordinacion'
-    };
-    return roleMap[roleNumber] || null;
-  };
-
-  useEffect(() => {
-    const storedUser = secureLocalStorage.getItem('user');
-    if (storedUser && typeof storedUser === 'object') {
-      const numericRole = (storedUser as StoredUser).type;
-      const userRole = getRoleNameFromNumber(numericRole);
-
-      if (userRole) {
-        const matchedRoutes = roleRoutes[userRole] ?? [];
-        setRoutes(matchedRoutes);
-      }
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    secureLocalStorage.removeItem('user');
-    router.push('/login');
-  };
 
   return (
     <>
@@ -146,7 +113,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
 
         {/* Cerrar sesión */}
         <button
-          onClick={handleLogout}
+          onClick={logout}
           className={`w-full px-4 py-3 text-sm flex items-center gap-2 hover:bg-white/10 border-t border-white/10 transition-all
             ${isCollapsed ? 'justify-center' : ''}`}
           title='Cerrar sesión'
