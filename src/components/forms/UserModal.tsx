@@ -13,11 +13,11 @@ import { Select } from '@/components/ui/select';
 import { DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
 import { USER_TYPES, DEFAULT_USER_TYPE } from '@/constants/userTypes';
 import {
-  administratorSchema,
-  administratorEditSchema,
-  type AdministratorFormData,
-  type AdministratorEditFormData
-} from '@/lib/validations/administrator';
+  userSchema,
+  userEditSchema,
+  type UserFormData,
+  type UserEditFormData
+} from '@/lib/validations/user';
 
 interface AxiosError {
   response?: {
@@ -28,7 +28,7 @@ interface AxiosError {
   };
 }
 
-// Tipos de usuario específicos para administradores
+// Tipos de usuario específicos para usuarios
 const ADMIN_USER_TYPES = USER_TYPES.filter(type =>
   type.value === 2 || type.value === 4 || type.value === 5
 ).map(type => ({
@@ -36,7 +36,7 @@ const ADMIN_USER_TYPES = USER_TYPES.filter(type =>
   label: type.label
 })); // Admin, Almacén, Coordinación
 
-interface Administrador {
+interface User {
   id?: number;
   first_name: string;
   last_name: string;
@@ -47,15 +47,15 @@ interface Administrador {
   type: number;
 }
 
-interface AdministradorModalProps {
+interface UserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (administrador: Omit<Administrador, 'id'>) => void;
-  editingAdministrador?: Administrador | null;
+  onSubmit: (user: Omit<User, 'id'>) => void;
+  editingUser?: User | null;
 }
 
-export default function AdministradorModal({ isOpen, onClose, onSubmit, editingAdministrador }: AdministradorModalProps) {
-  const isEditing = !!editingAdministrador;
+export default function UserModal({ isOpen, onClose, onSubmit, editingUser }: UserModalProps) {
+  const isEditing = !!editingUser;
 
   const {
     register,
@@ -65,8 +65,8 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
     setValue,
     watch,
     clearErrors
-  } = useForm<AdministratorFormData | AdministratorEditFormData>({
-    resolver: zodResolver(isEditing ? administratorEditSchema : administratorSchema),
+  } = useForm<UserFormData | UserEditFormData>({
+    resolver: zodResolver(isEditing ? userEditSchema : userSchema),
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -84,15 +84,15 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
 
   // Llenar el formulario cuando se está editando
   useEffect(() => {
-    if (editingAdministrador) {
+    if (editingUser) {
       reset({
-        first_name: editingAdministrador.first_name || '',
-        last_name: editingAdministrador.last_name || '',
-        document_type: (editingAdministrador.document_type || DEFAULT_DOCUMENT_TYPE).toString(),
-        document_number: editingAdministrador.document_number || '',
-        email: editingAdministrador.email || '',
+        first_name: editingUser.first_name || '',
+        last_name: editingUser.last_name || '',
+        document_type: (editingUser.document_type || DEFAULT_DOCUMENT_TYPE).toString(),
+        document_number: editingUser.document_number || '',
+        email: editingUser.email || '',
         password: '', // No mostrar la contraseña actual
-        type: editingAdministrador.type || DEFAULT_USER_TYPE,
+        type: editingUser.type || DEFAULT_USER_TYPE,
       });
     } else {
       reset({
@@ -106,27 +106,27 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
       });
     }
     setApiError('');
-  }, [editingAdministrador, isOpen, reset]);
+  }, [editingUser, isOpen, reset]);
 
-  const onFormSubmit: SubmitHandler<AdministratorFormData | AdministratorEditFormData> = async (data) => {
+  const onFormSubmit: SubmitHandler<UserFormData | UserEditFormData> = async (data) => {
     setIsLoading(true);
     setApiError('');
 
     try {
       const token = localStorage.getItem('token');
 
-      let requestBody: { [key in keyof Administrador]?: string | number };
+      let requestBody: { [key in keyof User]?: string | number };
 
-      if (editingAdministrador) {
+      if (editingUser) {
         // Solo enviar los campos que han cambiado
         requestBody = {};
         Object.keys(dirtyFields).forEach(field => {
-          const key = field as keyof Administrador;
+          const key = field as keyof User;
           requestBody[key] = data[key as keyof typeof data];
         });
       } else {
         // Para crear, enviar todos los campos necesarios
-        const createData = data as AdministratorFormData;
+        const createData = data as UserFormData;
         requestBody = {
           first_name: createData.first_name,
           last_name: createData.last_name,
@@ -139,15 +139,15 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
       }
 
       let response;
-      if (editingAdministrador) {
-        // Actualizar administrador existente
-        response = await api.put(`/user/update/${editingAdministrador.id}`, requestBody, {
+      if (editingUser) {
+        // Actualizar usuario existente
+        response = await api.put(`/user/update/${editingUser.id}`, requestBody, {
           headers: {
             authorization: `${token}`,
           },
         });
       } else {
-        // Crear nuevo administrador
+        // Crear nuevo usuario
         response = await api.post('/user/create', requestBody, {
           headers: {
             authorization: `${token}`,
@@ -156,23 +156,23 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
       }
 
       if (response.status === 200 || response.status === 201) {
-        onSubmit(data as Omit<Administrador, 'id'>);
+        onSubmit(data as Omit<User, 'id'>);
 
         // Resetear formulario
         reset();
 
         // Mostrar modal de éxito solo para actualizaciones
-        if (editingAdministrador) {
+        if (editingUser) {
           setShowSuccessModal(true);
         } else {
           onClose();
         }
       } else {
-        const action = editingAdministrador ? 'actualizar' : 'crear';
-        setApiError(response.data?.message || `Error al ${action} el administrador`);
+        const action = editingUser ? 'actualizar' : 'crear';
+        setApiError(response.data?.message || `Error al ${action} el usuario`);
       }
     } catch (error: unknown) {
-      console.error('Error al procesar administrador:', error);
+      console.error('Error al procesar usuario:', error);
 
       // Manejar diferentes tipos de errores
       if (error && typeof error === 'object' && 'response' in error) {
@@ -232,7 +232,7 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               ¡Actualización exitosa!
             </h3>
             <p className="text-sm text-gray-500 mb-6">
-              La información del administrador ha sido actualizada correctamente.
+              La información del usuario ha sido actualizada correctamente.
             </p>
             <Button
               onClick={handleSuccessModalClose}
@@ -251,7 +251,7 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">
-            {editingAdministrador ? 'Editar administrador' : 'Añadir administrador'}
+            {editingUser ? 'Editar usuario' : 'Añadir usuario'}
           </h2>
           <button
             onClick={handleClose}
@@ -357,17 +357,17 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               placeholder="Ingrese el correo electrónico"
               className={errors.email ? 'border-red-500' : ''}
               autoComplete="username"
-              disabled={!!editingAdministrador}
+              disabled={!!editingUser}
             />
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
             )}
-            {editingAdministrador && (
+            {editingUser && (
               <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
             )}
           </div>
 
-          {!editingAdministrador && (
+          {!editingUser && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Contraseña *
@@ -399,8 +399,8 @@ export default function AdministradorModal({ isOpen, onClose, onSubmit, editingA
               className="flex-1 bg-primary text-white disabled:opacity-50"
             >
               {isLoading ?
-                (editingAdministrador ? 'Actualizando...' : 'Guardando...') :
-                (editingAdministrador ? 'Actualizar' : 'Guardar')
+                (editingUser ? 'Actualizando...' : 'Guardando...') :
+                (editingUser ? 'Actualizar' : 'Guardar')
               }
             </Button>
           </div>

@@ -20,7 +20,7 @@ const createDocumentNumberValidator = (documentType: string) => {
   }
 };
 
-export const administratorSchema = z.object({
+export const userSchema = z.object({
   first_name: z
     .string()
     .min(1, 'El nombre es requerido')
@@ -65,7 +65,7 @@ export const administratorSchema = z.object({
 });
 
 // Schema para edición (email y password opcionales)
-export const administratorEditSchema = z.object({
+export const userEditSchema = z.object({
   first_name: z
     .string()
     .min(1, 'El nombre es requerido')
@@ -109,5 +109,5 @@ export const administratorEditSchema = z.object({
   path: ["document_number"]
 });
 
-export type AdministratorFormData = z.infer<typeof administratorSchema>;
-export type AdministratorEditFormData = z.infer<typeof administratorEditSchema>;
+export type UserFormData = z.infer<typeof userSchema>;
+export type UserEditFormData = z.infer<typeof userEditSchema>;

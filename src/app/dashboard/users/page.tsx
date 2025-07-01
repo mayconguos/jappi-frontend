@@ -12,11 +12,11 @@ import { Pagination } from '@/components/ui/pagination';
 import { Select } from '@/components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
-import AdministradorModal from '@/components/forms/AdministradorModal';
+import UserModal from '@/components/forms/UserModal';
 import { getDocumentTypeLabel } from '@/constants/documentTypes';
 import { getUserTypeLabel } from '@/constants/userTypes';
 
-interface Administrador {
+interface User {
   id: number;
   first_name: string;
   last_name: string;
@@ -27,28 +27,28 @@ interface Administrador {
   type: number;
 }
 
-const camposFiltro = [
+const filterBy = [
   { value: 'first_name', label: 'Nombre' },
   { value: 'last_name', label: 'Apellido' },
   { value: 'document_number', label: 'Número de documento' },
   { value: 'email', label: 'Correo electrónico' },
 ];
 
-export default function AdministradoresPage() {
-  const [administradores, setAdministradores] = useState<Administrador[]>([]);
-  const [campo, setCampo] = useState('first_name');
-  const [valor, setValor] = useState('');
-  const [filtrados, setFiltrados] = useState<Administrador[]>([]);
+export default function UsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [filterField, setFilterField] = useState('first_name');
+  const [searchValue, setSearchValue] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAdministrador, setEditingAdministrador] = useState<Administrador | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [administradorToDelete, setAdministradorToDelete] = useState<number | null>(null);
+  const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const fetchAdministradores = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -62,77 +62,77 @@ export default function AdministradoresPage() {
 
       const data = Array.isArray(response.data) ? response.data : [];
       // Sanitizar los datos para evitar valores null/undefined
-      const sanitizedData = data.map((admin: Administrador) => ({
-        id: admin.id || 0,
-        first_name: admin.first_name || '',
-        last_name: admin.last_name || '',
-        document_type: admin.document_type || '1',
-        document_number: admin.document_number || '',
-        email: admin.email || '',
-        password: admin.password || '',
-        type: admin.type || 2,
+      const sanitizedData = data.map((user: User) => ({
+        id: user.id || 0,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        document_type: user.document_type || '1',
+        document_number: user.document_number || '',
+        email: user.email || '',
+        password: user.password || '',
+        type: user.type || 2,
       }));
-      setAdministradores(sanitizedData);
+      setUsers(sanitizedData);
     } catch (err) {
-      setError('Error al cargar los administradores');
-      console.error('Error fetching administrators:', err);
-      setAdministradores([]);
+      setError('Error al cargar los users');
+      console.error('Error fetching users:', err);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleFiltrar = () => {
-    const val = valor.toLocaleLowerCase();
-    const nuevos = administradores.filter((admin) =>
-      admin[campo as keyof Administrador]?.toString().toLocaleLowerCase().includes(val)
+    const val = searchValue.toLocaleLowerCase();
+    const matchingUsers = users.filter((user) =>
+      user[filterField as keyof User]?.toString().toLocaleLowerCase().includes(val)
     );
-    setFiltrados(nuevos);
+    setFilteredUsers(matchingUsers);
     setCurrentPage(1); // Resetear a la primera página al filtrar
   };
 
-  const handleAddAdministrador = (nuevoAdministrador: Omit<Administrador, 'id'>) => {
-    if (editingAdministrador) {
-      // Actualizar administrador existente
-      const administradorActualizado = {
-        ...editingAdministrador,
-        ...nuevoAdministrador,
-        id: editingAdministrador.id
+  const handleAddUser = (newUser: Omit<User, 'id'>) => {
+    if (editingUser) {
+      // Actualizar usuario existente
+      const userUpdated = {
+        ...editingUser,
+        ...newUser,
+        id: editingUser.id
       };
-      setAdministradores(prev =>
-        prev.map(admin => admin.id === editingAdministrador.id ? administradorActualizado : admin)
+      setUsers(prev =>
+        prev.map(user => user.id === editingUser.id ? userUpdated : user)
       );
-      setFiltrados(prev =>
-        prev.map(admin => admin.id === editingAdministrador.id ? administradorActualizado : admin)
+      setFilteredUsers(prev =>
+        prev.map(user => user.id === editingUser.id ? userUpdated : user)
       );
     } else {
-      // Crear nuevo administrador
-      const administradorConId = {
-        ...nuevoAdministrador,
-        id: administradores.length + 1, // Temporal, en producción sería generado por la API
+      // Crear nuevo usuario
+      const userWithId = {
+        ...newUser,
+        id: users.length + 1, // Temporal, en producción sería generado por la API
       };
-      setAdministradores(prev => [...prev, administradorConId]);
-      setFiltrados(prev => [...prev, administradorConId]);
+      setUsers(prev => [...prev, userWithId]);
+      setFilteredUsers(prev => [...prev, userWithId]);
     }
   };
 
-  const handleEditAdministrador = (administrador: Administrador) => {
-    setEditingAdministrador(administrador);
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
     setIsModalOpen(true);
   };
 
-  const handleDeleteAdministrador = async (id: number) => {
-    setAdministradorToDelete(id);
+  const handleDeleteUser = async (id: number) => {
+    setUserToDelete(id);
     setIsConfirmModalOpen(true);
   };
 
-  const confirmDeleteAdministrador = async () => {
-    if (administradorToDelete) {
+  const confirmDeleteUser = async () => {
+    if (userToDelete) {
       try {
         const token = localStorage.getItem('token');
 
-        // Desactivar administrador en lugar de eliminarlo
-        await api.put(`/user/update/${administradorToDelete}`, {
+        // Desactivar usuario en lugar de eliminarlo
+        await api.put(`/user/update/${userToDelete}`, {
           active: false
         }, {
           headers: {
@@ -141,41 +141,41 @@ export default function AdministradoresPage() {
         });
 
         // Remover de la lista local después de desactivar exitosamente
-        setAdministradores(prev => prev.filter(admin => admin.id !== administradorToDelete));
-        setFiltrados(prev => prev.filter(admin => admin.id !== administradorToDelete));
+        setUsers(prev => prev.filter(user => user.id !== userToDelete));
+        setFilteredUsers(prev => prev.filter(user => user.id !== userToDelete));
       } catch (err) {
-        console.error('Error deleting administrator:', err);
-        setError('Error al eliminar el administrador');
+        console.error('Error deleting user:', err);
+        setError('Error al eliminar el usuario');
       } finally {
-        setAdministradorToDelete(null);
+        setUserToDelete(null);
       }
     }
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setEditingAdministrador(null);
+    setEditingUser(null);
   };
 
   const handleConfirmModalClose = () => {
     setIsConfirmModalOpen(false);
-    setAdministradorToDelete(null);
+    setUserToDelete(null);
   };
 
-  // Inicializar la lista filtrada cuando cambian los administradores
+  // Inicializar la lista filtrada cuando cambian los users
   useEffect(() => {
-    setFiltrados(administradores);
-    setCurrentPage(1); // Resetear a la primera página al cambiar los administradores
-  }, [administradores]);
+    setFilteredUsers(users);
+    setCurrentPage(1); // Resetear a la primera página al cambiar los users
+  }, [users]);
 
   useEffect(() => {
-    fetchAdministradores();
+    fetchUsers();
   }, []);
 
   // Calcular la paginación
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentItems = filtrados.slice(startIndex, endIndex);
+  const currentItems = filteredUsers.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -188,9 +188,9 @@ export default function AdministradoresPage() {
           <div className="flex flex-col gap-1 w-full md:w-44">
             <label className="text-sm font-medium text-gray-700">Filtrar por</label>
             <Select
-              value={campo}
-              onChange={(value: string) => setCampo(value)}
-              options={camposFiltro}
+              value={filterField}
+              onChange={(value: string) => setFilterField(value)}
+              options={filterBy}
             />
           </div>
 
@@ -198,8 +198,8 @@ export default function AdministradoresPage() {
             <label className="text-sm font-medium text-gray-700">Valor</label>
             <Input
               placeholder="Valor a buscar..."
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
             />
           </div>
 
@@ -213,21 +213,21 @@ export default function AdministradoresPage() {
             onClick={() => setIsModalOpen(true)}
             className="bg-primary text-white"
           >
-            Añadir administrador
+            Añadir usuario
           </Button>
         </div>
       </div>
 
       {loading && (
         <div className="text-center py-4">
-          <p className="text-gray-500">Cargando administradores...</p>
+          <p className="text-gray-500">Cargando users...</p>
         </div>
       )}
 
       {error && (
         <div className="text-center py-4">
           <p className="text-red-500">{error}</p>
-          <Button onClick={fetchAdministradores} className="mt-2">
+          <Button onClick={fetchUsers} className="mt-2">
             Reintentar
           </Button>
         </div>
@@ -248,22 +248,22 @@ export default function AdministradoresPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentItems.map((admin, index) => (
-                <TableRow key={admin.id}>
+              {currentItems.map((user, index) => (
+                <TableRow key={user.id}>
                   <TableCell className="font-medium text-gray-600">
                     {startIndex + index + 1}
                   </TableCell>
-                  <TableCell>{getUserTypeLabel(admin.type)}</TableCell>
-                  <TableCell>{admin.first_name}</TableCell>
-                  <TableCell>{admin.last_name}</TableCell>
-                  <TableCell>{getDocumentTypeLabel(admin.document_type)} - {admin.document_number}</TableCell>
-                  <TableCell>{admin.email}</TableCell>
+                  <TableCell>{getUserTypeLabel(user.type)}</TableCell>
+                  <TableCell>{user.first_name}</TableCell>
+                  <TableCell>{user.last_name}</TableCell>
+                  <TableCell>{getDocumentTypeLabel(user.document_type)} - {user.document_number}</TableCell>
+                  <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleEditAdministrador(admin)}
+                        onClick={() => handleEditUser(user)}
                         className="text-blue-600 hover:text-blue-800 p-2"
                         title="Editar"
                       >
@@ -272,7 +272,7 @@ export default function AdministradoresPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDeleteAdministrador(admin.id)}
+                        onClick={() => handleDeleteUser(user.id)}
                         className="text-red-600 hover:text-red-800 p-2"
                         title="Eliminar"
                       >
@@ -294,35 +294,35 @@ export default function AdministradoresPage() {
 
           <Pagination
             currentPage={currentPage}
-            totalItems={filtrados.length}
+            totalItems={filteredUsers.length}
             itemsPerPage={itemsPerPage}
             onPageChange={handlePageChange}
           />
         </>
       )}
 
-      <AdministradorModal
+      <UserModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        onSubmit={handleAddAdministrador}
-        editingAdministrador={editingAdministrador}
+        onSubmit={handleAddUser}
+        editingUser={editingUser}
       />
 
       <ConfirmModal
         isOpen={isConfirmModalOpen}
         onClose={handleConfirmModalClose}
-        onConfirm={confirmDeleteAdministrador}
-        title="Eliminar administrador"
-        message="¿Confirma que desea eliminar este administrador?"
+        onConfirm={confirmDeleteUser}
+        title="Eliminar usuario"
+        message="¿Confirma que desea eliminar este usuario?"
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
         variant="danger"
         context={{
-          name: administradorToDelete ?
-            administradores.find(admin => admin.id === administradorToDelete)?.first_name + ' ' +
-            administradores.find(admin => admin.id === administradorToDelete)?.last_name : undefined,
-          email: administradorToDelete ?
-            administradores.find(admin => admin.id === administradorToDelete)?.email : undefined
+          name: userToDelete ?
+            users.find(user => user.id === userToDelete)?.first_name + ' ' +
+            users.find(user => user.id === userToDelete)?.last_name : undefined,
+          email: userToDelete ?
+            users.find(user => user.id === userToDelete)?.email : undefined
         }}
       />
     </section>
