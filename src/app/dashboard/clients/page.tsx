@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
-interface Cliente {
-  id_persona: number;
+interface Client {
+  id_client: number;
   correo: string;
   nombre: string;
   telefono: string;
@@ -23,18 +23,18 @@ interface Cliente {
   titular: string;
 }
 
-const camposFiltro = [
-  { value: 'nombre', label: 'Nombre' },
-  { value: 'correo', label: 'Correo' },
+const filterFields = [
+  { value: 'name', label: 'Name' },
+  { value: 'email', label: 'Email' },
   { value: 'dni', label: 'DNI' },
-  { value: 'telefono', label: 'Teléfono' },
+  { value: 'phone', label: 'Phone' },
 ];
 
 export default function ClientsPage() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [campo, setCampo] = useState('nombre');
-  const [valor, setValor] = useState('');
-  const [filtrados, setFiltrados] = useState<Cliente[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [field, setField] = useState('name');
+  const [value, setValue] = useState('');
+  const [filtered, setFiltered] = useState<Client[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,8 +47,8 @@ export default function ClientsPage() {
         });
 
         if (res.data?.success && Array.isArray(res.data.data)) {
-          setClientes(res.data.data);
-          setFiltrados(res.data.data);
+          setClients(res.data.data);
+          setFiltered(res.data.data);
         } else {
           console.error('Respuesta inesperada:', res.data);
         }
@@ -60,12 +60,12 @@ export default function ClientsPage() {
     fetchData();
   }, []);
 
-  const handleFiltrar = () => {
-    const val = valor.toLowerCase();
-    const nuevos = clientes.filter((u) =>
-      u[campo as keyof Cliente]?.toString().toLowerCase().includes(val)
+  const handleFilter = () => {
+    const val = value.toLowerCase();
+    const newFiltered = clients.filter((client: Client) =>
+      client[field as keyof Client]?.toString().toLowerCase().includes(val)
     );
-    setFiltrados(nuevos);
+    setFiltered(newFiltered);
   };
 
   return (
@@ -75,9 +75,9 @@ export default function ClientsPage() {
           <div className="flex flex-col gap-1 w-full md:w-44">
             <label className="text-sm font-medium text-gray-700">Filtrar por</label>
             <Select
-              value={campo}
-              onChange={(value: string) => setCampo(value)}
-              options={camposFiltro}
+              value={field}
+              onChange={(value: string) => setField(value)}
+              options={filterFields}
             />
           </div>
 
@@ -85,13 +85,13 @@ export default function ClientsPage() {
             <label className="text-sm font-medium text-gray-700">Valor</label>
             <Input
               placeholder="Valor a buscar..."
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
             />
           </div>
 
           <div className="pt-[22px]">
-            <Button onClick={handleFiltrar}>Filtrar</Button>
+            <Button onClick={handleFilter}>Filtrar</Button>
           </div>
         </div>
 
@@ -113,18 +113,18 @@ export default function ClientsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filtrados.map((u) => (
-            <TableRow key={u.id_persona}>
-              <TableCell>{u.nombre}</TableCell>
-              <TableCell>{u.correo}</TableCell>
-              <TableCell>{u.telefono}</TableCell>
-              <TableCell>{u.dni}</TableCell>
-              <TableCell>{u.direccion}</TableCell>
-              <TableCell>{u.banco}</TableCell>
-              <TableCell>{u.titular}</TableCell>
+          {filtered.map((client) => (
+            <TableRow key={client.id_client}>
+              <TableCell>{client.nombre}</TableCell>
+              <TableCell>{client.correo}</TableCell>
+              <TableCell>{client.telefono}</TableCell>
+              <TableCell>{client.dni}</TableCell>
+              <TableCell>{client.direccion}</TableCell>
+              <TableCell>{client.banco}</TableCell>
+              <TableCell>{client.titular}</TableCell>
             </TableRow>
           ))}
-          {filtrados.length === 0 && (
+          {filtered.length === 0 && (
             <TableRow>
               <TableCell colSpan={7} className="text-center py-4 text-gray-500">
                 No hay resultados

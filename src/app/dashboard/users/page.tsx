@@ -220,7 +220,7 @@ export default function UsersPage() {
 
       {loading && (
         <div className="text-center py-4">
-          <p className="text-gray-500">Cargando users...</p>
+          <p className="text-gray-500">Cargando usuarios...</p>
         </div>
       )}
 
