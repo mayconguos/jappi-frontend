@@ -32,7 +32,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/deliveries', label: 'Entregas', icon: Package },
     { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
     { path: '/dashboard/warehouse', label: 'Almacén Japi', icon: Warehouse },
-    { path: '/dashboard/clients', label: 'Empresas clientes (falta corregir)', icon: Users },
+    { path: '/dashboard/clients', label: 'Empresas clientes **', icon: Users },
     { path: '/dashboard/couriers', label: 'Motorizados', icon: Truck },
     { path: '/dashboard/users', label: 'Usuarios internos *', icon: ShieldCheck },
     { path: '/dashboard/activations', label: 'Activación de cuentas', icon: ShieldCheck },
@@ -64,7 +64,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/company/create-shipment', label: 'Registrar envío', icon: Send },
     { path: '/dashboard/company/shipments', label: 'Mis envíos', icon: Package },
     { path: '/dashboard/company/warehouse', label: 'Mi almacén', icon: Warehouse },
-    { path: '/dashboard/company/profile', label: 'Perfil de empresa', icon: User },
+    { path: '/dashboard/company/profile', label: 'Perfil de empresa **', icon: User },
   ],
 
   motorizado: [

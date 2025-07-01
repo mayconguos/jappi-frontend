@@ -20,6 +20,18 @@ interface HeaderProps {
   onOpenSidebarMobile?: () => void;
 }
 
+// Mapeo de roles numéricos a nombres
+const getRoleNameFromNumber = (roleNumber: number): Role | null => {
+  const roleMap: Record<number, Role> = {
+    1: 'empresa',
+    2: 'admin',
+    3: 'motorizado',
+    4: 'almacen',
+    5: 'coordinacion'
+  };
+  return roleMap[roleNumber] || null;
+};
+
 export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -27,14 +39,20 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   const [pageTitle, setPageTitle] = useState('Dashboard');
   const menuRef = useRef<HTMLDivElement>(null);
 
+  type StoredUser = { type: number };
+
   // Obtener el título de la página actual basado en la ruta
   useEffect(() => {
     const storedUser = secureLocalStorage.getItem('user');
     if (storedUser && typeof storedUser === 'object') {
-      const userRole = (storedUser as { type: Role }).type;
-      const routes = roleRoutes[userRole] || [];
-      const currentRoute = routes.find(route => route.path === pathname);
-      setPageTitle(currentRoute?.label || 'Dashboard');
+      const numericRole = (storedUser as StoredUser).type;
+      const userRole = getRoleNameFromNumber(numericRole);
+
+      if (userRole) {
+        const routes = roleRoutes[userRole] || [];
+        const currentRoute = routes.find(route => route.path === pathname);
+        setPageTitle(currentRoute?.label || 'Dashboard');
+      }
     }
   }, [pathname]);
 
