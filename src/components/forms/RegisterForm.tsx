@@ -54,6 +54,7 @@ export default function RegisterForm() {
                 {...register('nombres')}
                 type="text"
                 placeholder="Ingresa tus nombres"
+                autoComplete="given-name"
               />
               {errors.nombres && (
                 <p className="text-red-500 text-sm mt-1">{errors.nombres.message}</p>
@@ -68,6 +69,7 @@ export default function RegisterForm() {
                 {...register('apellidos')}
                 type="text"
                 placeholder="Ingresa tus apellidos"
+                autoComplete="family-name"
               />
               {errors.apellidos && (
                 <p className="text-red-500 text-sm mt-1">{errors.apellidos.message}</p>
@@ -85,6 +87,7 @@ export default function RegisterForm() {
                 type="text"
                 placeholder="12345678"
                 maxLength={8}
+                autoComplete="off"
               />
               {errors.dni && (
                 <p className="text-red-500 text-sm mt-1">{errors.dni.message}</p>
@@ -99,6 +102,7 @@ export default function RegisterForm() {
                 label="Contraseña *"
                 placeholder="Mínimo 6 caracteres"
                 error={errors.password?.message}
+                autoComplete="new-password"
               />
             </div>
           </div>
@@ -117,6 +121,7 @@ export default function RegisterForm() {
                 {...register('nombreEmpresa')}
                 type="text"
                 placeholder="Nombre de tu empresa"
+                autoComplete="organization"
               />
               {errors.nombreEmpresa && (
                 <p className="text-red-500 text-sm mt-1">{errors.nombreEmpresa.message}</p>
@@ -131,6 +136,7 @@ export default function RegisterForm() {
                 {...register('direccion')}
                 type="text"
                 placeholder="Av. Ejemplo 123, Oficina 456"
+                autoComplete="street-address"
               />
               {errors.direccion && (
                 <p className="text-red-500 text-sm mt-1">{errors.direccion.message}</p>
@@ -160,6 +166,7 @@ export default function RegisterForm() {
                 type="text"
                 placeholder="987654321"
                 maxLength={9}
+                autoComplete="tel"
               />
               {errors.telefono && (
                 <p className="text-red-500 text-sm mt-1">{errors.telefono.message}</p>
@@ -175,6 +182,7 @@ export default function RegisterForm() {
                 type="text"
                 placeholder="12345678901"
                 maxLength={11}
+                autoComplete="off"
               />
               {errors.ruc && (
                 <p className="text-red-500 text-sm mt-1">{errors.ruc.message}</p>
@@ -218,6 +226,7 @@ export default function RegisterForm() {
                 type="text"
                 placeholder="1234567890123456"
                 maxLength={20}
+                autoComplete="off"
               />
               {errors.numeroCuentaBancaria && (
                 <p className="text-red-500 text-sm mt-1">{errors.numeroCuentaBancaria.message}</p>

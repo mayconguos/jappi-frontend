@@ -13,6 +13,7 @@ interface PasswordInputProps {
   className?: string;
   label?: string;
   error?: string;
+  autoComplete?: string;
 }
 
 export const PasswordInput = ({
@@ -22,7 +23,8 @@ export const PasswordInput = ({
   disabled = false,
   className,
   label,
-  error
+  error,
+  autoComplete
 }: PasswordInputProps) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -44,6 +46,7 @@ export const PasswordInput = ({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
+          autoComplete={autoComplete}
           className={clsx(
             'w-full px-3 py-2 pr-10 border rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
             error ? 'border-red-300' : 'border-gray-300',

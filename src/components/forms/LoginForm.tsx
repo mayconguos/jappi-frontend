@@ -108,6 +108,7 @@ export default function LoginForm() {
           placeholder="Ingresa tu contraseña"
           disabled={isLoading}
           error={errors.password?.message}
+          autoComplete="current-password"
         />
       </div>
 
