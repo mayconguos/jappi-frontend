@@ -12,6 +12,15 @@ export const DOCUMENT_TYPES: DocumentType[] = [
   { value: 'A', label: 'Ced. Diplomática de identidad' },
 ];
 
+// Tipos de documento para personas (sin RUC) - Para formularios de registro
+export const PERSONAL_DOCUMENT_TYPES: DocumentType[] = [
+  { value: '1', label: 'DNI' },
+  { value: '4', label: 'Carnet de extranjería' },
+  { value: '7', label: 'Pasaporte' },
+  { value: 'A', label: 'Ced. Diplomática de identidad' },
+  { value: '0', label: 'Otros' },
+];
+
 // Constante para el tipo de documento por defecto
 export const DEFAULT_DOCUMENT_TYPE = '1'; // DNI
 
