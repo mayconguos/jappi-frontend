@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Save, User, Building, CreditCard } from 'lucide-react';
 
 import api from '@/app/services/api';
@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { BankAccountManager } from '@/components/ui/bank-account-manager';
-
-import { DISTRITOS_LIMA } from '@/constants/formOptions';
+import { useLocationCatalog } from '@/hooks/useLocationCatalog';
 
 interface CompanyProfile {
   // Datos personales
@@ -61,6 +60,26 @@ export default function CompanyProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Hook para el catálogo de ubicaciones
+  const { catalog } = useLocationCatalog();
+
+  // Crear lista de todos los distritos de todas las regiones
+  const allDistrictOptions = useMemo(() => {
+    if (!catalog) return [];
+    
+    const allDistricts: Array<{ label: string; value: string }> = [];
+    catalog.forEach(region => {
+      region.districts.forEach(district => {
+        allDistricts.push({
+          label: `${district.district_name} (${region.region_name})`,
+          value: district.id_district.toString()
+        });
+      });
+    });
+    
+    return allDistricts.sort((a, b) => a.label.localeCompare(b.label));
+  }, [catalog]);
 
   // Cargar datos del perfil
   useEffect(() => {
@@ -253,7 +272,7 @@ export default function CompanyProfilePage() {
               label="Distrito *"
               value={profile.distrito}
               onChange={(value) => handleInputChange('distrito', value)}
-              options={[...DISTRITOS_LIMA]}
+              options={allDistrictOptions}
             />
           </div>
 

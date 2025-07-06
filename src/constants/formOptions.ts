@@ -1,20 +1,20 @@
-export const DISTRITOS_LIMA = [
-    { label: 'Lima', value: '150101' },
-    { label: 'Miraflores', value: '150122' },
-    { label: 'San Isidro', value: '150130' },
-    { label: 'Surco', value: '150141' },
-    { label: 'La Molina', value: '150117' }
+export const REGIONES_LIMA = [
+    { label: 'Lima', value: 1 },
+    { label: 'Miraflores', value: 2 },
+    { label: 'San Isidro', value: 3 },
+    { label: 'Surco', value: 4 },
+    { label: 'La Molina', value: 5 }
 ] as const;
 
 export const BANCOS = [
-    { label: 'BBVA', value: 'bbva' },
-    { label: 'BCP', value: 'bcp' },
-    { label: 'Interbank', value: 'interbank' },
-    { label: 'Scotiabank', value: 'scotiabank' }
+    { label: 'BBVA', value: 1 },
+    { label: 'BCP', value: 2 },
+    { label: 'Interbank', value: 3 },
+    { label: 'Scotiabank', value: 4 }
 ] as const;
 
 export const TIPOS_CUENTA = [
-    { label: 'Cuenta Corriente', value: 'corriente' },
-    { label: 'Cuenta de Ahorros', value: 'ahorros' },
-    { label: 'Cuenta CTS', value: 'cts' }
+    { label: 'Cuenta Corriente', value: 1 },
+    { label: 'Cuenta de Ahorros', value: 2 },
+    { label: 'Cuenta CTS', value: 3 }
 ] as const;

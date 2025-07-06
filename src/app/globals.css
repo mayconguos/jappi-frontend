@@ -29,8 +29,332 @@
   animation: fade-in 0.2s ease-out;
 }
 
+/* Animaciones personalizadas para login */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
 .user-name-highlight {
   color: var(--button-hover-color);
+}
+
+/* Animaciones para el loader de delivery */
+@keyframes delivery-move {
+  0% {
+    transform: translateX(0px);
+  }
+  20% {
+    transform: translateX(15px);
+  }
+  40% {
+    transform: translateX(25px);
+  }
+  60% {
+    transform: translateX(15px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
+}
+
+@keyframes motorized-delivery {
+  0% {
+    transform: translateX(0px) scaleX(1);
+  }
+  15% {
+    transform: translateX(8px) scaleX(1);
+  }
+  30% {
+    transform: translateX(20px) scaleX(1);
+  }
+  45% {
+    transform: translateX(28px) scaleX(1);
+  }
+  50% {
+    transform: translateX(30px) scaleX(-1);
+  }
+  65% {
+    transform: translateX(20px) scaleX(-1);
+  }
+  80% {
+    transform: translateX(8px) scaleX(-1);
+  }
+  90% {
+    transform: translateX(2px) scaleX(-1);
+  }
+  95% {
+    transform: translateX(0px) scaleX(-1);
+  }
+  100% {
+    transform: translateX(0px) scaleX(1);
+  }
+}
+
+/* Animación de latido del logo */
+@keyframes logo-heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.05);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.08);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+/* Ondas de pulso concéntricas */
+@keyframes pulse-ring {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+/* Puntos orbitales */
+@keyframes orbit-dots {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Parpadeo de estrellas */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Brillo de la sonrisa */
+@keyframes smile-glow {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 2px rgba(16, 185, 129, 0.3));
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));
+  }
+}
+
+/* Efecto de brillo pasando por encima */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes package-swing {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes propeller {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pin-drop {
+  0% {
+    transform: translateY(-20px) scale(0.8);
+    opacity: 0.6;
+  }
+  20% {
+    transform: translateY(-5px) scale(0.9);
+    opacity: 0.8;
+  }
+  40% {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-2px) scale(1.05);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes location-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes wheel-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes delivery-bounce {
+  0%, 100% {
+    transform: translateY(0px) scaleY(1);
+  }
+  50% {
+    transform: translateY(-12px) scaleY(0.95);
+  }
+}
+
+@keyframes package-bounce {
+  0%, 100% {
+    transform: translateY(0px) scaleY(1);
+  }
+  25% {
+    transform: translateY(-8px) scaleY(0.98);
+  }
+  50% {
+    transform: translateY(-16px) scaleY(0.95);
+  }
+  75% {
+    transform: translateY(-8px) scaleY(0.98);
+  }
+}
+
+@keyframes package-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}
+
+.animate-delivery-move {
+  animation: motorized-delivery 3s ease-in-out infinite;
+}
+
+.animate-logo-heartbeat {
+  animation: logo-heartbeat 2s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.animate-orbit-dots {
+  animation: orbit-dots 6s linear infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.animate-smile-glow {
+  animation: smile-glow 3s ease-in-out infinite;
+}
+
+.animate-shine {
+  animation: shine 3s ease-in-out infinite;
+}
+
+.animate-package-swing {
+  animation: package-swing 1.5s ease-in-out infinite;
+}
+
+.animate-propeller {
+  animation: propeller 0.1s linear infinite;
+}
+
+.animate-wheel-spin {
+  animation: wheel-spin 0.8s linear infinite;
+}
+
+.animate-delivery-bounce {
+  animation: delivery-bounce 1.5s ease-in-out infinite;
+}
+
+.animate-package-bounce {
+  animation: package-bounce 1.2s ease-in-out infinite;
+}
+
+.animate-package-wiggle {
+  animation: package-wiggle 2s ease-in-out infinite;
+}
+
+.animate-pin-drop {
+  animation: pin-drop 2s ease-in-out infinite;
+}
+
+.animate-location-pulse {
+  animation: location-pulse 2s ease-out infinite;
 }
 
 /* @theme inline {

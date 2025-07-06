@@ -17,7 +17,7 @@
       "responses": [
         {
           "uuid": "500843ef-10d4-4715-8b76-3252fd40a3be",
-          "body": "{\n  \"user\": {\n    \"id\": 18,\n    \"name\": \"alma\",\n    \"email\": \"almacen@japiexpress.com\",\n    \"type\": 2\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImlhdCI6MTc1MDk5NTkwMCwiZXhwIjoxNzUxMDgyMzAwfQ.jJFmoQLqza-vRizeUkXiUrkff7ECHNnW6akukQsp4Pw\"\n}",
+          "body": "  {\n  \"user\": {\n    \"id\": 18,\n    \"name\": \"alma\",\n    \"email\": \"almacen@japiexpress.com\",\n    \"id_rol\": 2,\n    \"status\": 1\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImlhdCI6MTc1MDk5NTkwMCwiZXhwIjoxNzUxMDgyMzAwfQ.jJFmoQLqza-vRizeUkXiUrkff7ECHNnW6akukQsp4Pw\"\n}",
           "latency": 2000,
           "statusCode": 200,
           "label": "Login exitoso",
@@ -343,8 +343,8 @@
       "responses": [
         {
           "uuid": "d5f4ab8d-4cf5-4a60-bbee-d5d2e9e6daec",
-          "body": "{\r\n  \"id\": 999\r\n}",
-          "latency": 2000,
+          "body": "{\n  \"id\": 2770\n}",
+          "latency": 5000,
           "statusCode": 200,
           "label": "Registro exitoso",
           "headers": [],
@@ -397,6 +397,54 @@
           "default": false,
           "crudKey": "id",
           "callbacks": []
+        },
+        {
+          "uuid": "11ad0df0-a2df-4122-bd75-135c28653a9e",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"El correo ya ha sido registrado\",\n  \"stack\": \"Error\\n    at new HttpError (/var/task/node_modules/routing-controllers/cjs/http-error/HttpError.js:17:22)\\n    at new UserError (/var/task/dist/domain/util/UserError.js:7:9)\\n    at CreateCompanyUseCase.execute (/var/task/dist/application/UseCase/CreateCompanyUseCase.js:25:19)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at async CompanyService.createCompany (/var/task/dist/application/Service/CompanyService.js:20:16)\",\n  \"statusCode\": 409\n}",
+          "latency": 0,
+          "statusCode": 409,
+          "label": "Correo registrado",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "b5e3008d-1385-4568-9f86-ecfd99715d32",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "company/district/catalog",
+      "responses": [
+        {
+          "uuid": "372585ad-441a-4a66-b38d-04742c0d7b4a",
+          "body": "[\n  {\n    \"id_region\": 1,\n    \"region_name\": \"Lima\",\n    \"districts\": [\n      {\n        \"id_district\": 1,\n        \"district_name\": \"Ate\",\n        \"sectors\": [\n          {\n            \"id_sector\": 1,\n            \"sector_name\": \"Ate Vitarte\"\n          },\n          {\n            \"id_sector\": 2,\n            \"sector_name\": \"Salamanca\"\n          },\n          {\n            \"id_sector\": 3,\n            \"sector_name\": \"Huaycan\"\n          },\n          {\n            \"id_sector\": 4,\n            \"sector_name\": \"Santa Clara\"\n          }\n        ]\n      },\n      {\n        \"id_district\": 2,\n        \"district_name\": \"Barranco\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 3,\n        \"district_name\": \"Breña\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 4,\n        \"district_name\": \"Carabayllo\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 5,\n        \"district_name\": \"Chorrillos\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 6,\n        \"district_name\": \"Comas\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 7,\n        \"district_name\": \"El Agustino\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 8,\n        \"district_name\": \"Independencia\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 9,\n        \"district_name\": \"Jesus Maria\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 10,\n        \"district_name\": \"La Molina\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 11,\n        \"district_name\": \"La Victoria\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 12,\n        \"district_name\": \"Cercado de Lima\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 13,\n        \"district_name\": \"Lince\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 14,\n        \"district_name\": \"Los Olivos\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 15,\n        \"district_name\": \"Lurigancho\",\n        \"sectors\": [\n          {\n            \"id_sector\": 5,\n            \"sector_name\": \"Huachipa(Zoologico)\"\n          }\n        ]\n      },\n      {\n        \"id_district\": 16,\n        \"district_name\": \"Magdalena del Mar\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 17,\n        \"district_name\": \"Miraflores\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 18,\n        \"district_name\": \"Pueblo Libre\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 19,\n        \"district_name\": \"Puente Piedra\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 20,\n        \"district_name\": \"Rimac\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 21,\n        \"district_name\": \"San Borja\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 22,\n        \"district_name\": \"San Isidro\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 23,\n        \"district_name\": \"San Juan de Lurigancho\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 24,\n        \"district_name\": \"San Juan de Miraflores\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 25,\n        \"district_name\": \"San Luis\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 26,\n        \"district_name\": \"San Martin de Porres\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 27,\n        \"district_name\": \"San Miguel\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 28,\n        \"district_name\": \"Santa Anita\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 29,\n        \"district_name\": \"Santiago de Surco\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 30,\n        \"district_name\": \"Surquillo\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 31,\n        \"district_name\": \"Villa el Salvador\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 32,\n        \"district_name\": \"Villa María del Triunfo\",\n        \"sectors\": []\n      }\n    ]\n  },\n  {\n    \"id_region\": 2,\n    \"region_name\": \"Callao\",\n    \"districts\": [\n      {\n        \"id_district\": 33,\n        \"district_name\": \"Callao\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 34,\n        \"district_name\": \"Bellavista\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 35,\n        \"district_name\": \"Carmen de la Legua\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 36,\n        \"district_name\": \"La Perla\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 37,\n        \"district_name\": \"La Punta\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 38,\n        \"district_name\": \"Mi Perú\",\n        \"sectors\": []\n      },\n      {\n        \"id_district\": 39,\n        \"district_name\": \"Ventanilla\",\n        \"sectors\": []\n      }\n    ]\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
         }
       ],
       "responseMode": null
@@ -430,6 +478,10 @@
     {
       "type": "route",
       "uuid": "86255583-1827-4ae0-adfe-2859275e961f"
+    },
+    {
+      "type": "route",
+      "uuid": "b5e3008d-1385-4568-9f86-ecfd99715d32"
     }
   ],
   "proxyMode": false,
