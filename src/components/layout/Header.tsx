@@ -10,7 +10,7 @@ interface UserData {
   id: number;
   email: string;
   name: string;
-  type: string;
+  id_role: number;
 }
 
 interface HeaderProps {
@@ -23,7 +23,7 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   const { pageTitle } = useUserRoutes();
   const { isOpen: showMenu, setIsOpen: setShowMenu, ref: menuRef } = useClickOutside<HTMLDivElement>();
 
-  const avatarSrc = `/avatars/${user?.type || 'default'}.png`;
+  const avatarSrc = `/avatars/${user?.id_role || 'default'}.png`;
 
   return (
     <header className='bg-[color:var(--background)] shadow p-4 flex justify-between items-center'>

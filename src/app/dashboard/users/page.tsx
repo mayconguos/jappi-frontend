@@ -11,7 +11,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 
 import UserModal from '@/components/forms/UserModal';
 import { getDocumentTypeLabel } from '@/constants/documentTypes';
-import { getUserTypeLabel } from '@/constants/userTypes';
+import { getUserRoleLabel } from '@/constants/userRoles';
 
 import { useUsers, useFilterAndPagination, useModal, type User } from '@/hooks';
 
@@ -25,7 +25,7 @@ const filterBy = [
 export default function UsersPage() {
   // Hooks personalizados
   const { users, loading, error, fetchUsers, deleteUser, handleUserSubmit } = useUsers();
-  
+
   const {
     filterField,
     searchValue,
@@ -146,7 +146,7 @@ export default function UsersPage() {
                   <TableCell className="font-medium text-gray-600">
                     {startIndex + index + 1}
                   </TableCell>
-                  <TableCell>{getUserTypeLabel(user.type)}</TableCell>
+                  <TableCell>{getUserRoleLabel(user.id_role)}</TableCell>
                   <TableCell>{user.first_name}</TableCell>
                   <TableCell>{user.last_name}</TableCell>
                   <TableCell>{getDocumentTypeLabel(user.document_type)} - {user.document_number}</TableCell>

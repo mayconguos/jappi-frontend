@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,8 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
+import DeliveryLoader from '@/components/ui/delivery-loader';
+import FullScreenDeliveryLoader from '@/components/ui/fullscreen-delivery-loader';
 
 export default function LoginForm() {
   const {
@@ -33,6 +35,7 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isServerError, setIsServerError] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -46,6 +49,7 @@ export default function LoginForm() {
       const userWithRole = { ...user };
       localStorage.setItem('token', token);
       secureLocalStorage.setItem('user', userWithRole);
+      setIsRedirecting(true);
       router.push('/dashboard');
     } catch (err: unknown) {
       // Type guard para verificar si es un error de axios
@@ -56,6 +60,10 @@ export default function LoginForm() {
           switch (axiosError.response.status) {
             case 401:
               setError('Credenciales inválidas. Verifica tu correo y contraseña.');
+              setIsServerError(false);
+              break;
+            case 403:
+              setError('Tu cuenta aún no ha sido activada por un administrador. Por favor, espere.');
               setIsServerError(false);
               break;
             case 500:
@@ -83,6 +91,25 @@ export default function LoginForm() {
       setIsLoading(false);
     }
   };
+
+  // Si ya hay usuario autenticado, redirigir inmediatamente y mostrar solo el loader
+  useEffect(() => {
+    const user = secureLocalStorage.getItem('user');
+    if (user) {
+      setIsRedirecting(true);
+      router.push('/dashboard');
+    }
+  }, [router]);
+
+  // Si está autenticando o redirigiendo, mostrar solo el loader de pantalla completa
+  if (isLoading || isRedirecting) {
+    return (
+      <FullScreenDeliveryLoader
+        isVisible={true}
+        message="Iniciando sesión en Jappi Express..."
+      />
+    );
+  }
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -189,11 +216,8 @@ export default function LoginForm() {
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Iniciando sesión...
+              <DeliveryLoader size="sm" message="" className="!space-y-0" />
+              <span className="ml-2">Iniciando sesión...</span>
             </div>
           ) : (
             <div className="flex items-center justify-center">
@@ -235,7 +259,7 @@ export default function LoginForm() {
       <div className="text-center mt-6 space-y-2">
         <p className="text-xs text-gray-500">
           Al continuar, aceptas nuestros{' '}
-          <a 
+          <a
             href="https://drive.google.com/file/d/1MHvTB9t3uQervfF1MYtHC_3nA8oyllcA/view?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"

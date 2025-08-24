@@ -11,7 +11,7 @@ export interface User {
   document_number: string;
   email: string;
   password: string;
-  type: number;
+  id_role: number;
 }
 
 export const useUsers = () => {
@@ -27,7 +27,7 @@ export const useUsers = () => {
     document_number: user.document_number || '',
     email: user.email || '',
     password: user.password || '',
-    type: user.type || 2,
+    id_role: user.id_role || 1,
   });
 
   const fetchUsers = useCallback(async () => {

@@ -8,7 +8,7 @@ export const userSchema = z.object({
   document_number: commonValidations.documentNumber,
   email: commonValidations.email,
   password: commonValidations.password,
-  type: commonValidations.userType,
+  id_role: commonValidations.userRole,
 }).refine((data) => {
   // Validación dinámica del número de documento según el tipo
   const validator = createDocumentNumberValidator(data.document_type);
@@ -27,7 +27,7 @@ export const userEditSchema = z.object({
   document_number: commonValidations.documentNumber,
   email: commonValidations.email.optional(),
   password: commonValidations.passwordOptional,
-  type: commonValidations.userType,
+  id_role: commonValidations.userRole,
 }).refine((data) => {
   // Validación dinámica del número de documento según el tipo
   const validator = createDocumentNumberValidator(data.document_type);

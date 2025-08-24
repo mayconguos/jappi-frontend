@@ -106,7 +106,7 @@ export function Modal({
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
@@ -114,25 +114,25 @@ export function Modal({
       aria-describedby={description ? "modal-description" : undefined}
     >
       {/* Overlay/Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+      <div
+        className="fixed inset-0 bg-transparent backdrop-blur-sm transition-opacity duration-300"
         onClick={handleOverlayClick}
         aria-hidden="true"
       />
-      
+
       {/* Modal Content */}
       <div className={`
-        relative bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden
+        relative bg-white rounded-lg border border-gray-300 shadow-2xl max-h-[90vh] overflow-hidden
         w-full mx-4 transition-all duration-300 transform
         ${sizeClasses[size]}
         ${className}
       `}>
         {/* Header */}
         {(title || description || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between p-4 pt-4 border-b border-gray-200">
             <div className="flex-1">
               {title && (
-                <h2 
+                <h2
                   id="modal-title"
                   className="text-xl font-semibold text-gray-900 mb-1"
                 >
@@ -140,7 +140,7 @@ export function Modal({
                 </h2>
               )}
               {description && (
-                <p 
+                <p
                   id="modal-description"
                   className="text-sm text-gray-600"
                 >
@@ -148,33 +148,33 @@ export function Modal({
                 </p>
               )}
             </div>
-            
+
             {showCloseButton && (
               <button
                 onClick={onClose}
                 className="ml-4 text-gray-400 hover:text-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-1"
                 aria-label="Cerrar modal"
               >
-                <svg 
-                  className="w-6 h-6" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M6 18L18 6M6 6l12 12" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
               </button>
             )}
           </div>
         )}
-        
+
         {/* Body */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
+        <div className="p-6 pt-4 overflow-y-auto max-h-[calc(90vh-8rem)]">
           {children}
         </div>
       </div>
@@ -196,7 +196,7 @@ interface ModalFooterProps {
 
 export function ModalFooter({ children, className = '' }: ModalFooterProps) {
   return (
-    <div className={`px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 ${className}`}>
+    <div className={`px-6 flex items-center justify-end gap-3 ${className}`}>
       {children}
     </div>
   );

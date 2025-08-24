@@ -15,7 +15,7 @@ export const useUserRoutes = () => {
   useEffect(() => {
     const storedUser = getStoredUser();
     if (storedUser) {
-      const userRoutes = getUserRoutes(storedUser.type);
+      const userRoutes = getUserRoutes(storedUser.id_role);
       setRoutes(userRoutes);
       
       // Obtener el título de la página actual

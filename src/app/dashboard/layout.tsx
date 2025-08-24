@@ -11,7 +11,7 @@ interface UserData {
   id: number;
   email: string;
   name: string;
-  role: string;
+  id_role: number;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

@@ -65,11 +65,11 @@ export const commonValidations = {
     .string()
     .min(1, 'El número de documento es requerido'),
 
-  // Tipo de usuario
-  userType: z
+  // Rol de usuario
+  userRole: z
     .number()
     .int()
-    .min(1, 'Debes seleccionar un tipo de usuario'),
+    .min(1, 'Debes seleccionar un rol de usuario'),
 
   // Teléfono (empresarial - más flexible)
   phone: z

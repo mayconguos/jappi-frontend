@@ -82,9 +82,9 @@ const DeliveryLoader: React.FC<DeliveryLoaderProps> = ({
             {message}
           </p>
           <div className="flex justify-center mt-2 space-x-1">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '100ms' }}></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
+            <div className="w-2 h-2 bg-[color:var(--surface-dark)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-[color:var(--surface-dark)] rounded-full animate-bounce" style={{ animationDelay: '100ms' }}></div>
+            <div className="w-2 h-2 bg-[color:var(--surface-dark)] rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
           </div>
         </div>
       )}
