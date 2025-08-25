@@ -6,6 +6,7 @@ import secureLocalStorage from 'react-secure-storage';
 
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 
 interface UserData {
   id: number;
@@ -39,20 +40,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (checking) {
     return (
       <main className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <p className='text-gray-400'>Cargando sesión...</p>
+        <DeliveryLoader message="Cargando sesión..." />
       </main>
     );
   }
 
   return (
-    <div className='min-h-screen flex'>
+    <div className='h-screen flex'>
       <Sidebar
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
       />
       <div className='flex-1 flex flex-col'>
         <Header user={user} onOpenSidebarMobile={() => setIsMobileSidebarOpen(true)} />
-        <main>{children}</main>
+        <main className='flex-1 overflow-y-auto'>{children}</main>
       </div>
     </div>
   );

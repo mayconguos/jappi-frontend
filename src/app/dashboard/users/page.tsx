@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { Select } from '@/components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 
 import UserModal from '@/components/forms/UserModal';
 import { getDocumentTypeLabel } from '@/constants/documentTypes';
@@ -113,7 +114,7 @@ export default function UsersPage() {
 
       {loading && (
         <div className="text-center py-4">
-          <p className="text-gray-500">Cargando usuarios...</p>
+          <DeliveryLoader message="Cargando usuarios..." />
         </div>
       )}
 

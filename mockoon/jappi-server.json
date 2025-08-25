@@ -17,7 +17,7 @@
       "responses": [
         {
           "uuid": "500843ef-10d4-4715-8b76-3252fd40a3be",
-          "body": "  {\n  \"user\": {\n    \"id\": 18,\n    \"name\": \"alma\",\n    \"email\": \"almacen@japiexpress.com\",\n    \"id_role\": 2,\n    \"status\": 1\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImlhdCI6MTc1MDk5NTkwMCwiZXhwIjoxNzUxMDgyMzAwfQ.jJFmoQLqza-vRizeUkXiUrkff7ECHNnW6akukQsp4Pw\"\n} ",
+          "body": "  {\n  \"user\": {\n    \"id\": 18,\n    \"name\": \"alma\",\n    \"email\": \"almacen@japiexpress.com\",\n    \"id_role\": 1,\n    \"status\": 1\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImlhdCI6MTc1MDk5NTkwMCwiZXhwIjoxNzUxMDgyMzAwfQ.jJFmoQLqza-vRizeUkXiUrkff7ECHNnW6akukQsp4Pw\"\n} ",
           "latency": 1000,
           "statusCode": 200,
           "label": "Login exitoso",
@@ -157,7 +157,7 @@
       "type": "http",
       "documentation": "",
       "method": "post",
-      "endpoint": "user/create",
+      "endpoint": "user/company",
       "responses": [
         {
           "uuid": "81629666-7051-4684-8cd3-2e18235da426",
@@ -228,7 +228,7 @@
       "responses": [
         {
           "uuid": "cbb3eb2c-329a-4336-a3df-99ce06e6a01a",
-          "body": "[\n  {\n    \"id\": 2802,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"admin@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2803,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"almacen@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 4\n  },\n  {\n    \"id\": 2804,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"coordinacion@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 5\n  },\n  {\n    \"id\": 2810,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"test@test.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 5\n  },\n  {\n    \"id\": 2811,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"a@a.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2812,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"maycon@sura.pe\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 4\n  },\n  {\n    \"id\": 2813,\n    \"first_name\": \"maycon\",\n    \"last_name\": \"guzman\",\n    \"email\": \"a@asda.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2814,\n    \"first_name\": \"asdas\",\n    \"last_name\": \"asdasd\",\n    \"email\": \"a@as.com\",\n    \"document_type\": 1,\n    \"document_number\": \"44444444\",\n    \"type\": 2\n  }\n]",
+          "body": "[\n  {\n    \"id\": 2802,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"admin@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2803,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"almacen@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 4\n  },\n  {\n    \"id\": 2804,\n    \"first_name\": \"\",\n    \"last_name\": null,\n    \"email\": \"coordinacion@test.com\",\n    \"document_type\": 0,\n    \"document_number\": \"\",\n    \"type\": 5\n  },\n  {\n    \"id\": 2810,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"test@test.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 5\n  },\n  {\n    \"id\": 2811,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"a@a.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2812,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"maycon@sura.pe\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 4\n  },\n  {\n    \"id\": 2813,\n    \"first_name\": \"maycon\",\n    \"last_name\": \"guzman\",\n    \"email\": \"a@asda.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2814,\n    \"first_name\": \"asdas\",\n    \"last_name\": \"asdasd\",\n    \"email\": \"a@as.com\",\n    \"document_type\": 1,\n    \"document_number\": \"44444444\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2815,\n    \"first_name\": \"Maycon\",\n    \"last_name\": \"Guzman\",\n    \"email\": \"maycon@sura.pe\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 4\n  },\n  {\n    \"id\": 2816,\n    \"first_name\": \"maycon\",\n    \"last_name\": \"guzman\",\n    \"email\": \"a@asda.com\",\n    \"document_type\": 1,\n    \"document_number\": \"45096121\",\n    \"type\": 2\n  },\n  {\n    \"id\": 2817,\n    \"first_name\": \"asdas\",\n    \"last_name\": \"asdasd\",\n    \"email\": \"a@as.com\",\n    \"document_type\": 1,\n    \"document_number\": \"44444444\",\n    \"type\": 2\n  }\n]",
           "latency": 2000,
           "statusCode": 200,
           "label": "Listado exitoso",

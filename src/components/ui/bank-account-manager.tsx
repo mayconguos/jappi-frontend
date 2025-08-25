@@ -131,11 +131,11 @@ export function BankAccountManager({
   };
 
   const getBancoLabel = (value: string) => {
-    return BANCOS.find(banco => banco.value === value)?.label || value;
+    return BANCOS.find(banco => banco.value.toString() === value)?.label || value;
   };
 
   const getTipoCuentaLabel = (value: string) => {
-    return TIPOS_CUENTA.find(tipo => tipo.value === value)?.label || value;
+    return TIPOS_CUENTA.find(tipo => tipo.value.toString() === value)?.label || value;
   };
 
   return (

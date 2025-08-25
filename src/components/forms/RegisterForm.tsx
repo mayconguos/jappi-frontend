@@ -276,7 +276,7 @@ export default function RegisterForm() {
     try {
       // Cerrar el modal de confirmación inmediatamente al hacer clic
       closeModal();
-      
+
       // Activar el estado de carga para mostrar el loader de pantalla completa
       setIsSubmittingConfirmation(true);
 
@@ -363,7 +363,7 @@ export default function RegisterForm() {
       console.log('Datos transformados para la API:', transformedData);
 
       // Llamada a la API para enviar los datos al servidor
-      const response = await api.post('/company/create', transformedData);
+      const response = await api.post('/user/company', transformedData);
 
       if (response.data) {
         // Desactivar el estado de carga
@@ -464,7 +464,7 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md max-w-4xl w-full">
+    <div className="bg-white p-4 md:p-8 rounded-lg shadow-md max-w-4xl w-full">
       <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
         Registro de Empresa
       </h1>
@@ -472,19 +472,27 @@ export default function RegisterForm() {
       {/* Progress Bar Stepper */}
       <div className="mb-8">
         {/* Títulos de los pasos */}
-        <div className="flex justify-between mb-4">
-          {steps.map((step) => (
-            <div key={step.number} className="flex-1 text-center">
-              <h3 className={`text-sm font-medium ${currentStep >= step.number ? 'text-blue-600' : 'text-gray-400'
-                }`}>
-                Paso {step.number}: {step.title}
-              </h3>
-              <p className={`text-xs mt-1 ${currentStep >= step.number ? 'text-gray-600' : 'text-gray-400'
-                }`}>
-                {step.description}
-              </p>
-            </div>
-          ))}
+        <div className="mb-4">
+          <div className="block md:hidden text-center">
+            <h3 className="text-base font-semibold text-blue-600">
+              Paso {currentStep}: {steps[currentStep - 1].title}
+            </h3>
+            <p className="text-sm mt-1 text-gray-600">
+              {steps[currentStep - 1].description}
+            </p>
+          </div>
+          <div className="hidden md:flex justify-between">
+            {steps.map((step) => (
+              <div key={step.number} className="flex-1 text-center">
+                <h3 className={`text-lg font-medium ${currentStep >= step.number ? 'text-blue-600' : 'text-gray-400'}`}>
+                  Paso {step.number}: {step.title}
+                </h3>
+                <p className={`text-sm mt-1 ${currentStep >= step.number ? 'text-gray-600' : 'text-gray-400'}`}>
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Barra de progreso */}
@@ -551,7 +559,6 @@ export default function RegisterForm() {
               onClick={openModal}
               disabled={isSubmitting || !isFormCompleteForSubmit}
               className="flex items-center gap-2"
-              size="lg"
             >
               {isSubmitting ? (
                 <>
@@ -705,6 +712,8 @@ export default function RegisterForm() {
       <Modal
         isOpen={isSuccessModalOpen}
         onClose={closeSuccessModal}
+        showCloseButton={false}
+        closeOnOverlayClick={false}
         title="¡Registro Exitoso!"
         description="Tu solicitud ha sido recibida correctamente"
         size="md"
@@ -775,7 +784,7 @@ export default function RegisterForm() {
       </Modal>
 
       {/* Loader de pantalla completa durante el registro */}
-      <FullScreenDeliveryLoader 
+      <FullScreenDeliveryLoader
         isVisible={isSubmittingConfirmation}
         message="Registrando tu empresa en Jappi Express..."
       />

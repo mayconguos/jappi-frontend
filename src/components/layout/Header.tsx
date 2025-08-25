@@ -23,7 +23,7 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   const { pageTitle } = useUserRoutes();
   const { isOpen: showMenu, setIsOpen: setShowMenu, ref: menuRef } = useClickOutside<HTMLDivElement>();
 
-  const avatarSrc = `/avatars/${user?.id_role || 'default'}.png`;
+  const avatarSrc = `/avatars/${user?.id_role || 'default'}.svg`;
 
   return (
     <header className='bg-[color:var(--background)] shadow p-4 flex justify-between items-center'>
@@ -45,8 +45,9 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
         )}
       </div>
 
-      <div className='relative flex items-center gap-4'>
-        <h1 className='text-xl font-semibold hidden md:block'>
+      {/* Avatar y saludo: ocultos en móviles */}
+      <div className='relative items-center gap-4 hidden md:flex'>
+        <h1 className='text-xl font-semibold'>
           ¡Bienvenido! <span className='user-name-highlight'>{user?.name}</span>
         </h1>
         <button
