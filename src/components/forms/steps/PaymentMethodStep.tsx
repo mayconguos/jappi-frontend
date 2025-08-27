@@ -43,7 +43,7 @@ export function PaymentMethodStep({
             description={
               <span>
                 Selecciona tu método de pago preferido{' '}
-                <span className="font-semibold text-blue-600">para recibir pagos</span>
+                <span className="font-bold text-[var(--surface-dark)]">para recibir pagos</span>
               </span>
             }
             columns={2}

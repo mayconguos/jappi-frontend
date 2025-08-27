@@ -28,7 +28,7 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   return (
     <header className='bg-[color:var(--background)] shadow p-4 flex justify-between items-center'>
       <div className='flex items-center'>
-        <h2 className='text-xl font-semibold text-gray-800'>{pageTitle}</h2>
+        <h2 className='text-xl font-semibold text-[color:var(--surface-dark)]'>{pageTitle.toUpperCase()}</h2>
       </div>
       <div className='flex items-center gap-3'>
         {/* Botón hamburguesa: solo visible en móviles */}
@@ -47,8 +47,8 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
 
       {/* Avatar y saludo: ocultos en móviles */}
       <div className='relative items-center gap-4 hidden md:flex'>
-        <h1 className='text-xl font-semibold'>
-          ¡Bienvenido! <span className='user-name-highlight'>{user?.name}</span>
+        <h1 className='text-xl font-semibold text-[color:var(--surface-dark)]'>
+          ¡Bienvenido! <span className='text-[color:var(--surface-dark)]'>{user?.name}</span>
         </h1>
         <button
           onClick={() => setShowMenu(!showMenu)}

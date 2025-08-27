@@ -465,7 +465,7 @@ export default function RegisterForm() {
 
   return (
     <div className="bg-white p-4 md:p-8 rounded-lg shadow-md max-w-4xl w-full">
-      <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+      <h1 className="text-2xl font-bold text-center text-[var(--surface-dark)] mb-6">
         Registro de Empresa
       </h1>
 
@@ -474,7 +474,7 @@ export default function RegisterForm() {
         {/* Títulos de los pasos */}
         <div className="mb-4">
           <div className="block md:hidden text-center">
-            <h3 className="text-base font-semibold text-blue-600">
+            <h3 className="text-base font-semibold text-[var(--surface-dark)]">
               Paso {currentStep}: {steps[currentStep - 1].title}
             </h3>
             <p className="text-sm mt-1 text-gray-600">
@@ -484,7 +484,7 @@ export default function RegisterForm() {
           <div className="hidden md:flex justify-between">
             {steps.map((step) => (
               <div key={step.number} className="flex-1 text-center">
-                <h3 className={`text-lg font-medium ${currentStep >= step.number ? 'text-blue-600' : 'text-gray-400'}`}>
+                <h3 className={`text-lg font-medium ${currentStep >= step.number ? 'text-[var(--surface-dark)]' : 'text-gray-400'}`}>
                   Paso {step.number}: {step.title}
                 </h3>
                 <p className={`text-sm mt-1 ${currentStep >= step.number ? 'text-gray-600' : 'text-gray-400'}`}>
@@ -498,7 +498,7 @@ export default function RegisterForm() {
         {/* Barra de progreso */}
         <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
           <div
-            className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-in-out shadow-sm"
+            className="bg-gradient-to-r from-[var(--surface-light)] to-[var(--surface-dark)] h-3 rounded-full transition-all duration-500 ease-in-out shadow-sm"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           ></div>
         </div>

@@ -143,7 +143,7 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           <Input
             {...register('ruc')}
             type="text"
-            placeholder="12345678901"
+            placeholder="20606707283"
             maxLength={11}
             autoComplete="off"
             onChange={async (e) => {

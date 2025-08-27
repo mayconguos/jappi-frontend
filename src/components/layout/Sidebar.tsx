@@ -46,7 +46,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
           <div className='flex items-center justify-between px-4 py-4 border-b border-white/10'>
             <div className={`flex items-center gap-2 ${isCollapsed ? 'justify-center w-full' : ''}`}>
               <Image
-                src="/logo.png"
+                src="/faviconyellow.jpg"
                 alt="Logo"
                 className={`${isCollapsed ? 'w-8 h-8' : 'w-12 h-12'}`}
                 fill={false}

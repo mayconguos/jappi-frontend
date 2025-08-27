@@ -224,7 +224,7 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "user/list",
+      "endpoint": "user",
       "responses": [
         {
           "uuid": "cbb3eb2c-329a-4336-a3df-99ce06e6a01a",
@@ -237,11 +237,19 @@
           "filePath": "",
           "databucketID": "",
           "sendFileAsBody": false,
-          "rules": [],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "type",
+              "value": "workers",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
-          "default": true,
+          "default": false,
           "crudKey": "id",
           "callbacks": []
         },
@@ -279,7 +287,7 @@
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
-          "default": false,
+          "default": true,
           "crudKey": "id",
           "callbacks": []
         }
@@ -296,7 +304,7 @@
         {
           "uuid": "0a310277-1782-4f9f-97bf-fef74269d803",
           "body": "{}",
-          "latency": 2000,
+          "latency": 5000,
           "statusCode": 200,
           "label": "Actualización exitosa",
           "headers": [],
@@ -444,7 +452,7 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "company/district/catalog",
+      "endpoint": "catalog/locations",
       "responses": [
         {
           "uuid": "372585ad-441a-4a66-b38d-04742c0d7b4a",
@@ -467,16 +475,98 @@
         }
       ],
       "responseMode": null
+    },
+    {
+      "uuid": "f7f9e51a-a924-4887-9bcb-dd5791b0eb0f",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "user",
+      "responses": [
+        {
+          "uuid": "c694c758-575b-4d3a-87c1-644dfbb212fd",
+          "body": "{\r\n  \"id\": 998\r\n}",
+          "latency": 5000,
+          "statusCode": 200,
+          "label": "Registro exitoso",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "c492504b-d750-4bf1-8ee1-b69824feeee8",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"Correo no registrado\",\n  \"stack\": \"Error\\n    at new HttpError (/var/task/node_modules/routing-controllers/cjs/http-error/HttpError.js:17:22)\\n    at new UserError (/var/task/dist/domain/util/UserError.js:7:9)\\n    at LoginUseCase.execute (/var/task/dist/application/UseCase/LoginUseCase.js:17:19)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at async UserService.authenticateUser (/var/task/dist/application/Service/UserService.js:12:16)\\n    at async UserController.login (/var/task/dist/infraestructura/Controller/UserController.js:38:33)\",\n  \"statusCode\": 401\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Error de credenciales",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "00cc12d4-77f5-4730-98fa-d67393c23a86",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"Correo ya registrado\",\n  \"statusCode\": 409\n}",
+          "latency": 0,
+          "statusCode": 409,
+          "label": "El correo ya ha sido registrado",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "8ca617e8-e474-4c62-9fe1-e36e5921516a",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "Error de servidor",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
     }
   ],
   "rootChildren": [
     {
       "type": "route",
-      "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081"
-    },
-    {
-      "type": "route",
-      "uuid": "1c0aedf8-7e9a-4ed9-b780-74dcf6793caf"
+      "uuid": "b5e3008d-1385-4568-9f86-ecfd99715d32"
     },
     {
       "type": "route",
@@ -484,7 +574,19 @@
     },
     {
       "type": "route",
+      "uuid": "f7f9e51a-a924-4887-9bcb-dd5791b0eb0f"
+    },
+    {
+      "type": "route",
+      "uuid": "1c0aedf8-7e9a-4ed9-b780-74dcf6793caf"
+    },
+    {
+      "type": "route",
       "uuid": "e595b41c-30e6-4d66-a94e-14ff4167994a"
+    },
+    {
+      "type": "route",
+      "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081"
     },
     {
       "type": "route",
@@ -497,10 +599,6 @@
     {
       "type": "route",
       "uuid": "86255583-1827-4ae0-adfe-2859275e961f"
-    },
-    {
-      "type": "route",
-      "uuid": "b5e3008d-1385-4568-9f86-ecfd99715d32"
     }
   ],
   "proxyMode": false,

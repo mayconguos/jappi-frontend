@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { PasswordInput } from '@/components/ui/password-input';
 import Modal, { ModalFooter } from '@/components/ui/modal';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 
 import { DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
 import { USER_ROLES, DEFAULT_USER_ROLE } from '@/constants/userRoles'
@@ -82,7 +83,6 @@ export default function UserModal({ isOpen, onClose, onSubmit, editingUser }: Us
 
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string>('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Llenar el formulario cuando se está editando
   useEffect(() => {
@@ -162,7 +162,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, editingUser }: Us
         });
       } else {
         // Crear nuevo usuario
-        response = await api.post('/user/create', requestBody, {
+        response = await api.post('/user', requestBody, {
           headers: {
             authorization: `${token}`,
           },
@@ -174,13 +174,6 @@ export default function UserModal({ isOpen, onClose, onSubmit, editingUser }: Us
 
         // Resetear formulario
         reset();
-
-        // Mostrar modal de éxito solo para actualizaciones
-        if (editingUser) {
-          setShowSuccessModal(true);
-        } else {
-          onClose();
-        }
       } else {
         const action = editingUser ? 'actualizar' : 'crear';
         setApiError(response.data?.message || `Error al ${action} el usuario`);
@@ -208,11 +201,6 @@ export default function UserModal({ isOpen, onClose, onSubmit, editingUser }: Us
     }
   };
 
-  const handleSuccessModalClose = () => {
-    setShowSuccessModal(false);
-    onClose();
-  };
-
   const handleClose = () => {
     reset();
     setApiError('');
@@ -221,221 +209,181 @@ export default function UserModal({ isOpen, onClose, onSubmit, editingUser }: Us
 
   if (!isOpen) return null;
 
-  // Modal de éxito
-  if (showSuccessModal) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <svg
-                className="h-6 w-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              ¡Actualización exitosa!
-            </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              La información del usuario ha sido actualizada correctamente.
-            </p>
-            <Button
-              onClick={handleSuccessModalClose}
-              className="w-full bg-primary text-white"
-            >
-              Aceptar
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={editingUser ? 'Editar usuario' : 'Añadir usuario'}
-      size="md"
-      showCloseButton
-    >
-      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-        {apiError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {apiError}
-          </div>
-        )}
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title={editingUser ? 'Editar usuario' : 'Añadir usuario'}
+        size="md"
+        showCloseButton
+      >
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+          {apiError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {apiError}
+            </div>
+          )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rol de usuario *
-          </label>
-          {editingUser ? (
-            <Input
-              value={ADMIN_USER_ROLES.find(role => role.value === watch('id_role').toString())?.label || ''}
-              disabled
-              className="bg-gray-100 cursor-not-allowed"
-            />
-          ) : (
-            <Select
-              value={watch('id_role').toString()}
-              options={ADMIN_USER_ROLES}
-              onChange={(value: string) => {
-                setValue('id_role', parseInt(value));
-                clearErrors('id_role');
-              }}
-            />
-          )}
-          {errors.id_role && (
-            <p className="text-red-500 text-xs mt-1">{errors.id_role.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre *
-          </label>
-          <Input
-            {...register('first_name')}
-            placeholder="Ingrese el nombre"
-            className={errors.first_name ? 'border-red-500' : ''}
-            onChange={(e) => {
-              setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
-            }}
-          />
-          {errors.first_name && (
-            <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Apellido *
-          </label>
-          <Input
-            {...register('last_name')}
-            placeholder="Ingrese el apellido"
-            className={errors.last_name ? 'border-red-500' : ''}
-            onChange={(e) => {
-              setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
-            }}
-          />
-          {errors.last_name && (
-            <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tipo de documento *
-          </label>
-          <Select
-            value={watch('document_type')}
-            options={DOCUMENT_TYPES}
-            onChange={(value: string) => {
-              setValue('document_type', value);
-              clearErrors('document_type');
-              // Limpiar el número de documento cuando cambie el tipo
-              setValue('document_number', '');
-              clearErrors('document_number');
-            }}
-          />
-          {errors.document_type && (
-            <p className="text-red-500 text-xs mt-1">{errors.document_type.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Número de documento *
-          </label>
-          <Input
-            {...register('document_number')}
-            placeholder="Ingrese el número de documento"
-            className={errors.document_number ? 'border-red-500' : ''}
-          />
-          {errors.document_number && (
-            <p className="text-red-500 text-xs mt-1">{errors.document_number.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Correo electrónico *
-          </label>
-          <Input
-            type="email"
-            {...register('email')}
-            placeholder="Ingrese el correo electrónico"
-            className={errors.email ? 'border-red-500' : ''}
-            autoComplete="username"
-            disabled={!!editingUser}
-            onChange={(e) => {
-              setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
-            }}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-          )}
-          {editingUser && (
-            <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
-          )}
-        </div>
-
-        {!editingUser && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña *
+              Rol de usuario *
             </label>
-            <PasswordInput
-              value={watch('password') || ''}
-              onChange={(value) => setValue('password', value)}
-              placeholder="Ingrese la contraseña"
-              disabled={isLoading}
-              error={errors.password?.message}
-              autoComplete="new-password"
+            {editingUser ? (
+              <Input
+                value={ADMIN_USER_ROLES.find(role => role.value === watch('id_role').toString())?.label || ''}
+                disabled
+                className="bg-gray-100 cursor-not-allowed"
+              />
+            ) : (
+              <Select
+                value={watch('id_role').toString()}
+                options={ADMIN_USER_ROLES}
+                onChange={(value: string) => {
+                  setValue('id_role', parseInt(value));
+                  clearErrors('id_role');
+                }}
+              />
+            )}
+            {errors.id_role && (
+              <p className="text-red-500 text-xs mt-1">{errors.id_role.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre *
+            </label>
+            <Input
+              {...register('first_name')}
+              placeholder="Ingrese el nombre"
+              className={errors.first_name ? 'border-red-500' : ''}
+              onChange={(e) => {
+                setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
+              }}
             />
+            {errors.first_name && (
+              <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Apellido *
+            </label>
+            <Input
+              {...register('last_name')}
+              placeholder="Ingrese el apellido"
+              className={errors.last_name ? 'border-red-500' : ''}
+              onChange={(e) => {
+                setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
+              }}
+            />
+            {errors.last_name && (
+              <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de documento *
+            </label>
+            <Select
+              value={watch('document_type')}
+              options={DOCUMENT_TYPES}
+              onChange={(value: string) => {
+                setValue('document_type', value);
+                clearErrors('document_type');
+                // Limpiar el número de documento cuando cambie el tipo
+                setValue('document_number', '');
+                clearErrors('document_number');
+              }}
+            />
+            {errors.document_type && (
+              <p className="text-red-500 text-xs mt-1">{errors.document_type.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Número de documento *
+            </label>
+            <Input
+              {...register('document_number')}
+              placeholder="Ingrese el número de documento"
+              className={errors.document_number ? 'border-red-500' : ''}
+            />
+            {errors.document_number && (
+              <p className="text-red-500 text-xs mt-1">{errors.document_number.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Correo electrónico *
+            </label>
+            <Input
+              type="email"
+              {...register('email')}
+              placeholder="Ingrese el correo electrónico"
+              className={errors.email ? 'border-red-500' : ''}
+              autoComplete="username"
+              disabled={!!editingUser}
+              onChange={(e) => {
+                setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
+              }}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+            )}
+            {editingUser && (
+              <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
+            )}
+          </div>
+
+          {!editingUser && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Contraseña *
+              </label>
+              <PasswordInput
+                value={watch('password') || ''}
+                onChange={(value) => setValue('password', value)}
+                placeholder="Ingrese la contraseña"
+                disabled={isLoading}
+                error={errors.password?.message}
+                autoComplete="new-password"
+              />
+            </div>
+          )}
+
+          <ModalFooter>
+            <Button
+              type="button"
+              onClick={handleClose}
+              className="bg-gray-500 hover:bg-gray-600 text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading || (isEditing && Object.keys(dirtyFields).length === 0)}
+              className="bg-primary text-white disabled:opacity-50"
+            >
+              {isLoading ?
+                (editingUser ? 'Actualizando...' : 'Guardando...') :
+                (editingUser ? 'Actualizar' : 'Guardar')
+              }
+            </Button>
+          </ModalFooter>
+        </form>
+
+        {isLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+            <DeliveryLoader message={editingUser ? 'Actualizando usuario...' : 'Guardando usuario...'} />
           </div>
         )}
-
-        {/* Campo oculto para nombre de usuario para accesibilidad */}
-        <input
-          type="text"
-          name="username"
-          autoComplete="username"
-          className="hidden"
-          aria-hidden="true"
-        />
-
-        <ModalFooter>
-          <Button
-            type="button"
-            onClick={handleClose}
-            className="bg-gray-500 hover:bg-gray-600 text-white"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading || (isEditing && Object.keys(dirtyFields).length === 0)}
-            className="bg-primary text-white disabled:opacity-50"
-          >
-            {isLoading ?
-              (editingUser ? 'Actualizando...' : 'Guardando...') :
-              (editingUser ? 'Actualizar' : 'Guardar')
-            }
-          </Button>
-        </ModalFooter>
-      </form>
-    </Modal>
+      </Modal>
+    </>
   );
 }

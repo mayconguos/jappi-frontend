@@ -31,7 +31,7 @@ export const useUsers = () => {
   });
 
   const fetchUsers = useCallback(async () => {
-    const response = await get('/user/list');
+    const response = await get('/user?type=workers');
     if (response) {
       const data = Array.isArray(response) ? response : [];
       const sanitizedData = data.map(sanitizeUser);

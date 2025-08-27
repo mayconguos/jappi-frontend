@@ -58,7 +58,7 @@ export function useLocationCatalog() {
         }
         
         // Hacer llamada a la API
-        const response = await api.get('/company/district/catalog');
+        const response = await api.get('/catalog/locations');
 
         // Guardar en localStorage
         localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(response.data));
@@ -146,7 +146,7 @@ export function useLocationCatalog() {
       // Limpiar caché existente
       clearCatalogCache();
       
-      const response = await api.get('/company/district/catalog');
+      const response = await api.get('/catalog/locations');
 
       // Guardar en localStorage
       localStorage.setItem('location_catalog', JSON.stringify(response.data));

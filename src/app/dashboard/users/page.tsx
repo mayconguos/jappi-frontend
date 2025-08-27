@@ -1,6 +1,7 @@
 'use client';
 
 import { Edit, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmModal } from '@/components/ui/confirm-modal';
@@ -19,14 +20,16 @@ import { useUsers, useFilterAndPagination, useModal, type User } from '@/hooks';
 const filterBy = [
   { value: 'first_name', label: 'Nombre' },
   { value: 'last_name', label: 'Apellido' },
-  { value: 'document_number', label: 'Número de documento' },
   { value: 'email', label: 'Correo electrónico' },
 ];
 
 export default function UsersPage() {
   // Hooks personalizados
-  const { users, loading, error, fetchUsers, deleteUser, handleUserSubmit } = useUsers();
+  const { users, loading, error, fetchUsers, handleUserSubmit } = useUsers();
+  const [successModal, setSuccessModal] = useState(false);
+  const [errorModal, setErrorModal] = useState<string | null>(null);
 
+  // Configuración de filtros y paginación
   const {
     filterField,
     searchValue,
@@ -41,14 +44,14 @@ export default function UsersPage() {
   } = useFilterAndPagination<User>({
     data: users,
     itemsPerPage: 10,
-    filterFields: ['first_name', 'last_name', 'document_number', 'email']
+    filterFields: ['first_name', 'last_name', 'email']
   });
 
-  // Modales
+  // Modales para añadir, editar y confirmar acciones
   const userModal = useModal<User>();
   const confirmModal = useModal<{ id: number; name: string; email: string }>();
 
-  // Handlers
+  // Handlers para acciones de usuario
   const handleEditUser = (user: User) => {
     userModal.openModal(user);
   };
@@ -61,22 +64,31 @@ export default function UsersPage() {
     });
   };
 
-  const confirmDeleteUser = async () => {
-    if (confirmModal.data) {
-      const success = await deleteUser(confirmModal.data.id);
-      if (success) {
-        confirmModal.closeModal();
-      }
+  // const confirmDeleteUser = async () => {
+  //   if (confirmModal.data) {
+  //     const success = await deleteUser(confirmModal.data.id);
+  //     if (success) {
+  //       confirmModal.closeModal();
+  //     }
+  //   }
+  // };
+
+  const handleUserModalSubmit = async (user: Omit<User, 'id'>) => {
+    try {
+      await handleUserSubmit(user, userModal.data);
+      setSuccessModal(true);
+    } catch {
+      // Mostrar modal de error en caso de fallo
+      setErrorModal('Hubo un error al procesar la solicitud.');
+    } finally {
+      userModal.closeModal();
     }
   };
 
-  const handleUserModalSubmit = (user: Omit<User, 'id'>) => {
-    handleUserSubmit(user, userModal.data);
-    userModal.closeModal();
-  };
-
   return (
+    // Sección principal de usuarios internos
     <section className="p-6 space-y-6">
+      {/* Filtros y botón para añadir usuario */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div className="flex flex-col md:flex-row md:items-end gap-2 flex-1">
           <div className="flex flex-col gap-1 w-full md:w-44">
@@ -112,12 +124,14 @@ export default function UsersPage() {
         </div>
       </div>
 
+      {/* Indicador de carga */}
       {loading && (
         <div className="text-center py-4">
           <DeliveryLoader message="Cargando usuarios..." />
         </div>
       )}
 
+      {/* Mensaje de error */}
       {error && (
         <div className="text-center py-4">
           <p className="text-red-500">{error}</p>
@@ -127,6 +141,7 @@ export default function UsersPage() {
         </div>
       )}
 
+      {/* Tabla de usuarios */}
       {!loading && !error && (
         <>
           <Table>
@@ -136,7 +151,7 @@ export default function UsersPage() {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Apellido</TableHead>
-                <TableHead>Nro. documento</TableHead>
+                <TableHead>Documento</TableHead>
                 <TableHead>Correo</TableHead>
                 <TableHead>Opciones</TableHead>
               </TableRow>
@@ -186,6 +201,7 @@ export default function UsersPage() {
             </TableBody>
           </Table>
 
+          {/* Paginación */}
           <Pagination
             currentPage={currentPage}
             totalItems={totalItems}
@@ -195,6 +211,7 @@ export default function UsersPage() {
         </>
       )}
 
+      {/* Modal para añadir o editar usuario */}
       <UserModal
         isOpen={userModal.isOpen}
         onClose={userModal.closeModal}
@@ -202,20 +219,31 @@ export default function UsersPage() {
         editingUser={userModal.data}
       />
 
-      <ConfirmModal
-        isOpen={confirmModal.isOpen}
-        onClose={confirmModal.closeModal}
-        onConfirm={confirmDeleteUser}
-        title="Eliminar usuario"
-        message="¿Confirma que desea eliminar este usuario?"
-        confirmText="Sí, eliminar"
-        cancelText="Cancelar"
-        variant="danger"
-        context={{
-          name: confirmModal.data?.name,
-          email: confirmModal.data?.email
-        }}
-      />
+      {/* Modal de confirmación de éxito */}
+      {successModal && (
+        <ConfirmModal
+          isOpen={successModal}
+          onClose={() => setSuccessModal(false)}
+          onConfirm={() => setSuccessModal(false)}
+          title="¡Creación exitosa!"
+          message="El usuario ha sido creado correctamente."
+          confirmText="Aceptar"
+          variant="info"
+        />
+      )}
+
+      {/* Modal de error */}
+      {errorModal && (
+        <ConfirmModal
+          isOpen={!!errorModal}
+          onClose={() => setErrorModal(null)}
+          onConfirm={() => setErrorModal(null)}
+          title="Error"
+          message={errorModal}
+          confirmText="Cerrar"
+          variant="danger"
+        />
+      )}
     </section>
   );
 }
