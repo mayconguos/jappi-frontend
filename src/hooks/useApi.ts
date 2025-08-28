@@ -69,11 +69,11 @@ export const useApi = <T>() => {
     }
   }, []);
 
-  const del = useCallback(async (url: string): Promise<T | null> => {
+  const del = useCallback(async (url: string, data?: unknown): Promise<T | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const response = await api.delete(url, { headers: getAuthHeaders() });
+      const response = await api.delete(url, { headers: getAuthHeaders(), data });
       const result = response.data;
       setState(prev => ({ ...prev, data: result, loading: false }));
       return result;
@@ -94,7 +94,7 @@ export const useApi = <T>() => {
     get,
     post,
     put,
-    delete: del,
+    del,
     reset
   };
 };

@@ -16,7 +16,7 @@ export interface User {
 
 export const useUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const { loading, error, get, put } = useApi<User[]>();
+  const { loading, error, get, del } = useApi<User[]>();
 
   // Sanitizar datos para evitar valores null/undefined
   const sanitizeUser = (user: User): User => ({
@@ -30,7 +30,7 @@ export const useUsers = () => {
     id_role: user.id_role || 1,
   });
 
-  const fetchUsers = useCallback(async () => {
+  const fetchWorkers = useCallback(async () => {
     const response = await get('/user?type=workers');
     if (response) {
       const data = Array.isArray(response) ? response : [];
@@ -55,16 +55,16 @@ export const useUsers = () => {
     );
   }, []);
 
-  const deleteUser = useCallback(async (id: number): Promise<boolean> => {
+  const deleteWorker = useCallback(async (id: number): Promise<boolean> => {
     try {
-      await put(`/user/update/${id}`, { active: false });
+      await del(`/user/${id}`, { active: false });
       setUsers(prev => prev.filter(user => user.id !== id));
       return true;
     } catch (err) {
       console.error('Error deleting user:', err);
       return false;
     }
-  }, [put]);
+  }, [del]);
 
   const handleUserSubmit = useCallback((user: Omit<User, 'id'>, editingUser?: User | null) => {
     if (editingUser) {
@@ -76,17 +76,17 @@ export const useUsers = () => {
   }, [addUser, updateUser]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchWorkers();
+  }, [fetchWorkers]);
 
   return {
     users,
     loading,
     error,
-    fetchUsers,
+    fetchWorkers,
     addUser,
     updateUser,
-    deleteUser,
+    deleteWorker,
     handleUserSubmit
   };
 };

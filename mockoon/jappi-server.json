@@ -249,7 +249,7 @@
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
-          "default": false,
+          "default": true,
           "crudKey": "id",
           "callbacks": []
         },
@@ -287,7 +287,7 @@
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
-          "default": true,
+          "default": false,
           "crudKey": "id",
           "callbacks": []
         }
@@ -561,6 +561,73 @@
         }
       ],
       "responseMode": null
+    },
+    {
+      "uuid": "5f9a65b6-c5b7-4a7c-b75f-891077bd8e3b",
+      "type": "http",
+      "documentation": "",
+      "method": "delete",
+      "endpoint": "user/:id",
+      "responses": [
+        {
+          "uuid": "7f0ede30-4fc3-464b-a794-1b9e138436e8",
+          "body": "{}",
+          "latency": 5000,
+          "statusCode": 200,
+          "label": "Actualización exitosa",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "fe7eee5b-40bf-4751-aeee-d012f54faead",
+          "body": "{\n  \"name\": \"HttpError\",\n  \"message\": \"Correo no registrado\",\n  \"stack\": \"Error\\n    at new HttpError (/var/task/node_modules/routing-controllers/cjs/http-error/HttpError.js:17:22)\\n    at new UserError (/var/task/dist/domain/util/UserError.js:7:9)\\n    at LoginUseCase.execute (/var/task/dist/application/UseCase/LoginUseCase.js:17:19)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at async UserService.authenticateUser (/var/task/dist/application/Service/UserService.js:12:16)\\n    at async UserController.login (/var/task/dist/infraestructura/Controller/UserController.js:38:33)\",\n  \"statusCode\": 401\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Error de credenciales",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "9aa2aca2-6638-4b00-b0f5-5a55a013ae01",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "Error de servidor",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
     }
   ],
   "rootChildren": [
@@ -599,6 +666,10 @@
     {
       "type": "route",
       "uuid": "86255583-1827-4ae0-adfe-2859275e961f"
+    },
+    {
+      "type": "route",
+      "uuid": "5f9a65b6-c5b7-4a7c-b75f-891077bd8e3b"
     }
   ],
   "proxyMode": false,

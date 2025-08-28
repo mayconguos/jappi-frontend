@@ -25,8 +25,8 @@ const filterBy = [
 
 export default function UsersPage() {
   // Hooks personalizados
-  const { users, loading, error, fetchUsers, handleUserSubmit } = useUsers();
-  const [successModal, setSuccessModal] = useState(false);
+  const { users, loading, error, fetchWorkers, handleUserSubmit, deleteWorker } = useUsers();
+  const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
 
   // Configuración de filtros y paginación
@@ -56,6 +56,15 @@ export default function UsersPage() {
     userModal.openModal(user);
   };
 
+  const confirmDeleteUser = async () => {
+    if (confirmModal.data) {
+      const success = await deleteWorker(confirmModal.data.id);
+      if (success) {
+        confirmModal.closeModal();
+      }
+    }
+  };
+
   const handleDeleteUser = (user: User) => {
     confirmModal.openModal({
       id: user.id,
@@ -64,19 +73,11 @@ export default function UsersPage() {
     });
   };
 
-  // const confirmDeleteUser = async () => {
-  //   if (confirmModal.data) {
-  //     const success = await deleteUser(confirmModal.data.id);
-  //     if (success) {
-  //       confirmModal.closeModal();
-  //     }
-  //   }
-  // };
-
   const handleUserModalSubmit = async (user: Omit<User, 'id'>) => {
     try {
+      const isEditing = !!userModal.data;
       await handleUserSubmit(user, userModal.data);
-      setSuccessModal(true);
+      setSuccessModal(isEditing ? 'El usuario ha sido actualizado correctamente.' : 'El usuario ha sido creado correctamente.');
     } catch {
       // Mostrar modal de error en caso de fallo
       setErrorModal('Hubo un error al procesar la solicitud.');
@@ -135,7 +136,7 @@ export default function UsersPage() {
       {error && (
         <div className="text-center py-4">
           <p className="text-red-500">{error}</p>
-          <Button onClick={fetchUsers} className="mt-2">
+          <Button onClick={fetchWorkers} className="mt-2">
             Reintentar
           </Button>
         </div>
@@ -187,6 +188,15 @@ export default function UsersPage() {
                       >
                         <Trash2 size={16} />
                       </Button>
+                      <ConfirmModal
+                        isOpen={confirmModal.isOpen}
+                        onClose={confirmModal.closeModal}
+                        onConfirm={confirmDeleteUser}
+                        title="Confirmar eliminación"
+                        message={`¿Estás seguro de que deseas eliminar a ${confirmModal.data?.name}?`}
+                        confirmText="Eliminar"
+                        variant="danger"
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -222,11 +232,11 @@ export default function UsersPage() {
       {/* Modal de confirmación de éxito */}
       {successModal && (
         <ConfirmModal
-          isOpen={successModal}
+          isOpen={!!successModal}
           onClose={() => setSuccessModal(false)}
           onConfirm={() => setSuccessModal(false)}
-          title="¡Creación exitosa!"
-          message="El usuario ha sido creado correctamente."
+          title="¡Éxito!"
+          message={typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
           confirmText="Aceptar"
           variant="info"
         />
