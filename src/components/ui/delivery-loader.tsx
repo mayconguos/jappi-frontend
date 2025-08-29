@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from 'next/image';
+import Logo from '@/assets/logo.svg';
 
 interface DeliveryLoaderProps {
   size?: 'sm' | 'md' | 'lg';
@@ -38,14 +38,7 @@ const DeliveryLoader: React.FC<DeliveryLoaderProps> = ({
           
           <div className="relative w-full h-full flex items-center justify-center p-3">
             {/* Podemos usar la imagen del logo directamente */}
-            <Image 
-              src="/logo.png" 
-              alt="Jappi Express"
-              width={100}
-              height={100}
-              className="w-full h-full object-contain"
-              style={{ filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.3))' }}
-            />
+            <Logo className="w-full h-full object-contain" style={{ filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.3))' }} />
             
             {/* Efectos de brillo superpuestos */}
             <div className="absolute inset-0 flex items-center justify-center rounded-2xl overflow-hidden">
