@@ -11,6 +11,7 @@ export interface User {
   document_number: string;
   email: string;
   password: string;
+  status: number;
   id_role: number;
 }
 
@@ -28,6 +29,7 @@ export const useUsers = () => {
     email: user.email || '',
     password: user.password || '',
     id_role: user.id_role || 1,
+    status: user.status || 1,
   });
 
   const fetchWorkers = useCallback(async () => {

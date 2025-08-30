@@ -59,8 +59,27 @@ export default function ActivationsPage() {
     }
   }, [put]);
 
+  const handleDeleteUser = useCallback(async (id: number) => {
+    setLoadingActivate(true); // Mostrar loader
+    try {
+      await put(`/user/unverified/${id}`, {});
+      setUnverifiedCompanies((prev) => prev.filter((user) => user.id !== id));
+      setSuccessModal(`El usuario ha sido eliminado.`);
+    } catch {
+      setErrorModal('Hubo un error al eliminar el usuario.');
+    } finally {
+      setLoadingActivate(false); // Ocultar loader
+    }
+  }, [put]);
+
   return (
     <section className="p-6 space-y-6">
+      {unverifiedCompanies.length === 0 && !loading && (
+        <div className="text-xl text-center text-gray-500">
+          No hay empresas pendientes de activación.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {unverifiedCompanies.map((user) => (
           <Card
@@ -131,7 +150,11 @@ export default function ActivationsPage() {
           onClose={() => setConfirmModal({ isOpen: false, user: null, action: 'activate' })}
           onConfirm={() => {
             if (confirmModal.user) {
-              handleActivateUser(confirmModal.user.id);
+              if (confirmModal.action === 'activate') {
+                handleActivateUser(confirmModal.user.id);
+              } else if (confirmModal.action === 'delete') {
+                handleDeleteUser(confirmModal.user.id);
+              }
             }
           }}
           title={
@@ -139,11 +162,9 @@ export default function ActivationsPage() {
               ? 'Confirmar Activación'
               : 'Confirmar Eliminación'
           }
-          message={`¿Estás seguro de que deseas ${
-            confirmModal.action === 'activate' ? 'activar' : 'eliminar'
-          } a ${
-            `${confirmModal.user?.first_name} ${confirmModal.user?.last_name || ''}`.trim()
-          }?`}
+          message={`¿Estás seguro de que deseas ${confirmModal.action === 'activate' ? 'activar' : 'eliminar'
+            } a ${`${confirmModal.user?.first_name} ${confirmModal.user?.last_name || ''}`.trim()
+            }?`}
           confirmText={confirmModal.action === 'activate' ? 'Activar' : 'Eliminar'}
           variant={confirmModal.action === 'activate' ? 'info' : 'danger'}
         />

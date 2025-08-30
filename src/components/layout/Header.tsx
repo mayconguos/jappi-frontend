@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { Shield, Building, Bike, Boxes, Workflow } from 'lucide-react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
@@ -23,7 +23,22 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   const { pageTitle } = useUserRoutes();
   const { isOpen: showMenu, setIsOpen: setShowMenu, ref: menuRef } = useClickOutside<HTMLDivElement>();
 
-  const avatarSrc = `/avatars/${user?.id_role || 'default'}.svg`;
+  const getAvatarIcon = (id_role: number | undefined) => {
+    switch (id_role) {
+      case 1:
+        return <Shield className='w-10 h-10 text-[color:var(--surface-dark)]' />;
+      case 2:
+        return <Building className='w-10 h-10 text-[color:var(--surface-dark)]' />;
+      case 3:
+        return <Bike className='w-10 h-10 text-[color:var(--surface-dark)]' />;
+      case 4:
+        return <Boxes className='w-10 h-10 text-[color:var(--surface-dark)]' />;
+      case 5:
+        return <Workflow className='w-10 h-10 text-[color:var(--surface-dark)]' />;
+      default:
+        return <Shield className='w-10 h-10 text-[color:var(--surface-dark)]' />; // Default icon
+    }
+  };
 
   return (
     <header className='bg-[color:var(--background)] shadow p-4 flex justify-between items-center'>
@@ -52,15 +67,9 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
         </h1>
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className='w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-300 hover:ring-primary transition'
+          className='w-10 h-10 rounded-lg overflow-hidden ring-2 ring-gray-300 hover:ring-primary transition flex items-center justify-center bg-amber-50'
         >
-          <Image
-            src={avatarSrc}
-            alt='Avatar'
-            width={40}
-            height={40}
-            className='object-cover w-full h-full bg-amber-50'
-          />
+          {getAvatarIcon(user?.id_role)}
         </button>
 
         {showMenu && (
@@ -79,13 +88,9 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
             </button>
 
             <div className='flex flex-col items-center text-center mt-6 mb-4'>
-              <Image
-                src={avatarSrc}
-                alt='Avatar'
-                width={60}
-                height={60}
-                className='rounded-full mb-3 bg-amber-50'
-              />
+              <div className='w-16 h-16 rounded-full mb-3 bg-amber-50 flex items-center justify-center'>
+                {getAvatarIcon(user?.id_role)}
+              </div>
               <p className='text-xl font-semibold text-gray-900'>¡Hola {user?.name}!</p>
               <p className='text-gray-500 text-sm'>{user?.email}</p>
             </div>

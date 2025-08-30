@@ -57,23 +57,10 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
             >
               <X size={18} />
             </button>
-
-            {/* Collapse en desktop */}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className='hidden md:block text-white hover:text-gray-300 transition-transform duration-300 cursor-pointer'
-              title={isCollapsed ? 'Expandir' : 'Colapsar'}
-            >
-              {isCollapsed ? (
-                <ChevronRight className='hover:scale-110' size={18} />
-              ) : (
-                <ChevronLeft className='hover:-rotate-6' size={18} />
-              )}
-            </button>
           </div>
 
           {/* Rutas */}
-          <nav className='flex flex-col mt-4 space-y-1 px-2'>
+          <nav className='flex flex-col mt-4 space-y-1 px-2 relative'>
             {routes.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.path;
@@ -100,6 +87,20 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
                 </Link>
               );
             })}
+
+            {/* Collapse en desktop */}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className={`hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 bg-white text-black hover:bg-gray-300 transition-all duration-500 cursor-pointer p-2 rounded-full shadow-md
+                ${isCollapsed ? 'hover:rotate-180' : 'hover:rotate-0'}`}
+              title={isCollapsed ? 'Expandir' : 'Colapsar'}
+            >
+              {isCollapsed ? (
+                <ChevronRight className='scale-100 transition-transform duration-500' size={20} />
+              ) : (
+                <ChevronLeft className='scale-100 transition-transform duration-500' size={20} />
+              )}
+            </button>
           </nav>
         </div>
 

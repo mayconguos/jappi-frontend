@@ -29,23 +29,29 @@ export default function UsersPage() {
   const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
 
+  const filteredUsers = users.filter(user => user.status === 1);
+
   // Configuración de filtros y paginación
+  const [currentPage, setCurrentPage] = useState(1); // Manejar explícitamente el estado de la página actual
+
   const {
     filterField,
     searchValue,
-    currentPage,
-    paginatedData: currentItems,
     totalItems,
-    startIndex,
     setFilterField,
     setSearchValue,
-    handleFilter,
-    handlePageChange
+    handleFilter
   } = useFilterAndPagination<User>({
-    data: users,
+    data: filteredUsers,
     itemsPerPage: 10,
     filterFields: ['first_name', 'last_name', 'email']
   });
+
+  const currentItems = filteredUsers.slice((currentPage - 1) * 10, currentPage * 10); // Recalcular los datos paginados
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   // Modales para añadir, editar y confirmar acciones
   const userModal = useModal<User>();
@@ -61,6 +67,13 @@ export default function UsersPage() {
       const success = await deleteWorker(confirmModal.data.id);
       if (success) {
         confirmModal.closeModal();
+
+        // Verificar si la página actual sigue siendo válida
+        const newTotalItems = filteredUsers.length - 1; // Ajustar el total de elementos después de la eliminación
+        const newTotalPages = Math.ceil(newTotalItems / 10);
+        if (currentPage > newTotalPages) {
+          setCurrentPage(1); // Redirigir a la primera página si la página actual no es válida
+        }
       }
     }
   };
@@ -85,6 +98,8 @@ export default function UsersPage() {
       userModal.closeModal();
     }
   };
+
+  const filteredItems = currentItems.filter(user => user.status === 1);
 
   return (
     // Sección principal de usuarios internos
@@ -158,10 +173,10 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentItems.map((user, index) => (
+              {filteredItems.map((user, index) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium text-gray-600">
-                    {startIndex + index + 1}
+                    {(currentPage - 1) * 10 + index + 1} {/* Ajustar la numeración de las filas */}
                   </TableCell>
                   <TableCell>{getUserRoleLabel(user.id_role)}</TableCell>
                   <TableCell>{user.first_name}</TableCell>
@@ -201,7 +216,7 @@ export default function UsersPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {currentItems.length === 0 && (
+              {filteredItems.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-4 text-gray-500">
                     No hay resultados
