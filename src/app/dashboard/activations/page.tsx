@@ -20,7 +20,7 @@ interface UnverifiedCompany {
 
 export default function ActivationsPage() {
   const [unverifiedCompanies, setUnverifiedCompanies] = useState<UnverifiedCompany[]>([]);
-  const { get, put } = useApi<UnverifiedCompany[]>();
+  const { get, put, del } = useApi<UnverifiedCompany[]>();
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     user: UnverifiedCompany | null;
@@ -62,7 +62,7 @@ export default function ActivationsPage() {
   const handleDeleteUser = useCallback(async (id: number) => {
     setLoadingActivate(true); // Mostrar loader
     try {
-      await put(`/user/unverified/${id}`, {});
+      await del(`/user/unverified/${id}`, {});
       setUnverifiedCompanies((prev) => prev.filter((user) => user.id !== id));
       setSuccessModal(`El usuario ha sido eliminado.`);
     } catch {
@@ -70,7 +70,7 @@ export default function ActivationsPage() {
     } finally {
       setLoadingActivate(false); // Ocultar loader
     }
-  }, [put]);
+  }, [del]);
 
   return (
     <section className="p-6 space-y-6">
