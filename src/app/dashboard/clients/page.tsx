@@ -20,7 +20,6 @@ interface Client {
   document_type: string;
   document_number: string;
   status: number;
-  id_role: number;
 }
 
 const filterFields = [
