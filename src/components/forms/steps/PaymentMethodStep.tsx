@@ -252,7 +252,7 @@ export function PaymentMethodStep({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Titular de la Cuenta
+                Titular de la Cuenta *
               </label>
               <Input
                 {...register('payment_account_holder')}
