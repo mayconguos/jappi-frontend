@@ -108,7 +108,7 @@ export default function UsersPage() {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div className="flex flex-col md:flex-row md:items-end gap-2 flex-1">
           <div className="flex flex-col gap-1 w-full md:w-44">
-            <label className="text-sm font-medium text-gray-700">Filtrar por</label>
+            <label className="text-sm font-medium text-gray-700">Buscar por</label>
             <Select
               value={filterField as string}
               onChange={(value: string) => setFilterField(value as keyof User)}
@@ -126,7 +126,7 @@ export default function UsersPage() {
           </div>
 
           <div className="pt-[22px]">
-            <Button onClick={handleFilter}>Filtrar</Button>
+            <Button onClick={handleFilter}>Buscar</Button>
           </div>
         </div>
 
