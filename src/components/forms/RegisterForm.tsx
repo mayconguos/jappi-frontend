@@ -143,10 +143,24 @@ export default function RegisterForm() {
     return null;
   }, [watchedValues.account_number]);
 
+  // Validación en tiempo real del titular de la cuenta para apps de pago
+  const paymentAccountHolderError = React.useMemo(() => {
+    const accountHolder = watchedValues.payment_account_holder;
+    if (paymentMethod !== 'app') {
+      return null;
+    }
+
+    if (!accountHolder || accountHolder.trim() === '') {
+      return 'El titular de la cuenta es obligatorio para el método de pago app';
+    }
+
+    return null;
+  }, [watchedValues.payment_account_holder, paymentMethod]);
+
   // Validación completa del formulario para habilitar el botón de submit
   const isFormCompleteForSubmit = React.useMemo(() => {
     // Verificar si hay errores en validaciones en tiempo real
-    if (documentNumberError || accountNumberError || paymentPhoneError) {
+    if (documentNumberError || accountNumberError || paymentPhoneError || paymentAccountHolderError) {
       return false;
     }
 
@@ -183,7 +197,8 @@ export default function RegisterForm() {
       // Validar datos de app de pagos
       step3Complete = !!(
         watchedValues.payment_app &&
-        watchedValues.payment_phone
+        watchedValues.payment_phone &&
+        watchedValues.payment_account_holder
       );
     }
 
@@ -193,7 +208,8 @@ export default function RegisterForm() {
     paymentMethod,
     documentNumberError,
     accountNumberError,
-    paymentPhoneError
+    paymentPhoneError,
+    paymentAccountHolderError
   ]);
 
   // Función para obtener la ubicación del usuario
@@ -231,7 +247,7 @@ export default function RegisterForm() {
         if (paymentMethod === 'bank') {
           isValid = await trigger(['account_number', 'account_holder', 'bank', 'account_type']);
         } else if (paymentMethod === 'app') {
-          isValid = await trigger(['payment_app', 'payment_phone']);
+          isValid = await trigger(['payment_app', 'payment_phone', 'payment_account_holder']);
         } else {
           // Si no ha seleccionado método de pago
           return false;
@@ -239,7 +255,7 @@ export default function RegisterForm() {
         break;
     }
 
-    return isValid && !documentNumberError && !accountNumberError && !paymentPhoneError;
+    return isValid && !documentNumberError && !accountNumberError && !paymentPhoneError && !paymentAccountHolderError;
   };
 
   // Avanzar al siguiente paso

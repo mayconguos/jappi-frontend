@@ -159,6 +159,15 @@ export const registerSchema = z.object({
     });
   }
 
+  // Validación dinámica: Titular de la cuenta requerido si el método de pago es app
+  if (data.payment_app && (!data.payment_account_holder || data.payment_account_holder.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'El titular de la cuenta es obligatorio cuando el método de pago es app',
+      path: ['payment_account_holder']
+    });
+  }
+
   // Nota: La validación del sector se maneja en el componente 
   // basado en si el distrito tiene sectores disponibles
 });
