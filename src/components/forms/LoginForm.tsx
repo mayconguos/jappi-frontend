@@ -9,6 +9,7 @@ import secureLocalStorage from 'react-secure-storage';
 
 import api from '@/app/services/api';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
+import { getRoleNameFromNumber } from '@/utils/roleUtils';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,8 +50,31 @@ export default function LoginForm() {
       const userWithRole = { ...user };
       localStorage.setItem('token', token);
       secureLocalStorage.setItem('user', userWithRole);
+
+      // Determine the role and redirect accordingly
+      const role = getRoleNameFromNumber(user.id_role);
+      let redirectPath = '/dashboard';
+
+      switch (role) {
+        case 'admin':
+        case 'coordinacion':
+          redirectPath = '/dashboard/deliveries-by-date';
+          break;
+        case 'empresa':
+          redirectPath = '/dashboard/company/create-shipment';
+          break;
+        case 'motorizado':
+          redirectPath = '/dashboard/courier/pickups';
+          break;
+        case 'almacen':
+          redirectPath = '/dashboard/warehouse-requests';
+          break;
+        default:
+          redirectPath = '/dashboard';
+      }
+
       setIsRedirecting(true);
-      router.push('/dashboard');
+      router.push(redirectPath);
     } catch (err: unknown) {
       // Type guard para verificar si es un error de axios
       if (err && typeof err === 'object' && 'response' in err) {
