@@ -88,9 +88,10 @@ export default function ClientsPage() {
 
   const handleFilter = () => {
     const val = value.toLowerCase();
-    const newFiltered = clients.filter((client) =>
-      client[field as keyof Client]?.toString().toLowerCase().includes(val)
-    );
+    const newFiltered = clients.filter((client) => {
+      const fieldValue = client[field as keyof Client];
+      return fieldValue ? fieldValue.toString().toLowerCase().includes(val) : false;
+    });
     setFiltered(newFiltered);
   };
 
@@ -121,15 +122,6 @@ export default function ClientsPage() {
           <div className="pt-[22px]">
             <Button onClick={handleFilter}>Buscar</Button>
           </div>
-        </div>
-
-        <div className="pt-[22px] md:pt-0">
-          <Button
-            //  onClick={() => userModal.openModal()}
-            className="bg-primary text-white"
-          >
-            Añadir cliente
-          </Button>
         </div>
       </div>
 
