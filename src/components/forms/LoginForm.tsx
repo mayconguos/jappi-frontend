@@ -63,8 +63,8 @@ export default function LoginForm() {
         case 'empresa':
           redirectPath = '/dashboard/company/create-shipment';
           break;
-        case 'motorizado':
-          redirectPath = '/dashboard/courier/pickups';
+        case 'transportista':
+          redirectPath = '/dashboard/carrier/pickups';
           break;
         case 'almacen':
           redirectPath = '/dashboard/warehouse-requests';

@@ -5,9 +5,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Componentes
-import WorkersFilter from '@/components/filters/WorkersFilter';
-import WorkersTable from '@/components/tables/WorkersTable';
-import WorkerModal from '@/components/forms/modals/WorkerModal';
+import CarriersFilter from '@/components/filters/CarriersFilter';
+import CarriersTable from '@/components/tables/CarriersTable';
+import CarrierModal from '@/components/forms/modals/CarrierModal';
 import { ConfirmModal } from '@/components/ui/confirm-modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Pagination } from '@/components/ui/pagination';
@@ -15,17 +15,21 @@ import { Pagination } from '@/components/ui/pagination';
 import { useApi, useModal } from '@/hooks';
 
 
-// --- Tipos ---
-export interface Worker {
+// --- Tipos --- 
+export interface Carrier {
   id: number;
-  first_name: string;
-  last_name: string;
-  document_type: string;
   document_number: string;
+  document_type: string;
   email: string;
-  password: string;
+  first_name: string;
+  last_name: string | null;
+  license: string;
+  brand: string;
+  plate_number: string;
+  vehicle_type: string;
   status: number;
   id_role: number;
+  password: string;
 }
 
 
@@ -39,9 +43,9 @@ const filterFields = [
 ];
 
 
-export default function WorkersPage() {
+export default function CarriersPage() {
   // --- State ---
-  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [field, setField] = useState('');
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,13 +54,13 @@ export default function WorkersPage() {
   const [errorModal, setErrorModal] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
-    data: Worker | null;
+    data: Carrier | null;
   }>({ isOpen: false, data: null });
   const [deleting, setDeleting] = useState(false);
 
   // --- Hooks ---
-  const { get, del, error: apiError } = useApi<Worker[]>();
-  const workerModal = useModal<Worker>();
+  const { get, del, error: apiError } = useApi<Carrier[]>();
+  const carrierModal = useModal<Carrier>();
 
   // --- Effects ---
   // Resetear paginación al cambiar filtro o valor
@@ -65,33 +69,33 @@ export default function WorkersPage() {
   }, [field, value]);
 
   // --- Data Fetching ---
-  const fetchWorkers = useCallback(async () => {
-    const response = await get('/user?type=workers');
+  const fetchCarriers = useCallback(async () => {
+    const response = await get('/user?type=couriers');
     if (response) {
       const data = Array.isArray(response) ? response : [];
-      setWorkers(data);
+      setCarriers(data);
     } else {
-      setWorkers([]);
+      setCarriers([]);
     }
   }, [get]);
 
   useEffect(() => {
     setLoading(true);
-    fetchWorkers().finally(() => setLoading(false));
-  }, [fetchWorkers]);
+    fetchCarriers().finally(() => setLoading(false));
+  }, [fetchCarriers]);
 
   // Mostrar error de carga de API si ocurre
-  const showApiError = !loading && apiError && workers.length === 0;
+  const showApiError = !loading && apiError && carriers.length === 0;
 
   // --- Derived Data ---
   const filtered = useMemo(() => {
-    if (!field) return workers;
+    if (!field) return carriers;
     const val = value.toLowerCase();
-    return workers.filter((worker) => {
-      const fieldValue = worker[field as keyof Worker];
+    return carriers.filter((carrier) => {
+      const fieldValue = carrier[field as keyof Carrier];
       return fieldValue ? fieldValue.toString().toLowerCase().includes(val) : false;
     });
-  }, [workers, field, value]);
+  }, [carriers, field, value]);
 
   const totalItems = filtered.length;
   const currentItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -99,48 +103,48 @@ export default function WorkersPage() {
   // --- Handlers ---
   const handlePageChange: (page: number) => void = (page) => setCurrentPage(page);
 
-  const handleDeleteWorker: (worker: Worker) => void = (worker) => setConfirmModal({ isOpen: true, data: worker });
+  const handleDeleteCarrier: (carrier: Carrier) => void = (carrier) => setConfirmModal({ isOpen: true, data: carrier });
 
-  const handleEditWorker: (worker: Worker) => void = (worker) => workerModal.openModal(worker);
+  const handleEditCarrier: (carrier: Carrier) => void = (carrier) => carrierModal.openModal(carrier);
 
-  const handleAddWorker: () => void = () => {
-    workerModal.openModal();
+  const handleAddCarrier: () => void = () => {
+    carrierModal.openModal();
   };
 
-  const handleWorkerSubmit: (worker: Omit<Worker, 'id'>, editingWorker?: Worker | null) => void = (worker, editingWorker) => {
-    if (editingWorker) {
-      const updatedWorker = { ...editingWorker, ...worker, id: editingWorker.id };
-      setWorkers(prev => prev.map(w => w.id === updatedWorker.id ? updatedWorker : w));
+  const handleCarrierSubmit: (carrier: Omit<Carrier, 'id'>, editingCarrier?: Carrier | null) => void = (carrier, editingCarrier) => {
+    if (editingCarrier) {
+      const updatedCarrier = { ...editingCarrier, ...carrier, id: editingCarrier.id };
+      setCarriers(prev => prev.map(c => c.id === updatedCarrier.id ? updatedCarrier : c));
     } else {
-      const workerWithId = { ...worker, id: Date.now() };
-      setWorkers(prev => [...prev, workerWithId]);
+      const carrierWithId = { ...carrier, id: Date.now() };
+      setCarriers(prev => [...prev, carrierWithId]);
     }
   };
 
-  const handleWorkerModalSubmit = async (worker: Omit<Worker, 'id'>) => {
+  const handleCarrierModalSubmit = async (carrier: Omit<Carrier, 'id'>) => {
     try {
-      const isEditing = !!workerModal.data;
-      await handleWorkerSubmit(worker, workerModal.data);
-      setSuccessModal(isEditing ? 'El usuario ha sido actualizado correctamente.' : 'El usuario ha sido creado correctamente.');
+      const isEditing = !!carrierModal.data;
+      await handleCarrierSubmit(carrier, carrierModal.data);
+      setSuccessModal(isEditing ? 'El transportista ha sido actualizado correctamente.' : 'El transportista ha sido creado correctamente.');
     } catch {
       setErrorModal('Hubo un error al procesar la solicitud.');
     } finally {
-      workerModal.closeModal();
+      carrierModal.closeModal();
     }
   };
 
-  const confirmDeleteWorker = async () => {
+  const confirmDeleteCarrier = async () => {
     if (confirmModal.data) {
       setDeleting(true);
-      const workerId = confirmModal.data.id;
-      const response = await del(`/user/${workerId}`);
+      const carrierId = confirmModal.data.id;
+      const response = await del(`/user/${carrierId}`);
       setDeleting(false);
       closeConfirmModal();
       if (response !== null) {
-        setWorkers(prev => prev.filter(w => w.id !== workerId));
-        setSuccessModal('El usuario ha sido eliminado correctamente.');
+        setCarriers(prev => prev.filter(c => c.id !== carrierId));
+        setSuccessModal('El transportista ha sido eliminado correctamente.');
       } else {
-        setErrorModal('No se pudo eliminar el usuario.');
+        setErrorModal('No se pudo eliminar el transportista.');
       }
     }
   };
@@ -155,22 +159,22 @@ export default function WorkersPage() {
   // --- Render ---
   return (
     <section className="p-6 space-y-6">
-      {/* Filtros y botón para añadir worker */}
-      <WorkersFilter
+      {/* Filtros carrier */}
+      <CarriersFilter
         {...{
           field,
           setField,
           value,
           setValue,
           filterFields,
-          onAdd: handleAddWorker,
+          onAdd: handleAddCarrier,
         }}
       />
 
       {/* Loader */}
       {loading && (
         <div className="text-center py-4">
-          <DeliveryLoader message="Cargando usuarios..." />
+          <DeliveryLoader message="Cargando transportistas..." />
         </div>
       )}
 
@@ -184,19 +188,19 @@ export default function WorkersPage() {
       {/* Sin datos */}
       {!loading && !showApiError && filtered.length === 0 && (
         <div className="text-center py-4 text-gray-500">
-          No hay trabajadores disponibles.
+          No hay transportistas disponibles.
         </div>
       )}
 
       {/* Tabla y paginación */}
       {!loading && (
         <>
-          <WorkersTable
+          <CarriersTable
             {...{
-              workers: currentItems,
+              carriers: currentItems,
               currentPage,
-              onEdit: handleEditWorker,
-              onDelete: handleDeleteWorker,
+              onEdit: handleEditCarrier,
+              onDelete: handleDeleteCarrier,
             }}
           />
           <Pagination
@@ -210,11 +214,11 @@ export default function WorkersPage() {
           <ConfirmModal
             isOpen={confirmModal.isOpen}
             onClose={deleting ? () => { } : closeConfirmModal}
-            onConfirm={deleting ? () => { } : confirmDeleteWorker}
-            title={deleting ? "Eliminando usuario..." : "Confirmar eliminación"}
+            onConfirm={deleting ? () => { } : confirmDeleteCarrier}
+            title={deleting ? "Eliminando transportista..." : "Confirmar eliminación"}
             message={
               deleting
-                ? "Eliminando usuario..."
+                ? "Eliminando transportista..."
                 : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}?`
             }
             confirmText={deleting ? "Eliminando..." : "Eliminar"}
@@ -223,7 +227,7 @@ export default function WorkersPage() {
           {deleting && (
             <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
               <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
-                <DeliveryLoader message="Eliminando usuario..." />
+                <DeliveryLoader message="Eliminando transportista..." />
               </div>
             </div>
           )}
@@ -231,12 +235,12 @@ export default function WorkersPage() {
       )}
 
       {/* Modal para añadir o editar usuario */}
-      <WorkerModal
+      <CarrierModal
         {...{
-          isOpen: workerModal.isOpen,
-          onClose: workerModal.closeModal,
-          onSubmit: handleWorkerModalSubmit,
-          editingUser: workerModal.data,
+          isOpen: carrierModal.isOpen,
+          onClose: carrierModal.closeModal,
+          onSubmit: handleCarrierModalSubmit,
+          editingCarrier: carrierModal.data,
         }}
       />
 
