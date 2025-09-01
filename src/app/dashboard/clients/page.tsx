@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Edit, Eye, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Edit, Eye, Trash2 } from 'lucide-react';
-import { useApi } from '@/hooks/useApi';
-import { Pagination } from '@/components/ui/pagination';
 import { ConfirmModal } from '@/components/ui/confirm-modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
+import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
+import { Select } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+import { useApi } from '@/hooks/useApi';
 
 interface Client {
   id: number;
@@ -38,7 +39,7 @@ export default function ClientsPage() {
   const itemsPerPage = 10;
   const totalItems = filtered.length;
 
-  const [loading, setLoading] = useState(false); // Estado para el loader
+  const [loading, setLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     data: Client | null;
@@ -59,9 +60,9 @@ export default function ClientsPage() {
   }, [get]);
 
   useEffect(() => {
-    setLoading(true); // Mostrar loader al cargar clientes
+    setLoading(true);
     fetchClients().finally(() => {
-      setLoading(false); // Ocultar loader al finalizar
+      setLoading(false);
     });
   }, [fetchClients]);
 

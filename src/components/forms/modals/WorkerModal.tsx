@@ -51,14 +51,14 @@ interface User {
   status: number;
 }
 
-interface UserModalProps {
+interface WorkerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (user: Omit<User, 'id'>) => void;
   editingUser?: User | null;
 }
 
-export default function UserModal({ isOpen, onClose, onSubmit, editingUser }: UserModalProps) {
+export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: WorkerModalProps) {
   const isEditing = !!editingUser;
 
   const {

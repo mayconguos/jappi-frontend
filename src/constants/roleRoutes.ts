@@ -36,7 +36,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/warehouse', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/clients', label: 'Empresas clientes', icon: Users },
     { path: '/dashboard/couriers', label: 'Transportistas', icon: Bike },
-    { path: '/dashboard/users', label: 'Usuarios internos', icon: IdCard },
+    { path: '/dashboard/workers', label: 'Usuarios internos', icon: IdCard },
     { path: '/dashboard/activations', label: 'Activación de cuentas', icon: UserCheck },
     { path: '/dashboard/pickup-history', label: 'Historial de recojos', icon: History },
     { path: '/dashboard/warehouse-requests', label: 'Solicitudes de almacén', icon: FileText },
