@@ -16,11 +16,11 @@ import DeliveryLoader from '@/components/ui/delivery-loader';
 import { DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
 import { USER_ROLES, DEFAULT_USER_ROLE } from '@/constants/userRoles'
 import {
-  userSchema,
-  userEditSchema,
-  type UserFormData,
-  type UserEditFormData
-} from '@/lib/validations/user';
+  workerSchema,
+  workerEditSchema,
+  type WorkerFormData,
+  type WorkerEditFormData
+} from '@/lib/validations/worker';
 
 interface AxiosError {
   response?: {
@@ -39,7 +39,7 @@ const ADMIN_USER_ROLES = USER_ROLES.filter(role =>
   label: role.label
 })); // Admin, Almacén, Coordinación
 
-interface User {
+interface Worker {
   id?: number;
   first_name: string;
   last_name: string;
@@ -54,12 +54,12 @@ interface User {
 interface WorkerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (user: Omit<User, 'id'>) => void;
-  editingUser?: User | null;
+  onSubmit: (worker: Omit<Worker, 'id'>) => void;
+  editingWorker?: Worker | null;
 }
 
-export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: WorkerModalProps) {
-  const isEditing = !!editingUser;
+export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }: WorkerModalProps) {
+  const isEditing = !!editingWorker;
 
   const {
     register,
@@ -69,8 +69,8 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
     setValue,
     watch,
     clearErrors
-  } = useForm<UserFormData | UserEditFormData>({
-    resolver: zodResolver(isEditing ? userEditSchema : userSchema),
+  } = useForm<WorkerFormData | WorkerEditFormData>({
+    resolver: zodResolver(isEditing ? workerEditSchema : workerSchema),
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -87,15 +87,15 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
 
   // Llenar el formulario cuando se está editando
   useEffect(() => {
-    if (editingUser) {
+    if (editingWorker) {
       reset({
-        first_name: editingUser.first_name || '',
-        last_name: editingUser.last_name || '',
-        document_type: (editingUser.document_type || DEFAULT_DOCUMENT_TYPE).toString(),
-        document_number: editingUser.document_number || '',
-        email: editingUser.email || '',
+        first_name: editingWorker.first_name || '',
+        last_name: editingWorker.last_name || '',
+        document_type: (editingWorker.document_type || DEFAULT_DOCUMENT_TYPE).toString(),
+        document_number: editingWorker.document_number || '',
+        email: editingWorker.email || '',
         password: '', // No mostrar la contraseña actual
-        id_role: editingUser.id_role || DEFAULT_USER_ROLE,
+        id_role: editingWorker.id_role || DEFAULT_USER_ROLE,
       });
     } else {
       reset({
@@ -109,7 +109,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
       });
     }
     setApiError('');
-  }, [editingUser, isOpen, reset]);
+  }, [editingWorker, isOpen, reset]);
 
   useEffect(() => {
     if (isOpen) {
@@ -123,40 +123,34 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
     };
   }, [isOpen]);
 
-  const onFormSubmit: SubmitHandler<UserFormData | UserEditFormData> = async (data) => {
+  const onFormSubmit: SubmitHandler<WorkerFormData | WorkerEditFormData> = async (data) => {
     setIsLoading(true);
     setApiError('');
 
     try {
       const token = localStorage.getItem('token');
 
-      let requestBody: { [key in keyof User]?: string | number };
+      let requestBody: { [key in keyof Worker]?: string | number };
 
-      if (editingUser) {
+      if (editingWorker) {
         // Solo enviar los campos que han cambiado
         requestBody = {};
         Object.keys(dirtyFields).forEach(field => {
-          const key = field as keyof User;
+          const key = field as keyof Worker;
           requestBody[key] = data[key as keyof typeof data];
         });
       } else {
         // Para crear, enviar todos los campos necesarios
-        const createData = data as UserFormData;
+        const createData = data as WorkerFormData;
         requestBody = {
-          first_name: createData.first_name,
-          last_name: createData.last_name,
-          document_type: createData.document_type,
-          document_number: createData.document_number,
-          id_role: createData.id_role,
-          email: createData.email,
-          password: createData.password
+          ...createData,
         };
       }
 
       let response;
-      if (editingUser) {
+      if (editingWorker) {
         // Actualizar usuario existente
-        response = await api.put(`/user/update/${editingUser.id}`, requestBody, {
+        response = await api.put(`/user/update/${editingWorker.id}`, requestBody, {
           headers: {
             authorization: `${token}`,
           },
@@ -171,12 +165,12 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
       }
 
       if (response.status === 200 || response.status === 201) {
-        onSubmit(data as Omit<User, 'id'>);
+        onSubmit(data as Omit<Worker, 'id'>);
 
         // Resetear formulario
         reset();
       } else {
-        const action = editingUser ? 'actualizar' : 'crear';
+        const action = editingWorker ? 'actualizar' : 'crear';
         setApiError(response.data?.message || `Error al ${action} el usuario`);
       }
     } catch (error: unknown) {
@@ -215,7 +209,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
-        title={editingUser ? 'Editar usuario' : 'Añadir usuario'}
+        title={editingWorker ? 'Editar usuario' : 'Añadir usuario'}
         size="md"
         showCloseButton
       >
@@ -230,7 +224,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Rol de usuario *
             </label>
-            {editingUser ? (
+            {editingWorker ? (
               <Input
                 value={ADMIN_USER_ROLES.find(role => role.value === watch('id_role').toString())?.label || ''}
                 disabled
@@ -329,7 +323,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
               placeholder="Ingrese el correo electrónico"
               className={errors.email ? 'border-red-500' : ''}
               autoComplete="username"
-              disabled={!!editingUser}
+              disabled={!!editingWorker}
               onChange={(e) => {
                 setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
               }}
@@ -337,12 +331,12 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
             )}
-            {editingUser && (
+            {editingWorker && (
               <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
             )}
           </div>
 
-          {!editingUser && (
+          {!editingWorker && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Contraseña *
@@ -372,8 +366,8 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
               className="bg-primary text-white disabled:opacity-50"
             >
               {isLoading ?
-                (editingUser ? 'Actualizando...' : 'Guardando...') :
-                (editingUser ? 'Actualizar' : 'Guardar')
+                (editingWorker ? 'Actualizando...' : 'Guardando...') :
+                (editingWorker ? 'Actualizar' : 'Guardar')
               }
             </Button>
           </ModalFooter>
@@ -381,7 +375,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingUser }: 
 
         {isLoading && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-            <DeliveryLoader message={editingUser ? 'Actualizando usuario...' : 'Guardando usuario...'} />
+            <DeliveryLoader message={editingWorker ? 'Actualizando trabajador...' : 'Guardando trabajador...'} />
           </div>
         )}
       </Modal>

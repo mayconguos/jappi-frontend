@@ -156,7 +156,7 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
         // Para crear, enviar todos los campos necesarios
         const createData = data as CarrierFormData;
         requestBody = {
-          ...createData,  //XANADU, ver si esto se puede aplicar para workers
+          ...createData,
         };
       }
 
