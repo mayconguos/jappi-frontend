@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Eye } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Carrier } from '@/app/dashboard/carriers/page';
 
 interface CarriersTableProps {
@@ -40,29 +40,30 @@ export default function CarriersTable({
             <TableCell>{carrier.plate_number}</TableCell>
             <TableCell>
               <div className="flex gap-2">
-                <Button
+                {/* <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => onEdit(carrier)}
-                  className="text-blue-600 hover:text-blue-800 p-2"
+                  // onClick={() => onEdit(carrier)}
                   title="Ver"
+                  className="transition-transform duration-200 hover:scale-110"
                 >
-                  <Eye size={16} />
-                </Button>
+                  <Eye size={16} className='' />
+                </Button> */}
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="text-blue-600 hover:text-blue-800 p-2"
+                  variant="warning"
+                  onClick={() => onEdit(carrier)}
                   title="Editar"
+                  className="transition-transform duration-200 hover:scale-110"
                 >
                   <Edit size={16} />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="text-red-600 hover:text-red-800 p-2"
+                  variant="destructive"
                   title="Eliminar"
                   onClick={() => onDelete(carrier)}
+                  className="transition-transform duration-200 hover:scale-110"
                 >
                   <Trash2 size={16} />
                 </Button>

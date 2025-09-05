@@ -13,7 +13,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
-import { DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
+import { PERSONAL_DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
 import { DEFAULT_CARRIER_ROLE } from '@/constants/userRoles'
 import {
   carrierSchema,
@@ -31,8 +31,6 @@ interface AxiosError {
   };
 }
 
-// Roless de usuario específicos para usuarios
-
 interface Carrier {
   id?: number;
   document_number: string;
@@ -42,11 +40,34 @@ interface Carrier {
   last_name: string | null;
   license: string;
   brand: string;
+  model: string;
   plate_number: string;
   vehicle_type: string;
   password: string;
   status: number;
   id_role: number;
+}
+
+interface CarrierUser {
+  first_name: string;
+  last_name: string;
+  document_type: string;
+  document_number: string;
+  email: string;
+  password: string;
+}
+
+interface CarrierVehicle {
+  vehicle_type: string;
+  brand: string;
+  model: string;
+  plate_number: string;
+  license: string;
+}
+
+interface CarrierRequestBody {
+  user: CarrierUser;
+  vehicle: CarrierVehicle;
 }
 
 interface CarrierModalProps {
@@ -77,8 +98,9 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
       last_name: '',
       license: '',
       brand: '',
+      model: '',
       plate_number: '',
-      vehicle_type: 'car',
+      vehicle_type: 'MOTOCICLETA',
       password: '',
       status: 0,
       id_role: DEFAULT_CARRIER_ROLE
@@ -99,8 +121,9 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
         last_name: editingCarrier.last_name || '',
         license: editingCarrier.license || '',
         brand: editingCarrier.brand || '',
+        model: editingCarrier.model || '',
         plate_number: editingCarrier.plate_number || '',
-        vehicle_type: (editingCarrier.vehicle_type as 'car' | 'motorcycle' | 'truck' | 'bicycle') || 'car',
+        vehicle_type: (editingCarrier.vehicle_type as 'MOTOCICLETA' | 'AUTO' | 'BICICLETA' | 'OTRO') || 'MOTOCICLETA',
         password: '', // No mostrar la contraseña actual
         status: editingCarrier.status ?? 1,
         id_role: editingCarrier.id_role || DEFAULT_CARRIER_ROLE
@@ -116,8 +139,9 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
         id_role: DEFAULT_CARRIER_ROLE,
         license: '',
         brand: '',
+        model: '',
         plate_number: '',
-        vehicle_type: 'car',
+        vehicle_type: 'MOTOCICLETA',
         status: 0
       });
     }
@@ -143,20 +167,46 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
     try {
       const token = localStorage.getItem('token');
 
-      let requestBody: { [key in keyof Carrier]?: string | number };
+      let requestBody: CarrierRequestBody;
 
       if (editingCarrier) {
-        // Solo enviar los campos que han cambiado
-        requestBody = {};
+        // Solo enviar los campos que han cambiado, agrupados en user y vehicle
+        const user: Partial<CarrierUser> = {};
+        const vehicle: Partial<CarrierVehicle> = {};
         Object.keys(dirtyFields).forEach(field => {
-          const key = field as keyof Carrier;
-          requestBody[key] = data[key as keyof typeof data];
+          if ([
+            'first_name', 'last_name', 'document_type', 'document_number', 'email', 'password'
+          ].includes(field)) {
+            (user as Partial<CarrierUser>)[field as keyof CarrierUser] = data[field as keyof typeof data] as string;
+          } else if ([
+            'vehicle_type', 'brand', 'model', 'plate_number', 'license'
+          ].includes(field)) {
+            (vehicle as Partial<CarrierVehicle>)[field as keyof CarrierVehicle] = data[field as keyof typeof data] as string;
+          }
         });
+        requestBody = {
+          user: user as CarrierUser,
+          vehicle: vehicle as CarrierVehicle,
+        };
       } else {
-        // Para crear, enviar todos los campos necesarios
+        // Para crear, enviar todos los campos necesarios agrupados en user y vehicle
         const createData = data as CarrierFormData;
         requestBody = {
-          ...createData,
+          user: {
+            first_name: createData.first_name,
+            last_name: createData.last_name,
+            document_type: createData.document_type,
+            document_number: createData.document_number,
+            email: createData.email,
+            password: createData.password,
+          },
+          vehicle: {
+            vehicle_type: createData.vehicle_type,
+            brand: createData.brand,
+            model: createData.model,
+            plate_number: createData.plate_number,
+            license: createData.license,
+          }
         };
       }
 
@@ -223,126 +273,36 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
         isOpen={isOpen}
         onClose={handleClose}
         title={editingCarrier ? 'Editar transportista' : 'Añadir transportista'}
-        size="md"
+        size="xl"
         showCloseButton
       >
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-8 relative">
           {apiError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded col-span-2">
               {apiError}
             </div>
           )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rol de usuario
-            </label>
-            <Input
-              value={DEFAULT_CARRIER_ROLE}
-              disabled
-              className="bg-gray-100 cursor-not-allowed"
-            />
-            {errors.id_role && (
-              <p className="text-red-500 text-xs mt-1">{errors.id_role.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre *
-            </label>
-            <Input
-              {...register('first_name')}
-              placeholder="Ingrese el nombre"
-              className={errors.first_name ? 'border-red-500' : ''}
-              onChange={(e) => {
-                setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
-              }}
-            />
-            {errors.first_name && (
-              <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Apellido *
-            </label>
-            <Input
-              {...register('last_name')}
-              placeholder="Ingrese el apellido"
-              className={errors.last_name ? 'border-red-500' : ''}
-              onChange={(e) => {
-                setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
-              }}
-            />
-            {errors.last_name && (
-              <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de documento *
-            </label>
-            <Select
-              value={watch('document_type')}
-              options={DOCUMENT_TYPES}
-              onChange={(value: string) => {
-                setValue('document_type', value);
-                clearErrors('document_type');
-                // Limpiar el número de documento cuando cambie el tipo
-                setValue('document_number', '');
-                clearErrors('document_number');
-              }}
-            />
-            {errors.document_type && (
-              <p className="text-red-500 text-xs mt-1">{errors.document_type.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Número de documento *
-            </label>
-            <Input
-              {...register('document_number')}
-              placeholder="Ingrese el número de documento"
-              className={errors.document_number ? 'border-red-500' : ''}
-            />
-            {errors.document_number && (
-              <p className="text-red-500 text-xs mt-1">{errors.document_number.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico *
-            </label>
-            <Input
-              type="email"
-              {...register('email')}
-              placeholder="Ingrese el correo electrónico"
-              className={errors.email ? 'border-red-500' : ''}
-              autoComplete="username"
-              disabled={!!editingCarrier}
-              onChange={(e) => {
-                setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
-              }}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-            )}
-            {editingCarrier && (
-              <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
-            )}
-          </div>
-
-          {!editingCarrier && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Fila 1: Correo | Contraseña */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contraseña *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
+              <Input
+                type="email"
+                {...register('email')}
+                placeholder="Ingrese el correo electrónico"
+                className={errors.email ? 'border-red-500' : ''}
+                autoComplete="username"
+                disabled={!!editingCarrier}
+                onChange={(e) => {
+                  setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
+                }}
+              />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              {editingCarrier && <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
               <PasswordInput
                 value={watch('password') || ''}
                 onChange={(value) => setValue('password', value)}
@@ -360,8 +320,122 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 autoComplete="new-password"
               />
             </div>
-          )}
 
+            {/* Fila 2: Nombre | Apellido */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+              <Input
+                {...register('first_name')}
+                placeholder="Ingrese el nombre"
+                className={errors.first_name ? 'border-red-500' : ''}
+                onChange={(e) => {
+                  setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
+                }}
+              />
+              {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+              <Input
+                {...register('last_name')}
+                placeholder="Ingrese el apellido"
+                className={errors.last_name ? 'border-red-500' : ''}
+                onChange={(e) => {
+                  setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
+                }}
+              />
+              {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>}
+            </div>
+
+            {/* Fila 3: Tipo documento | Número de documento */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de documento *</label>
+              <Select
+                value={watch('document_type')}
+                options={PERSONAL_DOCUMENT_TYPES}
+                onChange={(value: string) => {
+                  setValue('document_type', value);
+                  clearErrors('document_type');
+                  setValue('document_number', '');
+                  clearErrors('document_number');
+                }}
+              />
+              {errors.document_type && <p className="text-red-500 text-xs mt-1">{errors.document_type.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Número de documento *</label>
+              <Input
+                {...register('document_number')}
+                placeholder="Ingrese el número de documento"
+                className={errors.document_number ? 'border-red-500' : ''}
+              />
+              {errors.document_number && <p className="text-red-500 text-xs mt-1">{errors.document_number.message}</p>}
+            </div>
+
+            {/* Fila 4: Tipo de vehículo | Marca | Placa | Licencia */}
+            <div className="md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de vehículo *</label>
+              <Select
+                value={watch('vehicle_type')}
+                options={[
+                  { value: 'MOTOCICLETA', label: 'MOTOCICLETA' },
+                  { value: 'AUTO', label: 'AUTO' },
+                  { value: 'BICICLETA', label: 'BICICLETA' },
+                  { value: 'OTRO', label: 'OTRO' },
+                ]}
+                onChange={(value: string) => {
+                  setValue('vehicle_type', value as 'MOTOCICLETA' | 'AUTO' | 'BICICLETA' | 'OTRO');
+                  clearErrors('vehicle_type');
+                }}
+              />
+              {errors.vehicle_type && <p className="text-red-500 text-xs mt-1">{errors.vehicle_type.message}</p>}
+            </div>
+            <div className="md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+              <Input
+                {...register('brand')}
+                placeholder="Ingrese la marca"
+                className={errors.brand ? 'border-red-500' : ''}
+                onChange={(e) => {
+                  setValue('brand', e.target.value.toUpperCase(), { shouldDirty: true });
+                }}
+              />
+              {errors.brand && <p className="text-red-500 text-xs mt-1">{errors.brand.message}</p>}
+            </div>
+            <div className="md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
+              <Input
+                {...register('model')}
+                placeholder="Ingrese el modelo"
+                className={errors.model ? 'border-red-500' : ''}
+                onChange={(e) => {
+                  setValue('model', e.target.value.toUpperCase(), { shouldDirty: true });
+                }}
+              />
+              {errors.model && <p className="text-red-500 text-xs mt-1">{errors.model.message}</p>}
+            </div>
+            <div className="md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Placa *</label>
+              <Input
+                {...register('plate_number')}
+                placeholder="Ingrese la placa"
+                className={errors.plate_number ? 'border-red-500' : ''}
+                onChange={(e) => {
+                  setValue('plate_number', e.target.value.toUpperCase(), { shouldDirty: true });
+                }}
+              />
+              {errors.plate_number && <p className="text-red-500 text-xs mt-1">{errors.plate_number.message}</p>}
+            </div>
+            <div className="md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Licencia *</label>
+              <Input
+                {...register('license')}
+                placeholder="Ingrese la licencia"
+                className={errors.license ? 'border-red-500' : ''}
+              />
+              {errors.license && <p className="text-red-500 text-xs mt-1">{errors.license.message}</p>}
+            </div>
+          </div>
           <ModalFooter>
             <Button
               type="button"

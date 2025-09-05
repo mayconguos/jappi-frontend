@@ -25,6 +25,7 @@ export interface Carrier {
   last_name: string | null;
   license: string;
   brand: string;
+  model: string;
   plate_number: string;
   vehicle_type: string;
   status: number;
