@@ -44,14 +44,16 @@ export default function CompaniesPage() {
   const [loading, setLoading] = useState(false);
   const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
-  const [confirmModal, setConfirmModal] = useState<{
-    isOpen: boolean;
-    data: Company | null;
-  }>({ isOpen: false, data: null });
-  const [deleting, setDeleting] = useState(false);
+  // const [confirmModal, setConfirmModal] = useState<{
+  //   isOpen: boolean;
+  //   data: Company | null;
+  // }>({ isOpen: false, data: null });
+  // const [deleting, setDeleting] = useState(false);
 
   // --- Hooks ---
-  const { get, del, error: apiError } = useApi<Company[]>();
+  const { get, error: apiError } = useApi<Company[]>();
+  // const { get, del, error: apiError } = useApi<Company[]>();
+
   const companyModal = useModal<Company>();
 
   // --- Effects ---
@@ -95,7 +97,7 @@ export default function CompaniesPage() {
   // --- Handlers ---
   const handlePageChange = (page: number) => { setCurrentPage(page); };
 
-  const handleDeleteCompany = (company: Company) => { setConfirmModal({ isOpen: true, data: company }); };
+  // const handleDeleteCompany = (company: Company) => { setConfirmModal({ isOpen: true, data: company }); };
 
   const handleEditCompany: (company: Company) => void = (company) => companyModal.openModal(company);
 
@@ -171,7 +173,9 @@ export default function CompaniesPage() {
               companies: currentItems,
               currentPage,
               onEdit: handleEditCompany,
-              onDelete: handleDeleteCompany,
+              // onDelete: handleDeleteCompany,
+              onDelete: () => { },
+
             }}
           />
           <Pagination
@@ -195,13 +199,13 @@ export default function CompaniesPage() {
             confirmText={deleting ? "Eliminando..." : "Eliminar"}
             variant="danger"
           /> */}
-          {deleting && (
+          {/* {deleting && (
             <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
               <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
                 <DeliveryLoader message="Eliminando empresa..." />
               </div>
             </div>
-          )}
+          )} */}
         </>
       )}
 
