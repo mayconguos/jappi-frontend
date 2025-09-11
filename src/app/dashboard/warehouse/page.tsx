@@ -4,6 +4,10 @@
 // React
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import ExcelJS from 'exceljs';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 // Componentes
 import ProductsFilter from '@/components/filters/ProductsFilter';
 import ProductsTable from '@/components/tables/ProductsTable';
@@ -21,7 +25,6 @@ export interface Product {
   company_name: string;
   product_name: string;
   price: number;
-  id_entradaAlmacen: number;
   current_stock: number;
   last_movement: number;
 }
@@ -88,6 +91,65 @@ export default function WarehousePage() {
   // --- Handlers ---
   const handlePageChange = (page: number) => setCurrentPage(page);
 
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Productos');
+
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 10 },
+      { header: 'Empresa', key: 'company_name', width: 25 },
+      { header: 'Producto', key: 'product_name', width: 30 },
+      { header: 'Precio', key: 'price', width: 15 },
+      { header: 'Stock', key: 'current_stock', width: 10 },
+      { header: 'Último movimiento', key: 'last_movement', width: 20 },
+    ];
+
+    filtered.forEach((product) => {
+      worksheet.addRow(product);
+    });
+
+    // Generar el archivo y descargarlo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'productos.xlsx';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportPdf = async () => {
+    const doc = new jsPDF();
+    const columns = [
+      { header: 'ID', dataKey: 'id' },
+      { header: 'Empresa', dataKey: 'company_name' },
+      { header: 'Producto', dataKey: 'product_name' },
+      { header: 'Precio', dataKey: 'price' },
+      { header: 'Stock', dataKey: 'current_stock' },
+      { header: 'Último movimiento', dataKey: 'last_movement' },
+    ];
+    const rows = filtered.map(product => ({
+      id: product.id,
+      company_name: product.company_name,
+      product_name: product.product_name,
+      price: product.price,
+      current_stock: product.current_stock,
+      last_movement: product.last_movement,
+    }));
+    autoTable(doc, {
+      columns,
+      body: rows,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [220, 220, 220] },
+      margin: { top: 20 },
+      didDrawPage: () => {
+        doc.text('Listado de Productos', 14, 15);
+      },
+    });
+    doc.save('productos.pdf');
+  };
+
   // --- Render ---
   return (
     <section className="p-6 space-y-6">
@@ -99,6 +161,8 @@ export default function WarehousePage() {
           value,
           setValue,
           filterFields,
+          onExportExcel: handleExportExcel,
+          onExportPdf: handleExportPdf,
         }}
       />
 

@@ -1,5 +1,8 @@
+import { FileSpreadsheet, FileText } from 'lucide-react';
+
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface FilterField {
   value: string;
@@ -12,6 +15,8 @@ interface CompaniesFilterProps {
   value: string;
   setValue: (value: string) => void;
   filterFields: FilterField[];
+  onExportExcel: () => void;
+  onExportPdf: () => void;
 }
 
 export default function CompaniesFilter({
@@ -20,6 +25,8 @@ export default function CompaniesFilter({
   value,
   setValue,
   filterFields,
+  onExportExcel,
+  onExportPdf
 }: CompaniesFilterProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -40,6 +47,26 @@ export default function CompaniesFilter({
             onChange={e => setValue(e.target.value)}
           />
         </div>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onExportExcel}
+          className="text-green-600 hover:text-green-800 p-2 h-full"
+          title="Descargar en Excel"
+        >
+          <FileSpreadsheet />
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onExportPdf}
+          className="text-red-600 hover:text-red-800 p-2 h-full"
+          title="Descargar en PDF"
+        >
+          <FileText />
+        </Button>
       </div>
     </div>
   );

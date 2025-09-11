@@ -4,6 +4,10 @@
 // React
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import ExcelJS from 'exceljs';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 // Componentes
 import CompaniesFilter from '@/components/filters/CompaniesFilter';
 import CompaniesTable from '@/components/tables/CompaniesTable';
@@ -97,6 +101,69 @@ export default function CompaniesPage() {
   // --- Handlers ---
   const handlePageChange = (page: number) => { setCurrentPage(page); };
 
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Empresas');
+
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 10 },
+      { header: 'Nombre', key: 'first_name', width: 30 },
+      { header: 'Apellido', key: 'last_name', width: 30 },
+      { header: 'Correo electrónico', key: 'email', width: 30 },
+      { header: 'Tipo de documento', key: 'document_type', width: 20 },
+      { header: 'Número de documento', key: 'document_number', width: 20 },
+      { header: 'Estado', key: 'status', width: 10 },
+    ];
+
+    filtered.forEach((company) => {
+      worksheet.addRow(company);
+    });
+
+    // Generar el archivo y descargarlo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'empresas.xlsx';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportPdf = async () => {
+    const doc = new jsPDF();
+    const columns = [
+      { header: 'ID', dataKey: 'id' },
+      { header: 'Nombre', dataKey: 'first_name' },
+      { header: 'Apellido', dataKey: 'last_name' },
+      { header: 'Correo electrónico', dataKey: 'email' },
+      { header: 'Tipo de documento', dataKey: 'document_type' },
+      { header: 'Número de documento', dataKey: 'document_number' },
+      { header: 'Estado', dataKey: 'status' },
+    ];
+    const rows = filtered.map((company) => ({
+      id: company.id,
+      first_name: company.first_name,
+      last_name: company.last_name,
+      email: company.email,
+      document_type: company.document_type,
+      document_number: company.document_number,
+      status: company.status,
+    }));
+
+    autoTable(doc, {
+      columns,
+      body: rows,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [220, 220, 220] },
+      margin: { top: 20 },
+      didDrawPage: () => {
+        doc.text('Listado de Empresas', 14, 15);
+      },
+    });
+    doc.save('empresas.pdf');
+  };
+
   // const handleDeleteCompany = (company: Company) => { setConfirmModal({ isOpen: true, data: company }); };
 
   const handleEditCompany: (company: Company) => void = (company) => companyModal.openModal(company);
@@ -135,6 +202,8 @@ export default function CompaniesPage() {
           value,
           setValue,
           filterFields,
+          onExportExcel: handleExportExcel,
+          onExportPdf: handleExportPdf,
         }}
       />
 
