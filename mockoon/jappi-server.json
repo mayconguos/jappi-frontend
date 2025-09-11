@@ -519,6 +519,43 @@
         }
       ],
       "responseMode": null
+    },
+    {
+      "uuid": "6133e7b0-acdb-4501-b3d0-291c0e99692e",
+      "type": "http",
+      "documentation": "Obtener información almacén japi",
+      "method": "get",
+      "endpoint": "kardex",
+      "responses": [
+        {
+          "uuid": "c5dc58bf-a4c9-46f9-ab0e-b3fb13664244",
+          "body": "[\n  {\n    \"id\": 1,\n    \"company_name\": \"Gadgets Peru\",\n    \"product_name\": \"PINZAS CHEF 16CM\",\n    \"price\": 1,\n    \"last_movement\": \"2025-09-04T05:40:49.000Z\",\n    \"current_stock\": 9\n  },\n  {\n    \"id\": 2,\n    \"company_name\": \"Gadgets Peru\",\n    \"product_name\": \"PINZA CHEF 23CM INOXIBAR\",\n    \"price\": 16,\n    \"last_movement\": \"2025-09-04T05:46:07.000Z\",\n    \"current_stock\": 30\n  },\n  {\n    \"id\": 3,\n    \"company_name\": \"Kitchen Plus\",\n    \"product_name\": \"CUCHILLO SANTOKU 18CM\",\n    \"price\": 45,\n    \"last_movement\": \"2025-09-05T11:20:15.000Z\",\n    \"current_stock\": 12\n  },\n  {\n    \"id\": 4,\n    \"company_name\": \"Kitchen Plus\",\n    \"product_name\": \"TABLA DE PICAR BAMBU\",\n    \"price\": 25,\n    \"last_movement\": \"2025-09-06T09:14:32.000Z\",\n    \"current_stock\": 7\n  },\n  {\n    \"id\": 5,\n    \"company_name\": \"Deco Hogar\",\n    \"product_name\": \"VASO VIDRIO 350ML\",\n    \"price\": 5,\n    \"last_movement\": \"2025-09-07T14:33:50.000Z\",\n    \"current_stock\": 50\n  },\n  {\n    \"id\": 6,\n    \"company_name\": \"Deco Hogar\",\n    \"product_name\": \"COPA VINO TINTO 450ML\",\n    \"price\": 12,\n    \"last_movement\": \"2025-09-07T15:02:11.000Z\",\n    \"current_stock\": 24\n  },\n  {\n    \"id\": 7,\n    \"company_name\": \"Smart Tools\",\n    \"product_name\": \"DESTORNILLADOR PHILIPS\",\n    \"price\": 8,\n    \"last_movement\": \"2025-09-08T18:20:45.000Z\",\n    \"current_stock\": 60\n  },\n  {\n    \"id\": 8,\n    \"company_name\": \"Smart Tools\",\n    \"product_name\": \"ALICATE UNIVERSAL 8”\",\n    \"price\": 18,\n    \"last_movement\": \"2025-09-08T18:30:22.000Z\",\n    \"current_stock\": 33\n  },\n  {\n    \"id\": 9,\n    \"company_name\": \"OfficeMax\",\n    \"product_name\": \"RESMA A4 80GR\",\n    \"price\": 20,\n    \"last_movement\": \"2025-09-09T09:11:00.000Z\",\n    \"current_stock\": 100\n  },\n  {\n    \"id\": 10,\n    \"company_name\": \"OfficeMax\",\n    \"product_name\": \"LAPICERO AZUL BIC\",\n    \"price\": 2,\n    \"last_movement\": \"2025-09-09T09:35:14.000Z\",\n    \"current_stock\": 500\n  },\n  {\n    \"id\": 11,\n    \"company_name\": \"OfficeMax\",\n    \"product_name\": \"CUADERNO A4 RAYADO\",\n    \"price\": 15,\n    \"last_movement\": \"2025-09-09T12:44:28.000Z\",\n    \"current_stock\": 80\n  }\n]",
+          "latency": 2000,
+          "statusCode": 200,
+          "label": "Obtener productos almacen japi",
+          "headers": [],
+          "bodyType": "INLINE",
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "type",
+              "value": "workers",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "default": true,
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
     }
   ],
   "rootChildren": [
@@ -549,6 +586,10 @@
     {
       "type": "route",
       "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081"
+    },
+    {
+      "type": "route",
+      "uuid": "6133e7b0-acdb-4501-b3d0-291c0e99692e"
     }
   ],
   "proxyMode": false,
