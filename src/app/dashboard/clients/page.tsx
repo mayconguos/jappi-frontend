@@ -1,3 +1,4 @@
+//XANADU borrar esta page, ver funcionalidad antes de
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
