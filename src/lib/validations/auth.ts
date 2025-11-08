@@ -1,123 +1,23 @@
 import { z } from 'zod';
 import { commonValidations, createDocumentNumberValidator } from './common';
 
-export const registerSchema = z.object({
-  // Datos personales
-  first_name: commonValidations.name,
-  last_name: commonValidations.name,
-  document_type: commonValidations.documentType,
-  document_number: commonValidations.documentNumber,
-  email: commonValidations.email,
-  password: commonValidations.password,
-
-  // Datos de la empresa
-  company_name: z
-    .string()
-    .min(2, 'El nombre de la empresa debe tener al menos 2 caracteres')
-    .max(100, 'El nombre de la empresa no puede exceder 100 caracteres'),
-
+const addressSchema = z.object({
   address: z
     .string()
     .min(5, 'La dirección debe tener al menos 5 caracteres')
     .max(200, 'La dirección no puede exceder 200 caracteres'),
+  id_region: z.number().int().min(1, 'Debes seleccionar una región'),
+  id_district: z.number().int().min(1, 'Debes seleccionar un distrito'),
+  id_sector: z.number().int().min(0, 'Sector inválido').optional(),
+});
 
-  region: z
-    .number()
-    .int()
-    .min(1, 'Debes seleccionar una región'),
-
-  district: z
-    .number()
-    .int()
-    .min(1, 'Debes seleccionar un distrito'),
-
-  sector: z
-    .number()
-    .int()
-    .min(0, 'Sector inválido')
-    .optional(),
-
-  phone: commonValidations.phone,
-
-  latitude: z
-    .string()
-    .optional(), // Se captura en background
-
-  longitude: z
-    .string()
-    .optional(), // Se captura en background
-
-  ruc: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (value) => {
-        if (!value || value === '') return true; // Opcional, puede estar vacío
-        return /^\d{11}$/.test(value); // Si se proporciona, debe tener 11 dígitos
-      },
-      'El RUC debe tener exactamente 11 dígitos numéricos'
-    ),
-
-  // App de pagos (opcionales)
-  payment_app: z
-    .string()
-    .optional(),
-
-  payment_phone: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (value) => {
-        if (!value || value === '') return true; // Es opcional
-        return /^9\d{8}$/.test(value); // Debe empezar con 9 y tener exactamente 9 dígitos
-      },
-      'El número de celular debe empezar con 9 y tener exactamente 9 dígitos'
-    ),
-
-  payment_account_holder: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (value) => {
-        if (!value || value === '') return true; // Es opcional
-        return value.length >= 2 && value.length <= 100;
-      },
-      'El titular de la cuenta debe tener entre 2 y 100 caracteres'
-    ),
-
-  payment_document_number: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (value) => {
-        if (!value || value === '') return true; // Es opcional
-        return /^\d+$/.test(value) && value.length >= 8 && value.length <= 20;
-      },
-      'El número de documento debe tener entre 8 y 20 dígitos numéricos'
-    ),
-
-  // Cuenta bancaria (campos individuales para registro)
+const bankAccountSchema = z.object({
   account_number: z
     .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (value) => {
-        if (!value || value === '') return true; // Es opcional si no selecciona banco
-        return /^\d{10,20}$/.test(value); // Entre 10 y 20 dígitos
-      },
-      'El número de cuenta debe tener entre 10 y 20 dígitos numéricos'
-    ),
-
-  account_type: z
-    .number()
-    .int()
-    .optional(),
-
+    .min(10, 'El número de cuenta debe tener al menos 10 dígitos')
+    .max(20, 'El número de cuenta no puede exceder 20 dígitos')
+    .regex(/^\d+$/, 'Solo se permiten dígitos'),
+  account_type: z.number().int(),
   cci_number: z
     .string()
     .optional()
@@ -129,47 +29,82 @@ export const registerSchema = z.object({
       },
       'El CCI debe tener exactamente 20 dígitos numéricos'
     ),
-
   account_holder: z
     .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (value) => {
-        if (!value || value === '') return true; // Es opcional si no selecciona banco
-        return value.length >= 2 && value.length <= 100;
-      },
-      'El titular de la cuenta debe tener entre 2 y 100 caracteres'
-    ),
+    .min(2, 'El titular de la cuenta debe tener al menos 2 caracteres')
+    .max(100, 'El titular de la cuenta no puede exceder 100 caracteres'),
+  bank: z.number().int(),
+});
 
-  bank: z
-    .number()
-    .int()
+const paymentAppSchema = z.object({
+  app_name: z.string().min(2, 'El nombre de la app es obligatorio'),
+  phone_number: z
+    .string()
+    .regex(/^9\d{8}$/, 'El número debe empezar con 9 y tener 9 dígitos'),
+  account_holder: z
+    .string()
+    .min(2, 'El titular de la cuenta debe tener al menos 2 caracteres')
+    .max(100, 'El titular de la cuenta no puede exceder 100 caracteres'),
+  document_number: z
+    .string()
+    .regex(/^\d+$/, 'Debe contener solo dígitos')
+    .min(8, 'El número de documento debe tener al menos 8 dígitos')
+    .max(20, 'El número de documento no puede exceder 20 dígitos')
     .optional(),
+});
+
+export const registerSchema = z.object({
+  user: z.object({
+    first_name: commonValidations.name,
+    last_name: commonValidations.name,
+    document_type: commonValidations.documentType,
+    document_number: commonValidations.documentNumber,
+    email: commonValidations.email,
+    password: commonValidations.password,
+  }),
+
+  company: z.object({
+    company_name: z
+      .string()
+      .min(2, 'El nombre de la empresa debe tener al menos 2 caracteres')
+      .max(100, 'El nombre de la empresa no puede exceder 100 caracteres'),
+
+    addresses: z
+      .array(addressSchema)
+      .min(1, 'Debes registrar al menos una dirección'),
+
+    phones: z
+      .array(commonValidations.phone)
+      .min(1, 'Debes registrar al menos un número de teléfono'),
+
+    ruc: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine(
+        (value) => {
+          if (!value || value === '') return true; // opcional
+          return /^\d{11}$/.test(value);
+        },
+        'El RUC debe tener exactamente 11 dígitos numéricos'
+      ),
+
+    bank_accounts: z.array(bankAccountSchema).optional(),
+
+    payment_apps: z.array(paymentAppSchema).optional(),
+  }),
 }).superRefine((data, ctx) => {
-  // Validación dinámica del número de documento según el tipo
-  const validator = createDocumentNumberValidator(data.document_type);
-  const result = validator.safeParse(data.document_number);
+  // Validar el número de documento según el tipo
+  const validator = createDocumentNumberValidator(data.user.document_type);
+  const result = validator.safeParse(data.user.document_number);
 
   if (!result.success) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: result.error.issues[0]?.message || "Número de documento inválido",
-      path: ["document_number"]
+      message: result.error.issues[0]?.message || 'Número de documento inválido',
+      path: ['user', 'document_number'],
     });
   }
-
-  // Validación dinámica: Titular de la cuenta requerido si el método de pago es app
-  if (data.payment_app && (!data.payment_account_holder || data.payment_account_holder.trim() === '')) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'El titular de la cuenta es obligatorio cuando el método de pago es app',
-      path: ['payment_account_holder']
-    });
-  }
-
-  // Nota: La validación del sector se maneja en el componente 
-  // basado en si el distrito tiene sectores disponibles
 });
 
 export const loginSchema = z.object({

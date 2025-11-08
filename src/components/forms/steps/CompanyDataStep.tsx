@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { RegisterFormData } from '@/lib/validations/auth';
 import { Input } from '@/components/ui/input';
@@ -17,74 +17,40 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
   const { loading, error, getRegionOptions, getDistrictOptions, getSectorOptions } = useLocationCatalog();
 
   // Observar cambios en la región y distrito seleccionados
-  const selectedRegion = watch('region');
-  const selectedDistrict = watch('district');
+  const selectedRegion = watch('company.addresses.0.id_region');
+  const selectedDistrict = watch('company.addresses.0.id_district');
 
-  // Limpiar el distrito cuando cambie la región
-  useEffect(() => {
-    if (selectedRegion && watchedValues.district) {
-      const availableDistricts = getDistrictOptions(selectedRegion);
-      const currentDistrictExists = availableDistricts.some(
-        district => district.value === watchedValues.district?.toString()
-      );
-      
-      if (!currentDistrictExists) {
-        setValue('district', 0);
-        // También limpiar sector si existe
-        if (watchedValues.sector !== undefined) {
-          setValue('sector', 0);
-        }
-      }
-    }
-  }, [selectedRegion, setValue, getDistrictOptions, watchedValues.district, watchedValues.sector]);
 
-  // Limpiar el sector cuando cambie el distrito
-  useEffect(() => {
-    if (selectedDistrict && watchedValues.sector !== undefined) {
-      const availableSectors = getSectorOptions(selectedDistrict);
-      const currentSectorExists = availableSectors.some(
-        sector => sector.value === watchedValues.sector?.toString()
-      );
-      
-      if (!currentSectorExists || availableSectors.length === 0) {
-        setValue('sector', 0);
-      }
-    }
-  }, [selectedDistrict, setValue, getSectorOptions, watchedValues.sector]);
 
   // Verificar si el distrito seleccionado tiene sectores
   const districtHasSectors = selectedDistrict ? getSectorOptions(selectedDistrict).length > 0 : false;
 
   const handleRegionChange = (value: string) => {
     const regionId = parseInt(value);
-    setValue('region', regionId);
+    setValue('company.addresses.0.id_region', regionId);
     
-    // Limpiar el distrito y sector seleccionados cuando cambie la región
-    setValue('district', 0);
-    if (watchedValues.sector !== undefined) {
-      setValue('sector', 0);
-    }
+    // Siempre limpiar el distrito y sector cuando cambie la región
+    setValue('company.addresses.0.id_district', 0);
+    setValue('company.addresses.0.id_sector', 0);
     
     // Trigger validation
-    trigger('region');
+    trigger('company.addresses.0.id_region');
   };
 
   const handleDistrictChange = (value: string) => {
     const districtId = parseInt(value);
-    setValue('district', districtId);
+    setValue('company.addresses.0.id_district', districtId);
     
-    // Limpiar el sector seleccionado cuando cambie el distrito
-    if (watchedValues.sector !== undefined) {
-      setValue('sector', 0);
-    }
+    // Siempre limpiar el sector cuando cambie el distrito
+    setValue('company.addresses.0.id_sector', 0);
     
-    trigger('district');
+    trigger('company.addresses.0.id_district');
   };
 
   const handleSectorChange = (value: string) => {
     const sectorId = parseInt(value);
-    setValue('sector', sectorId);
-    trigger('sector');
+    setValue('company.addresses.0.id_sector', sectorId);
+    trigger('company.addresses.0.id_sector');
   };
 
   return (
@@ -95,19 +61,19 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
             Nombre de la Empresa *
           </label>
           <Input
-            {...register('company_name')}
+            {...register('company.company_name')}
             type="text"
             placeholder="Nombre de tu empresa"
             autoComplete="organization"
-            value={watchedValues.company_name || ''}
+            value={watchedValues.company?.company_name || ''}
             onChange={async (e) => {
               const upperValue = e.target.value.toUpperCase();
-              setValue('company_name', upperValue);
-              await trigger('company_name');
+              setValue('company.company_name', upperValue);
+              await trigger('company.company_name');
             }}
           />
-          {errors.company_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.company_name.message}</p>
+          {errors.company?.company_name && (
+            <p className="text-red-500 text-sm mt-1">{errors.company.company_name.message}</p>
           )}
         </div>
 
@@ -116,7 +82,7 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
             Teléfono *
           </label>
           <Input
-            {...register('phone')}
+            {...register('company.phones.0')}
             type="text"
             placeholder="(01) 234-5678 o 987654321"
             autoComplete="tel"
@@ -124,12 +90,12 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
             onChange={async (e) => {
               // Permitir números, espacios, guiones, paréntesis y signo +
               const value = e.target.value.replace(/[^\d\-\+\(\)\s]/g, '');
-              setValue('phone', value);
-              await trigger('phone');
+              setValue('company.phones.0', value);
+              await trigger('company.phones.0');
             }}
           />
-          {errors.phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+          {errors.company?.phones?.[0] && (
+            <p className="text-red-500 text-sm mt-1">{errors.company.phones[0].message}</p>
           )}
           <p className="text-gray-500 text-xs mt-1">
             Teléfono fijo o celular (6-15 dígitos)
@@ -141,7 +107,7 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
             RUC (opcional)
           </label>
           <Input
-            {...register('ruc')}
+            {...register('company.ruc')}
             type="text"
             placeholder="20606707283"
             maxLength={11}
@@ -149,12 +115,12 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
             onChange={async (e) => {
               // Solo permitir números para RUC
               const value = e.target.value.replace(/\D/g, '');
-              setValue('ruc', value);
-              await trigger('ruc');
+              setValue('company.ruc', value);
+              await trigger('company.ruc');
             }}
           />
-          {errors.ruc && (
-            <p className="text-red-500 text-sm mt-1">{errors.ruc.message}</p>
+          {errors.company?.ruc && (
+            <p className="text-red-500 text-sm mt-1">{errors.company.ruc.message}</p>
           )}
           <p className="text-gray-500 text-xs mt-1">
             11 dígitos numéricos
@@ -166,12 +132,12 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
         <div>
           <Select
             label="Región *"
-            value={watchedValues.region?.toString() || ''}
+            value={watchedValues.company?.addresses?.[0]?.id_region?.toString() || ''}
             onChange={handleRegionChange}
             options={loading ? [] : getRegionOptions()}
           />
-          {errors.region && (
-            <p className="text-red-500 text-sm mt-1">{errors.region.message}</p>
+          {errors.company?.addresses?.[0]?.id_region && (
+            <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].id_region.message}</p>
           )}
           {error && (
             <p className="text-red-500 text-sm mt-1">Error al cargar regiones</p>
@@ -189,12 +155,12 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           }`}>
             <Select
               label="Distrito *"
-              value={watchedValues.district?.toString() || ''}
+              value={watchedValues.company?.addresses?.[0]?.id_district?.toString() || ''}
               onChange={handleDistrictChange}
               options={selectedRegion ? getDistrictOptions(selectedRegion) : []}
             />
-            {errors.district && selectedRegion && (
-              <p className="text-red-500 text-sm mt-1">{errors.district.message}</p>
+            {errors.company?.addresses?.[0]?.id_district && selectedRegion && (
+              <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].id_district.message}</p>
             )}
           </div>
         </div>
@@ -207,12 +173,12 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           }`}>
             <Select
               label="Sector *"
-              value={watchedValues.sector?.toString() || ''}
+              value={watchedValues.company?.addresses?.[0]?.id_sector?.toString() || ''}
               onChange={handleSectorChange}
               options={selectedDistrict ? getSectorOptions(selectedDistrict) : []}
             />
-            {errors.sector && districtHasSectors && (
-              <p className="text-red-500 text-sm mt-1">{errors.sector.message}</p>
+            {errors.company?.addresses?.[0]?.id_sector && districtHasSectors && (
+              <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].id_sector.message}</p>
             )}
           </div>
         </div>
@@ -224,19 +190,19 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
             Dirección *
           </label>
           <Input
-            {...register('address')}
+            {...register('company.addresses.0.address')}
             type="text"
             placeholder="Av. Ejemplo 123, Oficina 456"
             autoComplete="street-address"
-            value={watchedValues.address || ''}
+            value={watchedValues.company?.addresses?.[0]?.address || ''}
             onChange={async (e) => {
               const upperValue = e.target.value.toUpperCase();
-              setValue('address', upperValue);
-              await trigger('address');
+              setValue('company.addresses.0.address', upperValue);
+              await trigger('company.addresses.0.address');
             }}
           />
-          {errors.address && (
-            <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+          {errors.company?.addresses?.[0]?.address && (
+            <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].address.message}</p>
           )}
         </div>
       </div>

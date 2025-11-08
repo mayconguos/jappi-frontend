@@ -95,21 +95,21 @@ export function PaymentMethodStep({
                 Número de Cuenta *
               </label>
               <Input
-                {...register('account_number')}
+                {...register('company.bank_accounts.0.account_number')}
                 type="text"
                 placeholder="123456789012"
                 autoComplete="off"
                 maxLength={20}
                 onChange={async (e) => {
                   const value = e.target.value.replace(/\D/g, '');
-                  setValue('account_number', value);
-                  await trigger('account_number');
+                  setValue('company.bank_accounts.0.account_number', value);
+                  await trigger('company.bank_accounts.0.account_number');
                 }}
                 className={accountNumberError ? 'border-red-500' : ''}
               />
-              {(errors.account_number || accountNumberError) && (
+              {(errors.company?.bank_accounts?.[0]?.account_number || accountNumberError) && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.account_number?.message || accountNumberError}
+                  {errors.company?.bank_accounts?.[0]?.account_number?.message || accountNumberError}
                 </p>
               )}
               <p className="text-gray-500 text-xs mt-1">
@@ -122,20 +122,20 @@ export function PaymentMethodStep({
                 Titular de la Cuenta *
               </label>
               <Input
-                {...register('account_holder')}
+                {...register('company.bank_accounts.0.account_holder')}
                 type="text"
                 placeholder="Nombre completo del titular"
                 autoComplete="off"
-                value={watchedValues.account_holder || ''}
+                value={watchedValues.company?.bank_accounts?.[0]?.account_holder || ''}
                 onChange={async (e) => {
                   const upperValue = e.target.value.toUpperCase();
-                  setValue('account_holder', upperValue);
-                  await trigger('account_holder');
+                  setValue('company.bank_accounts.0.account_holder', upperValue);
+                  await trigger('company.bank_accounts.0.account_holder');
                 }}
               />
-              {errors.account_holder && (
+              {errors.company?.bank_accounts?.[0]?.account_holder && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.account_holder?.message}
+                  {errors.company.bank_accounts[0].account_holder.message}
                 </p>
               )}
             </div>
@@ -145,13 +145,13 @@ export function PaymentMethodStep({
             <div>
               <Select
                 label="Banco *"
-                value={watchedValues.bank?.toString() || ''}
-                onChange={(value) => setValue('bank', parseInt(value))}
+                value={watchedValues.company?.bank_accounts?.[0]?.bank?.toString() || ''}
+                onChange={(value) => setValue('company.bank_accounts.0.bank', parseInt(value))}
                 options={BANCOS.map(banco => ({ label: banco.label, value: banco.value.toString() }))}
               />
-              {errors.bank && (
+              {errors.company?.bank_accounts?.[0]?.bank && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.bank?.message}
+                  {errors.company.bank_accounts[0].bank.message}
                 </p>
               )}
             </div>
@@ -159,13 +159,13 @@ export function PaymentMethodStep({
             <div>
               <Select
                 label="Tipo de Cuenta *"
-                value={watchedValues.account_type?.toString() || ''}
-                onChange={(value) => setValue('account_type', parseInt(value))}
+                value={watchedValues.company?.bank_accounts?.[0]?.account_type?.toString() || ''}
+                onChange={(value) => setValue('company.bank_accounts.0.account_type', parseInt(value))}
                 options={TIPOS_CUENTA.map(tipo => ({ label: tipo.label, value: tipo.value.toString() }))}
               />
-              {errors.account_type && (
+              {errors.company?.bank_accounts?.[0]?.account_type && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.account_type?.message}
+                  {errors.company.bank_accounts[0].account_type.message}
                 </p>
               )}
             </div>
@@ -175,20 +175,20 @@ export function PaymentMethodStep({
                 CCI (opcional)
               </label>
               <Input
-                {...register('cci_number')}
+                {...register('company.bank_accounts.0.cci_number')}
                 type="text"
                 placeholder="00200000000000000000"
                 autoComplete="off"
                 maxLength={20}
                 onChange={async (e) => {
                   const value = e.target.value.replace(/\D/g, '');
-                  setValue('cci_number', value);
-                  await trigger('cci_number');
+                  setValue('company.bank_accounts.0.cci_number', value);
+                  await trigger('company.bank_accounts.0.cci_number');
                 }}
               />
-              {errors.cci_number && (
+              {errors.company?.bank_accounts?.[0]?.cci_number && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.cci_number?.message}
+                  {errors.company.bank_accounts[0].cci_number.message}
                 </p>
               )}
             </div>
@@ -212,12 +212,12 @@ export function PaymentMethodStep({
             <div>
               <Select
                 label="App de Pagos *"
-                value={watchedValues.payment_app || ''}
-                onChange={(value) => setValue('payment_app', value)}
+                value={watchedValues.company?.payment_apps?.[0]?.app_name || ''}
+                onChange={(value) => setValue('company.payment_apps.0.app_name', value)}
                 options={PAYMENT_APPS}
               />
-              {errors.payment_app && (
-                <p className="text-red-500 text-sm mt-1">{errors.payment_app.message}</p>
+              {errors.company?.payment_apps?.[0]?.app_name && (
+                <p className="text-red-500 text-sm mt-1">{errors.company.payment_apps[0].app_name.message}</p>
               )}
             </div>
 
@@ -226,21 +226,21 @@ export function PaymentMethodStep({
                 Número de Celular *
               </label>
               <Input
-                {...register('payment_phone')}
+                {...register('company.payment_apps.0.phone_number')}
                 type="text"
                 placeholder="987654321"
                 autoComplete="tel"
                 maxLength={9}
                 onChange={async (e) => {
                   const value = e.target.value.replace(/\D/g, '');
-                  setValue('payment_phone', value);
-                  await trigger('payment_phone');
+                  setValue('company.payment_apps.0.phone_number', value);
+                  await trigger('company.payment_apps.0.phone_number');
                 }}
                 className={paymentPhoneError ? 'border-red-500' : ''}
               />
-              {(errors.payment_phone || paymentPhoneError) && (
+              {(errors.company?.payment_apps?.[0]?.phone_number || paymentPhoneError) && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.payment_phone?.message || paymentPhoneError}
+                  {errors.company?.payment_apps?.[0]?.phone_number?.message || paymentPhoneError}
                 </p>
               )}
               <p className="text-gray-500 text-xs mt-1">
@@ -255,20 +255,20 @@ export function PaymentMethodStep({
                 Titular de la Cuenta *
               </label>
               <Input
-                {...register('payment_account_holder')}
+                {...register('company.payment_apps.0.account_holder')}
                 type="text"
                 placeholder="Nombre completo del titular"
                 autoComplete="off"
-                value={watchedValues.payment_account_holder || ''}
+                value={watchedValues.company?.payment_apps?.[0]?.account_holder || ''}
                 onChange={async (e) => {
                   const upperValue = e.target.value.toUpperCase();
-                  setValue('payment_account_holder', upperValue);
-                  await trigger('payment_account_holder');
+                  setValue('company.payment_apps.0.account_holder', upperValue);
+                  await trigger('company.payment_apps.0.account_holder');
                 }}
               />
-              {errors.payment_account_holder && (
+              {errors.company?.payment_apps?.[0]?.account_holder && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.payment_account_holder?.message}
+                  {errors.company.payment_apps[0].account_holder.message}
                 </p>
               )}
             </div>
@@ -278,20 +278,20 @@ export function PaymentMethodStep({
                 Número de Documento (opcional)
               </label>
               <Input
-                {...register('payment_document_number')}
+                {...register('company.payment_apps.0.document_number')}
                 type="text"
                 placeholder="12345678"
                 autoComplete="off"
                 maxLength={20}
                 onChange={async (e) => {
                   const value = e.target.value.replace(/\D/g, '');
-                  setValue('payment_document_number', value);
-                  await trigger('payment_document_number');
+                  setValue('company.payment_apps.0.document_number', value);
+                  await trigger('company.payment_apps.0.document_number');
                 }}
               />
-              {errors.payment_document_number && (
+              {errors.company?.payment_apps?.[0]?.document_number && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.payment_document_number?.message}
+                  {errors.company.payment_apps[0].document_number.message}
                 </p>
               )}
               <p className="text-gray-500 text-xs mt-1">

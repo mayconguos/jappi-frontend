@@ -556,6 +556,43 @@
         }
       ],
       "responseMode": null
+    },
+    {
+      "uuid": "44bb663d-0a82-4ae0-ae85-af050477c23c",
+      "type": "http",
+      "documentation": "Obtener información almacén japi",
+      "method": "get",
+      "endpoint": "company/detail",
+      "responses": [
+        {
+          "uuid": "6b3a93fe-8c12-4865-812a-385a430b6dfc",
+          "body": "{\n  \"user\": {\n    \"first_name\": \"MAYCON\",\n    \"last_name\": \"GUZMAN OSCATEGUI\",\n    \"document_type\": \"1\",\n    \"document_number\": \"45096121\",\n    \"email\": \"maycon.guzman@sura.pe\",\n    \"password\": \"1234556\"\n  },\n  \"company\": {\n    \"company_name\": \"TERRACARGO SAC\",\n    \"addresses\": [\n      {\n        \"address\": \"AV A 123\",\n        \"id_region\": 1,\n        \"id_district\": 1,\n        \"id_sector\": 1\n      }\n    ],\n    \"phones\": [\n      \"12345455\"\n    ],\n    \"ruc\": \"10450961219\",\n    \"bank_accounts\": [\n      {\n        \"account_number\": \"1234567890000\",\n        \"account_type\": 1,\n        \"cci_number\": \"11111111111111111111\",\n        \"account_holder\": \"MAYCONCITO\",\n        \"bank\": 1\n      }\n    ],\n    \"payment_apps\": [\n      {\n        \"app_name\": \"Yape\",\n        \"phone_number\": \"911111111\",\n        \"account_holder\": \"MAYCON GUZMAN\",\n        \"document_number\": \"13444444444444\"\n      }\n    ]\n  }\n}",
+          "latency": 2000,
+          "statusCode": 200,
+          "label": "Obtener perfil de company recién creada",
+          "headers": [],
+          "bodyType": "INLINE",
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "type",
+              "value": "workers",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "default": true,
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
     }
   ],
   "rootChildren": [
@@ -590,6 +627,10 @@
     {
       "type": "route",
       "uuid": "6133e7b0-acdb-4501-b3d0-291c0e99692e"
+    },
+    {
+      "type": "route",
+      "uuid": "44bb663d-0a82-4ae0-ae85-af050477c23c"
     }
   ],
   "proxyMode": false,

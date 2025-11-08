@@ -20,8 +20,8 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
 
   // Obtener información de validación para el tipo de documento actual
   const documentValidationInfo = React.useMemo(() => {
-    return getPersonalDocumentValidationInfo(watchedValues.document_type || '');
-  }, [watchedValues.document_type]);
+    return getPersonalDocumentValidationInfo(watchedValues.user?.document_type || '');
+  }, [watchedValues.user?.document_type]);
 
   return (
     <div className="border border-gray-200 rounded-lg p-6 space-y-4">
@@ -32,19 +32,19 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
             Nombres *
           </label>
           <Input
-            {...register('first_name')}
+            {...register('user.first_name')}
             type="text"
             placeholder="Ingresa tus nombres"
             autoComplete="given-name"
-            value={watchedValues.first_name || ''}
+            value={watchedValues.user?.first_name || ''}
             onChange={async (e) => {
               const upperValue = e.target.value.toUpperCase();
-              setValue('first_name', upperValue);
-              await trigger('first_name');
+              setValue('user.first_name', upperValue);
+              await trigger('user.first_name');
             }}
           />
-          {errors.first_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.first_name.message}</p>
+          {errors.user?.first_name && (
+            <p className="text-red-500 text-sm mt-1">{errors.user.first_name.message}</p>
           )}
         </div>
 
@@ -53,36 +53,36 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
             Apellidos *
           </label>
           <Input
-            {...register('last_name')}
+            {...register('user.last_name')}
             type="text"
             placeholder="Ingresa tus apellidos"
             autoComplete="family-name"
-            value={watchedValues.last_name || ''}
+            value={watchedValues.user?.last_name || ''}
             onChange={async (e) => {
               const upperValue = e.target.value.toUpperCase();
-              setValue('last_name', upperValue);
-              await trigger('last_name');
+              setValue('user.last_name', upperValue);
+              await trigger('user.last_name');
             }}
           />
-          {errors.last_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.last_name.message}</p>
+          {errors.user?.last_name && (
+            <p className="text-red-500 text-sm mt-1">{errors.user.last_name.message}</p>
           )}
         </div>
 
         <div>
           <Select
             label="Tipo de Documento *"
-            value={watchedValues.document_type || ''}
+            value={watchedValues.user?.document_type || ''}
             onChange={async (value) => {
-              setValue('document_type', value);
+              setValue('user.document_type', value);
               // Limpiar el número de documento cuando cambie el tipo
-              setValue('document_number', '');
-              await trigger(['document_type', 'document_number']);
+              setValue('user.document_number', '');
+              await trigger(['user.document_type', 'user.document_number']);
             }}
             options={PERSONAL_DOCUMENT_TYPES.map(doc => ({ label: doc.label, value: doc.value }))}
           />
-          {errors.document_type && (
-            <p className="text-red-500 text-sm mt-1">{errors.document_type.message}</p>
+          {errors.user?.document_type && (
+            <p className="text-red-500 text-sm mt-1">{errors.user.document_type.message}</p>
           )}
         </div>
       </div>
@@ -94,7 +94,7 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
             Número de Documento *
           </label>
           <Input
-            {...register('document_number')}
+            {...register('user.document_number')}
             type="text"
             placeholder={documentValidationInfo.placeholder}
             autoComplete="off"
@@ -107,17 +107,17 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
                 value = value.replace(/\D/g, ''); // Solo números
               }
 
-              setValue('document_number', value);
-              await trigger('document_number');
+              setValue('user.document_number', value);
+              await trigger('user.document_number');
             }}
             className={documentNumberError ? 'border-red-500' : ''}
           />
-          {(errors.document_number || documentNumberError) && (
+          {(errors.user?.document_number || documentNumberError) && (
             <p className="text-red-500 text-sm mt-1">
-              {errors.document_number?.message || documentNumberError}
+              {errors.user?.document_number?.message || documentNumberError}
             </p>
           )}
-          {watchedValues.document_type && (
+          {watchedValues.user?.document_type && (
             <p className="text-gray-500 text-xs mt-1">
               {documentValidationInfo.helpText}
             </p>
@@ -129,33 +129,33 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
             Email *
           </label>
           <Input
-            {...register('email')}
+            {...register('user.email')}
             type="email"
             placeholder="tu@ejemplo.com"
             autoComplete="email"
-            value={watchedValues.email || ''}
+            value={watchedValues.user?.email || ''}
             onChange={async (e) => {
               const lowerValue = e.target.value.toLowerCase();
-              setValue('email', lowerValue);
-              await trigger('email');
+              setValue('user.email', lowerValue);
+              await trigger('user.email');
             }}
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+          {errors.user?.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.user.email.message}</p>
           )}
         </div>
 
         <div>
           <PasswordInput
-            {...register('password')}
-            value={watchedValues.password || ''}
+            {...register('user.password')}
+            value={watchedValues.user?.password || ''}
             onChange={async (value) => {
-              setValue('password', value);
-              await trigger('password');
+              setValue('user.password', value);
+              await trigger('user.password');
             }}
             label="Contraseña *"
             placeholder="Mínimo 6 caracteres"
-            error={errors.password?.message}
+            error={errors.user?.password?.message}
             autoComplete="new-password"
           />
         </div>

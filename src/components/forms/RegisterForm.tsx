@@ -60,11 +60,38 @@ export default function RegisterForm() {
     mode: 'onChange', // Valida en cada cambio
     reValidateMode: 'onChange', // Re-valida en cada cambio
     defaultValues: {
-      account_number: '',
-      account_type: 1,
-      cci_number: '',
-      account_holder: '',
-      bank: 1
+      user: {
+        first_name: '',
+        last_name: '',
+        document_type: '',
+        document_number: '',
+        email: '',
+        password: ''
+      },
+      company: {
+        company_name: '',
+        addresses: [{
+          address: '',
+          id_region: 0,
+          id_district: 0,
+          id_sector: 0
+        }],
+        phones: [''],
+        ruc: '',
+        bank_accounts: [{
+          account_number: '',
+          account_type: 1,
+          cci_number: '',
+          account_holder: '',
+          bank: 1
+        }],
+        payment_apps: [{
+          app_name: '',
+          phone_number: '',
+          account_holder: '',
+          document_number: ''
+        }]
+      }
     }
   });
 
@@ -72,7 +99,6 @@ export default function RegisterForm() {
     handleSubmit,
     formState: { isSubmitting },
     watch,
-    setValue,
     trigger
   } = form;
 
@@ -80,20 +106,20 @@ export default function RegisterForm() {
 
   // Obtener información de validación para el tipo de documento actual
   const documentValidationInfo = React.useMemo(() => {
-    return getPersonalDocumentValidationInfo(watchedValues.document_type || '');
-  }, [watchedValues.document_type]);
+    return getPersonalDocumentValidationInfo(watchedValues.user?.document_type || '');
+  }, [watchedValues.user?.document_type]);
 
   // Validación en tiempo real del número de documento
   const documentNumberError = React.useMemo(() => {
-    if (!watchedValues.document_type || !watchedValues.document_number) {
+    if (!watchedValues.user?.document_type || !watchedValues.user?.document_number) {
       return null;
     }
 
-    const isValid = documentValidationInfo.pattern.test(watchedValues.document_number);
+    const isValid = documentValidationInfo.pattern.test(watchedValues.user.document_number);
 
     if (!isValid) {
       // Retornar el mensaje específico según el tipo de documento
-      switch (watchedValues.document_type) {
+      switch (watchedValues.user.document_type) {
         case '1':
           return 'El DNI debe tener exactamente 8 dígitos numéricos';
         case '4':
@@ -109,11 +135,11 @@ export default function RegisterForm() {
       }
     }
     return null;
-  }, [watchedValues.document_type, watchedValues.document_number, documentValidationInfo.pattern]);
+  }, [watchedValues.user?.document_type, watchedValues.user?.document_number, documentValidationInfo.pattern]);
 
   // Validación en tiempo real del número de celular para apps de pago
   const paymentPhoneError = React.useMemo(() => {
-    const paymentPhone = watchedValues.payment_phone;
+    const paymentPhone = watchedValues.company?.payment_apps?.[0]?.phone_number;
     if (!paymentPhone || paymentMethod !== 'app') {
       return null;
     }
@@ -127,11 +153,11 @@ export default function RegisterForm() {
     }
 
     return null;
-  }, [watchedValues.payment_phone, paymentMethod]);
+  }, [watchedValues.company, paymentMethod]);
 
   // Validación en tiempo real del número de cuenta
   const accountNumberError = React.useMemo(() => {
-    const accountNumber = watchedValues.account_number;
+    const accountNumber = watchedValues.company?.bank_accounts?.[0]?.account_number;
     if (!accountNumber) {
       return null;
     }
@@ -141,11 +167,11 @@ export default function RegisterForm() {
     }
 
     return null;
-  }, [watchedValues.account_number]);
+  }, [watchedValues.company]);
 
   // Validación en tiempo real del titular de la cuenta para apps de pago
   const paymentAccountHolderError = React.useMemo(() => {
-    const accountHolder = watchedValues.payment_account_holder;
+    const accountHolder = watchedValues.company?.payment_apps?.[0]?.account_holder;
     if (paymentMethod !== 'app') {
       return null;
     }
@@ -155,7 +181,7 @@ export default function RegisterForm() {
     }
 
     return null;
-  }, [watchedValues.payment_account_holder, paymentMethod]);
+  }, [watchedValues.company, paymentMethod]);
 
   // Validación completa del formulario para habilitar el botón de submit
   const isFormCompleteForSubmit = React.useMemo(() => {
@@ -166,20 +192,20 @@ export default function RegisterForm() {
 
     // Paso 1: Datos Personales - campos requeridos
     const step1Complete = !!(
-      watchedValues.first_name &&
-      watchedValues.last_name &&
-      watchedValues.document_type &&
-      watchedValues.document_number &&
-      watchedValues.email &&
-      watchedValues.password
+      watchedValues.user?.first_name &&
+      watchedValues.user?.last_name &&
+      watchedValues.user?.document_type &&
+      watchedValues.user?.document_number &&
+      watchedValues.user?.email &&
+      watchedValues.user?.password
     );
 
     // Paso 2: Datos de la Empresa - campos requeridos
     const step2Complete = !!(
-      watchedValues.company_name &&
-      watchedValues.address &&
-      watchedValues.region &&
-      watchedValues.phone
+      watchedValues.company?.company_name &&
+      watchedValues.company?.addresses?.[0]?.address &&
+      watchedValues.company?.addresses?.[0]?.id_region &&
+      watchedValues.company?.phones?.[0]
     );
 
     // Paso 3: Método de Pago - debe haber seleccionado un método y completado sus datos
@@ -188,17 +214,17 @@ export default function RegisterForm() {
     if (paymentMethod === 'bank') {
       // Validar datos de cuenta bancaria
       step3Complete = !!(
-        watchedValues.account_number &&
-        watchedValues.account_holder &&
-        watchedValues.bank &&
-        watchedValues.account_type
+        watchedValues.company?.bank_accounts?.[0]?.account_number &&
+        watchedValues.company?.bank_accounts?.[0]?.account_holder &&
+        watchedValues.company?.bank_accounts?.[0]?.bank &&
+        watchedValues.company?.bank_accounts?.[0]?.account_type
       );
     } else if (paymentMethod === 'app') {
       // Validar datos de app de pagos
       step3Complete = !!(
-        watchedValues.payment_app &&
-        watchedValues.payment_phone &&
-        watchedValues.payment_account_holder
+        watchedValues.company?.payment_apps?.[0]?.app_name &&
+        watchedValues.company?.payment_apps?.[0]?.phone_number &&
+        watchedValues.company?.payment_apps?.[0]?.account_holder
       );
     }
 
@@ -212,42 +238,22 @@ export default function RegisterForm() {
     paymentAccountHolderError
   ]);
 
-  // Función para obtener la ubicación del usuario
-  const getCurrentLocation = React.useCallback(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setValue('latitude', position.coords.latitude.toString());
-          setValue('longitude', position.coords.longitude.toString());
-        },
-        (error) => {
-          console.log('Error obteniendo ubicación:', error);
-        }
-      );
-    }
-  }, [setValue]);
-
-  // Obtener ubicación al cargar el componente
-  React.useEffect(() => {
-    getCurrentLocation();
-  }, [getCurrentLocation]);
-
   // Validar campos del paso actual
   const validateCurrentStep = async () => {
     let isValid = true;
 
     switch (currentStep) {
       case 1: // Datos Personales
-        isValid = await trigger(['first_name', 'last_name', 'document_type', 'document_number', 'email', 'password']);
+        isValid = await trigger(['user.first_name', 'user.last_name', 'user.document_type', 'user.document_number', 'user.email', 'user.password']);
         break;
       case 2: // Datos de la Empresa
-        isValid = await trigger(['company_name', 'address', 'region', 'phone']);
+        isValid = await trigger(['company.company_name', 'company.addresses.0.address', 'company.addresses.0.id_region', 'company.phones.0']);
         break;
       case 3: // Método de Pago
         if (paymentMethod === 'bank') {
-          isValid = await trigger(['account_number', 'account_holder', 'bank', 'account_type']);
+          isValid = await trigger(['company.bank_accounts.0.account_number', 'company.bank_accounts.0.account_holder', 'company.bank_accounts.0.bank', 'company.bank_accounts.0.account_type']);
         } else if (paymentMethod === 'app') {
-          isValid = await trigger(['payment_app', 'payment_phone', 'payment_account_holder']);
+          isValid = await trigger(['company.payment_apps.0.app_name', 'company.payment_apps.0.phone_number', 'company.payment_apps.0.account_holder']);
         } else {
           // Si no ha seleccionado método de pago
           return false;
@@ -299,82 +305,27 @@ export default function RegisterForm() {
       const data = watch(); // Obtener todos los datos del formulario
       console.log('Datos del formulario:', data);
 
-      // Transformar los datos al formato requerido por la API
-      const transformedData: {
-        user: {
-          first_name: string;
-          last_name: string;
-          document_type: string;
-          document_number: string;
-          email: string;
-          password: string;
-        };
+      // Filtrar los datos según el método de pago seleccionado
+      const transformedData = {
+        user: data.user,
         company: {
-          company_name: string;
-          address: string;
-          id_region: number;
-          id_district: number;
-          id_sector?: number;
-          phone: string;
-          latitude?: string;
-          longitude?: string;
-          ruc?: string;
-          bank_account?: {
-            account_number?: string;
-            account_type?: number;
-            cci_number?: string;
-            account_holder?: string;
-            bank?: number;
-          };
-          payment_app?: {
-            app_name?: string;
-            phone_number?: string;
-            account_holder?: string;
-            document_number?: string;
-          };
-        };
-      } = {
-        user: {
-          first_name: data.first_name,
-          last_name: data.last_name,
-          document_type: data.document_type,
-          document_number: data.document_number,
-          email: data.email,
-          password: data.password
-        },
-        company: {
-          company_name: data.company_name,
-          address: data.address,
-          id_region: data.region,
-          id_district: data.district,
-          id_sector: data.sector || undefined, // Solo incluir si existe
-          phone: data.phone,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          ruc: data.ruc
+          company_name: data.company.company_name,
+          addresses: data.company.addresses.map(address => ({
+            address: address.address,
+            id_region: address.id_region,
+            id_district: address.id_district,
+            // Solo incluir id_sector si es diferente de 0
+            ...(address.id_sector && address.id_sector !== 0 ? { id_sector: address.id_sector } : {})
+          })),
+          phones: data.company.phones,
+          ruc: data.company.ruc,
+          // Solo incluir el método de pago seleccionado
+          ...(paymentMethod === 'bank' 
+            ? { bank_accounts: data.company.bank_accounts }
+            : { payment_apps: data.company.payment_apps }
+          )
         }
       };
-
-      // Agregar bank_account dentro de company si es método bancario
-      if (paymentMethod === 'bank') {
-        transformedData.company.bank_account = {
-          account_number: data.account_number,
-          account_type: data.account_type,
-          cci_number: data.cci_number,
-          account_holder: data.account_holder,
-          bank: data.bank
-        };
-      }
-
-      // Agregar payment_app dentro de company si es método de app
-      if (paymentMethod === 'app') {
-        transformedData.company.payment_app = {
-          app_name: data.payment_app,
-          phone_number: data.payment_phone,
-          account_holder: data.payment_account_holder,
-          document_number: data.payment_document_number
-        };
-      }
 
       console.log('Datos transformados para la API:', transformedData);
 
@@ -441,31 +392,31 @@ export default function RegisterForm() {
     const data = watch();
 
     // Obtener el nombre de la región desde el catálogo
-    const region = catalog?.find(r => r.id_region === data.region);
+    const region = catalog?.find(r => r.id_region === data.company?.addresses?.[0]?.id_region);
 
     // Obtener el nombre del distrito desde el catálogo
     let district = null;
-    if (data.district && region) {
-      district = region.districts.find(d => d.id_district === data.district);
+    if (data.company?.addresses?.[0]?.id_district && region) {
+      district = region.districts.find(d => d.id_district === data.company.addresses[0].id_district);
     }
 
     // Obtener el nombre del sector desde el catálogo
     let sector = null;
-    if (data.sector && district) {
-      sector = district.sectors.find(s => s.id_sector === data.sector);
+    if (data.company?.addresses?.[0]?.id_sector && district) {
+      sector = district.sectors.find(s => s.id_sector === data.company.addresses[0].id_sector);
     }
 
     // Obtener el nombre del banco (si es cuenta bancaria)
-    const banco = BANCOS.find(b => b.value === data.bank);
+    const banco = BANCOS.find(b => b.value === data.company?.bank_accounts?.[0]?.bank);
 
     // Obtener el tipo de cuenta (si es cuenta bancaria)
-    const tipoCuenta = TIPOS_CUENTA.find(t => t.value === data.account_type);
+    const tipoCuenta = TIPOS_CUENTA.find(t => t.value === data.company?.bank_accounts?.[0]?.account_type);
 
     // Obtener el tipo de documento
-    const tipoDocumento = PERSONAL_DOCUMENT_TYPES.find(d => d.value === data.document_type);
+    const tipoDocumento = PERSONAL_DOCUMENT_TYPES.find(d => d.value === data.user?.document_type);
 
     // Obtener la app de pago (si es app)
-    const appPago = PAYMENT_APPS.find(a => a.value === data.payment_app);
+    const appPago = PAYMENT_APPS.find(a => a.value === data.company?.payment_apps?.[0]?.app_name);
 
     return {
       ...data,
@@ -607,13 +558,13 @@ export default function RegisterForm() {
               </h4>
               <div className="space-y-1">
                 <p className="text-gray-700">
-                  <span className="font-medium">Nombre:</span> {getFormattedData().first_name} {getFormattedData().last_name}
+                  <span className="font-medium">Nombre:</span> {getFormattedData().user?.first_name} {getFormattedData().user?.last_name}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium">Documento:</span> {getFormattedData().tipo_documento_label} {getFormattedData().document_number}
+                  <span className="font-medium">Documento:</span> {getFormattedData().tipo_documento_label} {getFormattedData().user?.document_number}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium">Email:</span> {getFormattedData().email}
+                  <span className="font-medium">Email:</span> {getFormattedData().user?.email}
                 </p>
               </div>
             </div>
@@ -625,17 +576,17 @@ export default function RegisterForm() {
               </h4>
               <div className="space-y-1">
                 <p className="text-gray-700">
-                  <span className="font-medium">Empresa:</span> {getFormattedData().company_name}
+                  <span className="font-medium">Empresa:</span> {getFormattedData().company?.company_name}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium">Dirección:</span> {getFormattedData().address}, {getFormattedData().district_label}{getFormattedData().sector_label ? `, ${getFormattedData().sector_label}` : ''}, {getFormattedData().region_label}
+                  <span className="font-medium">Dirección:</span> {getFormattedData().company?.addresses?.[0]?.address}, {getFormattedData().district_label}{getFormattedData().sector_label ? `, ${getFormattedData().sector_label}` : ''}, {getFormattedData().region_label}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium">Teléfono:</span> {getFormattedData().phone}
+                  <span className="font-medium">Teléfono:</span> {getFormattedData().company?.phones?.[0]}
                 </p>
-                {getFormattedData().ruc && (
+                {getFormattedData().company?.ruc && (
                   <p className="text-gray-700">
-                    <span className="font-medium">RUC:</span> {getFormattedData().ruc}
+                    <span className="font-medium">RUC:</span> {getFormattedData().company.ruc}
                   </p>
                 )}
               </div>
@@ -656,14 +607,14 @@ export default function RegisterForm() {
                       <span className="font-medium">Banco:</span> {getFormattedData().banco_label}
                     </p>
                     <p className="text-gray-700">
-                      <span className="font-medium">Cuenta:</span> {getFormattedData().tipo_cuenta_label} - {getFormattedData().account_number}
+                      <span className="font-medium">Cuenta:</span> {getFormattedData().tipo_cuenta_label} - {getFormattedData().company?.bank_accounts?.[0]?.account_number}
                     </p>
                     <p className="text-gray-700">
-                      <span className="font-medium">Titular:</span> {getFormattedData().account_holder}
+                      <span className="font-medium">Titular:</span> {getFormattedData().company?.bank_accounts?.[0]?.account_holder}
                     </p>
-                    {getFormattedData().cci_number && (
+                    {getFormattedData().company?.bank_accounts?.[0]?.cci_number && (
                       <p className="text-gray-700">
-                        <span className="font-medium">CCI:</span> {getFormattedData().cci_number}
+                        <span className="font-medium">CCI:</span> {getFormattedData().company?.bank_accounts?.[0]?.cci_number}
                       </p>
                     )}
                   </>
@@ -676,16 +627,16 @@ export default function RegisterForm() {
                       <span className="font-medium">App:</span> {getFormattedData().app_pago_label}
                     </p>
                     <p className="text-gray-700">
-                      <span className="font-medium">Celular:</span> {getFormattedData().payment_phone}
+                      <span className="font-medium">Celular:</span> {getFormattedData().company?.payment_apps?.[0]?.phone_number}
                     </p>
-                    {getFormattedData().payment_account_holder && (
+                    {getFormattedData().company?.payment_apps?.[0]?.account_holder && (
                       <p className="text-gray-700">
-                        <span className="font-medium">Titular:</span> {getFormattedData().payment_account_holder}
+                        <span className="font-medium">Titular:</span> {getFormattedData().company?.payment_apps?.[0]?.account_holder}
                       </p>
                     )}
-                    {getFormattedData().payment_document_number && (
+                    {getFormattedData().company?.payment_apps?.[0]?.document_number && (
                       <p className="text-gray-700">
-                        <span className="font-medium">Documento:</span> {getFormattedData().payment_document_number}
+                        <span className="font-medium">Documento:</span> {getFormattedData().company?.payment_apps?.[0]?.document_number}
                       </p>
                     )}
                   </>
