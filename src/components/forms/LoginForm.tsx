@@ -19,7 +19,6 @@ import FullScreenDeliveryLoader from '@/components/ui/fullscreen-delivery-loader
 
 export default function LoginForm() {
   const {
-    register,
     handleSubmit,
     formState: { errors },
     watch,
@@ -27,8 +26,10 @@ export default function LoginForm() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'almacen@japiexpress.com',
-      password: 'japientregas24680'
+      // email: 'almacen@japiexpress.com',
+      // password: 'japientregas24680'
+      email: 'velia.guerra@gmail.com',
+      password: 'administracion2015'
     }
   });
 
@@ -140,67 +141,27 @@ export default function LoginForm() {
       {/* Formulario */}
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-gray-100">
         {/* Campo Email */}
-        <div className="space-y-2">
-          <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-            <svg
-              className="w-4 h-4 mr-2 text-gray-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-              />
-            </svg>
-            Correo electrónico
-          </label>
+        <div>
           <Input
-            {...register('email')}
-            type='email'
-            autoComplete='email'
+            label="Correo electrónico"
+            type="email"
+            autoComplete="email"
             disabled={isLoading}
-            placeholder="tu@email.com"
-            className="h-12 text-base rounded-xl border-gray-200 focus:border-[color:var(--button-hover-color)] focus:ring-[color:var(--button-hover-color)] transition-colors"
+            value={watch('email') || ''}
+            onChange={(value: string) => setValue('email', value)}
+            error={errors.email?.message}
           />
-          {errors.email && (
-            <div className="flex items-center text-red-500 text-sm mt-1">
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              {errors.email.message}
-            </div>
-          )}
         </div>
 
         {/* Campo Contraseña */}
-        <div className="space-y-2">
-          <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-            <svg
-              className="w-4 h-4 mr-2 text-gray-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-            Contraseña
-          </label>
+        <div>
           <PasswordInput
+            label="Contraseña"
             value={watch('password') || ''}
-            onChange={(value) => setValue('password', value)}
-            placeholder="••••••••"
+            onChange={(value: string) => setValue('password', value)}
             disabled={isLoading}
             error={errors.password?.message}
             autoComplete="current-password"
-            className="h-12 text-base rounded-xl border-gray-200 focus:border-[color:var(--button-hover-color)] focus:ring-[color:var(--button-hover-color)]"
           />
         </div>
 

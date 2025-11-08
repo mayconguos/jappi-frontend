@@ -17,7 +17,7 @@
       "responses": [
         {
           "uuid": "500843ef-10d4-4715-8b76-3252fd40a3be",
-          "body": "  {\n  \"user\": {\n    \"id\": 18,\n    \"name\": \"alma\",\n    \"email\": \"almacen@japiexpress.com\",\n    \"id_role\": 1,\n    \"status\": 1\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImlhdCI6MTc1MDk5NTkwMCwiZXhwIjoxNzUxMDgyMzAwfQ.jJFmoQLqza-vRizeUkXiUrkff7ECHNnW6akukQsp4Pw\"\n} ",
+          "body": "  {\n  \"user\": {\n    \"id\": 18,\n    \"name\": \"alma\",\n    \"email\": \"almacen@japiexpress.com\",\n    \"id_role\": 2,\n    \"status\": 1\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImlhdCI6MTc1MDk5NTkwMCwiZXhwIjoxNzUxMDgyMzAwfQ.jJFmoQLqza-vRizeUkXiUrkff7ECHNnW6akukQsp4Pw\"\n} ",
           "latency": 1000,
           "statusCode": 200,
           "label": "Login exitoso",
@@ -566,7 +566,7 @@
       "responses": [
         {
           "uuid": "6b3a93fe-8c12-4865-812a-385a430b6dfc",
-          "body": "{\n  \"user\": {\n    \"first_name\": \"MAYCON\",\n    \"last_name\": \"GUZMAN OSCATEGUI\",\n    \"document_type\": \"1\",\n    \"document_number\": \"45096121\",\n    \"email\": \"maycon.guzman@sura.pe\",\n    \"password\": \"1234556\"\n  },\n  \"company\": {\n    \"company_name\": \"TERRACARGO SAC\",\n    \"addresses\": [\n      {\n        \"address\": \"AV A 123\",\n        \"id_region\": 1,\n        \"id_district\": 1,\n        \"id_sector\": 1\n      }\n    ],\n    \"phones\": [\n      \"12345455\"\n    ],\n    \"ruc\": \"10450961219\",\n    \"bank_accounts\": [\n      {\n        \"account_number\": \"1234567890000\",\n        \"account_type\": 1,\n        \"cci_number\": \"11111111111111111111\",\n        \"account_holder\": \"MAYCONCITO\",\n        \"bank\": 1\n      }\n    ],\n    \"payment_apps\": [\n      {\n        \"app_name\": \"Yape\",\n        \"phone_number\": \"911111111\",\n        \"account_holder\": \"MAYCON GUZMAN\",\n        \"document_number\": \"13444444444444\"\n      }\n    ]\n  }\n}",
+          "body": "{\n  \"user\": {\n    \"first_name\": \"MAYCON\",\n    \"last_name\": \"GUZMAN OSCATEGUI\",\n    \"document_type\": \"1\",\n    \"document_number\": \"45096121\",\n    \"email\": \"maycon.guzman@sura.pe\",\n    \"password\": \"1234556\"\n  },\n  \"company\": {\n    \"company_name\": \"TERRACARGO SAC\",\n    \"addresses\": [\n      {\n        \"address\": \"AV A 123\",\n        \"id_region\": 1,\n        \"id_district\": 1,\n        \"id_sector\": 1\n      },\n      {\n        \"address\": \"AV B 456\",\n        \"id_region\": 1,\n        \"id_district\": 2\n      }\n    ],\n    \"phones\": [\n      \"12345455\"\n    ],\n    \"ruc\": \"10450961219\",\n    \"bank_accounts\": [\n      {\n        \"account_number\": \"1234567890000\",\n        \"account_type\": 1,\n        \"cci_number\": \"11111111111111111111\",\n        \"account_holder\": \"MAYCONCITO\",\n        \"bank\": 1\n      }\n    ],\n    \"payment_apps\": [\n      {\n        \"app_name\": \"Yape\",\n        \"phone_number\": \"911111111\",\n        \"account_holder\": \"MAYCON GUZMAN\",\n        \"document_number\": \"13444444444444\"\n      }\n    ]\n  }\n}",
           "latency": 2000,
           "statusCode": 200,
           "label": "Obtener perfil de company recién creada",

@@ -16,7 +16,7 @@ interface PersonalDataStepProps {
 }
 
 export function PersonalDataStep({ form, watchedValues, documentNumberError }: PersonalDataStepProps) {
-  const { register, formState: { errors }, setValue, trigger } = form;
+  const { formState: { errors }, setValue, trigger } = form;
 
   // Obtener información de validación para el tipo de documento actual
   const documentValidationInfo = React.useMemo(() => {
@@ -28,45 +28,33 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
       {/* Primera fila: Nombres, Apellidos, Tipo de Documento */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombres *
-          </label>
           <Input
-            {...register('user.first_name')}
+            label="Nombres *"
             type="text"
-            placeholder="Ingresa tus nombres"
             autoComplete="given-name"
             value={watchedValues.user?.first_name || ''}
-            onChange={async (e) => {
-              const upperValue = e.target.value.toUpperCase();
+            onChange={async (value: string) => {
+              const upperValue = value.toUpperCase();
               setValue('user.first_name', upperValue);
               await trigger('user.first_name');
             }}
+            error={errors.user?.first_name?.message}
           />
-          {errors.user?.first_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.user.first_name.message}</p>
-          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Apellidos *
-          </label>
           <Input
-            {...register('user.last_name')}
+            label="Apellidos *"
             type="text"
-            placeholder="Ingresa tus apellidos"
             autoComplete="family-name"
             value={watchedValues.user?.last_name || ''}
-            onChange={async (e) => {
-              const upperValue = e.target.value.toUpperCase();
+            onChange={async (value: string) => {
+              const upperValue = value.toUpperCase();
               setValue('user.last_name', upperValue);
               await trigger('user.last_name');
             }}
+            error={errors.user?.last_name?.message}
           />
-          {errors.user?.last_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.user.last_name.message}</p>
-          )}
         </div>
 
         <div>
@@ -80,81 +68,96 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
               await trigger(['user.document_type', 'user.document_number']);
             }}
             options={PERSONAL_DOCUMENT_TYPES.map(doc => ({ label: doc.label, value: doc.value }))}
+            error={errors.user?.document_type?.message}
           />
-          {errors.user?.document_type && (
-            <p className="text-red-500 text-sm mt-1">{errors.user.document_type.message}</p>
-          )}
         </div>
       </div>
 
       {/* Segunda fila: Número de Documento, Email, Contraseña */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Número de Documento *
-          </label>
           <Input
-            {...register('user.document_number')}
+            label="Número de Documento *"
             type="text"
-            placeholder={documentValidationInfo.placeholder}
             autoComplete="off"
             maxLength={documentValidationInfo.maxLength}
-            onChange={async (e) => {
-              let value = e.target.value;
+            value={watchedValues.user?.document_number || ''}
+            onChange={async (value: string) => {
+              let processedValue = value;
 
               // Aplicar filtros según el tipo de documento
               if (documentValidationInfo.allowOnlyNumbers) {
-                value = value.replace(/\D/g, ''); // Solo números
+                processedValue = processedValue.replace(/\D/g, ''); // Solo números
+              } else {
+                // Para documentos alfanuméricos, aplicar filtros específicos
+                if (watchedValues.user?.document_type === '4') {
+                  // Carnet de extranjería: solo letras y números, convertir a mayúsculas
+                  processedValue = processedValue.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                } else if (watchedValues.user?.document_type === '7') {
+                  // Pasaporte: formato específico [A-Z]{1,2}\d{6,7}
+                  // Eliminar caracteres no válidos y formatear
+                  const cleanValue = processedValue.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                  
+                  // Separar letras y números
+                  const letters = cleanValue.match(/^[A-Z]*/)?.[0] || '';
+                  const numbers = cleanValue.replace(/^[A-Z]*/, '').replace(/\D/g, '');
+                  
+                  // Combinar respetando el formato: máximo 2 letras + máximo 7 números
+                  const maxLetters = letters.slice(0, 2);
+                  const maxNumbers = numbers.slice(0, 7);
+                  
+                  processedValue = maxLetters + maxNumbers;
+                } else if (watchedValues.user?.document_type === 'A') {
+                  // Cédula Diplomática: formato específico [A-Z]{2}\d{6,8}
+                  // Eliminar caracteres no válidos y formatear
+                  const cleanValue = processedValue.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                  
+                  // Separar letras y números
+                  const letters = cleanValue.match(/^[A-Z]*/)?.[0] || '';
+                  const numbers = cleanValue.replace(/^[A-Z]*/, '').replace(/\D/g, '');
+                  
+                  // Combinar respetando el formato: exactamente 2 letras + máximo 8 números
+                  const exactLetters = letters.slice(0, 2);
+                  const maxNumbers = numbers.slice(0, 8);
+                  
+                  processedValue = exactLetters + maxNumbers;
+                } else if (watchedValues.user?.document_type === '0') {
+                  // Otros: formato específico [A-Z0-9\-]{4,15}
+                  // Permitir letras, números y guiones, convertir letras a mayúsculas
+                  processedValue = processedValue.replace(/[^A-Za-z0-9\-]/g, '').toUpperCase();
+                }
               }
 
-              setValue('user.document_number', value);
+              setValue('user.document_number', processedValue);
               await trigger('user.document_number');
             }}
-            className={documentNumberError ? 'border-red-500' : ''}
+            error={errors.user?.document_number?.message || documentNumberError}
           />
-          {(errors.user?.document_number || documentNumberError) && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.user?.document_number?.message || documentNumberError}
-            </p>
-          )}
-          {watchedValues.user?.document_type && (
-            <p className="text-gray-500 text-xs mt-1">
-              {documentValidationInfo.helpText}
-            </p>
-          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email *
-          </label>
           <Input
-            {...register('user.email')}
+            label="Email *"
             type="email"
-            placeholder="tu@ejemplo.com"
             autoComplete="email"
             value={watchedValues.user?.email || ''}
-            onChange={async (e) => {
-              const lowerValue = e.target.value.toLowerCase();
+            onChange={async (value: string) => {
+              const lowerValue = value.toLowerCase();
               setValue('user.email', lowerValue);
               await trigger('user.email');
             }}
+            error={errors.user?.email?.message}
           />
-          {errors.user?.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.user.email.message}</p>
-          )}
         </div>
 
         <div>
           <PasswordInput
-            {...register('user.password')}
+            label="Contraseña *"
             value={watchedValues.user?.password || ''}
-            onChange={async (value) => {
+            onChange={async (value: string) => {
               setValue('user.password', value);
               await trigger('user.password');
             }}
-            label="Contraseña *"
-            placeholder="Mínimo 6 caracteres"
             error={errors.user?.password?.message}
             autoComplete="new-password"
           />

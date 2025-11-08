@@ -4,17 +4,17 @@ import { z } from 'zod';
 export const createDocumentNumberValidator = (documentType: string) => {
   switch (documentType) {
     case '1': // DNI
-      return z.string().regex(/^\d{8}$/, 'El DNI debe tener exactamente 8 dígitos numéricos');
+      return z.string().regex(/^\d{8}$/, 'Debe tener exactamente 8 dígitos numéricos');
     case '6': // RUC
-      return z.string().regex(/^\d{11}$/, 'El RUC debe tener exactamente 11 dígitos numéricos');
+      return z.string().regex(/^\d{11}$/, 'Debe tener exactamente 11 dígitos numéricos');
     case '4': // Carnet de extranjería
-      return z.string().regex(/^[A-Za-z0-9]{1,12}$/, 'El Carnet de extranjería debe tener máximo 12 caracteres alfanuméricos');
+      return z.string().regex(/^[A-Za-z0-9]{9,12}$/, 'Debe tener entre 9 y 12 caracteres alfanuméricos');
     case '7': // Pasaporte
-      return z.string().regex(/^[A-Za-z0-9]{1,12}$/, 'El Pasaporte debe tener máximo 12 caracteres alfanuméricos');
+      return z.string().regex(/^[A-Z]{1,2}\d{6,7}$/, 'Debe tener 1-2 letras mayúsculas seguidas de 6-7 dígitos');
     case '0': // Otros
-      return z.string().regex(/^[A-Za-z0-9\-\s]{1,15}$/, 'El documento debe tener máximo 15 caracteres alfanuméricos');
+      return z.string().regex(/^[A-Z0-9\-]{4,15}$/, 'Debe tener entre 4 y 15 caracteres (letras mayúsculas, números o guiones)');
     case 'A': // Cédula Diplomática
-      return z.string().regex(/^[A-Za-z0-9\-\s]{1,15}$/, 'La Cédula Diplomática debe tener máximo 15 caracteres alfanuméricos');
+      return z.string().regex(/^[A-Z]{2}\d{6,8}$/, 'Debe tener 2 letras mayúsculas seguidas de 6-8 dígitos');
     default:
       return z.string().min(1, 'El número de documento es requerido');
   }
@@ -40,15 +40,15 @@ export const commonValidations = {
   // Password
   password: z
     .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .max(100, 'La contraseña no puede exceder 100 caracteres'),
+    .min(6, 'Debe tener al menos 6 caracteres')
+    .max(100, 'No puede exceder 100 caracteres'),
 
   // Password requerida
   passwordRequired: z
     .string()
-    .min(1, 'La contraseña es obligatoria')
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .max(100, 'La contraseña es demasiado larga'),
+    .min(1, 'Es obligatoria')
+    .min(6, 'Debe tener al menos 6 caracteres')
+    .max(100, 'No puede exceder 100 caracteres'),
 
   // Password opcional
   passwordOptional: z
@@ -63,7 +63,7 @@ export const commonValidations = {
   // Número de documento (se valida dinámicamente)
   documentNumber: z
     .string()
-    .min(1, 'El número de documento es requerido'),
+    .min(1, 'Es requerido'),
 
   // Rol de usuario
   userRole: z
@@ -74,8 +74,8 @@ export const commonValidations = {
   // Teléfono (empresarial - más flexible)
   phone: z
     .string()
-    .min(6, 'El teléfono debe tener al menos 6 dígitos')
-    .max(15, 'El teléfono no puede exceder 15 dígitos')
+    .min(6, 'Debe tener al menos 6 dígitos')
+    .max(15, 'No puede exceder 15 dígitos')
     .regex(/^[\d\-\+\(\)\s]+$/, 'Solo puede contener números, espacios, guiones y paréntesis')
     .refine(
       (value) => {
@@ -110,7 +110,6 @@ export const getDocumentValidationInfo = (documentType: string) => {
       return {
         maxLength: 8,
         placeholder: "12345678",
-        helpText: "Debe tener exactamente 8 dígitos numéricos",
         allowOnlyNumbers: true,
         pattern: /^\d{8}$/
       };
@@ -118,7 +117,6 @@ export const getDocumentValidationInfo = (documentType: string) => {
       return {
         maxLength: 11,
         placeholder: "12345678901",
-        helpText: "Debe tener exactamente 11 dígitos numéricos",
         allowOnlyNumbers: true,
         pattern: /^\d{11}$/
       };
@@ -126,39 +124,34 @@ export const getDocumentValidationInfo = (documentType: string) => {
       return {
         maxLength: 12,
         placeholder: "CE123456",
-        helpText: "Máximo 12 caracteres alfanuméricos",
         allowOnlyNumbers: false,
         pattern: /^[A-Za-z0-9]{1,12}$/
       };
     case '7': // Pasaporte
       return {
-        maxLength: 12,
-        placeholder: "ABC123456",
-        helpText: "Máximo 12 caracteres alfanuméricos",
+        maxLength: 9,
+        placeholder: "AB1234567",
         allowOnlyNumbers: false,
-        pattern: /^[A-Za-z0-9]{1,12}$/
+        pattern: /^[A-Z]{1,2}\d{6,7}$/
       };
     case '0': // Otros
       return {
         maxLength: 15,
-        placeholder: "OTROS123",
-        helpText: "Máximo 15 caracteres alfanuméricos",
+        placeholder: "OTRO-123",
         allowOnlyNumbers: false,
-        pattern: /^[A-Za-z0-9\-\s]{1,15}$/
+        pattern: /^[A-Z0-9\-]{4,15}$/
       };
     case 'A': // Cédula Diplomática
       return {
-        maxLength: 15,
-        placeholder: "DIP123456",
-        helpText: "Máximo 15 caracteres alfanuméricos",
+        maxLength: 10,
+        placeholder: "CD12345678",
         allowOnlyNumbers: false,
-        pattern: /^[A-Za-z0-9\-\s]{1,15}$/
+        pattern: /^[A-Z]{2}\d{6,8}$/
       };
     default:
       return {
         maxLength: 15,
         placeholder: "Número de documento",
-        helpText: "Ingrese el número de documento",
         allowOnlyNumbers: false,
         pattern: /^.+$/
       };
@@ -172,7 +165,6 @@ export const getPersonalDocumentValidationInfo = (documentType: string) => {
       return {
         maxLength: 8,
         placeholder: "12345678",
-        helpText: "Debe tener exactamente 8 dígitos numéricos",
         allowOnlyNumbers: true,
         pattern: /^\d{8}$/
       };
@@ -180,39 +172,34 @@ export const getPersonalDocumentValidationInfo = (documentType: string) => {
       return {
         maxLength: 12,
         placeholder: "CE123456",
-        helpText: "Máximo 12 caracteres alfanuméricos",
         allowOnlyNumbers: false,
         pattern: /^[A-Za-z0-9]{9,12}$/
       };
     case '7': // Pasaporte
       return {
-        maxLength: 12,
-        placeholder: "ABC123456",
-        helpText: "Máximo 12 caracteres alfanuméricos",
+        maxLength: 9,
+        placeholder: "AB1234567",
         allowOnlyNumbers: false,
-        pattern: /^[A-Za-z0-9]{8,12}$/
+        pattern: /^[A-Z]{1,2}\d{6,7}$/
       };
     case '0': // Otros
       return {
         maxLength: 15,
-        placeholder: "OTROS123",
-        helpText: "Máximo 15 caracteres alfanuméricos",
+        placeholder: "OTRO-123",
         allowOnlyNumbers: false,
-        pattern: /^[A-Za-z0-9\-\s]{6,15}$/
+        pattern: /^[A-Z0-9\-]{4,15}$/
       };
     case 'A': // Cédula Diplomática
       return {
-        maxLength: 15,
-        placeholder: "DIP123456",
-        helpText: "Máximo 15 caracteres alfanuméricos",
+        maxLength: 10,
+        placeholder: "CD12345678",
         allowOnlyNumbers: false,
-        pattern: /^[A-Za-z0-9\-\s]{1,15}$/
+        pattern: /^[A-Z]{2}\d{6,8}$/
       };
     default:
       return {
         maxLength: 15,
         placeholder: "Número de documento",
-        helpText: "Ingrese el número de documento",
         allowOnlyNumbers: false,
         pattern: /^.+$/
       };

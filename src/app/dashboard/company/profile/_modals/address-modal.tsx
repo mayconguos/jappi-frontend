@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, MapPin } from 'lucide-react';
-import { Button } from './button';
-import { Input } from './input';
-import { Select } from './select';
+import { useEffect, useState } from 'react';
+import { MapPin, X } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
 
 interface Address {
   address: string;
   id_region: number;
   id_district: number;
-  id_sector: number;
+  id_sector?: number;
 }
 
 interface AddressModalProps {
@@ -22,10 +24,10 @@ interface AddressModalProps {
   title?: string;
 }
 
-export function AddressModal({ 
-  isOpen, 
-  onClose, 
-  onSave, 
+export function AddressModal({
+  isOpen,
+  onClose,
+  onSave,
   address = null,
   title = "Agregar Dirección"
 }: AddressModalProps) {
@@ -33,19 +35,20 @@ export function AddressModal({
     address: '',
     id_region: 1,
     id_district: 1,
-    id_sector: 1
+    id_sector: undefined
   });
 
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { catalog, getRegionOptions, getDistrictOptions, getSectorOptions } = useLocationCatalog();
 
   // Funciones auxiliares para obtener nombres de ubicación
-  const getRegionName = (id: number) => {
+  const getRegionName = (id?: number) => {
+    if (!id || !catalog) return '';
     return catalog?.find(r => r.id_region === id)?.region_name || '';
   };
 
-  const getDistrictName = (id: number) => {
-    if (!catalog) return '';
+  const getDistrictName = (id?: number) => {
+    if (!id || !catalog) return '';
     for (const region of catalog) {
       const district = region.districts.find(d => d.id_district === id);
       if (district) return district.district_name;
@@ -53,8 +56,8 @@ export function AddressModal({
     return '';
   };
 
-  const getSectorName = (id: number) => {
-    if (!catalog) return '';
+  const getSectorName = (id?: number) => {
+    if (!id || !catalog) return '';
     for (const region of catalog) {
       for (const district of region.districts) {
         const sector = district.sectors.find(s => s.id_sector === id);
@@ -68,13 +71,15 @@ export function AddressModal({
   useEffect(() => {
     if (isOpen) {
       if (address) {
+        // Editando una dirección existente - usar valores guardados
         setFormData(address);
       } else {
+
         setFormData({
           address: '',
-          id_region: 1,
-          id_district: 1,
-          id_sector: 1
+          id_region: 0,
+          id_district: 0,
+          id_sector: undefined
         });
       }
       setErrors({});
@@ -86,7 +91,7 @@ export function AddressModal({
     const districts = getDistrictOptions(regionId);
     const firstDistrictId = districts.length > 0 ? parseInt(districts[0].value) : 1;
     const sectors = getSectorOptions(firstDistrictId);
-    const firstSectorId = sectors.length > 0 ? parseInt(sectors[0].value) : 1;
+    const firstSectorId = sectors.length > 0 ? parseInt(sectors[0].value) : undefined;
 
     setFormData(prev => ({
       ...prev,
@@ -99,7 +104,7 @@ export function AddressModal({
   const handleDistrictChange = (value: string) => {
     const districtId = parseInt(value);
     const sectors = getSectorOptions(districtId);
-    const firstSectorId = sectors.length > 0 ? parseInt(sectors[0].value) : 1;
+    const firstSectorId = sectors.length > 0 ? parseInt(sectors[0].value) : undefined;
 
     setFormData(prev => ({
       ...prev,
@@ -109,23 +114,21 @@ export function AddressModal({
   };
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData.address.trim()) {
       newErrors.address = 'La dirección es requerida';
     }
 
-    if (!formData.id_region) {
+    if (!formData.id_region || formData.id_region === 0) {
       newErrors.id_region = 'La región es requerida';
     }
 
-    if (!formData.id_district) {
+    if (!formData.id_district || formData.id_district === 0) {
       newErrors.id_district = 'El distrito es requerido';
     }
 
-    if (!formData.id_sector) {
-      newErrors.id_sector = 'El sector es requerido';
-    }
+    // El sector es opcional, no se valida como requerido
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -141,9 +144,9 @@ export function AddressModal({
   const handleCancel = () => {
     setFormData({
       address: '',
-      id_region: 1,
-      id_district: 1,
-      id_sector: 1
+      id_region: 0,
+      id_district: 0,
+      id_sector: undefined
     });
     setErrors({});
     onClose();
@@ -157,7 +160,7 @@ export function AddressModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <MapPin className="text-blue-600" size={24} />
+            <MapPin className="[color:var(--button-hover-color)]" size={24} />
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
           </div>
           <button
@@ -172,12 +175,10 @@ export function AddressModal({
         <div className="p-6 space-y-6">
           {/* Dirección */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Dirección completa *
-            </label>
             <Input
+              label="Dirección completa"
               value={formData.address}
-              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
               placeholder="Av. Ejemplo 123, Oficina 456"
               className={errors.address ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
             />
@@ -187,11 +188,11 @@ export function AddressModal({
           </div>
 
           {/* Ubicación geográfica */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 gap-4 ${formData.id_district !== 0 && getSectorOptions(formData.id_district).length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
             <div>
               <Select
                 label="Región *"
-                value={formData.id_region?.toString() || ''}
+                value={formData.id_region === 0 ? '' : formData.id_region?.toString() || ''}
                 onChange={handleRegionChange}
                 options={getRegionOptions()}
                 className={errors.id_region ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
@@ -204,9 +205,9 @@ export function AddressModal({
             <div>
               <Select
                 label="Distrito *"
-                value={formData.id_district?.toString() || ''}
+                value={formData.id_district === 0 ? '' : formData.id_district?.toString() || ''}
                 onChange={handleDistrictChange}
-                options={getDistrictOptions(formData.id_region)}
+                options={formData.id_region === 0 ? [] : getDistrictOptions(formData.id_region)}
                 className={errors.id_district ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
               />
               {errors.id_district && (
@@ -214,18 +215,20 @@ export function AddressModal({
               )}
             </div>
 
-            <div>
-              <Select
-                label="Sector *"
-                value={formData.id_sector?.toString() || ''}
-                onChange={(value) => setFormData(prev => ({ ...prev, id_sector: parseInt(value) }))}
-                options={getSectorOptions(formData.id_district)}
-                className={errors.id_sector ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
-              />
-              {errors.id_sector && (
-                <p className="mt-1 text-sm text-red-600">{errors.id_sector}</p>
-              )}
-            </div>
+            {formData.id_district !== 0 && getSectorOptions(formData.id_district).length > 0 && (
+              <div>
+                <Select
+                  label="Sector"
+                  value={formData.id_sector?.toString() || ''}
+                  onChange={(value) => setFormData(prev => ({ ...prev, id_sector: value ? parseInt(value) : undefined }))}
+                  options={getSectorOptions(formData.id_district)}
+                  className={errors.id_sector ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
+                />
+                {errors.id_sector && (
+                  <p className="mt-1 text-sm text-red-600">{errors.id_sector}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Preview de la ubicación */}
@@ -233,8 +236,13 @@ export function AddressModal({
             <h4 className="text-sm font-medium text-gray-700 mb-2">Vista previa de la ubicación:</h4>
             <p className="text-sm text-gray-600">
               <span className="font-medium">Región:</span> {getRegionName(formData.id_region)} <br />
-              <span className="font-medium">Distrito:</span> {getDistrictName(formData.id_district)} <br />
-              <span className="font-medium">Sector:</span> {getSectorName(formData.id_sector)}
+              <span className="font-medium">Distrito:</span> {getDistrictName(formData.id_district)}
+              {formData.id_sector && getSectorName(formData.id_sector) && (
+                <>
+                  <br />
+                  <span className="font-medium">Sector:</span> {getSectorName(formData.id_sector)}
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -249,7 +257,6 @@ export function AddressModal({
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700"
           >
             {address ? 'Actualizar' : 'Agregar'} Dirección
           </Button>

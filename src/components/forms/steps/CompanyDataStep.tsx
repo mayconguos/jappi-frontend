@@ -13,7 +13,7 @@ interface CompanyDataStepProps {
 }
 
 export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
-  const { register, formState: { errors }, setValue, trigger, watch } = form;
+  const { formState: { errors }, setValue, trigger, watch } = form;
   const { loading, error, getRegionOptions, getDistrictOptions, getSectorOptions } = useLocationCatalog();
 
   // Observar cambios en la región y distrito seleccionados
@@ -57,97 +57,78 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
     <div className="border border-gray-200 rounded-lg p-6 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre de la Empresa *
-          </label>
           <Input
-            {...register('company.company_name')}
+            name="company.company_name"
             type="text"
-            placeholder="Nombre de tu empresa"
+            label="Nombre de la Empresa *"
             autoComplete="organization"
+            error={errors.company?.company_name?.message}
             value={watchedValues.company?.company_name || ''}
-            onChange={async (e) => {
-              const upperValue = e.target.value.toUpperCase();
+            onChange={async (value) => {
+              const upperValue = value.toUpperCase();
               setValue('company.company_name', upperValue);
               await trigger('company.company_name');
             }}
           />
-          {errors.company?.company_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.company.company_name.message}</p>
-          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Teléfono *
-          </label>
           <Input
-            {...register('company.phones.0')}
+            name="company.phones.0"
             type="text"
-            placeholder="(01) 234-5678 o 987654321"
+            label="Teléfono *"
             autoComplete="tel"
             maxLength={15}
-            onChange={async (e) => {
+            error={errors.company?.phones?.[0]?.message}
+            value={watchedValues.company?.phones?.[0] || ''}
+            onChange={async (value) => {
               // Permitir números, espacios, guiones, paréntesis y signo +
-              const value = e.target.value.replace(/[^\d\-\+\(\)\s]/g, '');
-              setValue('company.phones.0', value);
+              const cleanValue = value.replace(/[^\d\-\+\(\)\s]/g, '');
+              setValue('company.phones.0', cleanValue);
               await trigger('company.phones.0');
             }}
           />
-          {errors.company?.phones?.[0] && (
-            <p className="text-red-500 text-sm mt-1">{errors.company.phones[0].message}</p>
-          )}
-          <p className="text-gray-500 text-xs mt-1">
-            Teléfono fijo o celular (6-15 dígitos)
-          </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            RUC (opcional)
-          </label>
           <Input
-            {...register('company.ruc')}
+            name="company.ruc"
             type="text"
-            placeholder="20606707283"
+            label="RUC (opcional)"
             maxLength={11}
             autoComplete="off"
-            onChange={async (e) => {
+            error={errors.company?.ruc?.message}
+            value={watchedValues.company?.ruc || ''}
+            onChange={async (value) => {
               // Solo permitir números para RUC
-              const value = e.target.value.replace(/\D/g, '');
-              setValue('company.ruc', value);
+              const numericValue = value.replace(/\D/g, '');
+              setValue('company.ruc', numericValue);
               await trigger('company.ruc');
             }}
           />
-          {errors.company?.ruc && (
-            <p className="text-red-500 text-sm mt-1">{errors.company.ruc.message}</p>
-          )}
-          <p className="text-gray-500 text-xs mt-1">
-            11 dígitos numéricos
-          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+        <div className="relative z-30">
           <Select
             label="Región *"
-            value={watchedValues.company?.addresses?.[0]?.id_region?.toString() || ''}
+            value={
+              watchedValues.company?.addresses?.[0]?.id_region && 
+              watchedValues.company.addresses[0].id_region > 0
+                ? watchedValues.company.addresses[0].id_region.toString()
+                : ''
+            }
             onChange={handleRegionChange}
             options={loading ? [] : getRegionOptions()}
+            error={errors.company?.addresses?.[0]?.id_region?.message || (error ? 'Error al cargar regiones' : '')}
           />
-          {errors.company?.addresses?.[0]?.id_region && (
-            <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].id_region.message}</p>
-          )}
-          {error && (
-            <p className="text-red-500 text-sm mt-1">Error al cargar regiones</p>
-          )}
           {loading && (
             <p className="text-gray-500 text-sm mt-1">Cargando regiones...</p>
           )}
         </div>
 
-        <div className="relative">          
+        <div className="relative z-20">          
           <div className={`transition-all duration-300 ease-in-out ${
             selectedRegion 
               ? 'opacity-100 translate-y-0 max-h-96' 
@@ -155,17 +136,20 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           }`}>
             <Select
               label="Distrito *"
-              value={watchedValues.company?.addresses?.[0]?.id_district?.toString() || ''}
+              value={
+                watchedValues.company?.addresses?.[0]?.id_district && 
+                watchedValues.company.addresses[0].id_district > 0
+                  ? watchedValues.company.addresses[0].id_district.toString()
+                  : ''
+              }
               onChange={handleDistrictChange}
               options={selectedRegion ? getDistrictOptions(selectedRegion) : []}
+              error={errors.company?.addresses?.[0]?.id_district?.message}
             />
-            {errors.company?.addresses?.[0]?.id_district && selectedRegion && (
-              <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].id_district.message}</p>
-            )}
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative z-10">
           <div className={`transition-all duration-300 ease-in-out ${
             districtHasSectors
               ? 'opacity-100 translate-y-0 max-h-96' 
@@ -173,37 +157,35 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           }`}>
             <Select
               label="Sector *"
-              value={watchedValues.company?.addresses?.[0]?.id_sector?.toString() || ''}
+              value={
+                watchedValues.company?.addresses?.[0]?.id_sector && 
+                watchedValues.company.addresses[0].id_sector > 0
+                  ? watchedValues.company.addresses[0].id_sector.toString()
+                  : ''
+              }
               onChange={handleSectorChange}
               options={selectedDistrict ? getSectorOptions(selectedDistrict) : []}
+              error={errors.company?.addresses?.[0]?.id_sector?.message}
             />
-            {errors.company?.addresses?.[0]?.id_sector && districtHasSectors && (
-              <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].id_sector.message}</p>
-            )}
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Dirección *
-          </label>
           <Input
-            {...register('company.addresses.0.address')}
+            name="company.addresses.0.address"
             type="text"
-            placeholder="Av. Ejemplo 123, Oficina 456"
+            label="Dirección *"
             autoComplete="street-address"
+            error={errors.company?.addresses?.[0]?.address?.message}
             value={watchedValues.company?.addresses?.[0]?.address || ''}
-            onChange={async (e) => {
-              const upperValue = e.target.value.toUpperCase();
+            onChange={async (value) => {
+              const upperValue = value.toUpperCase();
               setValue('company.addresses.0.address', upperValue);
               await trigger('company.addresses.0.address');
             }}
           />
-          {errors.company?.addresses?.[0]?.address && (
-            <p className="text-red-500 text-sm mt-1">{errors.company.addresses[0].address.message}</p>
-          )}
         </div>
       </div>
     </div>

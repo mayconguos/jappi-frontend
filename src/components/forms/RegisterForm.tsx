@@ -80,10 +80,10 @@ export default function RegisterForm() {
         ruc: '',
         bank_accounts: [{
           account_number: '',
-          account_type: 1,
+          account_type: 0,
           cci_number: '',
           account_holder: '',
-          bank: 1
+          bank: 0
         }],
         payment_apps: [{
           app_name: '',
@@ -121,15 +121,15 @@ export default function RegisterForm() {
       // Retornar el mensaje específico según el tipo de documento
       switch (watchedValues.user.document_type) {
         case '1':
-          return 'El DNI debe tener exactamente 8 dígitos numéricos';
+          return 'Debe tener exactamente 8 dígitos numéricos';
         case '4':
-          return 'El Carnet de extranjería debe tener máximo 12 caracteres alfanuméricos';
+          return 'Debe tener máximo 12 caracteres alfanuméricos';
         case '7':
-          return 'El Pasaporte debe tener máximo 12 caracteres alfanuméricos';
+          return 'Debe tener máximo 12 caracteres alfanuméricos';
         case '0':
-          return 'El documento debe tener máximo 15 caracteres alfanuméricos';
+          return 'Debe tener máximo 15 caracteres alfanuméricos';
         case 'A':
-          return 'La Cédula Diplomática debe tener máximo 15 caracteres alfanuméricos';
+          return 'Debe tener máximo 15 caracteres alfanuméricos';
         default:
           return 'Número de documento inválido';
       }
@@ -139,17 +139,25 @@ export default function RegisterForm() {
 
   // Validación en tiempo real del número de celular para apps de pago
   const paymentPhoneError = React.useMemo(() => {
-    const paymentPhone = watchedValues.company?.payment_apps?.[0]?.phone_number;
-    if (!paymentPhone || paymentMethod !== 'app') {
+    // Solo validar si el método de pago es 'app'
+    if (paymentMethod !== 'app') {
       return null;
     }
 
+    const paymentPhone = watchedValues.company?.payment_apps?.[0]?.phone_number;
+    
+    // Si no hay teléfono, no hay error (pero será requerido en el form validation)
+    if (!paymentPhone) {
+      return null;
+    }
+
+    // Validar formato del teléfono
     if (paymentPhone.length > 0 && paymentPhone.length < 9) {
-      return 'El número debe tener exactamente 9 dígitos';
+      return 'Debe tener exactamente 9 dígitos';
     }
 
     if (paymentPhone.length === 9 && !paymentPhone.startsWith('9')) {
-      return 'El número debe empezar con 9';
+      return 'Debe empezar con 9';
     }
 
     return null;
@@ -163,31 +171,31 @@ export default function RegisterForm() {
     }
 
     if (accountNumber.length < 10) {
-      return 'El número de cuenta debe tener al menos 10 dígitos';
+      return 'Debe tener al menos 10 dígitos';
     }
 
     return null;
   }, [watchedValues.company]);
 
-  // Validación en tiempo real del titular de la cuenta para apps de pago
-  const paymentAccountHolderError = React.useMemo(() => {
-    const accountHolder = watchedValues.company?.payment_apps?.[0]?.account_holder;
-    if (paymentMethod !== 'app') {
-      return null;
-    }
 
-    if (!accountHolder || accountHolder.trim() === '') {
-      return 'El titular de la cuenta es obligatorio para el método de pago app';
-    }
-
-    return null;
-  }, [watchedValues.company, paymentMethod]);
 
   // Validación completa del formulario para habilitar el botón de submit
   const isFormCompleteForSubmit = React.useMemo(() => {
-    // Verificar si hay errores en validaciones en tiempo real
-    if (documentNumberError || accountNumberError || paymentPhoneError || paymentAccountHolderError) {
+    // Verificar errores críticos que bloquean el envío
+    if (documentNumberError || accountNumberError) {
       return false;
+    }
+    
+    // Para apps de pago, verificar errores específicos solo si los campos tienen contenido
+    if (paymentMethod === 'app') {
+      const appData = watchedValues.company?.payment_apps?.[0];
+      
+      // Si hay número de teléfono, debe ser válido
+      if (appData?.phone_number && paymentPhoneError) {
+        return false;
+      }
+      
+      // No bloquear por paymentAccountHolderError aquí, se manejará en la validación de completitud
     }
 
     // Paso 1: Datos Personales - campos requeridos
@@ -220,11 +228,15 @@ export default function RegisterForm() {
         watchedValues.company?.bank_accounts?.[0]?.account_type
       );
     } else if (paymentMethod === 'app') {
-      // Validar datos de app de pagos
+      // Validar datos de app de pagos - campos obligatorios
+      const appData = watchedValues.company?.payment_apps?.[0];
       step3Complete = !!(
-        watchedValues.company?.payment_apps?.[0]?.app_name &&
-        watchedValues.company?.payment_apps?.[0]?.phone_number &&
-        watchedValues.company?.payment_apps?.[0]?.account_holder
+        appData?.app_name &&
+        appData?.phone_number && 
+        appData?.phone_number.length === 9 &&
+        appData?.phone_number.startsWith('9') &&
+        appData?.account_holder &&
+        appData?.account_holder.trim() !== ''
       );
     }
 
@@ -234,8 +246,7 @@ export default function RegisterForm() {
     paymentMethod,
     documentNumberError,
     accountNumberError,
-    paymentPhoneError,
-    paymentAccountHolderError
+    paymentPhoneError
   ]);
 
   // Validar campos del paso actual
@@ -261,7 +272,7 @@ export default function RegisterForm() {
         break;
     }
 
-    return isValid && !documentNumberError && !accountNumberError && !paymentPhoneError && !paymentAccountHolderError;
+    return isValid && !documentNumberError && !accountNumberError && !paymentPhoneError;
   };
 
   // Avanzar al siguiente paso
@@ -320,7 +331,7 @@ export default function RegisterForm() {
           phones: data.company.phones,
           ruc: data.company.ruc,
           // Solo incluir el método de pago seleccionado
-          ...(paymentMethod === 'bank' 
+          ...(paymentMethod === 'bank'
             ? { bank_accounts: data.company.bank_accounts }
             : { payment_apps: data.company.payment_apps }
           )

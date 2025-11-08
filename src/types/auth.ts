@@ -5,17 +5,7 @@ export interface RegisterFormData {
   dni: string;
   password: string;
 
-  // Datos de la empresa
-//   nombreEmpresa: string;
-//   telefono: string;
-//   ruc?: string;
-//   direccion: string;
-//   distrito: string;
-//   banco: string;
-//   numeroCuentaBancaria: string;
-//   tipoCuentaBancaria: string;
-
-//   // Términos y condiciones
+  // Términos y condiciones
   aceptaTerminos: boolean;
 }
 
