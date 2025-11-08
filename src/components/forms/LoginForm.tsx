@@ -268,7 +268,7 @@ export default function LoginForm() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push('/registro')}
+            onClick={() => router.push('/register')}
             className="w-full h-12 text-base font-semibold rounded-xl border-2 border-gray-200 text-gray-700 hover:border-[color:var(--button-hover-color)] hover:text-[color:var(--button-hover-color)] hover:bg-gray-50 transition-all duration-200"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
