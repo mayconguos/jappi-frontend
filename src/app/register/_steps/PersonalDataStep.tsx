@@ -3,25 +3,22 @@
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { PERSONAL_DOCUMENT_TYPES } from '@/constants/documentTypes';
-import { getPersonalDocumentValidationInfo } from '@/lib/validations/common';
 import { RegisterFormData } from '@/lib/validations/auth';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Select } from '@/components/ui/select';
+import { usePersonalDataValidation } from '../_hooks/usePersonalDataValidation';
 
 interface PersonalDataStepProps {
   form: UseFormReturn<RegisterFormData>;
   watchedValues: RegisterFormData;
-  documentNumberError: string;
 }
 
-export function PersonalDataStep({ form, watchedValues, documentNumberError }: PersonalDataStepProps) {
+export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps) {
   const { formState: { errors }, setValue, trigger } = form;
 
-  // Obtener información de validación para el tipo de documento actual
-  const documentValidationInfo = React.useMemo(() => {
-    return getPersonalDocumentValidationInfo(watchedValues.user?.document_type || '');
-  }, [watchedValues.user?.document_type]);
+  // Hook de validación específico para este step
+  const { documentValidationInfo, documentNumberError } = usePersonalDataValidation(watchedValues);
 
   return (
     <div className="border border-gray-200 rounded-lg p-6 space-y-4">
@@ -131,7 +128,7 @@ export function PersonalDataStep({ form, watchedValues, documentNumberError }: P
               setValue('user.document_number', processedValue);
               await trigger('user.document_number');
             }}
-            error={errors.user?.document_number?.message || documentNumberError}
+            error={errors.user?.document_number?.message || documentNumberError || undefined}
           />
         </div>
 

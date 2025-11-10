@@ -62,7 +62,6 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
   const isEditing = !!editingWorker;
 
   const {
-    register,
     handleSubmit,
     formState: { errors, dirtyFields },
     reset,
@@ -221,71 +220,61 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rol de usuario *
-            </label>
             {editingWorker ? (
               <Input
+                label="Rol de usuario *"
                 value={ADMIN_USER_ROLES.find(role => role.value === watch('id_role').toString())?.label || ''}
                 disabled
-                className="bg-gray-100 cursor-not-allowed"
+                size='compact'
               />
             ) : (
               <Select
+                label="Rol de usuario *"
                 value={watch('id_role').toString()}
                 options={ADMIN_USER_ROLES}
                 onChange={(value: string) => {
                   setValue('id_role', parseInt(value));
                   clearErrors('id_role');
                 }}
+                error={errors.id_role?.message}
+                size='compact'
               />
             )}
-            {errors.id_role && (
-              <p className="text-red-500 text-xs mt-1">{errors.id_role.message}</p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre *
-            </label>
             <Input
-              {...register('first_name')}
+              label="Nombre *"
+              size='compact'
               placeholder="Ingrese el nombre"
-              className={errors.first_name ? 'border-red-500' : ''}
-              onChange={(e) => {
-                setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
+              error={errors.first_name?.message}
+              value={watch('first_name') || ''}
+              onChange={(value) => {
+                setValue('first_name', value.toUpperCase(), { shouldDirty: true });
               }}
             />
-            {errors.first_name && (
-              <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Apellido *
-            </label>
             <Input
-              {...register('last_name')}
+              label="Apellido *"
+              size='compact'
               placeholder="Ingrese el apellido"
-              className={errors.last_name ? 'border-red-500' : ''}
-              onChange={(e) => {
-                setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
+              error={errors.last_name?.message}
+              value={watch('last_name') || ''}
+              onChange={(value) => {
+                setValue('last_name', value.toUpperCase(), { shouldDirty: true });
               }}
             />
-            {errors.last_name && (
-              <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de documento *
-            </label>
             <Select
+              label="Tipo de documento *"
               value={watch('document_type')}
+              size='compact'
               options={DOCUMENT_TYPES}
+              error={errors.document_type?.message}
               onChange={(value: string) => {
                 setValue('document_type', value);
                 clearErrors('document_type');
@@ -294,43 +283,35 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                 clearErrors('document_number');
               }}
             />
-            {errors.document_type && (
-              <p className="text-red-500 text-xs mt-1">{errors.document_type.message}</p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Número de documento *
-            </label>
             <Input
-              {...register('document_number')}
+              size='compact'
+              label="Número de documento *"
               placeholder="Ingrese el número de documento"
-              className={errors.document_number ? 'border-red-500' : ''}
-            />
-            {errors.document_number && (
-              <p className="text-red-500 text-xs mt-1">{errors.document_number.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico *
-            </label>
-            <Input
-              type="email"
-              {...register('email')}
-              placeholder="Ingrese el correo electrónico"
-              className={errors.email ? 'border-red-500' : ''}
-              autoComplete="username"
-              disabled={!!editingWorker}
-              onChange={(e) => {
-                setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
+              error={errors.document_number?.message}
+              value={watch('document_number') || ''}
+              onChange={(value) => {
+                setValue('document_number', value, { shouldDirty: true });
               }}
             />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-            )}
+          </div>
+
+          <div>
+            <Input
+              type="email"
+              label="Correo electrónico *"
+              size='compact'
+              placeholder="Ingrese el correo electrónico"
+              error={errors.email?.message}
+              autoComplete="username"
+              disabled={!!editingWorker}
+              value={watch('email') || ''}
+              onChange={(value) => {
+                setValue('email', value.toLowerCase(), { shouldDirty: true });
+              }}
+            />
             {editingWorker && (
               <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
             )}
@@ -338,13 +319,11 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
 
           {!editingWorker && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contraseña *
-              </label>
               <PasswordInput
+                label="Contraseña *"
+                size='compact'
                 value={watch('password') || ''}
                 onChange={(value) => setValue('password', value)}
-                placeholder="Ingrese la contraseña"
                 disabled={isLoading}
                 error={errors.password?.message}
                 autoComplete="new-password"

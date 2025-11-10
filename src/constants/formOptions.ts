@@ -18,3 +18,10 @@ export const TIPOS_CUENTA = [
     { label: 'Cuenta de Ahorros', value: 2 },
     { label: 'Cuenta CTS', value: 3 }
 ] as const;
+
+export const PAYMENT_APPS = [
+  { label: 'YAPE', value: 'yape' },
+  { label: 'PLIN', value: 'plin' },
+  { label: 'Lukita', value: 'lukita' },
+  { label: 'Agora Pay', value: 'agora' }
+];

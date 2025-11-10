@@ -26,7 +26,7 @@ export default function WorkersTable({
           <TableHead>Nombre</TableHead>
           <TableHead>Documento</TableHead>
           <TableHead>Correo</TableHead>
-          <TableHead>Opciones</TableHead>
+          <TableHead className="!text-center">Opciones</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -40,7 +40,7 @@ export default function WorkersTable({
             <TableCell>{worker.document_number}</TableCell>
             <TableCell>{worker.email}</TableCell>
             <TableCell>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-end">
                 <Button
                   size="sm"
                   variant="outline"

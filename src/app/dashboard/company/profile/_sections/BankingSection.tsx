@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Edit, Plus, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+
+import { BANCOS, TIPOS_CUENTA } from '@/constants/formOptions';
+import { BankAccountModal } from '../_modals/bank-account-modal';
 
 import { Button } from '@/components/ui/button';
 import { SaveButton } from '@/components/ui/save-button';
-import { BankAccountModal } from '@/app/dashboard/company/profile/_modals/bank-account-modal';
 
 interface BankAccount {
   account_number: string;
@@ -78,25 +81,30 @@ export default function BankingSection({
     }
   };
 
-  // Función para obtener el nombre del banco
-  const getBankName = (bankId: number) => {
-    const banks: { [key: number]: string } = {
-      1: 'BCP',
-      2: 'BBVA',
-      3: 'Interbank',
-      4: 'Scotiabank',
-      5: 'Banco de la Nación',
-    };
-    return banks[bankId] || `Banco ${bankId}`;
+  // Función para obtener el ícono del banco
+  const getBankIcon = (bankId: number) => {
+    switch (bankId) {
+      case 1: // BBVA
+        return <Image src="/icons/bbva.svg" alt="BBVA" width={70} height={48} />;
+      case 2: // BCP
+        return <Image src="/icons/bcp.svg" alt="BCP" width={70} height={48} />;
+      case 3: // Interbank
+        return <Image src="/icons/interbank.svg" alt="Interbank" width={110} height={48} />;
+      case 4: // Scotiabank
+        return <Image src="/icons/scotiabank.svg" alt="Scotiabank" width={110} height={48} />;
+      default:
+        return null;
+    }
   };
 
-  // Función para obtener el tipo de cuenta
+  const getBankName = (bankId: number) => {
+    const bank = BANCOS.find(b => b.value === bankId);
+    return bank?.label || `Banco ${bankId}`;
+  };
+
   const getAccountTypeName = (typeId: number) => {
-    const types: { [key: number]: string } = {
-      1: 'Ahorros',
-      2: 'Corriente',
-    };
-    return types[typeId] || `Tipo ${typeId}`;
+    const accountType = TIPOS_CUENTA.find(t => t.value === typeId);
+    return accountType?.label || `Tipo ${typeId}`;
   };
   return (
     <div className="space-y-6">
@@ -139,8 +147,16 @@ export default function BankingSection({
               <div key={index} className="p-4 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{getBankName(account.bank)}</p>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <div className="mb-2">
+                      {getBankIcon(account.bank) || (
+                        <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-600">
+                            {getBankName(account.bank).charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600">
                       {getAccountTypeName(account.account_type)} • {account.account_number}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">

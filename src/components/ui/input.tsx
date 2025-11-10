@@ -3,16 +3,17 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
   label: string;
   value?: string;
   onChange?: (value: string) => void;
   error?: string;
   className?: string;
+  size?: 'default' | 'compact';
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, value = '', onChange, error, className, disabled, ...props }, ref) => {
+  ({ label, value = '', onChange, error, className, disabled, size = 'default', ...props }, ref) => {
     const [isFocused, setIsFocused] = React.useState(false);
     const hasValue = Boolean(value && value.trim().length > 0);
     const shouldFloatLabel = isFocused || hasValue;
@@ -44,8 +45,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             onBlur={handleBlur}
             disabled={disabled}
             className={clsx(
-              'peer w-full h-14 px-4 py-4 text-base bg-white border rounded-xl transition-all duration-200 ease-in-out',
+              'peer w-full px-4 bg-white border rounded-xl transition-all duration-200 ease-in-out',
               'placeholder-transparent outline-none',
+              // Tamaños
+              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-14 py-4 text-base',
               // Estados normales
               !error && !isFocused && 'border-gray-300',
               !error && isFocused && 'border-2 border-[color:var(--button-hover-color)] ring-0',
@@ -67,7 +70,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // Posición y tamaño cuando flota (arriba) - en la línea del borde
               shouldFloatLabel && '-top-2 text-xs font-medium px-2 bg-white',
               // Posición y tamaño cuando está en el centro
-              !shouldFloatLabel && 'top-1/2 -translate-y-1/2 text-base',
+              !shouldFloatLabel && 'top-1/2 -translate-y-1/2',
+              !shouldFloatLabel && size === 'compact' ? 'text-sm' : 'text-base',
               // Colores según el estado
               !error && !isFocused && shouldFloatLabel && 'text-gray-600',
               !error && !isFocused && !shouldFloatLabel && 'text-gray-500',

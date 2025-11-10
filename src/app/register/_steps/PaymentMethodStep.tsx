@@ -2,38 +2,32 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
+
+import { BANCOS, PAYMENT_APPS, TIPOS_CUENTA } from '@/constants/formOptions';
 import { RegisterFormData } from '@/lib/validations/auth';
-import { BANCOS, TIPOS_CUENTA } from '@/constants/formOptions';
-import { SelectionCard, SelectionCardGroup } from '@/components/ui/selection-card';
+
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-
-// Opciones de apps de pago
-const PAYMENT_APPS = [
-  { label: 'YAPE', value: 'yape' },
-  { label: 'PLIN', value: 'plin' },
-  { label: 'Lukita', value: 'lukita' },
-  { label: 'Agora Pay', value: 'agora' }
-];
+import { SelectionCard, SelectionCardGroup } from '@/components/ui/selection-card';
+import { usePaymentMethodValidation } from '../_hooks/usePaymentMethodValidation';
 
 interface PaymentMethodStepProps {
-  form: UseFormReturn<RegisterFormData>;
-  watchedValues: RegisterFormData;
-  paymentMethod: 'bank' | 'app' | null;
-  setPaymentMethod: (method: 'bank' | 'app' | null) => void;
-  accountNumberError: string | null;
-  paymentPhoneError: string | null;
+  readonly form: UseFormReturn<RegisterFormData>;
+  readonly watchedValues: RegisterFormData;
+  readonly paymentMethod: 'bank' | 'app' | null;
+  readonly setPaymentMethod: (method: 'bank' | 'app' | null) => void;
 }
 
-export function PaymentMethodStep({ 
-  form, 
-  watchedValues, 
-  paymentMethod, 
-  setPaymentMethod,
-  accountNumberError,
-  paymentPhoneError
+export function PaymentMethodStep({
+  form,
+  watchedValues,
+  paymentMethod,
+  setPaymentMethod
 }: PaymentMethodStepProps) {
   const { formState: { errors }, setValue, trigger } = form;
+
+  // Hook de validación específico para este step
+  const { accountNumberError, paymentPhoneError } = usePaymentMethodValidation(watchedValues, paymentMethod);
 
   // Función para limpiar los campos del método de pago no seleccionado
   const handlePaymentMethodChange = (method: 'bank' | 'app') => {
@@ -54,9 +48,10 @@ export function PaymentMethodStep({
     setPaymentMethod(method);
   };
 
-  return (
-    <div className="border border-gray-200 rounded-lg p-6 space-y-4">
-      {!paymentMethod ? (
+  // Función para renderizar el contenido según el método de pago
+  const renderPaymentContent = () => {
+    if (!paymentMethod) {
+      return (
         <div className="space-y-4">
           <SelectionCardGroup
             description={
@@ -94,7 +89,11 @@ export function PaymentMethodStep({
             />
           </SelectionCardGroup>
         </div>
-      ) : paymentMethod === 'bank' ? (
+      );
+    }
+
+    if (paymentMethod === 'bank') {
+      return (
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-4">
             <button
@@ -118,11 +117,11 @@ export function PaymentMethodStep({
                 maxLength={20}
                 value={watchedValues.company?.bank_accounts?.[0]?.account_number || ''}
                 onChange={async (value) => {
-                  const numericValue = value.replace(/\D/g, '');
+                  const numericValue = value.replaceAll(/\D/g, '');
                   setValue('company.bank_accounts.0.account_number', numericValue);
                   await trigger('company.bank_accounts.0.account_number');
                 }}
-                error={errors.company?.bank_accounts?.[0]?.account_number?.message || accountNumberError || ''}
+                error={errors.company?.bank_accounts?.[0]?.account_number?.message || accountNumberError || undefined}
               />
             </div>
 
@@ -148,12 +147,12 @@ export function PaymentMethodStep({
               <Select
                 label="Banco *"
                 value={
-                  watchedValues.company?.bank_accounts?.[0]?.bank && 
-                  watchedValues.company.bank_accounts[0].bank > 0
+                  watchedValues.company?.bank_accounts?.[0]?.bank &&
+                    watchedValues.company.bank_accounts[0].bank > 0
                     ? watchedValues.company.bank_accounts[0].bank.toString()
                     : ''
                 }
-                onChange={(value) => setValue('company.bank_accounts.0.bank', parseInt(value))}
+                onChange={(value) => setValue('company.bank_accounts.0.bank', Number.parseInt(value, 10))}
                 options={BANCOS.map(banco => ({ label: banco.label, value: banco.value.toString() }))}
                 error={errors.company?.bank_accounts?.[0]?.bank?.message}
               />
@@ -163,12 +162,12 @@ export function PaymentMethodStep({
               <Select
                 label="Tipo de Cuenta *"
                 value={
-                  watchedValues.company?.bank_accounts?.[0]?.account_type && 
-                  watchedValues.company.bank_accounts[0].account_type > 0
+                  watchedValues.company?.bank_accounts?.[0]?.account_type &&
+                    watchedValues.company.bank_accounts[0].account_type > 0
                     ? watchedValues.company.bank_accounts[0].account_type.toString()
                     : ''
                 }
-                onChange={(value) => setValue('company.bank_accounts.0.account_type', parseInt(value))}
+                onChange={(value) => setValue('company.bank_accounts.0.account_type', Number.parseInt(value, 10))}
                 options={TIPOS_CUENTA.map(tipo => ({ label: tipo.label, value: tipo.value.toString() }))}
                 error={errors.company?.bank_accounts?.[0]?.account_type?.message}
               />
@@ -183,7 +182,7 @@ export function PaymentMethodStep({
                 maxLength={20}
                 value={watchedValues.company?.bank_accounts?.[0]?.cci_number || ''}
                 onChange={async (value) => {
-                  const numericValue = value.replace(/\D/g, '');
+                  const numericValue = value.replaceAll(/\D/g, '');
                   setValue('company.bank_accounts.0.cci_number', numericValue);
                   await trigger('company.bank_accounts.0.cci_number');
                 }}
@@ -192,85 +191,94 @@ export function PaymentMethodStep({
             </div>
           </div>
         </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <button
-              type="button"
-              onClick={() => setPaymentMethod(null)}
-              className="text-green-600 hover:text-green-800 text-sm font-medium"
-            >
-              ← Cambiar método de pago
-            </button>
+      );
+    }
+
+    // paymentMethod === 'app'
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <button
+            type="button"
+            onClick={() => setPaymentMethod(null)}
+            className="text-green-600 hover:text-green-800 text-sm font-medium"
+          >
+            ← Cambiar método de pago
+          </button>
+        </div>
+
+        <h3 className="text-md font-medium text-gray-700 mb-4">Información de App de Pagos</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Select
+              label="App de Pagos *"
+              value={watchedValues.company?.payment_apps?.[0]?.app_name || ''}
+              onChange={(value) => setValue('company.payment_apps.0.app_name', value)}
+              options={PAYMENT_APPS}
+              error={errors.company?.payment_apps?.[0]?.app_name?.message}
+            />
           </div>
 
-          <h3 className="text-md font-medium text-gray-700 mb-4">Información de App de Pagos</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Select
-                label="App de Pagos *"
-                value={watchedValues.company?.payment_apps?.[0]?.app_name || ''}
-                onChange={(value) => setValue('company.payment_apps.0.app_name', value)}
-                options={PAYMENT_APPS}
-                error={errors.company?.payment_apps?.[0]?.app_name?.message}
-              />
-            </div>
-
-            <div>
-              <Input
-                name="company.payment_apps.0.phone_number"
-                type="text"
-                label="Número de Celular *"
-                autoComplete="tel"
-                maxLength={9}
-                value={watchedValues.company?.payment_apps?.[0]?.phone_number || ''}
-                onChange={async (value) => {
-                  const numericValue = value.replace(/\D/g, '');
-                  setValue('company.payment_apps.0.phone_number', numericValue);
-                  await trigger('company.payment_apps.0.phone_number');
-                }}
-                error={errors.company?.payment_apps?.[0]?.phone_number?.message || paymentPhoneError || ''}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Input
-                name="company.payment_apps.0.account_holder"
-                type="text"
-                label="Titular de la Cuenta *"
-                autoComplete="off"
-                value={watchedValues.company?.payment_apps?.[0]?.account_holder || ''}
-                onChange={async (value) => {
-                  const upperValue = value.toUpperCase();
-                  setValue('company.payment_apps.0.account_holder', upperValue);
-                  await trigger('company.payment_apps.0.account_holder');
-                }}
-                error={errors.company?.payment_apps?.[0]?.account_holder?.message}
-              />
-            </div>
-
-            <div>
-              <Input
-                name="company.payment_apps.0.document_number"
-                type="text"
-                label="Número de Documento (opcional)"
-                autoComplete="off"
-                maxLength={20}
-                value={watchedValues.company?.payment_apps?.[0]?.document_number || ''}
-                onChange={async (value) => {
-                  const numericValue = value.replace(/\D/g, '');
-                  setValue('company.payment_apps.0.document_number', numericValue);
-                  await trigger('company.payment_apps.0.document_number');
-                }}
-                error={errors.company?.payment_apps?.[0]?.document_number?.message}
-              />
-            </div>
+          <div>
+            <Input
+              name="company.payment_apps.0.phone_number"
+              type="text"
+              label="Número de Celular *"
+              autoComplete="tel"
+              maxLength={9}
+              value={watchedValues.company?.payment_apps?.[0]?.phone_number || ''}
+              onChange={async (value) => {
+                const numericValue = value.replaceAll(/\D/g, '');
+                setValue('company.payment_apps.0.phone_number', numericValue);
+                await trigger('company.payment_apps.0.phone_number');
+              }}
+              error={errors.company?.payment_apps?.[0]?.phone_number?.message || paymentPhoneError || undefined}
+            />
           </div>
         </div>
-      )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Input
+              name="company.payment_apps.0.account_holder"
+              type="text"
+              label="Titular de la Cuenta *"
+              autoComplete="off"
+              value={watchedValues.company?.payment_apps?.[0]?.account_holder || ''}
+              onChange={async (value) => {
+                const upperValue = value.toUpperCase();
+                setValue('company.payment_apps.0.account_holder', upperValue);
+                await trigger('company.payment_apps.0.account_holder');
+              }}
+              error={errors.company?.payment_apps?.[0]?.account_holder?.message}
+            />
+          </div>
+
+          <div>
+            <Input
+              name="company.payment_apps.0.document_number"
+              type="text"
+              label="Número de Documento (opcional)"
+              autoComplete="off"
+              maxLength={20}
+              value={watchedValues.company?.payment_apps?.[0]?.document_number || ''}
+              onChange={async (value) => {
+                const numericValue = value.replaceAll(/\D/g, '');
+                setValue('company.payment_apps.0.document_number', numericValue);
+                await trigger('company.payment_apps.0.document_number');
+              }}
+              error={errors.company?.payment_apps?.[0]?.document_number?.message}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="border border-gray-200 rounded-lg p-6 space-y-4">
+      {renderPaymentContent()}
     </div>
   );
 }

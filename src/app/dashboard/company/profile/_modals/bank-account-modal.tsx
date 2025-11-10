@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { CreditCard, X } from 'lucide-react';
 
+import { BANCOS, TIPOS_CUENTA } from '@/constants/formOptions';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -16,12 +18,12 @@ interface BankAccount {
 }
 
 interface BankAccountModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (account: BankAccount) => void;
-  account?: BankAccount | null;
-  title?: string;
-  defaultAccountHolder?: string;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSave: (account: BankAccount) => void;
+  readonly account?: BankAccount | null;
+  readonly title?: string;
+  readonly defaultAccountHolder?: string;
 }
 
 export function BankAccountModal({
@@ -34,43 +36,24 @@ export function BankAccountModal({
 }: BankAccountModalProps) {
   const [formData, setFormData] = useState<BankAccount>({
     account_number: '',
-    account_type: 0, // 0 indica vacío
+    account_type: 0,
     cci_number: '',
     account_holder: '',
-    bank: 0 // 0 indica vacío
+    bank: 0
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Opciones de bancos
-  const getBankOptions = () => [
-    { value: '1', label: 'BCP' },
-    { value: '2', label: 'BBVA' },
-    { value: '3', label: 'Interbank' },
-    { value: '4', label: 'Scotiabank' },
-    { value: '5', label: 'Banco de la Nación' },
-    { value: '6', label: 'Banco Pichincha' },
-    { value: '7', label: 'Banco Falabella' },
-    { value: '8', label: 'Banco Ripley' }
-  ];
-
-  // Opciones de tipos de cuenta
-  const getAccountTypeOptions = () => [
-    { value: '1', label: 'Ahorros' },
-    { value: '2', label: 'Corriente' },
-    { value: '3', label: 'CTS' }
-  ];
-
   // Función para obtener el nombre del banco
   const getBankName = (bankId: number) => {
-    const option = getBankOptions().find(opt => opt.value === bankId.toString());
-    return option?.label || '';
+    const banco = BANCOS.find(b => b.value === bankId);
+    return banco?.label || '';
   };
 
   // Función para obtener el tipo de cuenta
   const getAccountTypeName = (typeId: number) => {
-    const option = getAccountTypeOptions().find(opt => opt.value === typeId.toString());
-    return option?.label || '';
+    const tipo = TIPOS_CUENTA.find(t => t.value === typeId);
+    return tipo?.label || '';
   };
 
   // Inicializar el formulario cuando se abre el modal
@@ -169,8 +152,8 @@ export function BankAccountModal({
               <Select
                 label="Banco *"
                 value={formData.bank === 0 ? '' : formData.bank?.toString() || ''}
-                onChange={(value) => setFormData(prev => ({ ...prev, bank: value ? parseInt(value) : 0 }))}
-                options={getBankOptions()}
+                onChange={(value) => setFormData(prev => ({ ...prev, bank: value ? Number.parseInt(value, 10) : 0 }))}
+                options={BANCOS.map(banco => ({ label: banco.label, value: banco.value.toString() }))}
                 className={errors.bank ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
               />
               {errors.bank && (
@@ -182,8 +165,8 @@ export function BankAccountModal({
               <Select
                 label="Tipo de Cuenta *"
                 value={formData.account_type === 0 ? '' : formData.account_type?.toString() || ''}
-                onChange={(value) => setFormData(prev => ({ ...prev, account_type: value ? parseInt(value) : 0 }))}
-                options={getAccountTypeOptions()}
+                onChange={(value) => setFormData(prev => ({ ...prev, account_type: value ? Number.parseInt(value, 10) : 0 }))}
+                options={TIPOS_CUENTA.map(tipo => ({ label: tipo.label, value: tipo.value.toString() }))}
                 className={errors.account_type ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
               />
               {errors.account_type && (

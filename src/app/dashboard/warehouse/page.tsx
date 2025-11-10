@@ -33,7 +33,6 @@ export interface Product {
 // --- Constantes ---
 const ITEMS_PER_PAGE = 10;
 const filterFields = [
-  { value: '', label: '-- Seleccionar --' },
   { value: 'company_name', label: 'Nombre' },
   { value: 'product_name', label: 'Descripción' }
 ];

@@ -30,21 +30,23 @@ export default function CompaniesFilter({
 }: CompaniesFilterProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-      <div className="flex flex-col md:flex-row md:items-end gap-2 flex-1">
-        <div className="flex flex-col gap-1 w-full md:w-44">
-          <label className="text-sm font-medium text-gray-700">Buscar por</label>
+      <div className="flex flex-col md:flex-row md:items-end gap-4 flex-1">
+        <div className="w-full md:w-48">
           <Select
+            label="Buscar por"
             value={field}
             onChange={setField}
             options={filterFields}
+            size="compact"
           />
         </div>
-        <div className="flex flex-col gap-1 w-full md:w-64">
-          <label className="text-sm font-medium text-gray-700">Valor</label>
+        <div className="w-full md:w-64">
           <Input
+            label="Valor"
             placeholder="Valor a buscar..."
             value={value}
-            onChange={e => setValue(e.target.value)}
+            onChange={setValue}
+            size="compact"
           />
         </div>
       </div>

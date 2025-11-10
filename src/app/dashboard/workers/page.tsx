@@ -32,7 +32,6 @@ export interface Worker {
 // --- Constantes ---
 const ITEMS_PER_PAGE = 10;
 const filterFields = [
-  { value: '', label: '-- Seleccionar --' },
   { value: 'first_name', label: 'Nombre' },
   { value: 'last_name', label: 'Apellido' },
   { value: 'email', label: 'Correo electrónico' },
@@ -236,7 +235,7 @@ export default function WorkersPage() {
           isOpen: workerModal.isOpen,
           onClose: workerModal.closeModal,
           onSubmit: handleWorkerModalSubmit,
-          editingUser: workerModal.data,
+          editingWorker: workerModal.data,
         }}
       />
 

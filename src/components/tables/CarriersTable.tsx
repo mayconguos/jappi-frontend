@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Eye, Trash2 } from 'lucide-react';
 import { Carrier } from '@/app/dashboard/carriers/page';
 
 interface CarriersTableProps {
@@ -24,7 +24,7 @@ export default function CarriersTable({
           <TableHead>Nombre</TableHead>
           <TableHead>Correo</TableHead>
           <TableHead>Placa</TableHead>
-          <TableHead>Opciones</TableHead>
+          <TableHead className="!text-center">Opciones</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -39,8 +39,8 @@ export default function CarriersTable({
             <TableCell>{carrier.email}</TableCell>
             <TableCell>{carrier.plate_number}</TableCell>
             <TableCell>
-              <div className="flex gap-2">
-                {/* <Button
+              <div className="flex gap-2 justify-end">
+                <Button
                   size="sm"
                   variant="outline"
                   // onClick={() => onEdit(carrier)}
@@ -48,22 +48,22 @@ export default function CarriersTable({
                   className="transition-transform duration-200 hover:scale-110"
                 >
                   <Eye size={16} className='' />
-                </Button> */}
+                </Button>
                 <Button
                   size="sm"
-                  variant="warning"
+                  variant="outline"
                   onClick={() => onEdit(carrier)}
                   title="Editar"
-                  className="transition-transform duration-200 hover:scale-110"
+                  className="text-blue-600 hover:text-blue-800 p-2"
                 >
                   <Edit size={16} />
                 </Button>
                 <Button
                   size="sm"
-                  variant="destructive"
+                  variant="outline"
                   title="Eliminar"
                   onClick={() => onDelete(carrier)}
-                  className="transition-transform duration-200 hover:scale-110"
+                 className="text-red-600 hover:text-red-800 p-2"
                 >
                   <Trash2 size={16} />
                 </Button>

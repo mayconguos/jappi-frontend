@@ -104,7 +104,7 @@ export default function CompanyProfilePage() {
         setLoading(true);
         const token = localStorage.getItem('token');
 
-        const response = await api.get('/company/detail', {
+        const response = await api.get('/user/company/detail', {
           headers: {
             authorization: `${token}`,
           },

@@ -81,7 +81,6 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
   const isEditing = !!editingCarrier;
 
   const {
-    register,
     handleSubmit,
     formState: { errors, dirtyFields },
     reset,
@@ -286,71 +285,63 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Fila 1: Correo | Contraseña */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
               <Input
                 type="email"
-                {...register('email')}
-                placeholder="Ingrese el correo electrónico"
-                className={errors.email ? 'border-red-500' : ''}
+                label="Correo electrónico *"
+                size="compact"
+                value={watch('email') || ''}
+                onChange={(value) => {
+                  setValue('email', value.toLowerCase(), { shouldDirty: true });
+                }}
+                error={errors.email?.message}
                 autoComplete="username"
                 disabled={!!editingCarrier}
-                onChange={(e) => {
-                  setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
-                }}
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
               {editingCarrier && <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
-              <PasswordInput
-                value={watch('password') || ''}
-                onChange={(value) => setValue('password', value)}
-                placeholder="Ingrese la contraseña"
-                disabled={isLoading}
-                error={
-                  typeof errors === 'object' && errors !== null &&
-                    'password' in errors &&
-                    errors.password &&
-                    typeof errors.password === 'object' &&
-                    'message' in errors.password
-                    ? (errors.password as { message: string }).message
-                    : undefined
-                }
-                autoComplete="new-password"
-              />
-            </div>
+            {!editingCarrier && (
+              <div>
+                <PasswordInput
+                  label="Contraseña *"
+                  size="compact"
+                  value={watch('password') || ''}
+                  onChange={(value) => setValue('password', value)}
+                  disabled={isLoading}
+                  error={'password' in errors ? errors.password?.message : undefined}
+                  autoComplete="new-password"
+                />
+              </div>
+            )}
 
             {/* Fila 2: Nombre | Apellido */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
               <Input
-                {...register('first_name')}
-                placeholder="Ingrese el nombre"
-                className={errors.first_name ? 'border-red-500' : ''}
-                onChange={(e) => {
-                  setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
+                label="Nombre *"
+                size="compact"
+                value={watch('first_name') || ''}
+                onChange={(value) => {
+                  setValue('first_name', value.toUpperCase(), { shouldDirty: true });
                 }}
+                error={errors.first_name?.message}
               />
-              {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
               <Input
-                {...register('last_name')}
-                placeholder="Ingrese el apellido"
-                className={errors.last_name ? 'border-red-500' : ''}
-                onChange={(e) => {
-                  setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
+                label="Apellido *"
+                size="compact"
+                value={watch('last_name') || ''}
+                onChange={(value) => {
+                  setValue('last_name', value.toUpperCase(), { shouldDirty: true });
                 }}
+                error={errors.last_name?.message}
               />
-              {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>}
             </div>
 
             {/* Fila 3: Tipo documento | Número de documento */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de documento *</label>
               <Select
+                label="Tipo de documento *"
+                size="compact"
                 value={watch('document_type')}
                 options={PERSONAL_DOCUMENT_TYPES}
                 onChange={(value: string) => {
@@ -359,23 +350,26 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('document_number', '');
                   clearErrors('document_number');
                 }}
+                error={errors.document_type?.message}
               />
-              {errors.document_type && <p className="text-red-500 text-xs mt-1">{errors.document_type.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número de documento *</label>
               <Input
-                {...register('document_number')}
-                placeholder="Ingrese el número de documento"
-                className={errors.document_number ? 'border-red-500' : ''}
+                label="Número de documento *"
+                size="compact"
+                value={watch('document_number') || ''}
+                onChange={(value) => {
+                  setValue('document_number', value, { shouldDirty: true });
+                }}
+                error={errors.document_number?.message}
               />
-              {errors.document_number && <p className="text-red-500 text-xs mt-1">{errors.document_number.message}</p>}
             </div>
 
-            {/* Fila 4: Tipo de vehículo | Marca | Placa | Licencia */}
+            {/* Fila 4: Tipo de vehículo | Marca */}
             <div className="md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de vehículo *</label>
               <Select
+                label="Tipo de vehículo *"
+                size="compact"
                 value={watch('vehicle_type')}
                 options={[
                   { value: 'MOTOCICLETA', label: 'MOTOCICLETA' },
@@ -387,53 +381,56 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('vehicle_type', value as 'MOTOCICLETA' | 'AUTO' | 'BICICLETA' | 'OTRO');
                   clearErrors('vehicle_type');
                 }}
+                error={errors.vehicle_type?.message}
               />
-              {errors.vehicle_type && <p className="text-red-500 text-xs mt-1">{errors.vehicle_type.message}</p>}
             </div>
             <div className="md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
               <Input
-                {...register('brand')}
-                placeholder="Ingrese la marca"
-                className={errors.brand ? 'border-red-500' : ''}
-                onChange={(e) => {
-                  setValue('brand', e.target.value.toUpperCase(), { shouldDirty: true });
+                label="Marca *"
+                size="compact"
+                value={watch('brand') || ''}
+                onChange={(value) => {
+                  setValue('brand', value.toUpperCase(), { shouldDirty: true });
                 }}
+                error={errors.brand?.message}
               />
-              {errors.brand && <p className="text-red-500 text-xs mt-1">{errors.brand.message}</p>}
             </div>
+
+            {/* Fila 5: Modelo | Placa */}
             <div className="md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
               <Input
-                {...register('model')}
-                placeholder="Ingrese el modelo"
-                className={errors.model ? 'border-red-500' : ''}
-                onChange={(e) => {
-                  setValue('model', e.target.value.toUpperCase(), { shouldDirty: true });
+                label="Modelo *"
+                size="compact"
+                value={watch('model') || ''}
+                onChange={(value) => {
+                  setValue('model', value.toUpperCase(), { shouldDirty: true });
                 }}
+                error={errors.model?.message}
               />
-              {errors.model && <p className="text-red-500 text-xs mt-1">{errors.model.message}</p>}
             </div>
             <div className="md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Placa *</label>
               <Input
-                {...register('plate_number')}
-                placeholder="Ingrese la placa"
-                className={errors.plate_number ? 'border-red-500' : ''}
-                onChange={(e) => {
-                  setValue('plate_number', e.target.value.toUpperCase(), { shouldDirty: true });
+                label="Placa *"
+                size="compact"
+                value={watch('plate_number') || ''}
+                onChange={(value) => {
+                  setValue('plate_number', value.toUpperCase(), { shouldDirty: true });
                 }}
+                error={errors.plate_number?.message}
               />
-              {errors.plate_number && <p className="text-red-500 text-xs mt-1">{errors.plate_number.message}</p>}
             </div>
+
+            {/* Fila 6: Licencia */}
             <div className="md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Licencia *</label>
               <Input
-                {...register('license')}
-                placeholder="Ingrese la licencia"
-                className={errors.license ? 'border-red-500' : ''}
+                label="Licencia *"
+                size="compact"
+                value={watch('license') || ''}
+                onChange={(value) => {
+                  setValue('license', value, { shouldDirty: true });
+                }}
+                error={errors.license?.message}
               />
-              {errors.license && <p className="text-red-500 text-xs mt-1">{errors.license.message}</p>}
             </div>
           </div>
           <ModalFooter>

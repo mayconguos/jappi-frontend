@@ -37,7 +37,6 @@ export interface Carrier {
 // --- Constantes ---
 const ITEMS_PER_PAGE = 10;
 const filterFields = [
-  { value: '', label: '-- Seleccionar --' },
   { value: 'first_name', label: 'Nombre' },
   { value: 'last_name', label: 'Apellido' },
   { value: 'email', label: 'Correo electrónico' },
