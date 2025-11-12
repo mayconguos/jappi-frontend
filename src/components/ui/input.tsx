@@ -16,7 +16,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, value = '', onChange, error, className, disabled, size = 'default', ...props }, ref) => {
     const [isFocused, setIsFocused] = React.useState(false);
     const hasValue = Boolean(value && value.trim().length > 0);
-    const shouldFloatLabel = isFocused || hasValue;
+    const isDateInput = props.type === 'date';
+    const shouldFloatLabel = isFocused || hasValue || isDateInput;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange?.(e.target.value);

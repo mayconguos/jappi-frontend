@@ -32,3 +32,33 @@ export const VEHICLE_TYPES = [
   { label: 'BICICLETA', value: 'BICICLETA' },
   { label: 'OTRO', value: 'OTRO' }
 ] as const;
+
+export const SHIPMENT_ORIGIN_TYPES = [
+  { label: 'Envío con recojo', value: 'pickup' },
+  { label: 'Envío desde almacén Jappi', value: 'warehouse' }
+];
+
+export const SHIPMENT_TYPES = [
+  { label: 'Regular', value: 'regular' },
+  { label: 'Express', value: 'express' },
+  { label: 'Cambio', value: 'cambio' }
+];
+
+export const DELIVERY_MODES = [
+  { label: 'Contra entrega', value: 'cod' },
+  { label: 'Solo entrega', value: 'delivery_only' }
+];
+
+export const PAYMENT_METHODS = [
+  { label: 'Efectivo', value: 'cash' },
+  { label: 'Tarjeta', value: 'card' },
+  { label: 'Transferencia', value: 'transfer' },
+  { label: 'Yape', value: 'yape' },
+  { label: 'Plin', value: 'plin' }
+];
+
+export const PAYMENT_FORMS = [
+  { label: 'Abono a empresa', value: 'company_payment' },
+  { label: 'Abono a vendedor', value: 'seller_payment' },
+  { label: 'Contraentrega', value: 'cod' }
+];

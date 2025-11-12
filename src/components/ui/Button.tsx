@@ -18,6 +18,7 @@ const buttonVariants = cva(
         'icon-view': 'border border-gray-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50 p-2',
       },
       size: {
+        xs: 'h-6 px-2 text-xs',
         default: 'h-10 px-4 py-2',
         sm: 'h-8 px-3 text-sm',
         lg: 'h-12 px-6 text-base',
