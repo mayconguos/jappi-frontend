@@ -40,21 +40,19 @@ export default function WorkersTable({
             <TableCell>{worker.document_number}</TableCell>
             <TableCell>{worker.email}</TableCell>
             <TableCell>
-              <div className="flex gap-2 justify-end">
+              <div className="flex gap-2 justify-center">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="icon-edit"
                   onClick={() => onEdit(worker)}
-                  className="text-blue-600 hover:text-blue-800 p-2"
                   title="Editar"
                 >
                   <Edit size={16} />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="icon-delete"
                   onClick={() => onDelete(worker)}
-                  className="text-red-600 hover:text-red-800 p-2"
                   title="Eliminar"
                 >
                   <Trash2 size={16} />

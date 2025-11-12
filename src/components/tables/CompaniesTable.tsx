@@ -24,7 +24,7 @@ export default function CompaniesTable({
           <TableHead>Nombre</TableHead>
           <TableHead>Correo</TableHead>
           <TableHead>Documento</TableHead>
-          <TableHead>Opciones</TableHead>
+          <TableHead className="!text-center">Opciones</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -37,21 +37,19 @@ export default function CompaniesTable({
             <TableCell>{company.email}</TableCell>
             <TableCell>{company.document_number}</TableCell>
             <TableCell>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="icon-edit"
                   onClick={() => onEdit(company)}
-                  className="text-blue-600 hover:text-blue-800 p-2"
                   title="Editar"
                 >
                   <Edit size={16} />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="icon-delete"
                   onClick={() => onDelete(company)}
-                  className="text-red-600 hover:text-red-800 p-2"
                   title="Eliminar"
                 >
                   <Trash2 size={16} />

@@ -12,6 +12,10 @@ const buttonVariants = cva(
         destructive: 'text-white hover:opacity-80 [background-color:var(--button-destructive-color)]',
         warning: 'bg-yellow-600 text-white hover:bg-yellow-700',
         info: 'bg-blue-600 text-white hover:bg-blue-700',
+        // Icon action variants for tables
+        'icon-edit': 'border border-gray-300 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 p-2',
+        'icon-delete': 'border border-gray-300 text-red-600 hover:text-red-800 hover:bg-red-50 p-2',
+        'icon-view': 'border border-gray-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50 p-2',
       },
       size: {
         default: 'h-10 px-4 py-2',

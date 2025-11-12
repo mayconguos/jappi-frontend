@@ -43,7 +43,10 @@ export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
   return (
     <header className='bg-[color:var(--background)] shadow p-4 flex justify-between items-center'>
       <div className='flex items-center'>
-        <h2 className='text-xl font-semibold text-[color:var(--surface-dark)]'>{pageTitle.toUpperCase()}</h2>
+        <h2 className='text-xl md:text-2xl font-semibold text-[color:var(--surface-dark)] flex items-center gap-2 md:gap-3'>
+          <span className="hidden sm:inline">{pageTitle}</span>
+          <span className="sm:hidden">{pageTitle.split(' ')[0]}</span>
+        </h2>
       </div>
       <div className='flex items-center gap-3'>
         {/* Botón hamburguesa: solo visible en móviles */}

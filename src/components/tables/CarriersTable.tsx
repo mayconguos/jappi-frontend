@@ -6,6 +6,7 @@ import { Carrier } from '@/app/dashboard/carriers/page';
 interface CarriersTableProps {
   carriers: Carrier[];
   currentPage: number;
+  onView: (carrier: Carrier) => void;
   onEdit: (carrier: Carrier) => void;
   onDelete: (carrier: Carrier) => void;
 }
@@ -13,6 +14,7 @@ interface CarriersTableProps {
 export default function CarriersTable({
   carriers,
   currentPage,
+  onView,
   onEdit,
   onDelete,
 }: CarriersTableProps) {
@@ -39,31 +41,28 @@ export default function CarriersTable({
             <TableCell>{carrier.email}</TableCell>
             <TableCell>{carrier.plate_number}</TableCell>
             <TableCell>
-              <div className="flex gap-2 justify-end">
+              <div className="flex gap-2 justify-center">
                 <Button
                   size="sm"
-                  variant="outline"
-                  // onClick={() => onEdit(carrier)}
+                  variant="icon-view"
+                  onClick={() => onView(carrier)}
                   title="Ver"
-                  className="transition-transform duration-200 hover:scale-110"
                 >
-                  <Eye size={16} className='' />
+                  <Eye size={16} />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="icon-edit"
                   onClick={() => onEdit(carrier)}
                   title="Editar"
-                  className="text-blue-600 hover:text-blue-800 p-2"
                 >
                   <Edit size={16} />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="icon-delete"
                   title="Eliminar"
                   onClick={() => onDelete(carrier)}
-                 className="text-red-600 hover:text-red-800 p-2"
                 >
                   <Trash2 size={16} />
                 </Button>

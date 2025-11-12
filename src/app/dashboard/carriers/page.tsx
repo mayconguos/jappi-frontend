@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import CarriersFilter from '@/components/filters/CarriersFilter';
 import CarriersTable from '@/components/tables/CarriersTable';
 import CarrierModal from '@/components/forms/modals/CarrierModal';
+import CarrierViewModal from '@/components/forms/modals/CarrierViewModal';
 import { ConfirmModal } from '@/components/ui/confirm-modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Pagination } from '@/components/ui/pagination';
@@ -61,6 +62,7 @@ export default function CarriersPage() {
   // --- Hooks ---
   const { get, del, error: apiError } = useApi<Carrier[]>();
   const carrierModal = useModal<Carrier>();
+  const carrierViewModal = useModal<Carrier>();
 
   // --- Effects ---
   // Resetear paginación al cambiar filtro o valor
@@ -104,6 +106,10 @@ export default function CarriersPage() {
   const handlePageChange: (page: number) => void = (page) => setCurrentPage(page);
 
   const handleDeleteCarrier: (carrier: Carrier) => void = (carrier) => setConfirmModal({ isOpen: true, data: carrier });
+
+  const handleViewCarrier: (carrier: Carrier) => void = (carrier) => {
+    carrierViewModal.openModal(carrier);
+  };
 
   const handleEditCarrier: (carrier: Carrier) => void = (carrier) => carrierModal.openModal(carrier);
 
@@ -199,6 +205,7 @@ export default function CarriersPage() {
             {...{
               carriers: currentItems,
               currentPage,
+              onView: handleViewCarrier,
               onEdit: handleEditCarrier,
               onDelete: handleDeleteCarrier,
             }}
@@ -242,6 +249,13 @@ export default function CarriersPage() {
           onSubmit: handleCarrierModalSubmit,
           editingCarrier: carrierModal.data,
         }}
+      />
+
+      {/* Modal para ver detalles del transportista */}
+      <CarrierViewModal
+        isOpen={carrierViewModal.isOpen}
+        onClose={carrierViewModal.closeModal}
+        carrier={carrierViewModal.data}
       />
 
       {/* Modal de éxito */}

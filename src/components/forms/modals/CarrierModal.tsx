@@ -14,12 +14,14 @@ import Modal, { ModalFooter } from '@/components/ui/modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
 import { PERSONAL_DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
-import { DEFAULT_CARRIER_ROLE } from '@/constants/userRoles'
+import { DEFAULT_CARRIER_ROLE } from '@/constants/userRoles';
+import { VEHICLE_TYPES } from '@/constants/formOptions';
+
 import {
   carrierSchema,
   carrierEditSchema,
   type CarrierFormData,
-  type CarrierEditFormData
+  type CarrierEditFormData,
 } from '@/lib/validations/carrier';
 
 interface AxiosError {
@@ -371,12 +373,7 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Tipo de vehículo *"
                 size="compact"
                 value={watch('vehicle_type')}
-                options={[
-                  { value: 'MOTOCICLETA', label: 'MOTOCICLETA' },
-                  { value: 'AUTO', label: 'AUTO' },
-                  { value: 'BICICLETA', label: 'BICICLETA' },
-                  { value: 'OTRO', label: 'OTRO' },
-                ]}
+                options={VEHICLE_TYPES.map(type => ({ label: type.label, value: type.value }))}
                 onChange={(value: string) => {
                   setValue('vehicle_type', value as 'MOTOCICLETA' | 'AUTO' | 'BICICLETA' | 'OTRO');
                   clearErrors('vehicle_type');

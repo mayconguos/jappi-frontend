@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import { commonValidations } from './common';
+import { VEHICLE_TYPES } from '@/constants/formOptions';
+
+// Extraer los valores de VEHICLE_TYPES para usar en validación
+const vehicleTypeValues = VEHICLE_TYPES.map(type => type.value) as [string, ...string[]];
 
 export const carrierSchema = z.object({
   document_number: commonValidations.documentNumber,
@@ -19,7 +23,7 @@ export const carrierSchema = z.object({
   plate_number: z
     .string()
     .regex(/^[A-Za-z0-9-]{6,8}$/, 'El número de placa debe ser alfanumérico, puede incluir guiones y tener entre 6 y 8 caracteres'),
-  vehicle_type: z.enum(['MOTOCICLETA', 'AUTO', 'BICICLETA', 'OTRO'], {
+  vehicle_type: z.enum(vehicleTypeValues, {
     errorMap: () => ({ message: 'Tipo de vehículo inválido' })
   }),
   password: commonValidations.password,
@@ -44,7 +48,7 @@ export const carrierEditSchema = z.object({
   plate_number: z
     .string()
     .regex(/^[A-Za-z0-9-]{6,8}$/, 'El número de placa debe ser alfanumérico, puede incluir guiones y tener entre 6 y 8 caracteres'),
-  vehicle_type: z.enum(['MOTOCICLETA', 'AUTO', 'BICICLETA', 'OTRO'], {
+  vehicle_type: z.enum(vehicleTypeValues, {
     errorMap: () => ({ message: 'Tipo de vehículo inválido' })
   }),
   status: z.number().min(0).optional(),
