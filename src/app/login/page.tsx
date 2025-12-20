@@ -34,7 +34,7 @@ export default function LoginPage() {
       {/* Footer minimalista */}
       <div className="absolute bottom-0 left-0 w-full py-4 text-center z-10 bg-white bg-opacity-80">
         <p className="text-sm text-gray-500">
-          © 2025 Jappi Express - Conectando destinos, entregando confianza
+          © 2025 Japi Express - Conectando destinos, entregando confianza
         </p>
       </div>
     </div>

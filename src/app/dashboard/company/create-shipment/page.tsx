@@ -91,7 +91,7 @@ export default function CreateShipmentPage() {
   const deliveryMode = watchedValues.service?.delivery_mode;
   const shouldShowPaymentStep = deliveryMode === 'cod';
   const totalSteps = shouldShowPaymentStep ? 3 : 2;
-  
+
   // Calcular isLastStep dinámicamente
   const isLastStep = currentStep === totalSteps;
 
@@ -296,9 +296,9 @@ export default function CreateShipmentPage() {
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
-        return <RecipientSection form={form} />;
-      case 2:
         return <ShipmentSection form={form} onProductsChange={handleProductsChange} />;
+      case 2:
+        return <RecipientSection form={form} />;
       case 3:
         // Solo renderizar PaymentSection si estamos en modo de 3 pasos (contra entrega)
         return <PaymentSection form={form} />;
@@ -308,10 +308,7 @@ export default function CreateShipmentPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      {/* Stepper Header */}
-      <Stepper steps={getSteps()} currentStep={currentStep} />
-
+    <div className="container mx-auto p-6">
       {/* Form Container */}
       <form onSubmit={handleSubmit(handleSubmit_)} className="space-y-6">
         {/* Current Step Content */}

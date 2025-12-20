@@ -212,7 +212,7 @@ export default function RegisterForm() {
       {/* Loader de pantalla completa durante el registro */}
       <FullScreenDeliveryLoader
         isVisible={registrationSubmit.isSubmittingConfirmation}
-        message="Registrando tu empresa en Jappi Express..."
+        message="Registrando tu empresa en Japi Express..."
       />
     </div>
   );

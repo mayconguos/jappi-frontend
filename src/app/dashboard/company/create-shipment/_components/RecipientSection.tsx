@@ -33,7 +33,7 @@ export default function RecipientSection({ form }: RecipientSectionProps) {
   const recipientSectorOptions = getSectorOptions(selectedDistrict || 0);
 
   return (
-    <div className="bg-white rounded-lg shadow-md">
+    // <div className="bg-white rounded-lg shadow-md">
       <div className="p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <User className="text-[var(--surface-dark)]" size={20} />
@@ -189,6 +189,6 @@ export default function RecipientSection({ form }: RecipientSectionProps) {
           </div>
         </div>
       </div>
-    </div>
+    // </div>
   );
 }

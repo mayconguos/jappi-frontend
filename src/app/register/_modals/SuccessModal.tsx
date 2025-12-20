@@ -34,7 +34,7 @@ export function SuccessModal({ isOpen, onClose }: SuccessModalProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-3">¡Bienvenido(a) a Jappi Express! 🎉</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-3">¡Bienvenido(a) a Japi Express! 🎉</h3>
         <p className="text-gray-600 leading-relaxed mb-4">
           Estamos verificando tus datos para activar tu cuenta. Te notificaremos por correo electrónico cuando el proceso esté completo.
         </p>

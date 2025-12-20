@@ -27,7 +27,7 @@ export default function LoaderExamplesPage() {
     <div className="p-8 space-y-12">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Jappi Express - Delivery Loaders
+          Japi Express - Delivery Loaders
         </h1>
         <p className="text-gray-600">
           Componentes animados de carga para la aplicación
@@ -170,7 +170,7 @@ export default function LoaderExamplesPage() {
       {/* Loader de pantalla completa */}
       <FullScreenDeliveryLoader
         isVisible={showFullScreen}
-        message="Registrando tu cuenta en Jappi Express..."
+        message="Registrando tu cuenta en Japi Express..."
       />
     </div>
   );

@@ -131,7 +131,7 @@ export default function LoginForm() {
     return (
       <FullScreenDeliveryLoader
         isVisible={true}
-        message="Iniciando sesión en Jappi Express..."
+        message="Iniciando sesión en Japi Express..."
       />
     );
   }

@@ -28,7 +28,7 @@ const DeliveryLoader: React.FC<DeliveryLoaderProps> = ({
     <div className={`flex flex-col items-center justify-center space-y-4 ${className}`}>
       {/* Contenedor del carrito animado */}
       <div className="relative">
-        {/* Logo fiel de Jappi Express con efecto de latido */}
+        {/* Logo fiel de Japi Express con efecto de latido */}
         <div className={`${sizeClasses[size]} relative animate-logo-heartbeat`}>
           {/* Fondo oscuro con bordes redondeados */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-2xl shadow-2xl opacity-90"></div>

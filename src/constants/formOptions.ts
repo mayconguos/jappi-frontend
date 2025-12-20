@@ -35,7 +35,7 @@ export const VEHICLE_TYPES = [
 
 export const SHIPMENT_ORIGIN_TYPES = [
   { label: 'Envío con recojo', value: 'pickup' },
-  { label: 'Envío desde almacén Jappi', value: 'warehouse' }
+  { label: 'Envío desde almacén Japi', value: 'warehouse' }
 ];
 
 export const SHIPMENT_TYPES = [

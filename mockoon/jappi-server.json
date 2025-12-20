@@ -1,6 +1,6 @@
 {
   "uuid": "b4f12f9a-c836-4f8d-ad2c-76d507bcc5f0",
-  "lastMigration": 32,
+  "lastMigration": 33,
   "name": "Jappi server",
   "endpointPrefix": "",
   "latency": 0,
@@ -92,7 +92,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "4df2b63d-ad60-4af8-a7b1-b81ea5044081",
@@ -159,7 +161,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "1c0aedf8-7e9a-4ed9-b780-74dcf6793caf",
@@ -269,7 +273,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "e595b41c-30e6-4d66-a94e-14ff4167994a",
@@ -336,7 +342,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "b5e3008d-1385-4568-9f86-ecfd99715d32",
@@ -365,7 +373,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "f7f9e51a-a924-4887-9bcb-dd5791b0eb0f",
@@ -451,7 +461,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "5f9a65b6-c5b7-4a7c-b75f-891077bd8e3b",
@@ -518,7 +530,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "6133e7b0-acdb-4501-b3d0-291c0e99692e",
@@ -555,7 +569,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     },
     {
       "uuid": "44bb663d-0a82-4ae0-ae85-af050477c23c",
@@ -592,7 +608,9 @@
           "callbacks": []
         }
       ],
-      "responseMode": null
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     }
   ],
   "rootChildren": [
