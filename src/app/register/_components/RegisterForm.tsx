@@ -10,7 +10,6 @@ import { useLocationCatalog } from '@/hooks/useLocationCatalog';
 import { Button } from '@/components/ui/button';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import FullScreenDeliveryLoader from '@/components/ui/fullscreen-delivery-loader';
-import { ProgressBarStepper } from '@/components/ui/progress-bar-stepper';
 
 // Hooks personalizados
 import { useStepValidation } from '../_hooks/useStepValidation';
@@ -107,16 +106,21 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="bg-white p-4 md:p-8 rounded-lg shadow-md max-w-4xl w-full">
+    <div className="w-full">
       {/* <h1 className="text-2xl font-bold text-center text-[var(--surface-dark)] mb-6">
         Registro de Empresa
       </h1> */}
 
-      {/* Progress Bar Stepper */}
-      <ProgressBarStepper
-        steps={steps}
-        currentStep={currentStep}
-      />
+      {/* Header del Paso (Minimalista) */}
+      <div className="mb-8 border-b border-gray-100 pb-4">
+        <span className="text-sm font-medium text-gray-500 uppercase tracking-wider block mb-1">
+          Paso {currentStep} de {steps.length}
+        </span>
+        <h1 className="text-2xl font-bold text-[var(--surface-dark)]">
+          {steps[currentStep - 1].title}
+        </h1>
+        <p className="text-gray-500 mt-1">{steps[currentStep - 1].description}</p>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Paso 1: Datos Personales */}

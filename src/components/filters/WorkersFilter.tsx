@@ -1,3 +1,4 @@
+import { Search, Filter, UserPlus } from 'lucide-react';
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,32 +26,43 @@ export default function WorkersFilter({
   onAdd,
 }: WorkersFilterProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-      <div className="flex flex-col md:flex-row md:items-end gap-4 flex-1">
-        <div className="w-full md:w-48">
+    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none z-0">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32" />
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 relative z-10 w-full xl:w-auto">
+        <div className="w-full sm:w-56">
           <Select
-            label="Buscar por"
+            label="Filtrar por"
             value={field}
             onChange={setField}
             options={filterFields}
-            size="compact"
+            placeholder="Seleccionar campo"
+            icon={Filter}
+            className="bg-slate-50 border-slate-200"
           />
         </div>
-        <div className="w-full md:w-64">
+        <div className="w-full sm:w-80">
           <Input
-            label="Valor"
+            label="Búsqueda"
+            placeholder="Escribe para buscar..."
             value={value}
             onChange={setValue}
-            size="compact"
+            icon={Search}
+            className="bg-slate-50 border-slate-200"
           />
         </div>
       </div>
-      <div className="pt-[22px] md:pt-0">
+
+      <div className="relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100">
         <Button
           onClick={onAdd}
-          className="bg-primary text-white"
+          className="w-full sm:w-auto bg-[color:var(--surface-dark)] hover:bg-[#0f2e2e] text-white flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
         >
-          Añadir usuario
+          <UserPlus size={18} />
+          <span>Añadir usuario</span>
         </Button>
       </div>
     </div>

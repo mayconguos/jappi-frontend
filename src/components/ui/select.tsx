@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Listbox } from '@headlessui/react';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, LucideIcon } from 'lucide-react';
 import clsx from 'clsx';
 
 interface Option {
@@ -19,9 +19,11 @@ interface SelectProps {
   className?: string;
   disabled?: boolean;
   size?: 'default' | 'compact';
+  placeholder?: string;
+  icon?: LucideIcon;
 }
 
-export const Select = ({ value, onChange, options, label, error, className, disabled, size = 'default' }: SelectProps) => {
+export const Select = ({ value, onChange, options, label, error, className, disabled, size = 'default', placeholder, icon: Icon }: SelectProps) => {
   const [isFocused, setIsFocused] = React.useState(false);
   const selectedOption = options.find((o) => o.value === value);
   const hasValue = Boolean(value && value !== '');
@@ -36,27 +38,33 @@ export const Select = ({ value, onChange, options, label, error, className, disa
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             className={clsx(
-              'w-full px-4 pr-10 bg-white border rounded-xl transition-all duration-200 ease-in-out text-left',
-              'focus:outline-none',
+              'w-full px-4 pr-10 bg-gray-50 border rounded-lg transition-all duration-200 ease-in-out text-left',
+              'focus:outline-none focus:bg-white',
               // Tamaños
-              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-14 py-4 text-base',
+              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-12 py-3 text-base',
               // Estados normales
-              !error && !isFocused && 'border-gray-300',
-              !error && isFocused && 'border-2 border-[color:var(--button-hover-color)] ring-0',
+              !error && !isFocused && 'border-gray-200',
+              !error && isFocused && 'border-2 border-[color:var(--button-hover-color)] ring-0 bg-white',
               // Estados de error
               error && !isFocused && 'border-red-300 bg-red-50/30',
               error && isFocused && 'border-2 border-red-500 bg-red-50/30 ring-0',
               // Estado disabled
-              disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed',
+              disabled && 'bg-gray-100 text-gray-500 cursor-not-allowed',
               // Hover
-              !disabled && !isFocused && 'hover:border-gray-400'
+              !disabled && !isFocused && 'hover:border-gray-300'
             )}
           >
             <span className={clsx(
               'block truncate',
-              !selectedOption && 'text-transparent'
+              'block truncate flex items-center',
+              !selectedOption && 'text-gray-500'
             )}>
-              {selectedOption?.label || 'Placeholder'}
+              {Icon && (
+                <span className="mr-2 inline-flex text-gray-400">
+                  <Icon size={16} />
+                </span>
+              )}
+              {selectedOption?.label || (shouldFloatLabel ? <span className="text-gray-400 font-normal">{placeholder || 'Seleccionar...'}</span> : null)}
             </span>
             <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
               <ChevronDown className="w-5 h-5 text-gray-400" />
@@ -66,7 +74,8 @@ export const Select = ({ value, onChange, options, label, error, className, disa
           {/* Floating Label */}
           <label
             className={clsx(
-              'absolute left-3 transition-all duration-200 ease-in-out pointer-events-none select-none',
+              'absolute transition-all duration-200 ease-in-out pointer-events-none select-none',
+              !Icon ? 'left-3' : 'left-9',
               // Posición y tamaño cuando flota (arriba) - en la línea del borde
               shouldFloatLabel && '-top-2 text-xs font-medium px-2 bg-white',
               // Posición y tamaño cuando está en el centro

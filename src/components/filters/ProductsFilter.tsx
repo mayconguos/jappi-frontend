@@ -1,4 +1,4 @@
-import { FileSpreadsheet, FileText } from 'lucide-react';
+import { FileSpreadsheet, FileText, Search, Filter } from 'lucide-react';
 
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -29,44 +29,55 @@ export default function ProductsFilter({
   onExportPdf
 }: ProductsFilterProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-      <div className="flex flex-col md:flex-row md:items-end gap-4 flex-1">
-        <div className="w-full md:w-48">
+    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none z-0">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32" />
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 relative z-10 w-full xl:w-auto">
+        <div className="w-full sm:w-56">
           <Select
-            label="Buscar por"
+            label="Filtrar por"
             value={field}
             onChange={setField}
             options={filterFields}
-            size="compact"
+            placeholder="Seleccionar campo"
+            icon={Filter}
+            className="bg-slate-50 border-slate-200"
           />
         </div>
-        <div className="w-full md:w-64">
+        <div className="w-full sm:w-80">
           <Input
-            label="Valor"
+            label="Búsqueda"
+            placeholder="Escribe para buscar..."
             value={value}
             onChange={setValue}
-            size="compact"
+            icon={Search}
+            className="bg-slate-50 border-slate-200"
           />
         </div>
       </div>
-      <div className="flex gap-2">
+
+      <div className="flex items-center gap-3 relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100">
+        <span className="text-sm font-medium text-gray-400 hidden sm:block mr-2">Exportar:</span>
         <Button
-          size="sm"
           variant="outline"
           onClick={onExportExcel}
-          className="text-green-600 hover:text-green-800 p-2 h-full"
-          title="Descargar en Excel"
+          className="flex items-center gap-2 border-slate-200 hover:border-emerald-200 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-all"
+          size="sm"
         >
-          <FileSpreadsheet />
+          <FileSpreadsheet size={16} />
+          <span className="hidden sm:inline">Excel</span>
         </Button>
         <Button
-          size="sm"
           variant="outline"
           onClick={onExportPdf}
-          className="text-red-600 hover:text-red-800 p-2 h-full"
-          title="Descargar en PDF"
+          className="flex items-center gap-2 border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all"
+          size="sm"
         >
-          <FileText />
+          <FileText size={16} />
+          <span className="hidden sm:inline">PDF</span>
         </Button>
       </div>
     </div>

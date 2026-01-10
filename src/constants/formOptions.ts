@@ -22,8 +22,6 @@ export const TIPOS_CUENTA = [
 export const PAYMENT_APPS = [
   { label: 'YAPE', value: 'yape' },
   { label: 'PLIN', value: 'plin' },
-  { label: 'Lukita', value: 'lukita' },
-  { label: 'Agora Pay', value: 'agora' }
 ];
 
 export const VEHICLE_TYPES = [

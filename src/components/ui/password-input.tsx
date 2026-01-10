@@ -4,7 +4,7 @@ import * as React from 'react';
 import { clsx } from 'clsx';
 import { Eye, EyeOff } from 'lucide-react';
 
-interface PasswordInputProps {
+interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
   label: string;
   value?: string;
   onChange?: (value: string) => void;
@@ -53,20 +53,20 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
             disabled={disabled}
             autoComplete={autoComplete}
             className={clsx(
-              'peer w-full px-4 pr-12 bg-white border rounded-xl transition-all duration-200 ease-in-out',
-              'placeholder-transparent outline-none',
+              'peer w-full px-4 pr-12 bg-gray-50 border rounded-lg transition-all duration-200 ease-in-out',
+              'placeholder-transparent outline-none focus:bg-white',
               // Tamaños
-              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-14 py-4 text-base',
+              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-12 py-3 text-base',
               // Estados normales
-              !error && !isFocused && 'border-gray-300',
+              !error && !isFocused && 'border-gray-200',
               !error && isFocused && 'border-2 border-[color:var(--button-hover-color)] ring-0',
               // Estados de error
               error && !isFocused && 'border-red-300 bg-red-50/30',
               error && isFocused && 'border-2 border-red-500 bg-red-50/30 ring-0',
               // Estado disabled
-              disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed',
+              disabled && 'bg-gray-100 text-gray-500 cursor-not-allowed',
               // Hover
-              !disabled && !isFocused && 'hover:border-gray-400'
+              !disabled && !isFocused && 'hover:border-gray-300'
             )}
             {...props}
           />

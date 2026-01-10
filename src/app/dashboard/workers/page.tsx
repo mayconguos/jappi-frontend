@@ -3,12 +3,14 @@
 
 // React
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 
 // Componentes
 import WorkersFilter from '@/components/filters/WorkersFilter';
 import WorkersTable from '@/components/tables/WorkersTable';
 import WorkerModal from '@/components/forms/modals/WorkerModal';
-import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Pagination } from '@/components/ui/pagination';
 // Hooks personalizados
@@ -153,83 +155,111 @@ export default function WorkersPage() {
 
   // --- Render ---
   return (
-    <section className="p-6 space-y-6">
-      {/* Filtros y botón para añadir worker */}
-      <WorkersFilter
-        {...{
-          field,
-          setField,
-          value,
-          setValue,
-          filterFields,
-          onAdd: handleAddWorker,
-        }}
-      />
+    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
 
-      {/* Loader */}
-      {loading && (
-        <div className="text-center py-4">
-          <DeliveryLoader message="Cargando usuarios..." />
-        </div>
-      )}
+      <div className="space-y-6">
+        {/* Filtros y botón para añadir worker */}
+        <WorkersFilter
+          {...{
+            field,
+            setField,
+            value,
+            setValue,
+            filterFields,
+            onAdd: handleAddWorker,
+          }}
+        />
 
-      {/* Error de carga de API */}
-      {showApiError && (
-        <div className="text-center py-4 text-red-500">
-          Error al cargar los trabajadores: {apiError}
-        </div>
-      )}
+        {/* Loader */}
+        {loading && (
+          <div className="grid place-items-center py-12">
+            <DeliveryLoader message="Cargando usuarios..." />
+          </div>
+        )}
 
-      {/* Sin datos */}
-      {!loading && !showApiError && filtered.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No hay trabajadores disponibles.
-        </div>
-      )}
+        {/* Error de carga de API */}
+        {showApiError && (
+          <div className="p-6 bg-red-50 border border-red-100 rounded-xl text-center text-red-600">
+            Error al cargar los trabajadores: {apiError}
+          </div>
+        )}
 
-      {/* Tabla y paginación */}
-      {!loading && (
-        <>
-          <WorkersTable
-            {...{
-              workers: currentItems,
-              currentPage,
-              onEdit: handleEditWorker,
-              onDelete: handleDeleteWorker,
-            }}
-          />
-          <Pagination
-            {...{
-              currentPage,
-              totalItems,
-              itemsPerPage: ITEMS_PER_PAGE,
-              onPageChange: handlePageChange,
-            }}
-          />
-          <ConfirmModal
-            isOpen={confirmModal.isOpen}
-            onClose={deleting ? () => { } : closeConfirmModal}
-            onConfirm={deleting ? () => { } : confirmDeleteWorker}
-            title={deleting ? "Eliminando usuario..." : "Confirmar eliminación"}
-            message={
-              deleting
-                ? "Eliminando usuario..."
-                : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}?`
-            }
-            confirmText={deleting ? "Eliminando..." : "Eliminar"}
-            variant="danger"
-          />
-          {deleting && (
-            <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
-              <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
-                <DeliveryLoader message="Eliminando usuario..." />
-              </div>
+        {/* Sin datos */}
+        {!loading && !showApiError && filtered.length === 0 && (
+          <div className="p-12 bg-white rounded-2xl border border-dashed border-gray-200 text-center text-gray-500">
+            <p>No hay trabajadores disponibles en este momento.</p>
+          </div>
+        )}
+
+        {/* Tabla y paginación */}
+        {!loading && !showApiError && filtered.length > 0 && (
+          <div className="space-y-4">
+            <WorkersTable
+              {...{
+                workers: currentItems,
+                currentPage,
+                onEdit: handleEditWorker,
+                onDelete: handleDeleteWorker,
+              }}
+            />
+            <div className="w-full pt-4">
+              <Pagination
+                {...{
+                  currentPage,
+                  totalItems,
+                  itemsPerPage: ITEMS_PER_PAGE,
+                  onPageChange: handlePageChange,
+                }}
+              />
             </div>
-          )}
-        </>
-      )}
+          </div>
+        )}
+      </div>
 
-      {/* Modal para añadir o editar usuario */}
+      {/* Confirmación para eliminar */}
+      <Modal
+        isOpen={confirmModal.isOpen}
+        onClose={deleting ? () => { } : closeConfirmModal}
+        size="sm"
+        title={deleting ? "Eliminando usuario..." : "Confirmar eliminación"}
+        footer={
+          <ModalFooter>
+            {!deleting && (
+              <Button
+                variant="outline"
+                onClick={closeConfirmModal}
+                className="border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              >
+                Cancelar
+              </Button>
+            )}
+            <Button
+              onClick={confirmDeleteWorker}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg min-w-[100px]"
+            >
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+            {deleting ? (
+              <DeliveryLoader size="sm" />
+            ) : (
+              <XCircle className="w-6 h-6 text-red-600" />
+            )}
+          </div>
+          <p className="text-gray-600 text-base leading-relaxed">
+            {deleting
+              ? "Por favor, espera un momento mientras procesamos la solicitud."
+              : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}? Esta acción no se puede deshacer.`}
+          </p>
+        </div>
+      </Modal>
+
+      {/* Modales de estado */}
       <WorkerModal
         {...{
           isOpen: workerModal.isOpen,
@@ -239,31 +269,59 @@ export default function WorkersPage() {
         }}
       />
 
-      {/* Modal de éxito */}
       {successModal && (
-        <ConfirmModal
+        <Modal
           isOpen={!!successModal}
           onClose={closeStatusModals}
-          onConfirm={closeStatusModals}
+          size="sm"
           title="¡Éxito!"
-          message={typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
-          confirmText="Aceptar"
-          variant="info"
-        />
+          footer={
+            <ModalFooter className="justify-center">
+              <Button
+                onClick={closeStatusModals}
+                className="bg-green-600 hover:bg-green-700 text-white shadow-green-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
+              >
+                Aceptar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-green-50">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-gray-600 text-base font-medium">
+              {typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
+            </p>
+          </div>
+        </Modal>
       )}
 
-      {/* Modal de error */}
       {errorModal && (
-        <ConfirmModal
+        <Modal
           isOpen={!!errorModal}
           onClose={closeStatusModals}
-          onConfirm={closeStatusModals}
+          size="sm"
           title="Error"
-          message={errorModal}
-          confirmText="Cerrar"
-          variant="danger"
-        />
+          footer={
+            <ModalFooter className="justify-center">
+              <Button
+                onClick={closeStatusModals}
+                className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
+              >
+                Cerrar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <p className="text-gray-600 text-base font-medium">{errorModal}</p>
+          </div>
+        </Modal>
       )}
-    </section>
+    </div>
   );
 }

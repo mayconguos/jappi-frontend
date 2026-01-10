@@ -12,7 +12,9 @@ import autoTable from 'jspdf-autotable';
 import CompaniesFilter from '@/components/filters/CompaniesFilter';
 import CompaniesTable from '@/components/tables/CompaniesTable';
 // import CompanyModal from '@/components/forms/modals/CompanyModal';
-import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Pagination } from '@/components/ui/pagination';
 // Hooks personalizados
@@ -192,90 +194,61 @@ export default function CompaniesPage() {
 
   // --- Render ---
   return (
-    <section className="p-6 space-y-6">
-      {/* Filtros para empresa */}
-      <CompaniesFilter
-        {...{
-          field,
-          setField,
-          value,
-          setValue,
-          filterFields,
-          onExportExcel: handleExportExcel,
-          onExportPdf: handleExportPdf,
-        }}
-      />
+    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
+      <div className="space-y-6">
+        {/* Filtros para empresa */}
+        <CompaniesFilter
+          {...{
+            field,
+            setField,
+            value,
+            setValue,
+            filterFields,
+            onExportExcel: handleExportExcel,
+            onExportPdf: handleExportPdf,
+          }}
+        />
 
-      {/* Loader */}
-      {loading && (
-        <div className="text-center py-4">
-          <DeliveryLoader message="Cargando empresas..." />
-        </div>
-      )}
+        {/* Loader */}
+        {loading && (
+          <div className="grid place-items-center py-12">
+            <DeliveryLoader message="Cargando empresas..." />
+          </div>
+        )}
 
-      {!loading && filtered.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No hay clientes disponibles.
-        </div>
-      )}
+        {/* Error de carga de API */}
+        {showApiError && (
+          <div className="p-6 bg-red-50 border border-red-100 rounded-xl text-center text-red-600">
+            Error al cargar las empresas: {apiError}
+          </div>
+        )}
 
-      {/* Error de carga de API */}
-      {showApiError && (
-        <div className="text-center py-4 text-red-500">
-          Error al cargar las empresas: {apiError}
-        </div>
-      )}
-
-      {/* Sin datos */}
-      {!loading && !showApiError && filtered.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No hay empresas disponibles.
-        </div>
-      )}
-
-      {/* Tabla y paginación */}
-      {!loading && (
-        <>
-          <CompaniesTable
-            {...{
-              companies: currentItems,
-              currentPage,
-              onEdit: handleEditCompany,
-              // onDelete: handleDeleteCompany,
-              onDelete: () => { },
-
-            }}
-          />
-          <Pagination
-            {...{
-              currentPage,
-              totalItems,
-              itemsPerPage: ITEMS_PER_PAGE,
-              onPageChange: handlePageChange,
-            }}
-          />
-          {/* <ConfirmModal
-            isOpen={confirmModal.isOpen}
-            onClose={deleting ? () => { } : closeConfirmModal}
-            onConfirm={deleting ? () => { } : confirmDeleteCompany}
-            title={deleting ? "Eliminando empresa..." : "Confirmar eliminación"}
-            message={
-              deleting
-                ? "Eliminando empresa..."
-                : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}?`
-            }
-            confirmText={deleting ? "Eliminando..." : "Eliminar"}
-            variant="danger"
-          /> */}
-          {/* {deleting && (
-            <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
-              <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
-                <DeliveryLoader message="Eliminando empresa..." />
+        {/* Tabla y paginación */}
+        {!loading && !showApiError && (
+          <div className="space-y-4">
+            <CompaniesTable
+              {...{
+                companies: currentItems,
+                currentPage,
+                onEdit: handleEditCompany,
+                onDelete: () => { },
+              }}
+            />
+            {currentItems.length > 0 && (
+              <div className="w-full pt-4">
+                <Pagination
+                  {...{
+                    currentPage,
+                    totalItems,
+                    itemsPerPage: ITEMS_PER_PAGE,
+                    onPageChange: handlePageChange,
+                  }}
+                />
               </div>
-            </div>
-          )} */}
-        </>
-      )}
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Modal para editar empresa */}
       {/* <CompanyModal
@@ -289,30 +262,60 @@ export default function CompaniesPage() {
 
       {/* Modal de éxito */}
       {successModal && (
-        <ConfirmModal
+        <Modal
           isOpen={!!successModal}
           onClose={closeStatusModals}
-          onConfirm={closeStatusModals}
+          size="sm"
           title="¡Éxito!"
-          message={typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
-          confirmText="Aceptar"
-          variant="info"
-        />
+          footer={
+            <ModalFooter className="justify-center">
+              <Button
+                onClick={closeStatusModals}
+                className="bg-green-600 hover:bg-green-700 text-white shadow-green-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
+              >
+                Aceptar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-green-50">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-gray-600 text-base font-medium">
+              {typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
+            </p>
+          </div>
+        </Modal>
       )}
 
       {/* Modal de error */}
       {errorModal && (
-        <ConfirmModal
+        <Modal
           isOpen={!!errorModal}
           onClose={closeStatusModals}
-          onConfirm={closeStatusModals}
+          size="sm"
           title="Error"
-          message={errorModal}
-          confirmText="Cerrar"
-          variant="danger"
-        />
+          footer={
+            <ModalFooter className="justify-center">
+              <Button
+                onClick={closeStatusModals}
+                className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
+              >
+                Cerrar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <p className="text-gray-600 text-base font-medium">{errorModal}</p>
+          </div>
+        </Modal>
       )}
 
-    </section>
+    </div>
   );
 }

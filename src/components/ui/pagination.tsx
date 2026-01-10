@@ -39,7 +39,7 @@ export function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between w-full">
       {showInfo && (
         <div className="text-sm text-gray-700">
           Mostrando {startIndex + 1} al {endIndex} de {totalItems} resultados

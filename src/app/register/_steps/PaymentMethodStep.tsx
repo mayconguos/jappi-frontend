@@ -52,12 +52,25 @@ export function PaymentMethodStep({
   const renderPaymentContent = () => {
     if (!paymentMethod) {
       return (
-        <div className="space-y-4">
+        <div className="space-y-6">
+          <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4 mb-6">
+            <div className="flex gap-3">
+              <div className="shrink-0 text-blue-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-sm text-blue-800 leading-relaxed">
+                <span className="font-semibold block mb-1">Primero lo primero</span>
+                Necesitamos una cuenta activa para que tus clientes puedan pagarte. No te preocupes, podrás agregar más bancos y billeteras (Yape/Plin) desde tu panel de control más adelante.
+              </p>
+            </div>
+          </div>
+
           <SelectionCardGroup
             description={
-              <span>
-                Selecciona tu método de pago preferido{' '}
-                <span className="font-bold text-[var(--surface-dark)]">para recibir pagos</span>
+              <span className="text-gray-600 block mb-2">
+                ¿Dónde prefieres recibir tu dinero <span className="text-[var(--surface-dark)] font-semibold">por ahora</span>?
               </span>
             }
             columns={2}
@@ -65,11 +78,11 @@ export function PaymentMethodStep({
             <SelectionCard
               id="bank"
               title="Cuenta Bancaria"
-              description="Registra una cuenta BBVA, BCP, Interbank, etc"
+              description="Ideal para montos altos. BBVA, BCP, Interbank, etc."
               color="blue"
               icon={
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
               }
               onClick={(id) => handlePaymentMethodChange(id as 'bank' | 'app')}
@@ -77,12 +90,12 @@ export function PaymentMethodStep({
 
             <SelectionCard
               id="app"
-              title="App de Pagos"
-              description="Registra tu número de YAPE, PLIN u otra app de pagos"
+              title="Billetera Digital"
+              description="Para pagos rápidos. Yape, Plin, etc."
               color="green"
               icon={
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               }
               onClick={(id) => handlePaymentMethodChange(id as 'bank' | 'app')}
@@ -142,7 +155,7 @@ export function PaymentMethodStep({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Select
                 label="Banco *"
@@ -173,7 +186,7 @@ export function PaymentMethodStep({
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <Input
                 name="company.bank_accounts.0.cci_number"
                 type="text"
@@ -277,7 +290,7 @@ export function PaymentMethodStep({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg p-6 space-y-4">
+    <div className="space-y-6">
       {renderPaymentContent()}
     </div>
   );

@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, X } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Modal, ModalFooter } from '@/components/ui/modal';
 
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
 
@@ -152,116 +153,106 @@ export function AddressModal({
     onClose();
   };
 
-  if (!isOpen) return null;
+  const footerContent = (
+    <ModalFooter>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleCancel}
+      >
+        Cancelar
+      </Button>
+      <Button
+        type="button"
+        onClick={handleSave}
+        className="shadow-lg shadow-[var(--button-hover-color)]/20"
+      >
+        {address ? 'Actualizar Dirección' : 'Agregar Dirección'}
+      </Button>
+    </ModalFooter>
+  );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <MapPin className="[color:var(--button-hover-color)]" size={24} />
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          </div>
-          <button
-            onClick={handleCancel}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X size={24} />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleCancel}
+      title={title}
+      description="Ingresa los datos exactos para asegurar una correcta facturación y logística."
+      size="lg"
+      footer={footerContent}
+    >
+      <div className="space-y-8 py-2">
+        {/* Dirección */}
+        <div className="group">
+          <Input
+            label="Dirección completa"
+            value={formData.address}
+            onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
+            placeholder="Av. Ejemplo 123, Oficina 456"
+            error={errors.address}
+          />
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Dirección */}
-          <div>
-            <Input
-              label="Dirección completa"
-              value={formData.address}
-              onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-              placeholder="Av. Ejemplo 123, Oficina 456"
-              className={errors.address ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
+        {/* Ubicación geográfica */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+          <div className="space-y-1">
+            <Select
+              label="Región *"
+              value={formData.id_region === 0 ? '' : formData.id_region?.toString() || ''}
+              onChange={handleRegionChange}
+              options={getRegionOptions()}
+              className={errors.id_region ? 'border-red-300' : ''}
             />
-            {errors.address && (
-              <p className="mt-1 text-sm text-red-600">{errors.address}</p>
-            )}
+            {errors.id_region && <p className="text-[10px] text-red-500 font-bold uppercase ml-1">{errors.id_region}</p>}
           </div>
 
-          {/* Ubicación geográfica */}
-          <div className={`grid grid-cols-1 gap-4 ${formData.id_district !== 0 && getSectorOptions(formData.id_district).length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-            <div>
+          <div className="space-y-1">
+            <Select
+              label="Distrito *"
+              value={formData.id_district === 0 ? '' : formData.id_district?.toString() || ''}
+              onChange={handleDistrictChange}
+              options={formData.id_region === 0 ? [] : getDistrictOptions(formData.id_region)}
+              className={errors.id_district ? 'border-red-300' : ''}
+            />
+            {errors.id_district && <p className="text-[10px] text-red-500 font-bold uppercase ml-1">{errors.id_district}</p>}
+          </div>
+
+          {formData.id_district !== 0 && getSectorOptions(formData.id_district).length > 0 && (
+            <div className="md:col-span-2 space-y-1">
               <Select
-                label="Región *"
-                value={formData.id_region === 0 ? '' : formData.id_region?.toString() || ''}
-                onChange={handleRegionChange}
-                options={getRegionOptions()}
-                className={errors.id_region ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
+                label="Sector (Opcional)"
+                value={formData.id_sector?.toString() || ''}
+                onChange={(value) => setFormData(prev => ({ ...prev, id_sector: value ? parseInt(value) : undefined }))}
+                options={getSectorOptions(formData.id_district)}
               />
-              {errors.id_region && (
-                <p className="mt-1 text-sm text-red-600">{errors.id_region}</p>
-              )}
             </div>
-
-            <div>
-              <Select
-                label="Distrito *"
-                value={formData.id_district === 0 ? '' : formData.id_district?.toString() || ''}
-                onChange={handleDistrictChange}
-                options={formData.id_region === 0 ? [] : getDistrictOptions(formData.id_region)}
-                className={errors.id_district ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
-              />
-              {errors.id_district && (
-                <p className="mt-1 text-sm text-red-600">{errors.id_district}</p>
-              )}
-            </div>
-
-            {formData.id_district !== 0 && getSectorOptions(formData.id_district).length > 0 && (
-              <div>
-                <Select
-                  label="Sector"
-                  value={formData.id_sector?.toString() || ''}
-                  onChange={(value) => setFormData(prev => ({ ...prev, id_sector: value ? parseInt(value) : undefined }))}
-                  options={getSectorOptions(formData.id_district)}
-                  className={errors.id_sector ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
-                />
-                {errors.id_sector && (
-                  <p className="mt-1 text-sm text-red-600">{errors.id_sector}</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Preview de la ubicación */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Vista previa de la ubicación:</h4>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Región:</span> {getRegionName(formData.id_region)} <br />
-              <span className="font-medium">Distrito:</span> {getDistrictName(formData.id_district)}
-              {formData.id_sector && getSectorName(formData.id_sector) && (
-                <>
-                  <br />
-                  <span className="font-medium">Sector:</span> {getSectorName(formData.id_sector)}
-                </>
-              )}
-            </p>
-          </div>
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
-          <Button
-            onClick={handleCancel}
-            variant="outline"
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSave}
-          >
-            {address ? 'Actualizar' : 'Agregar'} Dirección
-          </Button>
+        {/* Preview de la ubicación */}
+        <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
+          <div className="flex items-center gap-2 mb-3 text-slate-400">
+            <MapPin size={14} />
+            <h4 className="text-[10px] font-bold uppercase tracking-widest">Resumen de Ubicación</h4>
+          </div>
+          <div className="space-y-1">
+            <p className="text-white font-medium flex items-center justify-between">
+              <span className="text-slate-500 text-xs">Región:</span>
+              <span>{getRegionName(formData.id_region) || '---'}</span>
+            </p>
+            <p className="text-white font-medium flex items-center justify-between">
+              <span className="text-slate-500 text-xs">Distrito:</span>
+              <span>{getDistrictName(formData.id_district) || '---'}</span>
+            </p>
+            {formData.id_sector && getSectorName(formData.id_sector) && (
+              <p className="text-white font-medium flex items-center justify-between">
+                <span className="text-slate-500 text-xs">Sector:</span>
+                <span>{getSectorName(formData.id_sector)}</span>
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

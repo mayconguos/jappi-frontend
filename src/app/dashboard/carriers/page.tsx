@@ -9,7 +9,9 @@ import CarriersFilter from '@/components/filters/CarriersFilter';
 import CarriersTable from '@/components/tables/CarriersTable';
 import CarrierModal from '@/components/forms/modals/CarrierModal';
 import CarrierViewModal from '@/components/forms/modals/CarrierViewModal';
-import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Pagination } from '@/components/ui/pagination';
 // Hooks personalizados
@@ -218,19 +220,48 @@ export default function CarriersPage() {
               onPageChange: handlePageChange,
             }}
           />
-          <ConfirmModal
+          {/* Confirmación para eliminar */}
+          <Modal
             isOpen={confirmModal.isOpen}
             onClose={deleting ? () => { } : closeConfirmModal}
-            onConfirm={deleting ? () => { } : confirmDeleteCarrier}
+            size="sm"
             title={deleting ? "Eliminando transportista..." : "Confirmar eliminación"}
-            message={
-              deleting
-                ? "Eliminando transportista..."
-                : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}?`
+            footer={
+              <ModalFooter>
+                {!deleting && (
+                  <Button
+                    variant="outline"
+                    onClick={closeConfirmModal}
+                    className="border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </Button>
+                )}
+                <Button
+                  onClick={confirmDeleteCarrier}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg min-w-[100px]"
+                >
+                  {deleting ? "Eliminando..." : "Eliminar"}
+                </Button>
+              </ModalFooter>
             }
-            confirmText={deleting ? "Eliminando..." : "Eliminar"}
-            variant="danger"
-          />
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+                {deleting ? (
+                  <DeliveryLoader size="sm" />
+                ) : (
+                  <XCircle className="w-6 h-6 text-red-600" />
+                )}
+              </div>
+              <p className="text-gray-600 text-base leading-relaxed">
+                {deleting
+                  ? "Por favor, espera un momento mientras procesamos la solicitud."
+                  : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}? Esta acción no se puede deshacer.`}
+              </p>
+            </div>
+          </Modal>
           {deleting && (
             <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
               <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
@@ -258,30 +289,58 @@ export default function CarriersPage() {
         carrier={carrierViewModal.data}
       />
 
-      {/* Modal de éxito */}
       {successModal && (
-        <ConfirmModal
+        <Modal
           isOpen={!!successModal}
           onClose={closeStatusModals}
-          onConfirm={closeStatusModals}
+          size="sm"
           title="¡Éxito!"
-          message={typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
-          confirmText="Aceptar"
-          variant="info"
-        />
+          footer={
+            <ModalFooter className="justify-center">
+              <Button
+                onClick={closeStatusModals}
+                className="bg-green-600 hover:bg-green-700 text-white shadow-green-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
+              >
+                Aceptar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-green-50">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-gray-600 text-base font-medium">
+              {typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
+            </p>
+          </div>
+        </Modal>
       )}
 
-      {/* Modal de error */}
       {errorModal && (
-        <ConfirmModal
+        <Modal
           isOpen={!!errorModal}
           onClose={closeStatusModals}
-          onConfirm={closeStatusModals}
+          size="sm"
           title="Error"
-          message={errorModal}
-          confirmText="Cerrar"
-          variant="danger"
-        />
+          footer={
+            <ModalFooter className="justify-center">
+              <Button
+                onClick={closeStatusModals}
+                className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
+              >
+                Cerrar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <p className="text-gray-600 text-base font-medium">{errorModal}</p>
+          </div>
+        </Modal>
       )}
     </section>
   );

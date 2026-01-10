@@ -33,8 +33,8 @@ export interface Product {
 // --- Constantes ---
 const ITEMS_PER_PAGE = 10;
 const filterFields = [
-  { value: 'company_name', label: 'Nombre' },
-  { value: 'product_name', label: 'Descripción' }
+  { value: 'company_name', label: 'Empresa' },
+  { value: 'product_name', label: 'Producto' }
 ];
 
 
@@ -151,62 +151,67 @@ export default function WarehousePage() {
 
   // --- Render ---
   return (
-    <section className="p-6 space-y-6">
-      {/* Filtros y botón para añadir producto */}
-      <ProductsFilter
-        {...{
-          field,
-          setField,
-          value,
-          setValue,
-          filterFields,
-          onExportExcel: handleExportExcel,
-          onExportPdf: handleExportPdf,
-        }}
-      />
+    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
 
-      {/* Loader */}
-      {loading && (
-        <div className="text-center py-4">
-          <DeliveryLoader message="Cargando productos..." />
-        </div>
-      )}
+      <div className="space-y-6">
+        {/* Filtros y botón para añadir producto */}
+        <ProductsFilter
+          {...{
+            field,
+            setField,
+            value,
+            setValue,
+            filterFields,
+            onExportExcel: handleExportExcel,
+            onExportPdf: handleExportPdf,
+          }}
+        />
 
-      {/* Error de carga de API */}
-      {showApiError && (
-        <div className="text-center py-4 text-red-500">
-          Error al cargar los productos: {apiError}
-        </div>
-      )}
+        {/* Loader */}
+        {loading && (
+          <div className="grid place-items-center py-12">
+            <DeliveryLoader message="Cargando productos..." />
+          </div>
+        )}
 
-      {/* Sin datos */}
-      {!loading && !showApiError && filtered.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No hay productos disponibles.
-        </div>
-      )}
+        {/* Error de carga de API */}
+        {showApiError && (
+          <div className="p-6 bg-red-50 border border-red-100 rounded-xl text-center text-red-600">
+            Error al cargar los productos: {apiError}
+          </div>
+        )}
 
-      {/* Tabla y paginación */}
-      {!loading && (
-        <>
-          <ProductsTable
-            {...{
-              products: currentItems,
-              currentPage,
-              onEdit: () => { },
-              onDelete: () => { },
-            }}
-          />
-          <Pagination
-            {...{
-              currentPage,
-              totalItems,
-              itemsPerPage: ITEMS_PER_PAGE,
-              onPageChange: handlePageChange,
-            }}
-          />
-        </>
-      )}
-    </section>
+        {/* Sin datos */}
+        {!loading && !showApiError && filtered.length === 0 && (
+          <div className="p-12 bg-white rounded-2xl border border-dashed border-gray-200 text-center text-gray-500">
+            <p>No hay productos disponibles en este momento.</p>
+          </div>
+        )}
+
+        {/* Tabla y paginación */}
+        {!loading && !showApiError && filtered.length > 0 && (
+          <div className="space-y-4">
+            <ProductsTable
+              {...{
+                products: currentItems,
+                currentPage,
+                onEdit: () => { },
+                onDelete: () => { },
+              }}
+            />
+            <div className="w-full pt-4">
+              <Pagination
+                {...{
+                  currentPage,
+                  totalItems,
+                  itemsPerPage: ITEMS_PER_PAGE,
+                  onPageChange: handlePageChange,
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

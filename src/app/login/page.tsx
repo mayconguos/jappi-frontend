@@ -1,42 +1,89 @@
 import LoginForm from '@/components/forms/LoginForm';
+import Image from 'next/image';
+import Logo from '@/assets/logo.svg';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Fondo con gradiente corporativo */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-teal-50"></div>
+    <div className="min-h-screen w-full flex">
+      {/* Sección Izquierda - Branding e Imagen (Visible en Desktop) */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[color:var(--surface-dark)] overflow-hidden items-center justify-center">
+        {/* Imagen de fondo con overlay */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/background_humano.png"
+            // src="/images/background_futurista.png"
+            // src="/images/background_abstracto.png"
+            alt="Logistic Background"
+            fill
+            className="object-cover opacity-40 mix-blend-overlay"
+            priority
+          />
+          {/* Fallback pattern/gradient if image fails or while loading */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--surface-dark)] to-[#0f2e2e] opacity-90 mix-blend-multiply"></div>
+        </div>
 
-      {/* Patrón de fondo con colores corporativos */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[color:var(--button-hover-color)] rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[color:var(--surface-dark)] rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-[color:var(--button-hover-color)] rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
+        {/* Contenido sobre la imagen */}
+        <div className="relative z-10 p-12 text-white max-w-xl">
+          <div className="flex items-center gap-3 mb-8">
+            <Logo className="w-16 h-16 text-white" />
+            <h1 className="text-4xl font-bold tracking-tight">Japi Express</h1>
+          </div>
+
+          <div className="space-y-6">
+            <h2 className="text-3xl font-semibold leading-tight">
+              Gestión logística inteligente para tu negocio
+            </h2>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              Controla envíos, almacenes y entregas en tiempo real.
+              <br />
+              La plataforma diseñada para escalar tus operaciones.
+            </p>
+
+            {/* Stats o Trust Badges pequeños */}
+            <div className="flex gap-8 pt-4 border-t border-white/10 mt-8">
+              <div>
+                <p className="text-2xl font-bold text-[color:var(--button-hover-color)]">+50k</p>
+                <p className="text-sm text-gray-400">Envíos mensuales</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[color:var(--button-hover-color)]">99.9%</p>
+                <p className="text-sm text-gray-400">Uptime</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[color:var(--button-hover-color)]">24/7</p>
+                <p className="text-sm text-gray-400">Soporte</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Elementos decorativos corporativos */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Líneas sutiles corporativas */}
-        <div className="absolute top-1/4 left-0 w-48 h-px bg-gradient-to-r from-transparent via-teal-200 to-transparent opacity-30"></div>
-        <div className="absolute top-1/2 right-0 w-64 h-px bg-gradient-to-l from-transparent via-slate-300 to-transparent opacity-30"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-32 h-px bg-gradient-to-r from-transparent via-teal-200 to-transparent opacity-30"></div>
+      {/* Sección Derecha - Formulario */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white px-4 sm:px-12 lg:px-24">
+        <div className="w-full max-w-[440px] space-y-8">
 
-        {/* Círculos decorativos */}
-        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-teal-300 rounded-full opacity-40 animate-pulse"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-slate-400 rounded-full opacity-40 animate-pulse animation-delay-1000"></div>
-        <div className="absolute top-2/3 right-1/3 w-1.5 h-1.5 bg-teal-400 rounded-full opacity-40 animate-pulse animation-delay-2000"></div>
-      </div>
+          {/* Header Mobile (Logo visible solo en mobile) */}
+          <div className="lg:hidden flex flex-col items-center mb-8">
+            <Logo className="w-12 h-12 text-[color:var(--surface-dark)] mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900">Japi Express</h2>
+          </div>
 
-      {/* Contenido principal */}
-      <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8">
-        <LoginForm />
-      </div>
+          <div className="text-center md:text-left mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#002B45] mb-3">Te damos la bienvenida</h2>
+            <p className="text-base text-gray-500">
+              Ingresa a tu cuenta o regístrate para comenzar.
+            </p>
+          </div>
 
-      {/* Footer minimalista */}
-      <div className="absolute bottom-0 left-0 w-full py-4 text-center z-10 bg-white bg-opacity-80">
-        <p className="text-sm text-gray-500">
-          © 2025 Japi Express - Conectando destinos, entregando confianza
-        </p>
+          {/* Formulario limpio sin cards */}
+          <LoginForm />
+
+          <p className="text-center text-xs text-gray-500 mt-8">
+            © 2025 Japi Express. Todos los derechos reservados.
+          </p>
+        </div>
       </div>
     </div>
   );
 }
+

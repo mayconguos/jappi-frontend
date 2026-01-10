@@ -14,7 +14,6 @@ import { getRoleNameFromNumber } from '@/utils/roleUtils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
-import DeliveryLoader from '@/components/ui/delivery-loader';
 import FullScreenDeliveryLoader from '@/components/ui/fullscreen-delivery-loader';
 
 export default function LoginForm() {
@@ -36,13 +35,11 @@ export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isServerError, setIsServerError] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError('');
-    setIsServerError(false);
 
     try {
       const res = await api.post('/user/login', data);
@@ -58,6 +55,8 @@ export default function LoginForm() {
 
       switch (role) {
         case 'admin':
+          redirectPath = '/dashboard/activations';
+          break;
         case 'coordinacion':
           redirectPath = '/dashboard/deliveries-by-date';
           break;
@@ -85,32 +84,25 @@ export default function LoginForm() {
           switch (axiosError.response.status) {
             case 401:
               setError('Credenciales inválidas. Verifica tu correo y contraseña.');
-              setIsServerError(false);
               break;
             case 403:
               setError('Tu cuenta aún no ha sido activada por un administrador. Por favor, espere.');
-              setIsServerError(false);
               break;
             case 500:
               setError('Error interno del servidor. Por favor, intenta nuevamente en unos momentos.');
-              setIsServerError(true);
               break;
             case 503:
               setError('Servicio no disponible. El servidor está temporalmente fuera de servicio.');
-              setIsServerError(true);
               break;
             default:
               setError(`Error del servidor (${axiosError.response.status}). Por favor, contacta al soporte técnico.`);
-              setIsServerError(true);
           }
         } else {
           setError('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
-          setIsServerError(true);
         }
       } else {
         // Algo más causó el error
         setError('Ocurrió un error inesperado. Por favor, intenta nuevamente.');
-        setIsServerError(false);
       }
     } finally {
       setIsLoading(false);
@@ -137,121 +129,99 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full">
       {/* Formulario */}
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-gray-100">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         {/* Campo Email */}
-        <div>
-          <Input
-            label="Correo electrónico"
-            type="email"
-            autoComplete="email"
-            disabled={isLoading}
-            value={watch('email') || ''}
-            onChange={(value: string) => setValue('email', value)}
-            error={errors.email?.message}
-          />
-        </div>
+        <Input
+          label="Correo electrónico"
+          type="email"
+          placeholder="Ingresa tu correo"
+          autoComplete="email"
+          disabled={isLoading}
+          value={watch('email') || ''}
+          onChange={(value: string) => setValue('email', value)}
+          error={errors.email?.message}
+        />
 
         {/* Campo Contraseña */}
         <div>
           <PasswordInput
             label="Contraseña"
+            placeholder="Ingresa tu contraseña"
             value={watch('password') || ''}
             onChange={(value: string) => setValue('password', value)}
             disabled={isLoading}
             error={errors.password?.message}
             autoComplete="current-password"
           />
+          <div className="flex justify-end mt-2">
+            <a href="#" className="text-sm font-medium text-[#00A9C1] hover:text-[color:var(--surface-dark)] transition-colors">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
             <div className="flex items-start">
-              <svg className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <div className="flex-1">
-                <p className="text-red-700 text-sm font-medium">{error}</p>
-                {isServerError && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setError('');
-                      setIsServerError(false);
-                    }}
-                    className="text-red-600 hover:text-red-800 underline text-xs h-auto p-0 mt-2"
-                  >
-                    Limpiar error
-                  </Button>
-                )}
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Botón Submit */}
-        <Button
-          type='submit'
-          disabled={isLoading}
-          className="w-full h-12 text-base font-semibold rounded-xl bg-[color:var(--button-hover-color)] hover:bg-[color:var(--surface-dark)] border-0 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <DeliveryLoader size="sm" message="" className="!space-y-0" />
-              <span className="ml-2">Iniciando sesión...</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              Ingresar
-            </div>
-          )}
-        </Button>
-
-        {/* Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white text-gray-500">¿No tienes cuenta?</span>
-          </div>
-        </div>
-
-        {/* Registro Link */}
-        <div className="text-center">
+        {/* Botones de acción */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-2">
+          {/* Crear cuenta (Link secundario) */}
           <Button
             type="button"
-            variant="outline"
+            variant="link"
             onClick={() => router.push('/register')}
-            className="w-full h-12 text-base font-semibold rounded-xl border-2 border-gray-200 text-gray-700 hover:border-[color:var(--button-hover-color)] hover:text-[color:var(--button-hover-color)] hover:bg-gray-50 transition-all duration-200"
+            className="text-sm font-medium text-gray-500 hover:text-[color:var(--surface-dark)] transition-colors order-2 md:order-1 gap-1"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            Crear cuenta nueva
+            ¿No tienes cuenta? <span className="underline font-bold">Regístrate</span>
+          </Button>
+
+          {/* Botón Ingresar (Principal) */}
+          <Button
+            type='submit'
+            shape="pill"
+            disabled={isLoading}
+            className="w-full md:w-auto px-10 order-1 md:order-2"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Ingresando...</span>
+              </div>
+            ) : (
+              'Ingresar'
+            )}
           </Button>
         </div>
+
       </form>
 
-      {/* Footer */}
-      <div className="text-center mt-6 space-y-2">
-        <p className="text-xs text-gray-500">
-          Al continuar, aceptas nuestros{' '}
+      {/* Footer Legal Extra Small */}
+      <div className="mt-12 text-center border-t border-gray-100 pt-6">
+        <p className="text-xs text-gray-400">
+          Al iniciar sesión, aceptas nuestros{' '}
           <a
             href="https://drive.google.com/file/d/1MHvTB9t3uQervfF1MYtHC_3nA8oyllcA/view?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[color:var(--button-hover-color)] hover:underline transition-colors"
+            className="underline hover:text-gray-600 transition-colors"
           >
-            términos y condiciones
-          </a>
+            Términos y Condiciones
+          </a>.
         </p>
       </div>
     </div>

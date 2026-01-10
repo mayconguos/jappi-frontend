@@ -5,7 +5,7 @@ import { RegisterFormData } from '@/lib/validations/auth';
 import { PERSONAL_DOCUMENT_TYPES } from '@/constants/documentTypes';
 import { BANCOS, TIPOS_CUENTA } from '@/constants/formOptions';
 import { Button } from '@/components/ui/button';
-import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Modal } from '@/components/ui/modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import { LocationCatalog, Region, District } from '@/hooks/useLocationCatalog';
 
@@ -79,139 +79,165 @@ export function ConfirmationModal({
 
   const formattedData = getFormattedData();
 
+  const footerContent = (
+    <div className="flex items-center justify-end gap-3">
+      <Button
+        variant="outline"
+        onClick={onClose}
+        className="h-10 px-6"
+      >
+        Volver y Editar
+      </Button>
+      <Button
+        onClick={onConfirm}
+        disabled={isSubmitting}
+        className="flex items-center gap-2 h-10 px-8"
+      >
+        {isSubmitting ? (
+          <>
+            <DeliveryLoader size="sm" message="" className="!space-y-0" />
+            <span>Creando Cuenta...</span>
+          </>
+        ) : (
+          'Confirmar y Crear Cuenta'
+        )}
+      </Button>
+    </div>
+  );
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Confirmar Registro"
-      description="Revisa los datos antes de completar el registro"
-      size="md"
+      description="Por favor, revisa que toda la información sea correcta antes de finalizar."
+      size="lg"
+      footer={footerContent}
     >
-      <div className="space-y-4">
-        {/* Resumen compacto de todos los datos */}
-        <div className="space-y-3 text-xs">
-          {/* Datos Personales */}
-          <div className="bg-gray-50 p-3 rounded-md">
-            <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-              🏠 Datos Personales
-            </h4>
-            <div className="space-y-1">
-              <p className="text-gray-700">
-                <span className="font-medium">Nombre:</span> {formattedData.user?.first_name} {formattedData.user?.last_name}
-              </p>
-              <p className="text-gray-700">
-                <span className="font-medium">Documento:</span> {formattedData.tipo_documento_label} {formattedData.user?.document_number}
-              </p>
-              <p className="text-gray-700">
-                <span className="font-medium">Email:</span> {formattedData.user?.email}
+      <div className="space-y-8 py-2">
+        {/* Datos Personales */}
+        <section>
+          <h4 className="text-sm font-semibold text-[var(--surface-dark)] uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
+            Datos del Representante
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Nombre Completo</p>
+              <p className="text-base font-medium text-gray-900">
+                {formattedData.user?.first_name} {formattedData.user?.last_name}
               </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Documento de Identidad</p>
+              <p className="text-base font-medium text-gray-900">
+                {formattedData.tipo_documento_label} {formattedData.user?.document_number}
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <p className="text-sm text-gray-500 mb-1">Correo Electrónico</p>
+              <p className="text-base font-medium text-gray-900">{formattedData.user?.email}</p>
+            </div>
           </div>
+        </section>
 
-          {/* Datos de la Empresa */}
-          <div className="bg-gray-50 p-3 rounded-md">
-            <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-              🏢 Empresa
-            </h4>
-            <div className="space-y-1">
-              <p className="text-gray-700">
-                <span className="font-medium">Empresa:</span> {formattedData.company?.company_name}
+        {/* Datos de la Empresa */}
+        <section>
+          <h4 className="text-sm font-semibold text-[var(--surface-dark)] uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
+            Datos de la Empresa
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+            <div className="md:col-span-2">
+              <p className="text-sm text-gray-500 mb-1">Razón Social</p>
+              <p className="text-base font-medium text-gray-900">{formattedData.company?.company_name}</p>
+            </div>
+            {formattedData.company?.ruc && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">RUC</p>
+                <p className="text-base font-medium text-gray-900">{formattedData.company.ruc}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Teléfono de Contacto</p>
+              <p className="text-base font-medium text-gray-900">{formattedData.company?.phones?.[0]}</p>
+            </div>
+            <div className="md:col-span-2">
+              <p className="text-sm text-gray-500 mb-1">Dirección Fiscal / Operativa</p>
+              <p className="text-base font-medium text-gray-900">
+                {formattedData.company?.addresses?.[0]?.address}
               </p>
-              <p className="text-gray-700">
-                <span className="font-medium">Dirección:</span> {formattedData.company?.addresses?.[0]?.address}, {formattedData.district_label}{formattedData.sector_label ? `, ${formattedData.sector_label}` : ''}, {formattedData.region_label}
+              <p className="text-sm text-gray-600 mt-0.5">
+                {formattedData.district_label}{formattedData.sector_label ? `, ${formattedData.sector_label}` : ''}, {formattedData.region_label}
               </p>
-              <p className="text-gray-700">
-                <span className="font-medium">Teléfono:</span> {formattedData.company?.phones?.[0]}
-              </p>
-              {formattedData.company?.ruc && (
-                <p className="text-gray-700">
-                  <span className="font-medium">RUC:</span> {formattedData.company.ruc}
-                </p>
-              )}
             </div>
           </div>
+        </section>
 
-          {/* Método de Pago */}
-          <div className="bg-gray-50 p-3 rounded-md">
-            <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-              💳 Método de Pago
-            </h4>
-            <div className="space-y-1">
-              {paymentMethod === 'bank' ? (
-                <>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Tipo:</span> Cuenta Bancaria
+        {/* Método de Pago */}
+        <section>
+          <h4 className="text-sm font-semibold text-[var(--surface-dark)] uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
+            Método de Abono Inicial
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+            {paymentMethod === 'bank' ? (
+              <>
+                <div className="md:col-span-2 flex items-center gap-3 bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                    🏦
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-blue-900">Cuenta Bancaria</p>
+                    <p className="text-sm text-blue-700">{formattedData.banco_label} — {formattedData.tipo_cuenta_label}</p>
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-500 mb-1">Número de Cuenta</p>
+                  <p className="text-base font-mono font-medium text-gray-900 tracking-wide">
+                    {formattedData.company?.bank_accounts?.[0]?.account_number}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Banco:</span> {formattedData.banco_label}
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Titular de la Cuenta</p>
+                  <p className="text-sm font-medium text-gray-900 uppercase">
+                    {formattedData.company?.bank_accounts?.[0]?.account_holder}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Cuenta:</span> {formattedData.tipo_cuenta_label} - {formattedData.company?.bank_accounts?.[0]?.account_number}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Titular:</span> {formattedData.company?.bank_accounts?.[0]?.account_holder}
-                  </p>
-                  {formattedData.company?.bank_accounts?.[0]?.cci_number && (
-                    <p className="text-gray-700">
-                      <span className="font-medium">CCI:</span> {formattedData.company?.bank_accounts?.[0]?.cci_number}
+                </div>
+                {formattedData.company?.bank_accounts?.[0]?.cci_number && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">CCI</p>
+                    <p className="text-sm font-mono text-gray-900">
+                      {formattedData.company?.bank_accounts?.[0]?.cci_number}
                     </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Tipo:</span> App de Pagos
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="md:col-span-2 flex items-center gap-3 bg-green-50/50 p-3 rounded-lg border border-green-100">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold shrink-0">
+                    📱
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-green-900">Billetera Digital</p>
+                    <p className="text-sm text-green-700">{formattedData.app_pago_label}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Número de Celular</p>
+                  <p className="text-base font-mono font-medium text-gray-900 tracking-wide">
+                    {formattedData.company?.payment_apps?.[0]?.phone_number}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">App:</span> {formattedData.app_pago_label}
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Titular</p>
+                  <p className="text-sm font-medium text-gray-900 uppercase">
+                    {formattedData.company?.payment_apps?.[0]?.account_holder}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Celular:</span> {formattedData.company?.payment_apps?.[0]?.phone_number}
-                  </p>
-                  {formattedData.company?.payment_apps?.[0]?.account_holder && (
-                    <p className="text-gray-700">
-                      <span className="font-medium">Titular:</span> {formattedData.company?.payment_apps?.[0]?.account_holder}
-                    </p>
-                  )}
-                  {formattedData.company?.payment_apps?.[0]?.document_number && (
-                    <p className="text-gray-700">
-                      <span className="font-medium">Documento:</span> {formattedData.company?.payment_apps?.[0]?.document_number}
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            )}
           </div>
-        </div>
+        </section>
       </div>
-
-      {/* Footer del Modal */}
-      <ModalFooter className="py-3">
-        <Button
-          variant="outline"
-          onClick={onClose}
-          size="sm"
-        >
-          Editar
-        </Button>
-        <Button
-          onClick={onConfirm}
-          disabled={isSubmitting}
-          className="flex items-center gap-2"
-          size="sm"
-        >
-          {isSubmitting ? (
-            <>
-              <DeliveryLoader size="sm" message="" className="!space-y-0" />
-              <span>Procesando...</span>
-            </>
-          ) : (
-            <>
-              <span>Confirmar</span>
-            </>
-          )}
-        </Button>
-      </ModalFooter>
     </Modal>
   );
 }

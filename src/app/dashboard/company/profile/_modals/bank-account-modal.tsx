@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CreditCard, X } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 import { BANCOS, TIPOS_CUENTA } from '@/constants/formOptions';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Modal, ModalFooter } from '@/components/ui/modal';
 
 interface BankAccount {
   account_number: string;
@@ -31,7 +32,7 @@ export function BankAccountModal({
   onClose,
   onSave,
   account = null,
-  title = "Agregar Cuenta Bancaria",
+  title = "Vincular Cuenta Bancaria",
   defaultAccountHolder = ""
 }: BankAccountModalProps) {
   const [formData, setFormData] = useState<BankAccount>({
@@ -44,32 +45,18 @@ export function BankAccountModal({
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Función para obtener el nombre del banco
-  const getBankName = (bankId: number) => {
-    const banco = BANCOS.find(b => b.value === bankId);
-    return banco?.label || '';
-  };
-
-  // Función para obtener el tipo de cuenta
-  const getAccountTypeName = (typeId: number) => {
-    const tipo = TIPOS_CUENTA.find(t => t.value === typeId);
-    return tipo?.label || '';
-  };
-
   // Inicializar el formulario cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
       if (account) {
-        // Editando una cuenta existente - usar valores guardados
         setFormData(account);
       } else {
-        // Agregando nueva cuenta - campos vacíos
         setFormData({
           account_number: '',
-          account_type: 0, // 0 indica vacío
+          account_type: 0,
           cci_number: '',
           account_holder: defaultAccountHolder,
-          bank: 0 // 0 indica vacío
+          bank: 0
         });
       }
       setErrors({});
@@ -82,24 +69,23 @@ export function BankAccountModal({
     if (!formData.account_number.trim()) {
       newErrors.account_number = 'El número de cuenta es requerido';
     } else if (formData.account_number.length < 10) {
-      newErrors.account_number = 'El número de cuenta debe tener al menos 10 dígitos';
+      newErrors.account_number = 'Número de cuenta demasiado corto';
     }
 
     if (!formData.bank || formData.bank === 0) {
-      newErrors.bank = 'El banco es requerido';
+      newErrors.bank = 'Selecciona una institución';
     }
 
     if (!formData.account_type || formData.account_type === 0) {
-      newErrors.account_type = 'El tipo de cuenta es requerido';
+      newErrors.account_type = 'Selecciona el tipo de cuenta';
     }
 
     if (!formData.account_holder.trim()) {
-      newErrors.account_holder = 'El titular de la cuenta es requerido';
+      newErrors.account_holder = 'El titular es requerido';
     }
 
-    // CCI es opcional, pero si se proporciona debe tener 20 dígitos
     if (formData.cci_number && formData.cci_number.length !== 20) {
-      newErrors.cci_number = 'El CCI debe tener exactamente 20 dígitos';
+      newErrors.cci_number = 'El CCI debe tener 20 dígitos';
     }
 
     setErrors(newErrors);
@@ -114,135 +100,106 @@ export function BankAccountModal({
   };
 
   const handleCancel = () => {
-    setFormData({
-      account_number: '',
-      account_type: 0,
-      cci_number: '',
-      account_holder: defaultAccountHolder,
-      bank: 0
-    });
-    setErrors({});
     onClose();
   };
 
-  if (!isOpen) return null;
+  // Convertir opciones a formato string para el componente Select
+  const bankOptions = BANCOS.map(b => ({ label: b.label, value: b.value.toString() }));
+  const typeOptions = TIPOS_CUENTA.map(t => ({ label: t.label, value: t.value.toString() }));
+
+  const footerContent = (
+    <ModalFooter>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleCancel}
+      >
+        Cancelar
+      </Button>
+      <Button
+        type="button"
+        onClick={handleSave}
+        className="shadow-lg shadow-[var(--button-hover-color)]/20"
+      >
+        {account ? 'Actualizar Cuenta' : 'Vincular Cuenta'}
+      </Button>
+    </ModalFooter>
+  );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <CreditCard className="[color:var(--button-hover-color)]" size={24} />
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleCancel}
+      title={title}
+      description="Los abonos se realizarán exclusivamente a la cuenta seleccionada como principal."
+      size="xl"
+      footer={footerContent}
+    >
+      <div className="space-y-8 py-2">
+        {/* Entidad y Tipo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+          <div className="space-y-1">
+            <Select
+              label="Institución Financiera *"
+              value={formData.bank === 0 ? '' : formData.bank.toString()}
+              onChange={(value) => setFormData(prev => ({ ...prev, bank: parseInt(value) || 0 }))}
+              options={bankOptions}
+              className={errors.bank ? 'border-red-300' : ''}
+            />
+            {errors.bank && <p className="text-[10px] text-red-500 font-bold uppercase ml-1 tracking-wider">{errors.bank}</p>}
           </div>
-          <button
-            onClick={handleCancel}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X size={24} />
-          </button>
+
+          <div className="space-y-1">
+            <Select
+              label="Tipo de Cuenta *"
+              value={formData.account_type === 0 ? '' : formData.account_type.toString()}
+              onChange={(value) => setFormData(prev => ({ ...prev, account_type: parseInt(value) || 0 }))}
+              options={typeOptions}
+              className={errors.account_type ? 'border-red-300' : ''}
+            />
+            {errors.account_type && <p className="text-[10px] text-red-500 font-bold uppercase ml-1 tracking-wider">{errors.account_type}</p>}
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Información básica */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Select
-                label="Banco *"
-                value={formData.bank === 0 ? '' : formData.bank?.toString() || ''}
-                onChange={(value) => setFormData(prev => ({ ...prev, bank: value ? Number.parseInt(value, 10) : 0 }))}
-                options={BANCOS.map(banco => ({ label: banco.label, value: banco.value.toString() }))}
-                className={errors.bank ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
-              />
-              {errors.bank && (
-                <p className="mt-1 text-sm text-red-600">{errors.bank}</p>
-              )}
-            </div>
-
-            <div>
-              <Select
-                label="Tipo de Cuenta *"
-                value={formData.account_type === 0 ? '' : formData.account_type?.toString() || ''}
-                onChange={(value) => setFormData(prev => ({ ...prev, account_type: value ? Number.parseInt(value, 10) : 0 }))}
-                options={TIPOS_CUENTA.map(tipo => ({ label: tipo.label, value: tipo.value.toString() }))}
-                className={errors.account_type ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
-              />
-              {errors.account_type && (
-                <p className="mt-1 text-sm text-red-600">{errors.account_type}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Número de cuenta */}
-          <div>
+        {/* Datos de la Cuenta */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
             <Input
               label="Número de Cuenta *"
               value={formData.account_number}
               onChange={(value) => setFormData(prev => ({ ...prev, account_number: value }))}
-              placeholder="1234567890123456"
-              maxLength={20}
+              placeholder="0000-0000-0000000000"
               error={errors.account_number}
             />
           </div>
 
-          {/* CCI */}
-          <div>
+          <div className="space-y-1">
             <Input
-              label="CCI (Código de Cuenta Interbancaria)"
-              value={formData.cci_number}
+              label="Número CCI (Opcional)"
+              value={formData.cci_number || ''}
               onChange={(value) => setFormData(prev => ({ ...prev, cci_number: value }))}
-              placeholder="12345678901234567890"
+              placeholder="000-000-000000000000-00"
               maxLength={20}
               error={errors.cci_number}
             />
           </div>
-
-          {/* Titular */}
-          <div>
-            <Input
-              label="Titular de la Cuenta *"
-              value={formData.account_holder}
-              onChange={(value) => setFormData(prev => ({ ...prev, account_holder: value }))}
-              placeholder="Nombre completo del titular"
-              error={errors.account_holder}
-            />
-          </div>
-
-          {/* Preview de la cuenta */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Vista previa de la cuenta:</h4>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Banco:</span> {getBankName(formData.bank)} <br />
-              <span className="font-medium">Tipo:</span> {getAccountTypeName(formData.account_type)} <br />
-              <span className="font-medium">Número:</span> {formData.account_number || 'No especificado'} <br />
-              <span className="font-medium">Titular:</span> {formData.account_holder || 'No especificado'}
-              {formData.cci_number && (
-                <>
-                  <br />
-                  <span className="font-medium">CCI:</span> {formData.cci_number}
-                </>
-              )}
-            </p>
-          </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
-          <Button
-            onClick={handleCancel}
-            variant="outline"
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSave}
-          >
-            {account ? 'Actualizar' : 'Agregar'} Cuenta
-          </Button>
+        {/* Titular */}
+        <div className="group">
+          <Input
+            label="Titular de la Cuenta *"
+            value={formData.account_holder}
+            onChange={(value) => setFormData(prev => ({ ...prev, account_holder: value }))}
+            placeholder="Nombre completo del titular"
+            error={errors.account_holder}
+          />
+          <p className="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100 text-[10px] text-emerald-800 font-medium leading-relaxed flex items-start gap-2">
+            <ShieldCheck size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+            Por seguridad, la cuenta debe estar a nombre de la empresa o del representante legal registrado. No se aceptan cuentas de terceros.
+          </p>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

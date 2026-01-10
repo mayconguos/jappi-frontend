@@ -41,9 +41,9 @@ export function ProgressBarStepper({ steps, currentStep }: ProgressBarStepperPro
       </div>
 
       {/* Barra de progreso */}
-      <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+      <div className="w-full bg-gray-100 rounded-full h-2 mb-8">
         <div
-          className="bg-gradient-to-r from-[var(--surface-light)] to-[var(--surface-dark)] h-3 rounded-full transition-all duration-500 ease-in-out shadow-sm"
+          className="bg-gradient-to-r from-[var(--surface-light)] to-[var(--surface-dark)] h-2 rounded-full transition-all duration-500 ease-in-out shadow-sm"
           style={{ width: `${(currentStep / steps.length) * 100}%` }}
         ></div>
       </div>

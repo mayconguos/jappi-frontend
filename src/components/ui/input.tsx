@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { clsx } from 'clsx';
+import { LucideIcon } from 'lucide-react';
 
 interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
   label: string;
@@ -10,10 +11,11 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   error?: string;
   className?: string;
   size?: 'default' | 'compact';
+  icon?: LucideIcon;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, value = '', onChange, error, className, disabled, size = 'default', ...props }, ref) => {
+  ({ label, value = '', onChange, error, className, disabled, size = 'default', icon: Icon, ...props }, ref) => {
     const [isFocused, setIsFocused] = React.useState(false);
     const hasValue = Boolean(value && value.trim().length > 0);
     const isDateInput = props.type === 'date';
@@ -46,20 +48,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             onBlur={handleBlur}
             disabled={disabled}
             className={clsx(
-              'peer w-full px-4 bg-white border rounded-xl transition-all duration-200 ease-in-out',
-              'placeholder-transparent outline-none',
+              'peer w-full px-4 bg-gray-50 border rounded-lg transition-all duration-200 ease-in-out',
+              Icon && 'pl-10',
+              'placeholder-transparent outline-none focus:bg-white',
               // Tamaños
-              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-14 py-4 text-base',
+              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-12 py-3 text-base',
               // Estados normales
-              !error && !isFocused && 'border-gray-300',
+              !error && !isFocused && 'border-gray-200',
               !error && isFocused && 'border-2 border-[color:var(--button-hover-color)] ring-0',
               // Estados de error
               error && !isFocused && 'border-red-300 bg-red-50/30',
               error && isFocused && 'border-2 border-red-500 bg-red-50/30 ring-0',
               // Estado disabled
-              disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed',
+              disabled && 'bg-gray-100 text-gray-500 cursor-not-allowed',
               // Hover
-              !disabled && !isFocused && 'hover:border-gray-400'
+              !disabled && !isFocused && 'hover:border-gray-300'
             )}
             {...props}
           />
@@ -67,7 +70,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {/* Floating Label */}
           <label
             className={clsx(
-              'absolute left-3 transition-all duration-200 ease-in-out pointer-events-none select-none',
+              'absolute transition-all duration-200 ease-in-out pointer-events-none select-none',
+              !Icon ? 'left-3' : 'left-9',
               // Posición y tamaño cuando flota (arriba) - en la línea del borde
               shouldFloatLabel && '-top-2 text-xs font-medium px-2 bg-white',
               // Posición y tamaño cuando está en el centro
@@ -84,15 +88,23 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           >
             {label}
           </label>
+
+          {Icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <Icon size={18} />
+            </div>
+          )}
         </div>
 
         {/* Error Message - Outside the relative container */}
-        {error && (
-          <div className="mt-1 text-red-500 text-sm">
-            <span>{error}</span>
-          </div>
-        )}
-      </div>
+        {
+          error && (
+            <div className="mt-1 text-red-500 text-sm">
+              <span>{error}</span>
+            </div>
+          )
+        }
+      </div >
     );
   }
 );

@@ -67,8 +67,9 @@ export function Modal({
   closeOnOverlayClick = true,
   closeOnEscape = true,
   className = '',
-  showCloseButton = true
-}: ModalProps) {
+  showCloseButton = true,
+  footer
+}: ModalProps & { footer?: React.ReactNode }) {
   // Manejar el cierre con ESC
   React.useEffect(() => {
     if (!isOpen || !closeOnEscape) return;
@@ -107,7 +108,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? "modal-title" : undefined}
@@ -115,26 +116,26 @@ export function Modal({
     >
       {/* Overlay/Backdrop */}
       <div
-        className="fixed inset-0 bg-transparent backdrop-blur-sm transition-opacity duration-300"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
         onClick={handleOverlayClick}
         aria-hidden="true"
       />
 
       {/* Modal Content */}
       <div className={`
-        relative bg-white rounded-lg border border-gray-300 shadow-2xl max-h-[90vh] overflow-hidden
-        w-full mx-4 transition-all duration-300 transform
+        relative bg-white rounded-2xl shadow-2xl border border-white/50 max-h-[90vh] overflow-hidden flex flex-col
+        w-full transition-all duration-300 transform
         ${sizeClasses[size]}
         ${className}
       `}>
         {/* Header */}
         {(title || description || showCloseButton) && (
-          <div className="flex items-start justify-between p-4 pt-4 border-b border-gray-200">
-            <div className="flex-1">
+          <div className="flex items-start justify-between p-6 pb-4 border-b border-gray-100 shrink-0">
+            <div className="flex-1 pr-8">
               {title && (
                 <h2
                   id="modal-title"
-                  className="text-xl font-semibold text-gray-900 mb-1"
+                  className="text-xl font-bold text-gray-900 mb-1"
                 >
                   {title}
                 </h2>
@@ -142,7 +143,7 @@ export function Modal({
               {description && (
                 <p
                   id="modal-description"
-                  className="text-sm text-gray-600"
+                  className="text-sm text-gray-500"
                 >
                   {description}
                 </p>
@@ -152,11 +153,11 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="ml-4 text-gray-400 hover:text-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-1"
+                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-full p-2"
                 aria-label="Cerrar modal"
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -174,9 +175,16 @@ export function Modal({
         )}
 
         {/* Body */}
-        <div className="p-6 pt-4 overflow-y-auto max-h-[calc(90vh-8rem)]">
+        <div className="p-6 pt-4 overflow-y-auto flex-1">
           {children}
         </div>
+
+        {/* Fixed Footer */}
+        {footer && (
+          <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 shrink-0">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

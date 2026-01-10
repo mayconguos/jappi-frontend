@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Building, CreditCard, Smartphone, User } from 'lucide-react';
+import { Building, CreditCard, Smartphone, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import secureLocalStorage from 'react-secure-storage';
 
 import api from '@/app/services/api';
 
@@ -66,6 +67,9 @@ export default function CompanyProfilePage() {
     }
   });
 
+  // Estado para controlar si el RUC ya estaba guardado
+  const [savedRuc, setSavedRuc] = useState<string>('');
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -103,8 +107,15 @@ export default function CompanyProfilePage() {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
+        const user = secureLocalStorage.getItem('user') as { id?: number | string } | null;
 
-        const response = await api.get('/user/company/detail', {
+        if (!user || !user.id) {
+          console.error('User ID not found in secure storage');
+          setError('No se pudo identificar al usuario. Por favor, inicie sesión nuevamente.');
+          return;
+        }
+
+        const response = await api.get(`/user/company/detail/${user.id}`, {
           headers: {
             authorization: `${token}`,
           },
@@ -112,6 +123,8 @@ export default function CompanyProfilePage() {
 
         if (response.data) {
           setProfile(response.data);
+          // Establecer el RUC guardado inicial
+          setSavedRuc(response.data.company.ruc || '');
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
@@ -136,20 +149,36 @@ export default function CompanyProfilePage() {
   };
 
   // Función de guardado que pueden usar las secciones
-  const handleSave = async () => {
+  const handleSave = async (updates?: Partial<CompanyProfile['company']>) => {
     try {
       setError(null);
       setSuccess(null);
 
+      // Si hay actualizaciones, mezclarlas con el estado actual
+      const updatedProfile = { ...profile };
+      if (updates) {
+        updatedProfile.company = { ...updatedProfile.company, ...updates };
+      }
+
       const token = localStorage.getItem('token');
 
-      await api.put('/company/profile', profile, {
+      await api.put('/company/profile', updatedProfile, {
         headers: {
           authorization: `${token}`,
         },
       });
 
+      // Actualizar el estado local con los nuevos datos guardados
+      if (updates) {
+        setProfile(updatedProfile);
+      }
+
       setSuccess('Perfil actualizado correctamente');
+
+      // Actualizar el RUC guardado después de un guardado exitoso
+      if (updatedProfile.company.ruc) {
+        setSavedRuc(updatedProfile.company.ruc);
+      }
 
       // Limpiar mensaje de éxito después de 3 segundos
       setTimeout(() => setSuccess(null), 3000);
@@ -177,8 +206,8 @@ export default function CompanyProfilePage() {
       content: (
         <CompanySection
           company={profile.company}
-          onUpdate={(data) => updateCompanyData(data)}
           onSave={handleSave}
+          savedRuc={savedRuc}
         />
       )
     },
@@ -221,24 +250,29 @@ export default function CompanyProfilePage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-8">
-      {/* Mensajes de estado */}
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
 
-      {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-600">{success}</p>
-        </div>
-      )}
+      {/* Mensajes de estado con estética moderna */}
+      <div className="fixed top-24 right-8 z-50 flex flex-col gap-3 w-full max-w-md pointer-events-none">
+        {error && (
+          <div className="p-4 bg-red-50/90 backdrop-blur-sm border border-red-100 rounded-xl shadow-lg shadow-red-500/10 flex items-center gap-3 animate-in slide-in-from-right-8 pointer-events-auto">
+            <AlertCircle className="text-red-500 shrink-0" size={20} />
+            <p className="text-red-800 font-medium text-sm">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="p-4 bg-emerald-50/90 backdrop-blur-sm border border-emerald-100 rounded-xl shadow-lg shadow-emerald-500/10 flex items-center gap-3 animate-in slide-in-from-right-8 pointer-events-auto">
+            <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
+            <p className="text-emerald-800 font-medium text-sm">{success}</p>
+          </div>
+        )}
+      </div>
 
       {/* Sistema de Tabs */}
-      <Tabs tabs={tabs} defaultTab="personal" />
-
-
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <Tabs tabs={tabs} defaultTab="personal" />
+      </div>
     </div>
   );
 }
