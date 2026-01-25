@@ -23,7 +23,7 @@ interface SelectionCardProps {
    * Color del tema para gradientes y efectos hover
    * @default 'blue'
    */
-  color?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'indigo';
+  color?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'indigo' | 'brand';
   /**
    * Si la card está seleccionada
    * @default false
@@ -86,6 +86,13 @@ const colorVariants = {
     selectedBorder: 'border-indigo-500',
     selectedBg: 'bg-indigo-50',
     hoverText: 'group-hover:text-indigo-600'
+  },
+  brand: {
+    gradient: 'from-[#02997d] to-[#027d66]',
+    hover: 'hover:border-[#02997d]',
+    selectedBorder: 'border-[#02997d] ring-1 ring-[#02997d]',
+    selectedBg: 'bg-[#02997d]/5',
+    hoverText: 'group-hover:text-[#02997d]'
   }
 };
 
@@ -113,12 +120,12 @@ export function SelectionCard({
       onClick={handleClick}
       className={`
         border-2 rounded-lg p-6 transition-all duration-300 group
-        ${disabled 
-          ? 'cursor-not-allowed opacity-50 border-gray-200' 
+        ${disabled
+          ? 'cursor-not-allowed opacity-50 border-gray-200'
           : 'cursor-pointer hover:shadow-lg'
         }
-        ${isSelected 
-          ? `${colors.selectedBorder} ${colors.selectedBg} shadow-md` 
+        ${isSelected
+          ? `${colors.selectedBorder} ${colors.selectedBg} shadow-md`
           : `border-gray-200 ${!disabled ? colors.hover : ''}`
         }
         ${className}
@@ -140,8 +147,8 @@ export function SelectionCard({
         {/* Título */}
         <h3 className={`
           text-lg font-semibold transition-colors duration-300
-          ${isSelected 
-            ? colors.hoverText.replace('group-hover:', '') 
+          ${isSelected
+            ? colors.hoverText.replace('group-hover:', '')
             : `text-gray-800 ${!disabled ? colors.hoverText : ''}`
           }
         `}>
@@ -163,17 +170,17 @@ export function SelectionCard({
               w-6 h-6 rounded-full bg-gradient-to-br ${colors.gradient} 
               flex items-center justify-center shadow-sm
             `}>
-              <svg 
-                className="w-4 h-4 text-white" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-4 h-4 text-white"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M5 13l4 4L19 7" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
                 />
               </svg>
             </div>

@@ -21,9 +21,9 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
   const { documentValidationInfo, documentNumberError } = usePersonalDataValidation(watchedValues);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Fila 1: Nombres y Apellidos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Input
           label="Nombres *"
           type="text"

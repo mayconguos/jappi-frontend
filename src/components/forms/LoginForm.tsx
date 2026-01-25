@@ -93,32 +93,37 @@ export default function LoginForm() {
 
   return (
     <div className="w-full">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <Input
-          label="Correo electrónico"
-          type="email"
-          placeholder="Ingresa tu correo"
-          autoComplete="email"
-          disabled={isLoading}
-          value={watch('email') || ''}
-          onChange={(e) => setValue('email', e.target.value)}
-          error={errors.email?.message}
-        />
-
-        <div>
-          <PasswordInput
-            label="Contraseña"
-            placeholder="Ingresa tu contraseña"
-            value={watch('password') || ''}
-            onChange={(e) => setValue('password', e.target.value)}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-5">
+          <Input
+            label="Correo electrónico"
+            type="email"
+            placeholder="nombre@empresa.com"
+            autoComplete="email"
             disabled={isLoading}
-            error={errors.password?.message}
-            autoComplete="current-password"
+            value={watch('email') || ''}
+            onChange={(e) => setValue('email', e.target.value)}
+            error={errors.email?.message}
           />
-          <div className="flex justify-end mt-2">
-            <a href="#" className="text-sm font-medium text-[#00A9C1] hover:text-[color:var(--surface-dark)] transition-colors">
-              ¿Olvidaste tu contraseña?
-            </a>
+
+          <div>
+            <PasswordInput
+              label="Contraseña"
+              placeholder="••••••••"
+              value={watch('password') || ''}
+              onChange={(e) => setValue('password', e.target.value)}
+              disabled={isLoading}
+              error={errors.password?.message}
+              autoComplete="current-password"
+            />
+            <div className="flex justify-end mt-2">
+              <a
+                href="#"
+                className="text-sm font-medium text-[#02997d] hover:text-[#027d66] hover:underline transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
           </div>
         </div>
 
@@ -137,20 +142,13 @@ export default function LoginForm() {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-2">
-          <Button
-            type="button"
-            variant="link"
-            onClick={() => router.push('/register')}
-            className="text-sm font-medium text-gray-500 hover:text-[color:var(--surface-dark)] transition-colors order-2 md:order-1 gap-1"
-          >
-            ¿No tienes cuenta? <span className="underline font-bold">Regístrate</span>
-          </Button>
-
+        <div className="pt-2">
           <Button
             type='submit'
+            variant="primary"
+            size="lg"
             disabled={isLoading}
-            className="w-full md:w-auto px-10 order-1 md:order-2"
+            className="w-full font-semibold text-base shadow-lg shadow-[#02997d]/20 hover:shadow-[#02997d]/30 transition-all"
           >
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
@@ -161,22 +159,22 @@ export default function LoginForm() {
               'Ingresar'
             )}
           </Button>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500">
+              ¿No tienes cuenta?{' '}
+              <button
+                type="button"
+                onClick={() => router.push('/register')}
+                className="font-medium text-[#02997d] hover:text-[#027d66] hover:underline transition-colors"
+              >
+                Regístrate
+              </button>
+            </p>
+          </div>
         </div>
       </form>
 
-      <div className="mt-12 text-center border-t border-gray-100 pt-6">
-        <p className="text-xs text-gray-400">
-          Al iniciar sesión, aceptas nuestros{' '}
-          <a
-            href="https://drive.google.com/file/d/1MHvTB9t3uQervfF1MYtHC_3nA8oyllcA/view?usp=sharing"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-gray-600 transition-colors"
-          >
-            Términos y Condiciones
-          </a>.
-        </p>
-      </div>
     </div>
   );
 }

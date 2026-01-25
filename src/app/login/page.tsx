@@ -59,28 +59,44 @@ export default function LoginPage() {
       </div>
 
       {/* Sección Derecha - Formulario */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white px-4 sm:px-12 lg:px-24">
-        <div className="w-full max-w-[440px] space-y-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white">
+        <div className="w-full max-w-[480px] px-8 sm:px-12 py-12">
 
           {/* Header Mobile (Logo visible solo en mobile) */}
-          <div className="lg:hidden flex flex-col items-center mb-8">
-            <Logo className="w-12 h-12 text-[color:var(--surface-dark)] mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900">Japi Express</h2>
+          <div className="lg:hidden flex justify-center mb-10">
+            <div className="flex items-center gap-2">
+              <Logo className="w-10 h-10 text-[var(--surface-dark)]" />
+              <span className="text-xl font-bold text-gray-900">Japi Express</span>
+            </div>
           </div>
 
-          <div className="text-center md:text-left mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#002B45] mb-3">Te damos la bienvenida</h2>
-            <p className="text-base text-gray-500">
+          <div className="mb-10 text-center sm:text-left">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              Te damos la bienvenida
+            </h1>
+            <p className="mt-3 text-base text-gray-500">
               Ingresa a tu cuenta o regístrate para comenzar.
             </p>
           </div>
 
-          {/* Formulario limpio sin cards */}
           <LoginForm />
 
-          <p className="text-center text-xs text-gray-500 mt-8">
-            © 2025 Japi Express. Todos los derechos reservados.
-          </p>
+          <div className="mt-12 space-y-4">
+            <p className="text-center text-xs text-gray-400">
+              Al iniciar sesión, aceptas nuestros{' '}
+              <a
+                href="https://drive.google.com/file/d/1MHvTB9t3uQervfF1MYtHC_3nA8oyllcA/view?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-gray-500 hover:text-gray-900 underline transition-colors"
+              >
+                Términos y Condiciones
+              </a>.
+            </p>
+            <p className="text-center text-xs text-gray-300">
+              © 2025 Japi Express. Todos los derechos reservados.
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -51,35 +51,8 @@ export default function RegisterPage() {
       </div>
 
       {/* Sección Derecha - Formulario Wizard */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center bg-white px-4 sm:px-12 lg:px-12 xl:px-24 py-10 overflow-y-auto h-screen">
-        <div className="w-full max-w-[600px] mx-auto space-y-8">
-
-          {/* Header Mobile (Logo visible solo en mobile) */}
-          <div className="lg:hidden flex flex-col items-center mb-6">
-            <Logo className="w-12 h-12 text-[color:var(--surface-dark)] mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900">Japi Express</h2>
-          </div>
-
-          <div className="text-center md:text-left">
-            <h2 className="text-3xl font-bold tracking-tight text-[#002B45] mb-2">Registra tu empresa</h2>
-            <p className="text-base text-gray-500">
-              Completa los pasos para activar tu cuenta corporativa.
-            </p>
-          </div>
-
-          {/* Formulario Wizard */}
-          <RegisterForm />
-
-          {/* Footer del Registro */}
-          <div className="text-center pt-8 border-t border-gray-100">
-            <p className="text-sm text-gray-500">
-              ¿Ya tienes una cuenta?{' '}
-              <a href="/login" className="font-semibold text-[color:var(--surface-dark)] hover:underline">
-                Inicia sesión aquí
-              </a>
-            </p>
-          </div>
-        </div>
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white lg:px-0">
+        <RegisterForm />
       </div>
     </div>
   );
