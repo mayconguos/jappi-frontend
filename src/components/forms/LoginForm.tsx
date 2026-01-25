@@ -24,10 +24,10 @@ export default function LoginForm() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      // email: 'almacen@japiexpress.com',
-      // password: 'japientregas24680'
-      email: 'velia.guerra@gmail.com',
-      password: 'administracion2015'
+      email: 'almacen@japiexpress.com',
+      password: 'japientregas24680'
+      // email: 'velia.guerra@gmail.com',
+      // password: 'administracion2015'
     }
   });
 
@@ -101,7 +101,7 @@ export default function LoginForm() {
           autoComplete="email"
           disabled={isLoading}
           value={watch('email') || ''}
-          onChange={(value: string) => setValue('email', value)}
+          onChange={(e) => setValue('email', e.target.value)}
           error={errors.email?.message}
         />
 
@@ -110,7 +110,7 @@ export default function LoginForm() {
             label="Contraseña"
             placeholder="Ingresa tu contraseña"
             value={watch('password') || ''}
-            onChange={(value: string) => setValue('password', value)}
+            onChange={(e) => setValue('password', e.target.value)}
             disabled={isLoading}
             error={errors.password?.message}
             autoComplete="current-password"
@@ -149,7 +149,6 @@ export default function LoginForm() {
 
           <Button
             type='submit'
-            shape="pill"
             disabled={isLoading}
             className="w-full md:w-auto px-10 order-1 md:order-2"
           >

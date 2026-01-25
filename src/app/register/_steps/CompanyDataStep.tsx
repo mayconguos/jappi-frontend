@@ -64,7 +64,8 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           autoComplete="organization"
           error={errors.company?.company_name?.message}
           value={watchedValues.company?.company_name || ''}
-          onChange={async (value) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             const upperValue = value.toUpperCase();
             setValue('company.company_name', upperValue);
             await trigger('company.company_name');
@@ -79,7 +80,8 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           autoComplete="off"
           error={errors.company?.ruc?.message}
           value={watchedValues.company?.ruc || ''}
-          onChange={async (value) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             const numericValue = value.replace(/\D/g, '');
             setValue('company.ruc', numericValue);
             await trigger('company.ruc');
@@ -96,7 +98,8 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           maxLength={15}
           error={errors.company?.phones?.[0]?.message}
           value={watchedValues.company?.phones?.[0] || ''}
-          onChange={async (value) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             const cleanValue = value.replace(/[^\d\-\+\(\)\s]/g, '');
             setValue('company.phones.0', cleanValue);
             await trigger('company.phones.0');
@@ -173,7 +176,8 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           autoComplete="street-address"
           error={errors.company?.addresses?.[0]?.address?.message}
           value={watchedValues.company?.addresses?.[0]?.address || ''}
-          onChange={async (value) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             const upperValue = value.toUpperCase();
             setValue('company.addresses.0.address', upperValue);
             await trigger('company.addresses.0.address');

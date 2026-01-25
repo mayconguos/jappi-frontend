@@ -211,7 +211,7 @@ export default function ActivationsPage() {
         footer={
           <ModalFooter>
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
               className="border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             >

@@ -29,7 +29,8 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
           type="text"
           autoComplete="given-name"
           value={watchedValues.user?.first_name || ''}
-          onChange={async (value: string) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             const upperValue = value.toUpperCase();
             setValue('user.first_name', upperValue);
             await trigger('user.first_name');
@@ -42,7 +43,8 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
           type="text"
           autoComplete="family-name"
           value={watchedValues.user?.last_name || ''}
-          onChange={async (value: string) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             const upperValue = value.toUpperCase();
             setValue('user.last_name', upperValue);
             await trigger('user.last_name');
@@ -72,7 +74,8 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
           autoComplete="off"
           maxLength={documentValidationInfo.maxLength}
           value={watchedValues.user?.document_number || ''}
-          onChange={async (value: string) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             let processedValue = value;
 
             // Aplicar filtros según el tipo de documento
@@ -132,7 +135,8 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
           type="email"
           autoComplete="email"
           value={watchedValues.user?.email || ''}
-          onChange={async (value: string) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             const lowerValue = value.toLowerCase();
             setValue('user.email', lowerValue);
             await trigger('user.email');
@@ -143,7 +147,8 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
         <PasswordInput
           label="Contraseña *"
           value={watchedValues.user?.password || ''}
-          onChange={async (value: string) => {
+          onChange={async (e) => {
+            const value = e.target.value;
             setValue('user.password', value);
             await trigger('user.password');
           }}

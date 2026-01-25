@@ -1,42 +1,71 @@
 
 'use client';
 
-// React
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { CheckCircle, AlertTriangle, Trash2 } from 'lucide-react';
 
-// Componentes
 import CompaniesFilter from '@/components/filters/CompaniesFilter';
 import CompaniesTable from '@/components/tables/CompaniesTable';
-// import CompanyModal from '@/components/forms/modals/CompanyModal';
 import { Modal, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Pagination } from '@/components/ui/pagination';
-// Hooks personalizados
+import CompanyDetailsModal from '@/components/forms/modals/CompanyDetailsModal';
+
 import { useApi, useModal } from '@/hooks';
 
-
-// --- Tipos ---
 export interface Company {
   id: number;
   first_name: string;
-  last_name: string | null;
+  last_name: string;
   email: string;
-  document_type: string;
-  document_number: string;
+  company_name: string;
+  address: string;
+  phone_number: string;
   status: number;
 }
 
-// --- Constantes ---
+export interface CompanyDetail {
+  user: {
+    first_name: string;
+    last_name: string;
+    document_type: string;
+    document_number: string;
+    email: string;
+  };
+  company: {
+    company_name: string;
+    ruc: string;
+    bank_accounts: any[];
+    phones: string[];
+    payment_apps: {
+      id: number;
+      phone_number: string;
+      payment_app: number;
+      app_name: string;
+      account_holder: string;
+      document_number: string;
+    }[];
+    addresses: {
+      id: number;
+      address: string;
+      id_region: number;
+      id_district: number;
+      id_sector: number;
+    }[];
+  };
+}
+
+// --- Constants ---
 const ITEMS_PER_PAGE = 10;
-const filterFields = [
-  { value: 'first_name', label: 'Nombre' },
-  { value: 'last_name', label: 'Apellido' },
+const FILTER_FIELDS = [
+  { value: 'company_name', label: 'Empresa' },
+  { value: 'first_name', label: 'Nombre Contacto' },
+  { value: 'last_name', label: 'Apellido Contacto' },
   { value: 'email', label: 'Correo electrónico' },
 ];
 
@@ -46,61 +75,67 @@ export default function CompaniesPage() {
   const [field, setField] = useState('');
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start loading true
+
   const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
-  // const [confirmModal, setConfirmModal] = useState<{
-  //   isOpen: boolean;
-  //   data: Company | null;
-  // }>({ isOpen: false, data: null });
-  // const [deleting, setDeleting] = useState(false);
 
-  // --- Hooks ---
-  const { get, error: apiError } = useApi<Company[]>();
-  // const { get, del, error: apiError } = useApi<Company[]>();
+  const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  /* Soft Delete State */
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
+
+  const { get, put, error: apiError } = useApi<Company[]>();
+
+  const { get: getDetail } = useApi<CompanyDetail>();
 
   const companyModal = useModal<Company>();
 
-  // --- Effects ---
-  // Resetear paginación al cambiar filtro o valor
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [field, value]);
 
-  // --- Data Fetching ---
   const fetchCompanies = useCallback(async () => {
-    const response = await get('/user?type=companies');
-    if (response) {
-      const data = Array.isArray(response) ? response : [];
-      setCompanies(data);
-    } else {
-      setCompanies([]);
+    try {
+      const response = await get('/user?type=companies');
+      if (response && Array.isArray(response)) {
+        setCompanies(response);
+      } else {
+        setCompanies([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch companies", err);
+      // Optional: setErrorModal('Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
     }
   }, [get]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchCompanies().finally(() => { setLoading(false); });
+    fetchCompanies();
   }, [fetchCompanies]);
 
-  // Mostrar error de carga de API si ocurre
-  const showApiError = !loading && apiError && companies.length === 0;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [field, value]);
 
-  // --- Derived Data ---
-  const filtered = useMemo(() => {
-    if (!field) return companies;
-    const val = value.toLowerCase();
+  const filteredCompanies = useMemo(() => {
+    if (!field || !value) return companies;
+
+    const searchTerm = value.toLowerCase();
     return companies.filter((company) => {
       const fieldValue = company[field as keyof Company];
-      return fieldValue ? fieldValue.toString().toLowerCase().includes(val) : false;
+      return fieldValue
+        ? String(fieldValue).toLowerCase().includes(searchTerm)
+        : false;
     });
   }, [companies, field, value]);
 
-  const totalItems = filtered.length;
-  const currentItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-
-  // --- Handlers ---
-  const handlePageChange = (page: number) => { setCurrentPage(page); };
+  const totalItems = filteredCompanies.length;
+  const currentItems = filteredCompanies.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handleExportExcel = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -108,141 +143,146 @@ export default function CompaniesPage() {
 
     worksheet.columns = [
       { header: 'ID', key: 'id', width: 10 },
-      { header: 'Nombre', key: 'first_name', width: 30 },
-      { header: 'Apellido', key: 'last_name', width: 30 },
+      { header: 'Empresa', key: 'company_name', width: 30 },
+      { header: 'Contacto (Nombre)', key: 'first_name', width: 20 },
+      { header: 'Contacto (Apellido)', key: 'last_name', width: 20 },
       { header: 'Correo electrónico', key: 'email', width: 30 },
-      { header: 'Tipo de documento', key: 'document_type', width: 20 },
-      { header: 'Número de documento', key: 'document_number', width: 20 },
+      { header: 'Teléfono', key: 'phone_number', width: 20 },
+      { header: 'Dirección', key: 'address', width: 40 },
       { header: 'Estado', key: 'status', width: 10 },
     ];
 
-    filtered.forEach((company) => {
-      worksheet.addRow(company);
-    });
+    filteredCompanies.forEach((company) => worksheet.addRow(company));
 
-    // Generar el archivo y descargarlo
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'empresas.xlsx';
-    a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `empresas_${new Date().toISOString().split('T')[0]}.xlsx`;
+    link.click();
     window.URL.revokeObjectURL(url);
   };
 
-  const handleExportPdf = async () => {
+  const handleExportPdf = () => {
     const doc = new jsPDF();
     const columns = [
       { header: 'ID', dataKey: 'id' },
-      { header: 'Nombre', dataKey: 'first_name' },
-      { header: 'Apellido', dataKey: 'last_name' },
-      { header: 'Correo electrónico', dataKey: 'email' },
-      { header: 'Tipo de documento', dataKey: 'document_type' },
-      { header: 'Número de documento', dataKey: 'document_number' },
-      { header: 'Estado', dataKey: 'status' },
+      { header: 'Empresa', dataKey: 'company_name' },
+      { header: 'Contacto', dataKey: 'full_name' },
+      { header: 'Correo', dataKey: 'email' },
+      { header: 'Teléfono', dataKey: 'phone_number' },
     ];
-    const rows = filtered.map((company) => ({
-      id: company.id,
-      first_name: company.first_name,
-      last_name: company.last_name,
-      email: company.email,
-      document_type: company.document_type,
-      document_number: company.document_number,
-      status: company.status,
+
+    const rows = filteredCompanies.map((c) => ({
+      ...c,
+      full_name: `${c.first_name} ${c.last_name}`
     }));
 
     autoTable(doc, {
       columns,
       body: rows,
       styles: { fontSize: 9 },
-      headStyles: { fillColor: [220, 220, 220] },
+      headStyles: { fillColor: [71, 85, 105] },
       margin: { top: 20 },
       didDrawPage: () => {
-        doc.text('Listado de Empresas', 14, 15);
+        doc.text('Reporte de Empresas', 14, 15);
       },
     });
-    doc.save('empresas.pdf');
+    doc.save(`empresas_${new Date().toISOString().split('T')[0]}.pdf`);
   };
-
-  // const handleDeleteCompany = (company: Company) => { setConfirmModal({ isOpen: true, data: company }); };
-
-  const handleEditCompany: (company: Company) => void = (company) => companyModal.openModal(company);
-
-  // const confirmDeleteCompany = async () => {
-  //   if (confirmModal.data) {
-  //     setDeleting(true);
-  //     const companyId = confirmModal.data.id;
-  //     const response = await del(`/user/${companyId}`);
-  //     setDeleting(false);
-  //     closeConfirmModal();
-  //     if (response !== null) {
-  //       setCompanies(prev => prev.filter(c => c.id !== companyId));
-  //       setSuccessModal('La empresa ha sido eliminada correctamente.');
-  //     } else {
-  //       setErrorModal('No se pudo eliminar la empresa.');
-  //     }
-  //   }
-  // };
-
-  // const closeConfirmModal = () => { setConfirmModal({ isOpen: false, data: null }); };
 
   const closeStatusModals = () => {
     setSuccessModal(false);
     setErrorModal(null);
   };
 
-  // --- Render ---
+  const handleViewCompany = async (company: Company) => {
+    setIsDetailModalOpen(true);
+    setDetailLoading(true);
+    setCompanyDetail(null);
+    try {
+      // Endpoint logic: /user/company/detail/:id
+      const response = await getDetail(`/user/company/detail/${company.id}`);
+      if (response) {
+        setCompanyDetail(response);
+      }
+    } catch (error) {
+      console.error("Error details", error);
+      // Optional toast
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (company: Company) => {
+    setCompanyToDelete(company);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!companyToDelete) return;
+
+    try {
+      // Call API to soft delete (status: 2)
+      const response = await put(`/user/update/${companyToDelete.id}`, { status: 2 });
+
+      // If successful (response is usually the updated object or just truthy)
+      if (response) {
+        // Update local state to remove the deleted company
+        setCompanies(prev => prev.filter(c => c.id !== companyToDelete.id));
+        setSuccessModal('La empresa ha sido eliminada correctamente.');
+        setDeleteModalOpen(false);
+        setCompanyToDelete(null);
+      } else {
+        setErrorModal('No se pudo eliminar la empresa. Inténtalo de nuevo.');
+      }
+    } catch (error) {
+      console.error("Delete error", error);
+      setErrorModal('Ocurrió un error al intentar eliminar la empresa.');
+    }
+  };
+
   return (
-    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
+
       <div className="space-y-6">
-        {/* Filtros para empresa */}
         <CompaniesFilter
-          {...{
-            field,
-            setField,
-            value,
-            setValue,
-            filterFields,
-            onExportExcel: handleExportExcel,
-            onExportPdf: handleExportPdf,
-          }}
+          field={field}
+          setField={setField}
+          value={value}
+          setValue={setValue}
+          filterFields={FILTER_FIELDS}
+          onExportExcel={handleExportExcel}
+          onExportPdf={handleExportPdf}
+          totalItems={totalItems}
         />
 
-        {/* Loader */}
-        {loading && (
-          <div className="grid place-items-center py-12">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
             <DeliveryLoader message="Cargando empresas..." />
           </div>
-        )}
-
-        {/* Error de carga de API */}
-        {showApiError && (
-          <div className="p-6 bg-red-50 border border-red-100 rounded-xl text-center text-red-600">
-            Error al cargar las empresas: {apiError}
+        ) : apiError && companies.length === 0 ? (
+          <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
+            <AlertTriangle size={32} />
+            <p className="font-medium">Error al cargar datos: {apiError}</p>
           </div>
-        )}
-
-        {/* Tabla y paginación */}
-        {!loading && !showApiError && (
+        ) : (
           <div className="space-y-4">
             <CompaniesTable
-              {...{
-                companies: currentItems,
-                currentPage,
-                onEdit: handleEditCompany,
-                onDelete: () => { },
-              }}
+              companies={currentItems}
+              currentPage={currentPage}
+              onView={handleViewCompany}
+              onDelete={handleDeleteClick}
             />
-            {currentItems.length > 0 && (
-              <div className="w-full pt-4">
+
+            {totalItems > 0 && (
+              <div className="pt-4 flex justify-center sm:justify-end">
                 <Pagination
-                  {...{
-                    currentPage,
-                    totalItems,
-                    itemsPerPage: ITEMS_PER_PAGE,
-                    onPageChange: handlePageChange,
-                  }}
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setCurrentPage}
                 />
               </div>
             )}
@@ -250,46 +290,35 @@ export default function CompaniesPage() {
         )}
       </div>
 
-      {/* Modal para editar empresa */}
-      {/* <CompanyModal
-        {...{
-          isOpen: companyModal.isOpen,
-          onClose: companyModal.closeModal,
-          onSubmit: handleCompanyModalSubmit,
-          editingCompany: companyModal.data,
-        }}
-      /> */}
+      {/* --- Modals --- */}
 
-      {/* Modal de éxito */}
+      {/* Success Modal */}
       {successModal && (
         <Modal
           isOpen={!!successModal}
           onClose={closeStatusModals}
           size="sm"
-          title="¡Éxito!"
+          title="Operación Exitosa"
           footer={
             <ModalFooter className="justify-center">
-              <Button
-                onClick={closeStatusModals}
-                className="bg-green-600 hover:bg-green-700 text-white shadow-green-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
-              >
+              <Button onClick={closeStatusModals} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto">
                 Aceptar
               </Button>
             </ModalFooter>
           }
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-green-50">
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-4">
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
-            <p className="text-gray-600 text-base font-medium">
-              {typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
+            <p className="text-slate-600 font-medium">
+              {typeof successModal === 'string' ? successModal : 'Operación completada correctamente.'}
             </p>
           </div>
         </Modal>
       )}
 
-      {/* Modal de error */}
+      {/* Error Modal */}
       {errorModal && (
         <Modal
           isOpen={!!errorModal}
@@ -298,24 +327,64 @@ export default function CompaniesPage() {
           title="Error"
           footer={
             <ModalFooter className="justify-center">
-              <Button
-                onClick={closeStatusModals}
-                className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
-              >
+              <Button onClick={closeStatusModals} className="bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto">
                 Cerrar
               </Button>
             </ModalFooter>
           }
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
               <AlertTriangle className="w-6 h-6 text-red-600" />
             </div>
-            <p className="text-gray-600 text-base font-medium">{errorModal}</p>
+            <p className="text-slate-600 font-medium">{errorModal}</p>
           </div>
         </Modal>
       )}
 
+      {/* Details Modal */}
+      <CompanyDetailsModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        data={companyDetail}
+        loading={detailLoading}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        size="sm"
+        title="Confirmar Eliminación"
+        footer={
+          <ModalFooter className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setDeleteModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+            >
+              Eliminar
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+            <Trash2 className="w-6 h-6 text-red-600" />
+          </div>
+          <p className="text-slate-600 font-medium mb-1">
+            ¿Estás seguro que deseas eliminar la empresa <span className="font-bold text-slate-900">"{companyToDelete?.company_name}"</span>?
+          </p>
+          <p className="text-sm text-slate-400">
+            Esta acción no se puede deshacer.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }

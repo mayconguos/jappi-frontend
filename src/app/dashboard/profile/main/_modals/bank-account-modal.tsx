@@ -111,7 +111,7 @@ export function BankAccountModal({
     <ModalFooter>
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         onClick={handleCancel}
       >
         Cancelar
@@ -167,7 +167,7 @@ export function BankAccountModal({
             <Input
               label="Número de Cuenta *"
               value={formData.account_number}
-              onChange={(value) => setFormData(prev => ({ ...prev, account_number: value }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, account_number: e.target.value }))}
               placeholder="0000-0000-0000000000"
               error={errors.account_number}
             />
@@ -177,7 +177,7 @@ export function BankAccountModal({
             <Input
               label="Número CCI (Opcional)"
               value={formData.cci_number || ''}
-              onChange={(value) => setFormData(prev => ({ ...prev, cci_number: value }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, cci_number: e.target.value }))}
               placeholder="000-000-000000000000-00"
               maxLength={20}
               error={errors.cci_number}
@@ -190,7 +190,7 @@ export function BankAccountModal({
           <Input
             label="Titular de la Cuenta *"
             value={formData.account_holder}
-            onChange={(value) => setFormData(prev => ({ ...prev, account_holder: value }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, account_holder: e.target.value }))}
             placeholder="Nombre completo del titular"
             error={errors.account_holder}
           />

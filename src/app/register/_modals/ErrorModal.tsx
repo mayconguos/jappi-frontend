@@ -44,10 +44,10 @@ export function ErrorModal({ isOpen, onClose, title, message }: ErrorModalProps)
       </div>
       <ModalFooter className="py-3">
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={onClose}
           size="sm"
-          className="flex-1"
+          className="w-full"
         >
           Entendido
         </Button>

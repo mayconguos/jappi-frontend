@@ -52,7 +52,7 @@ export default function ProductsFilter({
             label="Búsqueda"
             placeholder="Escribe para buscar..."
             value={value}
-            onChange={setValue}
+            onChange={(e) => setValue(e.target.value)}
             icon={Search}
             className="bg-slate-50 border-slate-200"
           />
@@ -62,7 +62,7 @@ export default function ProductsFilter({
       <div className="flex items-center gap-3 relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100">
         <span className="text-sm font-medium text-gray-400 hidden sm:block mr-2">Exportar:</span>
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={onExportExcel}
           className="flex items-center gap-2 border-slate-200 hover:border-emerald-200 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-all"
           size="sm"
@@ -71,7 +71,7 @@ export default function ProductsFilter({
           <span className="hidden sm:inline">Excel</span>
         </Button>
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={onExportPdf}
           className="flex items-center gap-2 border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all"
           size="sm"

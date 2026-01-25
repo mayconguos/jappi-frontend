@@ -129,7 +129,8 @@ export function PaymentMethodStep({
                 autoComplete="off"
                 maxLength={20}
                 value={watchedValues.company?.bank_accounts?.[0]?.account_number || ''}
-                onChange={async (value) => {
+                onChange={async (e) => {
+                  const value = e.target.value;
                   const numericValue = value.replaceAll(/\D/g, '');
                   setValue('company.bank_accounts.0.account_number', numericValue);
                   await trigger('company.bank_accounts.0.account_number');
@@ -145,7 +146,8 @@ export function PaymentMethodStep({
                 label="Titular de la Cuenta *"
                 autoComplete="off"
                 value={watchedValues.company?.bank_accounts?.[0]?.account_holder || ''}
-                onChange={async (value) => {
+                onChange={async (e) => {
+                  const value = e.target.value;
                   const upperValue = value.toUpperCase();
                   setValue('company.bank_accounts.0.account_holder', upperValue);
                   await trigger('company.bank_accounts.0.account_holder');
@@ -194,7 +196,8 @@ export function PaymentMethodStep({
                 autoComplete="off"
                 maxLength={20}
                 value={watchedValues.company?.bank_accounts?.[0]?.cci_number || ''}
-                onChange={async (value) => {
+                onChange={async (e) => {
+                  const value = e.target.value;
                   const numericValue = value.replaceAll(/\D/g, '');
                   setValue('company.bank_accounts.0.cci_number', numericValue);
                   await trigger('company.bank_accounts.0.cci_number');
@@ -241,7 +244,8 @@ export function PaymentMethodStep({
               autoComplete="tel"
               maxLength={9}
               value={watchedValues.company?.payment_apps?.[0]?.phone_number || ''}
-              onChange={async (value) => {
+              onChange={async (e) => {
+                const value = e.target.value;
                 const numericValue = value.replaceAll(/\D/g, '');
                 setValue('company.payment_apps.0.phone_number', numericValue);
                 await trigger('company.payment_apps.0.phone_number');
@@ -259,7 +263,8 @@ export function PaymentMethodStep({
               label="Titular de la Cuenta *"
               autoComplete="off"
               value={watchedValues.company?.payment_apps?.[0]?.account_holder || ''}
-              onChange={async (value) => {
+              onChange={async (e) => {
+                const value = e.target.value;
                 const upperValue = value.toUpperCase();
                 setValue('company.payment_apps.0.account_holder', upperValue);
                 await trigger('company.payment_apps.0.account_holder');
@@ -276,7 +281,8 @@ export function PaymentMethodStep({
               autoComplete="off"
               maxLength={20}
               value={watchedValues.company?.payment_apps?.[0]?.document_number || ''}
-              onChange={async (value) => {
+              onChange={async (e) => {
+                const value = e.target.value;
                 const numericValue = value.replaceAll(/\D/g, '');
                 setValue('company.payment_apps.0.document_number', numericValue);
                 await trigger('company.payment_apps.0.document_number');

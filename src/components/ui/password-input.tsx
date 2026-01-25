@@ -1,122 +1,104 @@
 'use client';
 
 import * as React from 'react';
-import { clsx } from 'clsx';
+import { clsx, type ClassValue } from 'clsx';
 import { Eye, EyeOff } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 
-interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
-  label: string;
-  value?: string;
-  onChange?: (value: string) => void;
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  label?: string;
   error?: string;
-  className?: string;
-  disabled?: boolean;
-  autoComplete?: string;
   size?: 'default' | 'compact';
 }
 
 export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ label, value = '', onChange, error, className, disabled, autoComplete, size = 'default', ...props }, ref) => {
-    const [isFocused, setIsFocused] = React.useState(false);
+  ({ label, className, error, disabled, size = 'default', id, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
-    const hasValue = Boolean(value && value.trim().length > 0);
-    const shouldFloatLabel = isFocused || hasValue;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange?.(e.target.value);
-    };
-
-    const handleFocus = () => {
-      setIsFocused(true);
-    };
-
-    const handleBlur = () => {
-      setIsFocused(false);
-    };
+    // Generate a unique ID if one isn't provided for accessibility
+    const inputId = React.useId();
+    const finalId = id || inputId;
 
     const togglePasswordVisibility = () => {
       setShowPassword(!showPassword);
     };
 
     return (
-      <div className={clsx('w-full', className)}>
-        {/* Input Container */}
-        <div className="relative">
-          {/* Input Field */}
-          <input
-            ref={ref}
-            type={showPassword ? 'text' : 'password'}
-            value={value}
-            onChange={handleChange}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            disabled={disabled}
-            autoComplete={autoComplete}
-            className={clsx(
-              'peer w-full px-4 pr-12 bg-gray-50 border rounded-lg transition-all duration-200 ease-in-out',
-              'placeholder-transparent outline-none focus:bg-white',
-              // Tamaños
-              size === 'compact' ? 'h-10 py-2 text-sm' : 'h-12 py-3 text-base',
-              // Estados normales
-              !error && !isFocused && 'border-gray-200',
-              !error && isFocused && 'border-2 border-[color:var(--button-hover-color)] ring-0',
-              // Estados de error
-              error && !isFocused && 'border-red-300 bg-red-50/30',
-              error && isFocused && 'border-2 border-red-500 bg-red-50/30 ring-0',
-              // Estado disabled
-              disabled && 'bg-gray-100 text-gray-500 cursor-not-allowed',
-              // Hover
-              !disabled && !isFocused && 'hover:border-gray-300'
-            )}
-            {...props}
-          />
-
-          {/* Floating Label */}
+      <div className={cn('w-full', className)}>
+        {/* Fixed Label - Stacked */}
+        {label && (
           <label
-            className={clsx(
-              'absolute left-3 transition-all duration-200 ease-in-out pointer-events-none select-none',
-              // Posición y tamaño cuando flota (arriba) - en la línea del borde
-              shouldFloatLabel && '-top-2 text-xs font-medium px-2 bg-white',
-              // Posición y tamaño cuando está en el centro
-              !shouldFloatLabel && 'top-1/2 -translate-y-1/2',
-              !shouldFloatLabel && size === 'compact' ? 'text-sm' : 'text-base',
-              // Colores según el estado
-              !error && !isFocused && shouldFloatLabel && 'text-gray-600',
-              !error && !isFocused && !shouldFloatLabel && 'text-gray-500',
-              !error && isFocused && 'text-[color:var(--button-hover-color)]',
-              error && shouldFloatLabel && 'text-red-500',
-              error && !shouldFloatLabel && 'text-gray-500',
-              disabled && 'text-gray-400'
-            )}
+            htmlFor={finalId}
+            className="block mb-1.5 text-sm font-medium text-gray-700"
           >
             {label}
           </label>
+        )}
+
+        {/* Input Container */}
+        <div className="relative">
+          <input
+            ref={ref}
+            id={finalId}
+            type={showPassword ? 'text' : 'password'}
+            disabled={disabled}
+            aria-invalid={!!error}
+            className={cn(
+              // Base styles
+              'flex w-full rounded-lg border bg-white px-3 text-sm text-gray-900 shadow-sm transition-all duration-200 ease-in-out',
+              'placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-0',
+              'file:border-0 file:bg-transparent file:text-sm file:font-medium',
+
+              // Right padding for the eye icon
+              'pr-10',
+
+              // Size variants
+              size === 'compact' ? 'h-8 py-1 text-xs' : 'h-10 py-2 text-sm',
+
+              // State: Normal
+              !error && !disabled && 'border-gray-300 focus:border-[#02997d] focus:ring-[#02997d]/20',
+
+              // State: Error
+              error && !disabled && 'border-red-300 focus:border-red-500 focus:ring-red-200',
+
+              // State: Disabled
+              disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed border-gray-200 hover:border-gray-200',
+
+              className
+            )}
+            {...props}
+          />
 
           {/* Toggle Password Visibility Button */}
           <button
             type="button"
             onClick={togglePasswordVisibility}
             disabled={disabled}
-            className={clsx(
-              'absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors',
-              'text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600',
-              disabled && 'cursor-not-allowed opacity-50'
+            className={cn(
+              'absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-gray-400 transition-colors',
+              'hover:text-gray-600 focus:outline-none focus:text-[#02997d]',
+              disabled && 'cursor-not-allowed opacity-50 hover:text-gray-400'
             )}
             tabIndex={-1}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
-              <EyeOff className={size === 'compact' ? 'w-4 h-4' : 'w-5 h-5'} />
+              <EyeOff size={size === 'compact' ? 16 : 20} />
             ) : (
-              <Eye className={size === 'compact' ? 'w-4 h-4' : 'w-5 h-5'} />
+              <Eye size={size === 'compact' ? 16 : 20} />
             )}
           </button>
         </div>
 
-        {/* Error Message - Outside the relative container */}
+        {/* Error Message */}
         {error && (
-          <div className="mt-1 text-red-500 text-sm">
-            <span>{error}</span>
-          </div>
+          <p className="mt-1.5 text-sm text-red-500 animate-in slide-in-from-top-1 fade-in duration-200">
+            {error}
+          </p>
         )}
       </div>
     );

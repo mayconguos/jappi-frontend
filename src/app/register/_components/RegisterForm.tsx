@@ -153,7 +153,7 @@ export default function RegisterForm() {
         <div className="flex justify-between pt-6">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={prevStep}
             className="flex items-center gap-2"
           >

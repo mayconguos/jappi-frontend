@@ -157,7 +157,7 @@ export function AddressModal({
     <ModalFooter>
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         onClick={handleCancel}
       >
         Cancelar
@@ -187,7 +187,7 @@ export function AddressModal({
           <Input
             label="Dirección completa"
             value={formData.address}
-            onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
             placeholder="Av. Ejemplo 123, Oficina 456"
             error={errors.address}
           />

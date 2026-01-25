@@ -124,7 +124,7 @@ export default function BankingSection({
             <Button
               type="button"
               onClick={addBankAccount}
-              variant="outline"
+              variant="secondary"
               size="sm"
               className="rounded-full px-4 border-slate-200 hover:border-[var(--button-hover-color)] hover:text-[var(--button-hover-color)] transition-all font-semibold"
             >

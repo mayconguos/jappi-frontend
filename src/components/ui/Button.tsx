@@ -1,51 +1,60 @@
+import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { clsx } from 'clsx';
+import { clsx, type ClassValue } from 'clsx';
+import { Loader2 } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
+
+// Utility for merging tailwind classes safely
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer',
+  'inline-flex items-center justify-center font-medium transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#02997d] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg active:scale-95',
   {
     variants: {
       variant: {
-        default: 'text-white hover:bg-opacity-90 bg-[color:var(--surface-dark)] hover:bg-[#0f2e2e] shadow-sm hover:shadow-md',
-        primary: 'text-white hover:opacity-80 bg-[color:var(--button-hover-color)]', // Renaming old default to primary or keeping both? Let's keep default as the MAIN one used. The user used surface-dark for login. I'll make default surface-dark to standardise.
-        outline: 'border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900',
-        ghost: 'bg-transparent hover:bg-gray-100 text-gray-900',
-        destructive: 'text-white hover:opacity-80 bg-[color:var(--button-destructive-color)]',
-        warning: 'bg-yellow-600 text-white hover:bg-yellow-700',
-        info: 'bg-blue-600 text-white hover:bg-blue-700',
-        link: 'text-[color:var(--surface-dark)] underline-offset-4 hover:underline !p-0 !h-auto', // Minimalist link style
-        // Icon action variants for tables
-        'icon-edit': 'border border-gray-300 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 p-2',
-        'icon-delete': 'border border-gray-300 text-red-600 hover:text-red-800 hover:bg-red-50 p-2',
-        'icon-view': 'border border-gray-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50 p-2',
+        primary: 'bg-[#02997d] hover:bg-[#027d66] text-white shadow-sm border border-transparent',
+        secondary: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm',
+        ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent',
+        destructive: 'bg-red-600 hover:bg-red-700 text-white border border-transparent shadow-sm',
+        link: 'text-[#02997d] underline-offset-4 hover:underline !p-0 !h-auto',
       },
       size: {
-        xs: 'h-6 px-2 text-xs',
-        default: 'h-12 px-6 py-3 text-base', // Updating default to match inputs h-12
-        sm: 'h-9 px-4 text-sm',
-        lg: 'h-14 px-8 text-lg',
-        icon: 'h-10 w-10 p-0',
+        sm: 'h-8 px-3 text-xs',
+        md: 'h-10 px-4 py-2 text-sm',
+        lg: 'h-12 px-6 text-base',
+        icon: 'h-10 w-10 p-2', // Kept for compatibility with icon buttons
       },
-      shape: {
-        default: 'rounded-lg',
-        pill: 'rounded-full',
-        square: 'rounded-none',
-      }
     },
     defaultVariants: {
-      variant: 'default',
-      size: 'default',
-      shape: 'default',
+      variant: 'primary',
+      size: 'md',
     },
   }
 );
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof buttonVariants> { }
-
-export function Button({ className, variant, size, ...props }: ButtonProps) {
-  return (
-    <button className={clsx(buttonVariants({ variant, size }), className)} {...props} />
-  );
+  VariantProps<typeof buttonVariants> {
+  isLoading?: boolean;
 }
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, isLoading = false, children, ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(buttonVariants({ variant, size, className }))}
+        disabled={isLoading || props.disabled}
+        {...props}
+      >
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {children}
+      </button>
+    );
+  }
+);
+Button.displayName = 'Button';
+
+export { Button, buttonVariants };

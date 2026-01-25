@@ -82,9 +82,9 @@ export function ConfirmationModal({
   const footerContent = (
     <div className="flex items-center justify-end gap-3">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={onClose}
-        className="h-10 px-6"
+        disabled={isSubmitting}
       >
         Volver y Editar
       </Button>

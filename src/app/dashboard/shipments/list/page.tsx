@@ -177,7 +177,7 @@ export default function ShipmentsPage() {
                 label="Fecha"
                 type="date"
                 value={dateValue}
-                onChange={setDateValue}
+                onChange={(e) => setDateValue(e.target.value)}
                 className="bg-slate-50 border-slate-200"
               />
             </div>
@@ -208,7 +208,7 @@ export default function ShipmentsPage() {
                 label="Búsqueda"
                 placeholder="Buscar..."
                 value={searchValue}
-                onChange={setSearchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
                 icon={Search}
                 className="bg-slate-50 border-slate-200"
               />
@@ -218,8 +218,9 @@ export default function ShipmentsPage() {
           {/* Group 3: Exportar */}
           <div className="w-full lg:w-auto pt-2 lg:pt-0">
             <Button
-              variant="outline"
-              className="w-full lg:w-auto text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm"
+              variant="secondary"
+              size="sm"
+              className="gap-2 text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm"
             >
               <Download size={18} className="mr-2" />
               Exportar

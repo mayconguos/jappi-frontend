@@ -230,9 +230,10 @@ export default function CarriersPage() {
               <ModalFooter>
                 {!deleting && (
                   <Button
-                    variant="outline"
+                    variant="secondary"
+                    size="sm"
                     onClick={closeConfirmModal}
-                    className="border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    className="bg-white border-dashed border-gray-300 text-gray-600 hover:border-[#02997d] hover:text-[#02997d]"
                   >
                     Cancelar
                   </Button>

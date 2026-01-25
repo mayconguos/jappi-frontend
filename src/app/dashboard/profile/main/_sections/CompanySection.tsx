@@ -175,7 +175,7 @@ export default function CompanySection({
             <Input
               label="RUC"
               value={formData.ruc || ''}
-              onChange={(value) => setFormData(prev => ({ ...prev, ruc: value }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, ruc: e.target.value }))}
               placeholder="Ingresa el RUC de tu empresa"
               maxLength={11}
               disabled={!!savedRuc} // Bloqueado SOLO si ya está guardado en backend
@@ -201,7 +201,7 @@ export default function CompanySection({
             <Button
               type="button"
               onClick={() => openAddressModal()}
-              variant="outline"
+              variant="secondary"
               size="sm"
               className="rounded-full px-4 border-slate-200 hover:border-[var(--button-hover-color)] hover:text-[var(--button-hover-color)] transition-all"
             >
@@ -292,7 +292,7 @@ export default function CompanySection({
             <Button
               type="button"
               onClick={addPhone}
-              variant="outline"
+              variant="secondary"
               size="sm"
               className="rounded-full px-4 border-slate-200 hover:border-[var(--button-hover-color)] hover:text-[var(--button-hover-color)] transition-all"
             >
@@ -309,7 +309,7 @@ export default function CompanySection({
                 <Input
                   label={`Teléfono ${index + 1}`}
                   value={phone}
-                  onChange={(value) => handlePhoneChange(index, value)}
+                  onChange={(e) => handlePhoneChange(index, e.target.value)}
                   placeholder="987 654 321"
                   maxLength={9}
                   className="bg-transparent border-none shadow-none focus:ring-0 p-0 text-lg font-bold placeholder:text-slate-300"

@@ -226,7 +226,7 @@ export default function WorkersPage() {
           <ModalFooter>
             {!deleting && (
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={closeConfirmModal}
                 className="border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               >

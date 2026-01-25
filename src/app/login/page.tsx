@@ -25,7 +25,7 @@ export default function LoginPage() {
         {/* Contenido sobre la imagen */}
         <div className="relative z-10 p-12 text-white max-w-xl">
           <div className="flex items-center gap-3 mb-8">
-            <Logo className="w-16 h-16 text-white" />
+            <Logo className="w-32 h-32 text-white" />
             <h1 className="text-4xl font-bold tracking-tight">Japi Express</h1>
           </div>
 

@@ -108,83 +108,73 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-50 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? "modal-title" : undefined}
       aria-describedby={description ? "modal-description" : undefined}
     >
-      {/* Overlay/Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
-        onClick={handleOverlayClick}
-        aria-hidden="true"
-      />
+      <div className="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
 
-      {/* Modal Content */}
-      <div className={`
-        relative bg-white rounded-2xl shadow-2xl border border-white/50 max-h-[90vh] overflow-hidden flex flex-col
-        w-full transition-all duration-300 transform
-        ${sizeClasses[size]}
-        ${className}
-      `}>
-        {/* Header */}
-        {(title || description || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 pb-4 border-b border-gray-100 shrink-0">
-            <div className="flex-1 pr-8">
-              {title && (
-                <h2
-                  id="modal-title"
-                  className="text-xl font-bold text-gray-900 mb-1"
+        {/* Overlay/Backdrop */}
+        <div
+          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
+          onClick={handleOverlayClick}
+          aria-hidden="true"
+        />
+
+        {/* Modal Content */}
+        <div className={`
+          relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl border border-gray-100/50 transition-all sm:my-8 w-full
+          ${sizeClasses[size]}
+          ${className}
+        `}>
+
+          {/* Header */}
+          {(title || description || showCloseButton) && (
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                {title && (
+                  <h3 className="text-xl font-semibold leading-6 text-gray-900" id="modal-title">
+                    {title}
+                  </h3>
+                )}
+                {description && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500" id="modal-description">
+                      {description}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {showCloseButton && (
+                <button
+                  type="button"
+                  className="rounded-lg p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition-colors"
+                  onClick={onClose}
+                  aria-label="Cerrar"
                 >
-                  {title}
-                </h2>
-              )}
-              {description && (
-                <p
-                  id="modal-description"
-                  className="text-sm text-gray-500"
-                >
-                  {description}
-                </p>
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               )}
             </div>
+          )}
 
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-full p-2"
-                aria-label="Cerrar modal"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            )}
+          {/* Body */}
+          <div className="px-6 py-6 sm:p-8">
+            {children}
           </div>
-        )}
 
-        {/* Body */}
-        <div className="p-6 pt-4 overflow-y-auto flex-1">
-          {children}
+          {/* Footer */}
+          {footer && (
+            <div className="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 rounded-b-xl border-t border-gray-100">
+              {footer}
+            </div>
+          )}
         </div>
-
-        {/* Fixed Footer */}
-        {footer && (
-          <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 shrink-0">
-            {footer}
-          </div>
-        )}
       </div>
     </div>
   );

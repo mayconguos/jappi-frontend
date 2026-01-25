@@ -135,7 +135,7 @@ export default function PaymentsSection({
         {paymentApps.length > 0 && (
           <Button
             onClick={() => openFlow()}
-            variant="outline"
+            variant="secondary"
             size="sm"
             className="rounded-full px-4 border-slate-200 hover:border-[var(--button-hover-color)] hover:text-[var(--button-hover-color)] transition-all"
           >
@@ -254,7 +254,7 @@ export default function PaymentsSection({
         size="md"
         footer={
           <ModalFooter>
-            <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
+            <Button variant="secondary" onClick={() => setIsAddModalOpen(false)}>
               Cancelar
             </Button>
             <Button
@@ -290,7 +290,7 @@ export default function PaymentsSection({
             <Input
               label="Nombre del Titular"
               value={tempApp.account_holder}
-              onChange={(val) => updateTempField('account_holder', val)}
+              onChange={(e) => updateTempField('account_holder', e.target.value)}
               placeholder="Ej. Juan Pérez"
               icon={User}
             />
@@ -298,7 +298,7 @@ export default function PaymentsSection({
               <Input
                 label="Número Celular"
                 value={tempApp.phone_number}
-                onChange={(val) => updateTempField('phone_number', val)}
+                onChange={(e) => updateTempField('phone_number', e.target.value)}
                 placeholder="900 000 000"
                 maxLength={9}
                 icon={Smartphone}
@@ -306,7 +306,7 @@ export default function PaymentsSection({
               <Input
                 label="DNI / RUC"
                 value={tempApp.document_number}
-                onChange={(val) => updateTempField('document_number', val)}
+                onChange={(e) => updateTempField('document_number', e.target.value)}
                 placeholder="Opcional"
                 icon={CreditCard}
               />
@@ -323,7 +323,7 @@ export default function PaymentsSection({
         size="sm"
         footer={
           <ModalFooter>
-            <Button variant="outline" onClick={() => {
+            <Button variant="secondary" onClick={() => {
               setIsConfirmModalOpen(false);
               setIsAddModalOpen(true);
             }}>

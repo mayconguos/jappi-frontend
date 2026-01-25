@@ -34,7 +34,7 @@ export default function StepNavigation({
         {!isFirstStep && (
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={onPrevious}
             disabled={isSubmitting}
             className="flex items-center gap-2"
