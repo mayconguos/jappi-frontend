@@ -14,6 +14,11 @@ interface PersonalDataStepProps {
   watchedValues: RegisterFormData;
 }
 
+// Función utilitaria para Capitalizar Nombres
+const toTitleCase = (str: string) => {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+};
+
 export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps) {
   const { formState: { errors }, setValue, trigger } = form;
 
@@ -27,12 +32,13 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
         <Input
           label="Nombres *"
           type="text"
+          className="capitalize"
           autoComplete="given-name"
           value={watchedValues.user?.first_name || ''}
           onChange={async (e) => {
             const value = e.target.value;
-            const upperValue = value.toUpperCase();
-            setValue('user.first_name', upperValue);
+            const titleValue = toTitleCase(value);
+            setValue('user.first_name', titleValue);
             await trigger('user.first_name');
           }}
           error={errors.user?.first_name?.message}
@@ -41,12 +47,13 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
         <Input
           label="Apellidos *"
           type="text"
+          className="capitalize"
           autoComplete="family-name"
           value={watchedValues.user?.last_name || ''}
           onChange={async (e) => {
             const value = e.target.value;
-            const upperValue = value.toUpperCase();
-            setValue('user.last_name', upperValue);
+            const titleValue = toTitleCase(value);
+            setValue('user.last_name', titleValue);
             await trigger('user.last_name');
           }}
           error={errors.user?.last_name?.message}
@@ -129,7 +136,7 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
       </div>
 
       {/* Fila 3: Credenciales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <Input
           label="Email *"
           type="email"
@@ -137,8 +144,7 @@ export function PersonalDataStep({ form, watchedValues }: PersonalDataStepProps)
           value={watchedValues.user?.email || ''}
           onChange={async (e) => {
             const value = e.target.value;
-            const lowerValue = value.toLowerCase();
-            setValue('user.email', lowerValue);
+            setValue('user.email', value.toLowerCase());
             await trigger('user.email');
           }}
           error={errors.user?.email?.message}

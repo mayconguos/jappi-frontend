@@ -67,7 +67,7 @@ export const Select = ({
               // Disabled State
               disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed border-gray-200',
               // Hover
-              !error && !disabled && 'hover:border-gray-400'
+              // !error && !disabled && 'hover:border-gray-400'
             )}
           >
             {Icon && (
@@ -91,49 +91,48 @@ export const Select = ({
             </span>
           </ListboxButton>
 
-          <Transition
-            as="div"
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-            className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg border border-gray-100 ring-1 ring-black ring-opacity-5 focus:outline-none custom-scrollbar"
+          <ListboxOptions
+            anchor="bottom"
+            transition
+            className={cn(
+              "z-50 w-[var(--button-width)] overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg border border-gray-100 ring-1 ring-black ring-opacity-5 focus:outline-none custom-scrollbar",
+              "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0"
+            )}
           >
-            <ListboxOptions className="outline-none w-full static">
-              {options.map((option) => (
-                <ListboxOption
-                  key={option.value}
-                  className={({ active }) =>
-                    cn(
-                      'relative cursor-default select-none py-2.5 pl-3 pr-9 transition-colors',
-                      active ? 'bg-[#02997d]/10 text-[#02997d]' : 'text-gray-900'
-                    )
-                  }
-                  value={option.value}
-                >
-                  {({ selected }) => (
-                    <>
-                      <span
-                        className={cn(
-                          'block truncate',
-                          selected ? 'font-semibold text-[#02997d]' : 'font-normal'
-                        )}
-                      >
-                        {option.label}
+            {options.map((option) => (
+              <ListboxOption
+                key={option.value}
+                className={({ focus }) =>
+                  cn(
+                    'relative cursor-default select-none py-2.5 pl-3 pr-9 transition-colors',
+                    focus ? 'bg-[#02997d]/10 text-[#02997d]' : 'text-gray-900'
+                  )
+                }
+                value={option.value}
+              >
+                {({ selected }) => (
+                  <>
+                    <span
+                      className={cn(
+                        'block truncate',
+                        selected ? 'font-semibold text-[#02997d]' : 'font-normal'
+                      )}
+                    >
+                      {option.label}
+                    </span>
+                    {selected ? (
+                      <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#02997d]">
+                        <Check className="h-4 w-4" aria-hidden="true" />
                       </span>
-                      {selected ? (
-                        <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#02997d]">
-                          <Check className="h-4 w-4" aria-hidden="true" />
-                        </span>
-                      ) : null}
-                    </>
-                  )}
-                </ListboxOption>
-              ))}
-              {options.length === 0 && (
-                <div className="py-2.5 px-3 text-gray-500 italic">No hay opciones</div>
-              )}
-            </ListboxOptions>
-          </Transition>
+                    ) : null}
+                  </>
+                )}
+              </ListboxOption>
+            ))}
+            {options.length === 0 && (
+              <div className="py-2.5 px-3 text-gray-500 italic">No hay opciones</div>
+            )}
+          </ListboxOptions>
 
           {/* Error Message */}
           {error && (

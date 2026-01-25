@@ -7,10 +7,13 @@ import { useRouter } from 'next/navigation';
 
 import { shipmentSchema, type ShipmentFormData } from '@/lib/validations/shipment';
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
-import RecipientSection from './_components/RecipientSection';
-import ShipmentSection from './_components/ShipmentSection';
-import PaymentSection from './_components/PaymentSection';
+
 import { Button } from '@/components/ui/button';
+
+import ShipmentSection from './_components/ShipmentSection';
+import RecipientSection from './_components/RecipientSection';
+import PaymentSection from './_components/PaymentSection';
+import ShipmentSummary from './_components/ShipmentSummary';
 
 export default function CreateShipmentPage() {
   const router = useRouter();
@@ -45,7 +48,7 @@ export default function CreateShipmentPage() {
         phone: '987654321',
         email: 'contacto@empresa.com',
         address: {
-          address: 'Dirección de la empresa',
+          address: 'Dirección de Recojo',
           id_region: 1,
           id_district: 1,
           id_sector: 0,
@@ -89,7 +92,7 @@ export default function CreateShipmentPage() {
   // Obtener el modo de entrega actual
   const watchedValues = watch();
   const deliveryMode = watchedValues.service?.delivery_mode;
-  const shouldShowPaymentStep = deliveryMode === 'cod';
+  const shouldShowPaymentStep = deliveryMode === 'pay_on_delivery';
 
   // Manejar cambios en las listas de productos
   const handleProductsChange = useCallback((products: typeof productsData) => {
@@ -159,6 +162,12 @@ export default function CreateShipmentPage() {
     return await trigger(fieldsToValidate as (keyof ShipmentFormData)[]);
   };
 
+  // Calcular si el formulario está listo para envio
+  // 1. Shipment y Recipient completos
+  // 2. Si es Contra Entrega (shouldShowPaymentStep), validar método y forma de pago
+  const isPaymentValid = !shouldShowPaymentStep || (watchedValues.service?.payment_method && watchedValues.service?.payment_form);
+  const isFormReady = isShipmentComplete && isRecipientComplete && isPaymentValid;
+
   // Handlers
   const handleContinueShipment = async () => {
     const isValid = await validateShipmentSection();
@@ -216,66 +225,83 @@ export default function CreateShipmentPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-24">
-      <form onSubmit={hookFormHandleSubmit(onSubmit)} className="space-y-6">
-        {/* SECCIÓN 1: ENVÍO */}
-        <section>
-          <ShipmentSection
-            form={form}
-            onProductsChange={handleProductsChange}
-            isActive={!isShipmentComplete}
-            isCompleted={isShipmentComplete}
-            onContinue={handleContinueShipment}
-            onEdit={handleEditShipment}
-          />
-        </section>
+    <div className="max-w-7xl mx-auto pb-24 px-4 sm:px-6 lg:px-8 pt-8">
 
-        {/* SECCIÓN 2: DESTINATARIO */}
-        {(isShipmentComplete || isRecipientComplete) && (
-          <section ref={recipientRef} className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <RecipientSection
+      {/* Page Header */}
+      {/* Page Header Removed as requested */}
+
+
+      <form id="shipment-form" onSubmit={hookFormHandleSubmit(onSubmit)} className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
+
+        {/* COLUMNA IZQUIERDA: Formularios (Span 8) */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* SECCIÓN 1: ENVÍO */}
+          <section>
+            <ShipmentSection
               form={form}
-              isActive={isShipmentComplete && !isRecipientComplete}
-              isCompleted={isRecipientComplete}
-              onContinue={handleContinueRecipient}
-              onEdit={handleEditRecipient}
-            />
-
-            {/* Botón de Registro SI NO hay paso de pago */}
-            {isRecipientComplete && !shouldShowPaymentStep && (
-              <div className="pt-8 flex justify-end animate-in fade-in zoom-in duration-500">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-[var(--surface-dark)] hover:bg-[var(--surface-dark)]/90 text-white h-14 px-10 rounded-2xl shadow-xl shadow-[var(--surface-dark)]/20 hover:shadow-2xl hover:scale-105 transition-all text-lg font-bold"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="animate-spin mr-2">⏳</span> Registrando...
-                    </>
-                  ) : (
-                    <>
-                      <span className="mr-2">🚀</span> Registrar Envío
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* SECCIÓN 3: PAGO (Condicional) */}
-        {shouldShowPaymentStep && isRecipientComplete && (
-          <section ref={paymentRef} className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <PaymentSection
-              form={form}
-              isActive={isRecipientComplete}
-              isCompleted={false}
-              onSubmit={hookFormHandleSubmit(onSubmit)}
-              isLoading={isSubmitting}
+              onProductsChange={handleProductsChange}
+              isActive={!isShipmentComplete}
+              isCompleted={isShipmentComplete}
+              onContinue={handleContinueShipment}
+              onEdit={handleEditShipment}
             />
           </section>
-        )}
+
+          {/* SECCIÓN 2: DESTINATARIO */}
+          {(isShipmentComplete || isRecipientComplete) && (
+            <section ref={recipientRef} className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <RecipientSection
+                form={form}
+                isActive={isShipmentComplete && !isRecipientComplete}
+                isCompleted={isRecipientComplete}
+                onContinue={handleContinueRecipient}
+                onEdit={handleEditRecipient}
+              />
+
+              {/* Botón de Registro SI NO hay paso de pago */}
+              {isRecipientComplete && !shouldShowPaymentStep && (
+                <div className="pt-8 flex justify-end animate-in fade-in zoom-in duration-500 lg:hidden">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || !isFormReady}
+                    variant="primary"
+                    size="lg"
+                    className="h-14 px-10 rounded-2xl shadow-xl shadow-teal-900/10 hover:shadow-2xl hover:scale-105 transition-all text-lg font-bold w-full sm:w-auto"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="animate-spin mr-2">⏳</span> Registrando...
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-2">🚀</span> Registrar Envío
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* SECCIÓN 3: PAGO (Condicional) */}
+          {shouldShowPaymentStep && isRecipientComplete && (
+            <section ref={paymentRef} className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <PaymentSection
+                form={form}
+                isActive={isRecipientComplete}
+                isCompleted={false}
+                onSubmit={hookFormHandleSubmit(onSubmit)}
+                isLoading={isSubmitting}
+              />
+            </section>
+          )}
+        </div>
+
+        {/* COLUMNA DERECHA: Resumen (Span 4) */}
+        <div className="hidden lg:block lg:col-span-4 space-y-6 sticky top-6">
+          <ShipmentSummary watchedValues={watchedValues} isSubmitting={isSubmitting} disabled={!isFormReady} />
+        </div>
+
       </form>
     </div>
   );

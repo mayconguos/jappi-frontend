@@ -1,22 +1,22 @@
 export const REGIONES_LIMA = [
-    { label: 'Lima', value: 1 },
-    { label: 'Miraflores', value: 2 },
-    { label: 'San Isidro', value: 3 },
-    { label: 'Surco', value: 4 },
-    { label: 'La Molina', value: 5 }
+  { label: 'Lima', value: 1 },
+  { label: 'Miraflores', value: 2 },
+  { label: 'San Isidro', value: 3 },
+  { label: 'Surco', value: 4 },
+  { label: 'La Molina', value: 5 }
 ] as const;
 
 export const BANCOS = [
-    { label: 'BBVA', value: 1 },
-    { label: 'BCP', value: 2 },
-    { label: 'Interbank', value: 3 },
-    { label: 'Scotiabank', value: 4 }
+  { label: 'BBVA', value: 1 },
+  { label: 'BCP', value: 2 },
+  { label: 'Interbank', value: 3 },
+  { label: 'Scotiabank', value: 4 }
 ] as const;
 
 export const TIPOS_CUENTA = [
-    { label: 'Cuenta corriente', value: 1 },
-    { label: 'Cuenta ahorro', value: 2 },
-    { label: 'Cuenta CTS', value: 3 }
+  { label: 'Cuenta corriente', value: 1 },
+  { label: 'Cuenta ahorro', value: 2 },
+  { label: 'Cuenta CTS', value: 3 }
 ] as const;
 
 export const PAYMENT_APPS = [
@@ -43,7 +43,7 @@ export const SHIPMENT_TYPES = [
 ];
 
 export const DELIVERY_MODES = [
-  { label: 'Contra entrega', value: 'cod' },
+  { label: 'Contra entrega', value: 'pay_on_delivery' },
   { label: 'Solo entrega', value: 'delivery_only' }
 ];
 
@@ -56,7 +56,6 @@ export const PAYMENT_METHODS = [
 ];
 
 export const PAYMENT_FORMS = [
-  { label: 'Abono a empresa', value: 'company_payment' },
+  { label: 'Abono a Japi', value: 'japy_payment' },
   { label: 'Abono a vendedor', value: 'seller_payment' },
-  { label: 'Contraentrega', value: 'cod' }
 ];

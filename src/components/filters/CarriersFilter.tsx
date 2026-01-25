@@ -40,7 +40,7 @@ export default function CarriersFilter({
           <Input
             label="Valor"
             value={value}
-            onChange={setValue}
+            onChange={(e) => setValue(e.target.value)}
             size="compact"
           />
         </div>

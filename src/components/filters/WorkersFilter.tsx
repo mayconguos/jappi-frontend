@@ -49,7 +49,7 @@ export default function WorkersFilter({
             label="Búsqueda"
             placeholder="Escribe para buscar..."
             value={value}
-            onChange={setValue}
+            onChange={(e) => setValue(e.target.value)}
             icon={Search}
             className="bg-slate-50 border-slate-200"
           />

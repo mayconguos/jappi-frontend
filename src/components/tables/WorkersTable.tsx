@@ -65,7 +65,7 @@ export default function WorkersTable({
                 <div className="flex gap-2 justify-center">
                   <Button
                     size="icon"
-                    variant="icon-edit"
+                    variant="ghost"
                     onClick={() => onEdit(worker)}
                     className="h-8 w-8 !rounded-full !border-0 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 shadow-sm"
                     title="Editar"
@@ -74,7 +74,7 @@ export default function WorkersTable({
                   </Button>
                   <Button
                     size="icon"
-                    variant="icon-delete"
+                    variant="ghost"
                     onClick={() => onDelete(worker)}
                     className="h-8 w-8 !rounded-full !border-0 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 shadow-sm"
                     title="Eliminar"

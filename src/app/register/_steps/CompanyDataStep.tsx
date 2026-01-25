@@ -12,6 +12,11 @@ interface CompanyDataStepProps {
   watchedValues: RegisterFormData;
 }
 
+// Función utilitaria para Capitalizar
+const toTitleCase = (str: string) => {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+};
+
 export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
   const { formState: { errors }, setValue, trigger, watch } = form;
   const { loading, error, getRegionOptions, getDistrictOptions, getSectorOptions } = useLocationCatalog();
@@ -19,8 +24,6 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
   // Observar cambios en la región y distrito seleccionados
   const selectedRegion = watch('company.addresses.0.id_region');
   const selectedDistrict = watch('company.addresses.0.id_district');
-
-
 
   // Verificar si el distrito seleccionado tiene sectores
   const districtHasSectors = selectedDistrict ? getSectorOptions(selectedDistrict).length > 0 : false;
@@ -61,13 +64,14 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           name="company.company_name"
           type="text"
           label="Nombre de la Empresa *"
+          className="capitalize"
           autoComplete="organization"
           error={errors.company?.company_name?.message}
           value={watchedValues.company?.company_name || ''}
           onChange={async (e) => {
             const value = e.target.value;
-            const upperValue = value.toUpperCase();
-            setValue('company.company_name', upperValue);
+            const titleValue = toTitleCase(value);
+            setValue('company.company_name', titleValue);
             await trigger('company.company_name');
           }}
         />
@@ -75,7 +79,7 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
         <Input
           name="company.ruc"
           type="text"
-          label="RUC (opcional)"
+          label="RUC"
           maxLength={11}
           autoComplete="off"
           error={errors.company?.ruc?.message}
@@ -90,21 +94,25 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          name="company.phones.0"
-          type="text"
-          label="Teléfono *"
-          autoComplete="tel"
-          maxLength={15}
-          error={errors.company?.phones?.[0]?.message}
-          value={watchedValues.company?.phones?.[0] || ''}
-          onChange={async (e) => {
-            const value = e.target.value;
-            const cleanValue = value.replace(/[^\d\-\+\(\)\s]/g, '');
-            setValue('company.phones.0', cleanValue);
-            await trigger('company.phones.0');
-          }}
-        />
+        <div className="relative">
+          <Input
+            name="company.phones.0"
+            type="text"
+            label="Teléfono *"
+            prefix="+51"
+            autoComplete="tel"
+            placeholder="900 000 000"
+            maxLength={15}
+            error={errors.company?.phones?.[0]?.message}
+            value={watchedValues.company?.phones?.[0] || ''}
+            onChange={async (e) => {
+              const value = e.target.value;
+              const cleanValue = value.replace(/[^\d\-\+\(\)\s]/g, '');
+              setValue('company.phones.0', cleanValue);
+              await trigger('company.phones.0');
+            }}
+          />
+        </div>
 
         <div className="relative z-30">
           <Select
@@ -126,12 +134,13 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
       </div>
 
       {/* Ubicación */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="relative z-20">
-          <div className={`transition-all duration-300 ease-in-out ${selectedRegion
-            ? 'opacity-100 translate-y-0 max-h-96'
-            : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden pointer-events-none absolute top-0 left-0 right-0'
-            }`}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-300">
+        <div className={`relative z-20 transition-all duration-500 ease-in-out ${selectedRegion
+          ? 'opacity-100 translate-y-0 scale-100'
+          : 'opacity-0 -translate-y-2 scale-95 pointer-events-none absolute'
+          } ${!districtHasSectors ? 'md:col-span-2' : ''
+          }`}>
+          {selectedRegion && (
             <Select
               label="Distrito *"
               value={
@@ -141,17 +150,17 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
                   : ''
               }
               onChange={handleDistrictChange}
-              options={selectedRegion ? getDistrictOptions(selectedRegion) : []}
+              options={getDistrictOptions(selectedRegion)}
               error={errors.company?.addresses?.[0]?.id_district?.message}
             />
-          </div>
+          )}
         </div>
 
-        <div className="relative z-10">
-          <div className={`transition-all duration-300 ease-in-out ${districtHasSectors
-            ? 'opacity-100 translate-y-0 max-h-96'
-            : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden pointer-events-none absolute top-0 left-0 right-0'
-            }`}>
+        <div className={`relative z-10 transition-all duration-500 ease-in-out ${districtHasSectors
+          ? 'opacity-100 translate-y-0 scale-100'
+          : 'opacity-0 -translate-y-2 scale-95 pointer-events-none absolute hidden'
+          }`}>
+          {districtHasSectors && (
             <Select
               label="Sector *"
               value={
@@ -161,10 +170,10 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
                   : ''
               }
               onChange={handleSectorChange}
-              options={selectedDistrict ? getSectorOptions(selectedDistrict) : []}
+              options={getSectorOptions(selectedDistrict)}
               error={errors.company?.addresses?.[0]?.id_sector?.message}
             />
-          </div>
+          )}
         </div>
       </div>
 
@@ -173,13 +182,14 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
           name="company.addresses.0.address"
           type="text"
           label="Dirección *"
+          className="capitalize"
           autoComplete="street-address"
           error={errors.company?.addresses?.[0]?.address?.message}
           value={watchedValues.company?.addresses?.[0]?.address || ''}
           onChange={async (e) => {
             const value = e.target.value;
-            const upperValue = value.toUpperCase();
-            setValue('company.addresses.0.address', upperValue);
+            const titleValue = toTitleCase(value);
+            setValue('company.addresses.0.address', titleValue);
             await trigger('company.addresses.0.address');
           }}
         />

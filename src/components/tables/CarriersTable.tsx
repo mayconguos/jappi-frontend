@@ -43,26 +43,29 @@ export default function CarriersTable({
             <TableCell>
               <div className="flex gap-2 justify-center">
                 <Button
-                  size="sm"
-                  variant="icon-view"
+                  size="icon"
+                  variant="ghost"
                   onClick={() => onView(carrier)}
+                  className="h-8 w-8 !rounded-full !border-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 shadow-sm"
                   title="Ver"
                 >
                   <Eye size={16} />
                 </Button>
                 <Button
-                  size="sm"
-                  variant="icon-edit"
+                  size="icon"
+                  variant="ghost"
                   onClick={() => onEdit(carrier)}
+                  className="h-8 w-8 !rounded-full !border-0 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 shadow-sm"
                   title="Editar"
                 >
                   <Edit size={16} />
                 </Button>
                 <Button
-                  size="sm"
-                  variant="icon-delete"
+                  size="icon"
+                  variant="ghost"
                   title="Eliminar"
                   onClick={() => onDelete(carrier)}
+                  className="h-8 w-8 !rounded-full !border-0 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 shadow-sm"
                 >
                   <Trash2 size={16} />
                 </Button>

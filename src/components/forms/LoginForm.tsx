@@ -24,10 +24,10 @@ export default function LoginForm() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'almacen@japiexpress.com',
-      password: 'japientregas24680'
-      // email: 'velia.guerra@gmail.com',
-      // password: 'administracion2015'
+      // email: 'almacen@japiexpress.com',
+      // password: 'japientregas24680'
+      email: 'velia.guerra@gmail.com',
+      password: 'administracion2015'
     }
   });
 

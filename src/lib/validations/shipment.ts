@@ -136,7 +136,7 @@ export const shipmentSchema = z.object({
   // Validar el número de documento del remitente según el tipo
   const senderValidator = createDocumentNumberValidator(data.sender.document_type);
   const senderResult = senderValidator.safeParse(data.sender.document_number);
-  
+
   if (!senderResult.success) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -148,7 +148,7 @@ export const shipmentSchema = z.object({
   // Validar el número de documento del destinatario según el tipo
   const recipientValidator = createDocumentNumberValidator(data.recipient.document_type);
   const recipientResult = recipientValidator.safeParse(data.recipient.document_number);
-  
+
   if (!recipientResult.success) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -167,7 +167,7 @@ export const shipmentSchema = z.object({
   }
 
   // Validar campos de pago solo si el modo de entrega es "contra entrega"
-  if (data.service.delivery_mode === 'cod') {
+  if (data.service.delivery_mode === 'pay_on_delivery') {
     if (!data.service.payment_method || data.service.payment_method.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -189,7 +189,7 @@ export const shipmentSchema = z.object({
   if (data.service.preferred_pickup_date && data.service.preferred_delivery_date) {
     const pickupDate = new Date(data.service.preferred_pickup_date);
     const deliveryDate = new Date(data.service.preferred_delivery_date);
-    
+
     if (deliveryDate <= pickupDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

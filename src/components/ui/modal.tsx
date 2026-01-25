@@ -126,13 +126,14 @@ export function Modal({
         {/* Modal Content */}
         <div className={`
           relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl border border-gray-100/50 transition-all sm:my-8 w-full
+          flex flex-col
           ${sizeClasses[size]}
           ${className}
         `}>
 
           {/* Header */}
           {(title || description || showCloseButton) && (
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-white z-10">
               <div>
                 {title && (
                   <h3 className="text-xl font-semibold leading-6 text-gray-900" id="modal-title">
@@ -164,13 +165,13 @@ export function Modal({
           )}
 
           {/* Body */}
-          <div className="px-6 py-6 sm:p-8">
+          <div className="flex-1 overflow-y-auto px-6 py-6 sm:p-8">
             {children}
           </div>
 
           {/* Footer */}
           {footer && (
-            <div className="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 rounded-b-xl border-t border-gray-100">
+            <div className="bg-white px-6 py-6 flex items-center justify-end gap-3 rounded-b-xl border-t border-gray-100 shrink-0 z-10">
               {footer}
             </div>
           )}

@@ -249,8 +249,8 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
               placeholder="Ingrese el nombre"
               error={errors.first_name?.message}
               value={watch('first_name') || ''}
-              onChange={(value) => {
-                setValue('first_name', value.toUpperCase(), { shouldDirty: true });
+              onChange={(e) => {
+                setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
               }}
             />
           </div>
@@ -262,8 +262,8 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
               placeholder="Ingrese el apellido"
               error={errors.last_name?.message}
               value={watch('last_name') || ''}
-              onChange={(value) => {
-                setValue('last_name', value.toUpperCase(), { shouldDirty: true });
+              onChange={(e) => {
+                setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
               }}
             />
           </div>
@@ -292,8 +292,8 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
               placeholder="Ingrese el número de documento"
               error={errors.document_number?.message}
               value={watch('document_number') || ''}
-              onChange={(value) => {
-                setValue('document_number', value, { shouldDirty: true });
+              onChange={(e) => {
+                setValue('document_number', e.target.value, { shouldDirty: true });
               }}
             />
           </div>
@@ -308,8 +308,8 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
               autoComplete="username"
               disabled={!!editingWorker}
               value={watch('email') || ''}
-              onChange={(value) => {
-                setValue('email', value.toLowerCase(), { shouldDirty: true });
+              onChange={(e) => {
+                setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
               }}
             />
             {editingWorker && (
@@ -323,7 +323,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                 label="Contraseña *"
                 size='compact'
                 value={watch('password') || ''}
-                onChange={(value) => setValue('password', value)}
+                onChange={(e) => setValue('password', e.target.value)}
                 disabled={isLoading}
                 error={errors.password?.message}
                 autoComplete="new-password"

@@ -1,11 +1,11 @@
-'use client';
-
 import { UseFormReturn } from 'react-hook-form';
-import { User, MapPin, CheckCircle2, ChevronDown } from 'lucide-react';
+import { MapPin, CheckCircle2, ChevronDown, User, Phone, Mail } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
@@ -15,14 +15,16 @@ interface RecipientSectionProps {
   form: UseFormReturn<ShipmentFormData>;
   isActive: boolean;
   isCompleted: boolean;
-  onContinue: () => void;
+  onContinue: () => void; // Prop crítica para avanzar
   onEdit?: () => void;
+  onBack?: () => void;
 }
 
-export default function RecipientSection({ form, isActive, isCompleted, onContinue, onEdit }: RecipientSectionProps) {
+export default function RecipientSection({ form, isActive, isCompleted, onContinue, onEdit, onBack }: RecipientSectionProps) {
   const { getRegionOptions, getDistrictOptions, getSectorOptions } = useLocationCatalog();
   const { formState: { errors }, watch, setValue, trigger } = form;
   const watchedValues = watch();
+  const [isValidating, setIsValidating] = useState(false);
 
   const selectedRegion = watchedValues.recipient?.address?.id_region;
   const selectedDistrict = watchedValues.recipient?.address?.id_district;
@@ -33,117 +35,163 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
   const recipientDistrictOptions = getDistrictOptions(selectedRegion || 0);
   const recipientSectorOptions = getSectorOptions(selectedDistrict || 0);
 
+  const handleContinue = async () => {
+    setIsValidating(true);
+
+    // Lista de campos a validar en esta sección
+    const fieldsToValidate: (keyof ShipmentFormData | `recipient.${string}`)[] = [
+      'recipient.full_name',
+      'recipient.phone',
+      'recipient.email', // Opcional pero verificamos formato correcto si está lleno
+      'recipient.address.id_region',
+      'recipient.address.id_district',
+      'recipient.address.address',
+      'recipient.address.reference'
+    ];
+
+    if (districtHasSectors) {
+      fieldsToValidate.push('recipient.address.id_sector' as any);
+    }
+
+    // Ejecutar validación
+    const isValid = await trigger(fieldsToValidate as any);
+
+    setIsValidating(false);
+
+    if (isValid) {
+      onContinue();
+    }
+  };
+
   return (
     <div className={clsx(
-      "bg-white rounded-[24px] shadow-sm transition-all duration-500 border",
-      isActive ? "overflow-visible" : "overflow-hidden",
-      isCompleted ? "border-emerald-200" : (isActive ? "border-[var(--surface-dark)] ring-1 ring-[var(--surface-dark)]/20 shadow-lg" : "border-slate-100 opacity-60")
+      "transition-all duration-500 ease-in-out",
+      isActive ? "opacity-100 translate-y-0" : (isCompleted ? "opacity-60" : "opacity-40 translate-y-4 pointer-events-none")
     )}>
-      <div
-        className={clsx(
-          "px-8 py-6 flex items-center justify-between border-b transition-colors duration-300",
-          isCompleted ? "bg-emerald-50 border-emerald-100" : (isActive ? "bg-white border-slate-100" : "bg-slate-50 border-transparent")
-        )}
-      >
-        <div className="flex items-center gap-4">
-          <div className={clsx(
-            "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
-            isCompleted ? "bg-emerald-500 text-white shadow-emerald-200" : (isActive ? "bg-[var(--surface-dark)] text-white shadow-lg shadow-[var(--surface-dark)]/30" : "bg-slate-200 text-slate-400")
-          )}>
-            {isCompleted ? <CheckCircle2 size={24} /> : <User size={20} />}
+      <Card className="overflow-hidden border-gray-200 shadow-sm bg-white">
+
+        {/* HEADER */}
+        <div className="px-6 py-5 flex items-center justify-between border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className={clsx(
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all",
+              isCompleted ? "bg-emerald-100 text-emerald-600" : "bg-[#02997d]/10 text-[#02997d]"
+            )}>
+              {isCompleted ? <CheckCircle2 size={18} /> : <span>2</span>}
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">
+                Datos del Destinatario
+              </h3>
+              {!isCompleted && <p className="text-xs text-gray-500">A quién entregamos el paquete</p>}
+            </div>
           </div>
-          <div>
-            <h3 className={clsx("text-lg font-bold transition-colors", isCompleted ? "text-emerald-800" : "text-slate-900")}>
-              Datos del Destinatario
-            </h3>
-            <p className="text-sm text-slate-500">
-              {isCompleted ? "Información del cliente completada" : "Quién recibe el paquete"}
-            </p>
-          </div>
+
+          {isCompleted && onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="text-sm text-gray-400 hover:text-gray-600 font-medium flex items-center transition-colors"
+            >
+              Editar <ChevronDown size={14} className="ml-1" />
+            </button>
+          )}
         </div>
 
-        {isCompleted && onEdit && (
-          <Button variant="ghost" size="sm" onClick={onEdit} className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 rounded-full">
-            <span className="mr-2 text-xs font-bold uppercase">Editar</span>
-            <ChevronDown size={16} />
-          </Button>
-        )}
-      </div>
+        {/* BODY */}
+        <div className={clsx(
+          "transition-all duration-500",
+          !isActive && !isCompleted ? "max-h-0 py-0 opacity-0 overflow-hidden" : "max-h-[2000px] opacity-100"
+        )}>
+          <div className="p-6 space-y-8">
 
-      <div className={clsx(
-        "transition-all duration-500 ease-in-out",
-        (isActive || isCompleted) ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0",
-        isActive ? "overflow-visible" : "overflow-hidden"
-      )}>
-        <div className={clsx("p-8 space-y-8", isCompleted && "pointer-events-none opacity-80 grayscale-[0.3]")}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Input
-                label="Nombre completo *"
-                value={watchedValues.recipient?.full_name || ''}
-                onChange={async (value) => {
-                  setValue('recipient.full_name', value.toUpperCase());
-                  await trigger('recipient.full_name');
-                }}
-                error={errors.recipient?.full_name?.message}
-              />
-            </div>
-
-            <div>
-              <Input
-                label="Teléfono *"
-                value={watchedValues.recipient?.phone || ''}
-                onChange={async (value) => {
-                  const numericValue = value.replace(/\D/g, '');
-                  setValue('recipient.phone', numericValue);
-                  await trigger('recipient.phone');
-                }}
-                error={errors.recipient?.phone?.message}
-                maxLength={9}
-              />
-            </div>
-
-            <div>
-              <Input
-                label="Correo electrónico"
-                type="email"
-                value={watchedValues.recipient?.email || ''}
-                onChange={async (value) => {
-                  setValue('recipient.email', value.toLowerCase());
-                  await trigger('recipient.email');
-                }}
-                error={errors.recipient?.email?.message}
-              />
-            </div>
-          </div>
-
-          <div className="mt-2">
-            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <MapPin size={16} />
-              Dirección de entrega
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative z-30">
-                <Select
-                  label="Región *"
-                  value={watchedValues.recipient?.address?.id_region?.toString() || ''}
-                  options={regionOptions}
-                  onChange={async (value) => {
-                    setValue('recipient.address.id_region', parseInt(value));
-                    setValue('recipient.address.id_district', 0);
-                    setValue('recipient.address.id_sector', 0);
-                    await trigger(['recipient.address.id_region', 'recipient.address.id_district']);
+            {/* Grid: Datos Personales con Iconos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-1">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <User size={14} className="text-gray-400" />
+                  <label className="text-sm font-medium text-gray-700">Nombre Completo / Razón Social *</label>
+                </div>
+                <Input
+                  value={watchedValues.recipient?.full_name || ''}
+                  onChange={async (e) => {
+                    const value = e.target.value;
+                    setValue('recipient.full_name', value.toUpperCase());
+                    await trigger('recipient.full_name');
                   }}
-                  error={errors.recipient?.address?.id_region?.message}
+                  error={errors.recipient?.full_name?.message}
+                  className="h-10 border-gray-200 focus:border-[#02997d]"
+                  placeholder="Ej. Juan Pérez / Empresa S.A.C."
                 />
               </div>
 
-              <div className="relative z-20">
-                <div className={`transition-all duration-300 ease-in-out ${selectedRegion
-                  ? 'opacity-100 translate-y-0 max-h-96'
-                  : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden pointer-events-none absolute top-0 left-0 right-0'
-                  }`}>
+              <div className="md:col-span-1">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Phone size={14} className="text-gray-400" />
+                  <label className="text-sm font-medium text-gray-700">Teléfono *</label>
+                </div>
+                <Input
+                  value={watchedValues.recipient?.phone || ''}
+                  onChange={async (e) => {
+                    const value = e.target.value;
+                    const numericValue = value.replace(/\D/g, '');
+                    setValue('recipient.phone', numericValue);
+                    await trigger('recipient.phone');
+                  }}
+                  error={errors.recipient?.phone?.message}
+                  maxLength={9}
+                  prefix="+51"
+                  className="h-10 border-gray-200 focus:border-[#02997d]"
+                  placeholder="999 999 999"
+                />
+              </div>
+
+              <div className="col-span-full">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Mail size={14} className="text-gray-400" />
+                  <label className="text-sm font-medium text-gray-700">Correo electrónico (Opcional)</label>
+                </div>
+                <Input
+                  type="email"
+                  value={watchedValues.recipient?.email || ''}
+                  onChange={async (e) => {
+                    const value = e.target.value;
+                    setValue('recipient.email', value.toLowerCase());
+                    await trigger('recipient.email');
+                  }}
+                  error={errors.recipient?.email?.message}
+                  className="h-10 border-gray-200 focus:border-[#02997d]"
+                  placeholder="juan@ejemplo.com"
+                />
+              </div>
+            </div>
+
+            {/* Dirección de Entrega (Bloque Contenido) */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
+              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <MapPin size={14} /> Dirección de Entrega
+              </h4>
+
+              {/* Fila 1: Selectores (Fondo Blanco) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                {/* Región */}
+                <div className="relative">
+                  <Select
+                    label="Región *"
+                    value={watchedValues.recipient?.address?.id_region?.toString() || ''}
+                    options={regionOptions}
+                    onChange={async (value) => {
+                      setValue('recipient.address.id_region', parseInt(value));
+                      setValue('recipient.address.id_district', 0);
+                      setValue('recipient.address.id_sector', 0);
+                      await trigger(['recipient.address.id_region', 'recipient.address.id_district']);
+                    }}
+                    error={errors.recipient?.address?.id_region?.message}
+                  />
+                </div>
+
+                {/* Distrito */}
+                <div className={clsx("transition-all duration-300 ease-in-out relative", selectedRegion ? 'opacity-100' : 'opacity-50 pointer-events-none')}>
                   <Select
                     label="Distrito *"
                     value={watchedValues.recipient?.address?.id_district?.toString() || ''}
@@ -156,61 +204,75 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                     error={errors.recipient?.address?.id_district?.message}
                   />
                 </div>
+
+                {/* Sector */}
+                {districtHasSectors ? (
+                  <div className="animate-in fade-in slide-in-from-top-2 relative">
+                    <Select
+                      label="Sector *"
+                      value={watchedValues.recipient?.address?.id_sector?.toString() || ''}
+                      options={recipientSectorOptions}
+                      onChange={async (value) => {
+                        setValue('recipient.address.id_sector', parseInt(value));
+                        await trigger('recipient.address.id_sector');
+                      }}
+                      error={errors.recipient?.address?.id_sector?.message}
+                    />
+                  </div>
+                ) : (
+                  <div className="hidden md:block"></div>
+                )}
               </div>
 
-              <div className="relative z-10">
-                <div className={`transition-all duration-300 ease-in-out ${districtHasSectors
-                  ? 'opacity-100 translate-y-0 max-h-96'
-                  : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden pointer-events-none absolute top-0 left-0 right-0'
-                  }`}>
-                  <Select
-                    label="Sector *"
-                    value={watchedValues.recipient?.address?.id_sector?.toString() || ''}
-                    options={recipientSectorOptions}
-                    onChange={async (value) => {
-                      setValue('recipient.address.id_sector', parseInt(value));
-                      await trigger('recipient.address.id_sector');
-                    }}
-                    error={
-                      errors.recipient?.address?.id_sector?.message ||
-                      (districtHasSectors &&
-                        (!watchedValues.recipient?.address?.id_sector || watchedValues.recipient?.address?.id_sector === 0)
-                        ? 'Debes seleccionar un sector'
-                        : '')
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-              <div>
+              {/* Fila 2: Dirección Exacta - Separada */}
+              <div className="mb-4">
                 <Input
-                  label="Dirección *"
+                  label="Dirección Exacta"
                   value={watchedValues.recipient?.address?.address || ''}
-                  onChange={async (value) => {
+                  onChange={async (e) => {
+                    const value = e.target.value;
                     setValue('recipient.address.address', value.toUpperCase());
                     await trigger('recipient.address.address');
                   }}
                   error={errors.recipient?.address?.address?.message}
+                  className="border-gray-200 focus:border-[#02997d]"
+                  placeholder="Av. Principal 123, Urb. Las Flores"
+                />
+              </div>
+
+              {/* Fila 3: Referencia - Separada */}
+              <div>
+                <Input
+                  label="Referencia"
+                  value={watchedValues.recipient?.address?.reference || ''}
+                  onChange={async (e) => {
+                    const value = e.target.value;
+                    setValue('recipient.address.reference', value.toUpperCase());
+                  }}
+                  error={errors.recipient?.address?.reference?.message}
+                  className="border-gray-200 focus:border-[#02997d]"
+                  placeholder="Ej. Portón negro, frente al parque..."
                 />
               </div>
             </div>
-          </div>
 
-          {!isCompleted && isActive && (
-            <div className="pt-6 flex justify-end">
-              <Button
-                onClick={onContinue}
-                type="button"
-                className="bg-[var(--surface-dark)] hover:bg-[var(--surface-dark)]/90 text-white px-8 rounded-full shadow-lg shadow-[var(--surface-dark)]/20 hover:shadow-xl hover:scale-105 transition-all"
-              >
-                Continuar al Pago
-              </Button>
-            </div>
-          )}
+            {/* BOTÓN DE NAVEGACIÓN */}
+            {!isCompleted && isActive && (
+              <div className="pt-8 flex justify-end border-t border-gray-50 mt-4">
+                <Button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={isValidating}
+                  className="bg-gray-900 text-white hover:bg-black px-8 h-11 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  {isValidating ? 'Validando...' : (watchedValues.service?.delivery_mode === 'pay_on_delivery' ? 'Continuar al Pago' : 'Confirmar Dirección')}
+                </Button>
+              </div>
+            )}
+
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

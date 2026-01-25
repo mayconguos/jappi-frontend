@@ -14,6 +14,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   error?: string;
   size?: 'default' | 'compact';
   icon?: LucideIcon;
+  prefix?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -41,6 +42,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
 
+          {props.prefix && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm pointer-events-none">
+              {props.prefix}
+            </span>
+          )}
+
           <input
             ref={ref}
             id={finalId}
@@ -53,7 +60,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
 
               // Icon padding
-              Icon ? 'pl-10' : 'px-3',
+              Icon ? 'pl-10' : (props.prefix ? 'pl-12' : 'px-3'),
 
               // Size variants
               size === 'compact' ? 'h-8 py-1 text-xs' : 'h-10 py-2 text-sm',

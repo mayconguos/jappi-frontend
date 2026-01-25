@@ -72,6 +72,14 @@ export default function RegisterForm() {
     prevStep: () => {
       if (currentStep === 1) {
         window.location.href = '/login';
+      } else if (currentStep === 3) {
+        // En el paso 3, si hay un método seleccionado, 'Atrás' solo resetea la selección
+        if (paymentMethod) {
+          setPaymentMethod(null);
+        } else {
+          // Si no hay selección, 'Atrás' vuelve al paso 2
+          setCurrentStep(currentStep - 1);
+        }
       } else if (currentStep > 1) {
         setCurrentStep(currentStep - 1);
       }

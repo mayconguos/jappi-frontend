@@ -292,8 +292,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Correo electrónico *"
                 size="compact"
                 value={watch('email') || ''}
-                onChange={(value) => {
-                  setValue('email', value.toLowerCase(), { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('email', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.email?.message}
                 autoComplete="username"
@@ -307,7 +307,7 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   label="Contraseña *"
                   size="compact"
                   value={watch('password') || ''}
-                  onChange={(value) => setValue('password', value)}
+                  onChange={(e) => setValue('password', e.target.value)}
                   disabled={isLoading}
                   error={'password' in errors ? errors.password?.message : undefined}
                   autoComplete="new-password"
@@ -321,8 +321,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Nombre *"
                 size="compact"
                 value={watch('first_name') || ''}
-                onChange={(value) => {
-                  setValue('first_name', value.toUpperCase(), { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.first_name?.message}
               />
@@ -332,8 +332,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Apellido *"
                 size="compact"
                 value={watch('last_name') || ''}
-                onChange={(value) => {
-                  setValue('last_name', value.toUpperCase(), { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.last_name?.message}
               />
@@ -360,8 +360,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Número de documento *"
                 size="compact"
                 value={watch('document_number') || ''}
-                onChange={(value) => {
-                  setValue('document_number', value, { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('document_number', e.target.value, { shouldDirty: true });
                 }}
                 error={errors.document_number?.message}
               />
@@ -386,8 +386,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Marca *"
                 size="compact"
                 value={watch('brand') || ''}
-                onChange={(value) => {
-                  setValue('brand', value.toUpperCase(), { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('brand', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.brand?.message}
               />
@@ -399,8 +399,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Modelo *"
                 size="compact"
                 value={watch('model') || ''}
-                onChange={(value) => {
-                  setValue('model', value.toUpperCase(), { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('model', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.model?.message}
               />
@@ -410,8 +410,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Placa *"
                 size="compact"
                 value={watch('plate_number') || ''}
-                onChange={(value) => {
-                  setValue('plate_number', value.toUpperCase(), { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('plate_number', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.plate_number?.message}
               />
@@ -423,8 +423,8 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 label="Licencia *"
                 size="compact"
                 value={watch('license') || ''}
-                onChange={(value) => {
-                  setValue('license', value, { shouldDirty: true });
+                onChange={(e) => {
+                  setValue('license', e.target.value, { shouldDirty: true });
                 }}
                 error={errors.license?.message}
               />
