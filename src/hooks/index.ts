@@ -1,5 +1,4 @@
 // Hooks de autenticación y rutas
-export { useAuth } from './useAuth';
 export { useUserRoutes } from './useUserRoutes';
 
 // Hooks de UI

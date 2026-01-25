@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Building2 } from 'lucide-react';
-import { Company } from '@/app/dashboard/companies/page';
+import { Company } from '@/app/dashboard/accounts/companies/page';
 
 interface CompaniesTableProps {
   companies: Company[];

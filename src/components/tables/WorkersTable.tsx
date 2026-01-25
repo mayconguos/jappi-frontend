@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, User } from 'lucide-react';
 import { getUserRoleLabel } from '@/constants/userRoles';
-import { Worker } from '@/app/dashboard/workers/page';
+import { Worker } from '@/app/dashboard/accounts/workers/page';
 
 interface WorkersTableProps {
   workers: Worker[];
@@ -50,8 +50,8 @@ export default function WorkersTable({
 
               <TableCell>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${worker.id_role === 1
-                    ? 'bg-purple-50 text-purple-700 border border-purple-100'
-                    : 'bg-blue-50 text-blue-700 border border-blue-100'
+                  ? 'bg-purple-50 text-purple-700 border border-purple-100'
+                  : 'bg-blue-50 text-blue-700 border border-blue-100'
                   }`}>
                   {getUserRoleLabel(worker.id_role)}
                 </span>

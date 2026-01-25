@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from '@/assets/logo.svg';
 import { ChevronLeft, ChevronRight, LogOut, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { clsx } from 'clsx';
 

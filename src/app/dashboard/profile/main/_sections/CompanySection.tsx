@@ -4,7 +4,7 @@ import { Edit, Plus, Trash2, Building2, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SaveButton } from '@/components/ui/save-button';
-import { AddressModal } from '@/app/dashboard/company/profile/_modals/address-modal';
+import { AddressModal } from '@/app/dashboard/profile/main/_modals/address-modal';
 
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
 

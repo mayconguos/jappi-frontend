@@ -16,3 +16,22 @@ export const getUserRoutes = (userType: number) => {
   const userRole = getRoleNameFromNumber(userType);
   return userRole ? roleRoutes[userRole] || [] : [];
 };
+
+export const getRedirectPathForUser = (roleNumber: number): string => {
+  const roleName = getRoleNameFromNumber(roleNumber);
+
+  switch (roleName) {
+    case 'admin':
+      return '/dashboard/accounts/pending';
+    case 'coordinacion':
+      return '/dashboard/shipments/calendar';
+    case 'empresa':
+      return '/dashboard/shipments/new';
+    case 'transportista':
+      return '/dashboard/carrier/pickups';
+    case 'almacen':
+      return '/dashboard/inventory/requests';
+    default:
+      return '/dashboard';
+  }
+};

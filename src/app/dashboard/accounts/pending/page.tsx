@@ -75,7 +75,7 @@ export default function ActivationsPage() {
   }, [del]);
 
   // Filter Logic
-  const filteredCompanies = unverifiedCompanies.filter(company =>
+  const filteredCompanies = (unverifiedCompanies || []).filter(company =>
     company.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     company.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     company.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

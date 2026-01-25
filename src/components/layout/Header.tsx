@@ -1,25 +1,17 @@
 'use client';
 
 import { Shield, Building, Bike, Boxes, Workflow, Menu, User, LogOut } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { clsx } from 'clsx';
 
-interface UserData {
-  id: number;
-  email: string;
-  name: string;
-  id_role: number;
-}
-
 interface HeaderProps {
-  user: UserData | null;
   onOpenSidebarMobile?: () => void;
 }
 
-export default function Header({ user, onOpenSidebarMobile }: HeaderProps) {
-  const { logout } = useAuth();
+export default function Header({ onOpenSidebarMobile }: HeaderProps) {
+  const { user, logout } = useAuth();
   const { pageTitle } = useUserRoutes();
   const { isOpen: showMenu, setIsOpen: setShowMenu, ref: menuRef } = useClickOutside<HTMLDivElement>();
 

@@ -7,9 +7,8 @@ import { useRouter } from 'next/navigation';
 
 import secureLocalStorage from 'react-secure-storage';
 
-import api from '@/app/services/api';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
-import { getRoleNameFromNumber } from '@/utils/roleUtils';
+import { useAuth } from '@/context/AuthContext';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,55 +31,22 @@ export default function LoginForm() {
     }
   });
 
+  const { login } = useAuth();
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const res = await api.post('/user/login', data);
-      const token = res.data.token;
-      const user = res.data.user;
-      const userWithRole = { ...user };
-      localStorage.setItem('token', token);
-      secureLocalStorage.setItem('user', userWithRole);
-
-      // Determine the role and redirect accordingly
-      const role = getRoleNameFromNumber(user.id_role);
-      let redirectPath = '/dashboard';
-
-      switch (role) {
-        case 'admin':
-          redirectPath = '/dashboard/activations';
-          break;
-        case 'coordinacion':
-          redirectPath = '/dashboard/deliveries-by-date';
-          break;
-        case 'empresa':
-          redirectPath = '/dashboard/company/create-shipment';
-          break;
-        case 'transportista':
-          redirectPath = '/dashboard/carrier/pickups';
-          break;
-        case 'almacen':
-          redirectPath = '/dashboard/warehouse-requests';
-          break;
-        default:
-          redirectPath = '/dashboard';
-      }
-
-      setIsRedirecting(true);
-      router.push(redirectPath);
+      await login(data);
+      // Redirection is handled in AuthContext
     } catch (err: unknown) {
-      // Type guard para verificar si es un error de axios
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { status: number } };
         if (axiosError.response) {
-          // El servidor respondió con un código de estado fuera del rango 2xx
           switch (axiosError.response.status) {
             case 401:
               setError('Credenciales inválidas. Verifica tu correo y contraseña.');
@@ -101,7 +67,6 @@ export default function LoginForm() {
           setError('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
         }
       } else {
-        // Algo más causó el error
         setError('Ocurrió un error inesperado. Por favor, intenta nuevamente.');
       }
     } finally {
@@ -109,17 +74,15 @@ export default function LoginForm() {
     }
   };
 
-  // Si ya hay usuario autenticado, redirigir inmediatamente y mostrar solo el loader
+  // Check if user is already logged in (optional, but good UX to prevent showing form if session exists)
   useEffect(() => {
     const user = secureLocalStorage.getItem('user');
     if (user) {
-      setIsRedirecting(true);
-      router.push('/dashboard');
+      router.replace('/dashboard');
     }
   }, [router]);
 
-  // Si está autenticando o redirigiendo, mostrar solo el loader de pantalla completa
-  if (isLoading || isRedirecting) {
+  if (isLoading) {
     return (
       <FullScreenDeliveryLoader
         isVisible={true}
@@ -130,9 +93,7 @@ export default function LoginForm() {
 
   return (
     <div className="w-full">
-      {/* Formulario */}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        {/* Campo Email */}
         <Input
           label="Correo electrónico"
           type="email"
@@ -144,7 +105,6 @@ export default function LoginForm() {
           error={errors.email?.message}
         />
 
-        {/* Campo Contraseña */}
         <div>
           <PasswordInput
             label="Contraseña"
@@ -162,7 +122,6 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
             <div className="flex items-start">
@@ -178,9 +137,7 @@ export default function LoginForm() {
           </div>
         )}
 
-        {/* Botones de acción */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-2">
-          {/* Crear cuenta (Link secundario) */}
           <Button
             type="button"
             variant="link"
@@ -190,7 +147,6 @@ export default function LoginForm() {
             ¿No tienes cuenta? <span className="underline font-bold">Regístrate</span>
           </Button>
 
-          {/* Botón Ingresar (Principal) */}
           <Button
             type='submit'
             shape="pill"
@@ -207,10 +163,8 @@ export default function LoginForm() {
             )}
           </Button>
         </div>
-
       </form>
 
-      {/* Footer Legal Extra Small */}
       <div className="mt-12 text-center border-t border-gray-100 pt-6">
         <p className="text-xs text-gray-400">
           Al iniciar sesión, aceptas nuestros{' '}

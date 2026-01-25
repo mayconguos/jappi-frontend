@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Package, Search } from 'lucide-react';
-import { Product } from '@/app/dashboard/warehouse/page';
+import { Product } from '@/app/dashboard/inventory/main/page';
 
 interface ProductsTableProps {
   products: Product[];
@@ -50,8 +50,8 @@ export default function ProductsTable({
 
               <TableCell className="text-center">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${product.current_stock > 10
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                  : 'bg-amber-50 text-amber-700 border border-amber-100'
                   }`}>
                   {product.current_stock} und.
                 </span>

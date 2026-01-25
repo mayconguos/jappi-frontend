@@ -205,7 +205,7 @@ export default function CreateShipmentPage() {
       // Simulación
       await new Promise(resolve => setTimeout(resolve, 1500));
       alert('¡Envío registrado exitosamente!');
-      router.push('/dashboard/company/shipments');
+      router.push('/dashboard/shipments/list');
 
     } catch (error) {
       console.error('Error al registrar envío:', error);

@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Edit, Eye, Trash2 } from 'lucide-react';
-import { Carrier } from '@/app/dashboard/carriers/page';
+import { Carrier } from '@/app/dashboard/accounts/carriers/page';
 
 interface CarriersTableProps {
   carriers: Carrier[];
