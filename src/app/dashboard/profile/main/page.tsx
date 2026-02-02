@@ -250,7 +250,7 @@ export default function CompanyProfilePage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-6 animate-in fade-in duration-500">
 
       {/* Mensajes de estado con estética moderna */}
       <div className="fixed top-24 right-8 z-50 flex flex-col gap-3 w-full max-w-md pointer-events-none">

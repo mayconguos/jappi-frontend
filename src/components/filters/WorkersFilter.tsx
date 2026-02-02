@@ -15,6 +15,7 @@ interface WorkersFilterProps {
   setValue: (value: string) => void;
   filterFields: FilterField[];
   onAdd: () => void;
+  totalItems: number;
 }
 
 export default function WorkersFilter({
@@ -24,6 +25,7 @@ export default function WorkersFilter({
   setValue,
   filterFields,
   onAdd,
+  totalItems,
 }: WorkersFilterProps) {
   return (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
@@ -41,7 +43,7 @@ export default function WorkersFilter({
             options={filterFields}
             placeholder="Seleccionar campo"
             icon={Filter}
-            className="bg-slate-50 border-slate-200"
+            className="bg-white border-slate-200"
           />
         </div>
         <div className="w-full sm:w-80">
@@ -51,15 +53,23 @@ export default function WorkersFilter({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             icon={Search}
-            className="bg-slate-50 border-slate-200"
+            className="bg-white border-slate-200"
           />
         </div>
       </div>
 
-      <div className="relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100">
+      <div className="flex items-center gap-4 relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100 flex-wrap justify-between sm:justify-end w-full xl:w-auto">
+        {/* Total Badge */}
+        <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 shadow-sm flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+          Total: <span className="text-slate-900 font-bold">{totalItems}</span>
+        </div>
+
+        <div className="w-px h-8 bg-slate-200 hidden sm:block" />
+
         <Button
           onClick={onAdd}
-          className="w-full sm:w-auto bg-[color:var(--surface-dark)] hover:bg-[#0f2e2e] text-white flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
+          className="w-full sm:w-auto flex items-center justify-center gap-2"
         >
           <UserPlus size={18} />
           <span>Añadir usuario</span>

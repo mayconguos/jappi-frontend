@@ -155,20 +155,23 @@ export function AddressModal({
 
   const footerContent = (
     <ModalFooter>
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={handleCancel}
-      >
-        Cancelar
-      </Button>
-      <Button
-        type="button"
-        onClick={handleSave}
-        className="shadow-lg shadow-[var(--button-hover-color)]/20"
-      >
-        {address ? 'Actualizar Dirección' : 'Agregar Dirección'}
-      </Button>
+      <div className="flex justify-between w-full">
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-gray-500"
+          onClick={handleCancel}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="button"
+          onClick={handleSave}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20"
+        >
+          {address ? 'Actualizar Dirección' : 'Agregar Dirección'}
+        </Button>
+      </div>
     </ModalFooter>
   );
 
@@ -190,18 +193,19 @@ export function AddressModal({
             onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
             placeholder="Av. Ejemplo 123, Oficina 456"
             error={errors.address}
+            className="bg-white"
           />
         </div>
 
         {/* Ubicación geográfica */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
           <div className="space-y-1">
             <Select
               label="Región *"
               value={formData.id_region === 0 ? '' : formData.id_region?.toString() || ''}
               onChange={handleRegionChange}
               options={getRegionOptions()}
-              className={errors.id_region ? 'border-red-300' : ''}
+              className={`${errors.id_region ? 'border-red-300' : 'border-gray-200'} bg-white`}
             />
             {errors.id_region && <p className="text-[10px] text-red-500 font-bold uppercase ml-1">{errors.id_region}</p>}
           </div>
@@ -212,7 +216,7 @@ export function AddressModal({
               value={formData.id_district === 0 ? '' : formData.id_district?.toString() || ''}
               onChange={handleDistrictChange}
               options={formData.id_region === 0 ? [] : getDistrictOptions(formData.id_region)}
-              className={errors.id_district ? 'border-red-300' : ''}
+              className={`${errors.id_district ? 'border-red-300' : 'border-gray-200'} bg-white`}
             />
             {errors.id_district && <p className="text-[10px] text-red-500 font-bold uppercase ml-1">{errors.id_district}</p>}
           </div>
@@ -224,29 +228,30 @@ export function AddressModal({
                 value={formData.id_sector?.toString() || ''}
                 onChange={(value) => setFormData(prev => ({ ...prev, id_sector: value ? parseInt(value) : undefined }))}
                 options={getSectorOptions(formData.id_district)}
+                className="bg-white border-gray-200"
               />
             </div>
           )}
         </div>
 
         {/* Preview de la ubicación */}
-        <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
-          <div className="flex items-center gap-2 mb-3 text-slate-400">
+        <div className="bg-gray-900 rounded-2xl p-5 shadow-inner">
+          <div className="flex items-center gap-2 mb-3 text-gray-400">
             <MapPin size={14} />
             <h4 className="text-[10px] font-bold uppercase tracking-widest">Resumen de Ubicación</h4>
           </div>
           <div className="space-y-1">
             <p className="text-white font-medium flex items-center justify-between">
-              <span className="text-slate-500 text-xs">Región:</span>
+              <span className="text-gray-500 text-xs">Región:</span>
               <span>{getRegionName(formData.id_region) || '---'}</span>
             </p>
             <p className="text-white font-medium flex items-center justify-between">
-              <span className="text-slate-500 text-xs">Distrito:</span>
+              <span className="text-gray-500 text-xs">Distrito:</span>
               <span>{getDistrictName(formData.id_district) || '---'}</span>
             </p>
             {formData.id_sector && getSectorName(formData.id_sector) && (
               <p className="text-white font-medium flex items-center justify-between">
-                <span className="text-slate-500 text-xs">Sector:</span>
+                <span className="text-gray-500 text-xs">Sector:</span>
                 <span>{getSectorName(formData.id_sector)}</span>
               </p>
             )}

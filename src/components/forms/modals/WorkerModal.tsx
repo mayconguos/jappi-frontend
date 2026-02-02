@@ -209,152 +209,192 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
         isOpen={isOpen}
         onClose={handleClose}
         title={editingWorker ? 'Editar usuario' : 'Añadir usuario'}
-        size="md"
+        size="lg"
         showCloseButton
       >
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
           {apiError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+              <span className="block w-1.5 h-1.5 rounded-full bg-red-600 mb-0.5" />
               {apiError}
             </div>
           )}
 
-          <div>
-            {editingWorker ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            {/* Grupo 1: Nombre */}
+            <div className="md:col-span-2">
+              <h4 className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
+                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+                Información Personal
+              </h4>
+            </div>
+
+            <div className="space-y-1.5">
               <Input
-                label="Rol de usuario *"
-                value={ADMIN_USER_ROLES.find(role => role.value === watch('id_role').toString())?.label || ''}
-                disabled
+                label="Nombre *"
                 size='compact'
-              />
-            ) : (
-              <Select
-                label="Rol de usuario *"
-                value={watch('id_role').toString()}
-                options={ADMIN_USER_ROLES}
-                onChange={(value: string) => {
-                  setValue('id_role', parseInt(value));
-                  clearErrors('id_role');
+                placeholder="Ej: Juan"
+                error={errors.first_name?.message}
+                value={watch('first_name') || ''}
+                onChange={(e) => {
+                  setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
-                error={errors.id_role?.message}
-                size='compact'
-              />
-            )}
-          </div>
-
-          <div>
-            <Input
-              label="Nombre *"
-              size='compact'
-              placeholder="Ingrese el nombre"
-              error={errors.first_name?.message}
-              value={watch('first_name') || ''}
-              onChange={(e) => {
-                setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
-              }}
-            />
-          </div>
-
-          <div>
-            <Input
-              label="Apellido *"
-              size='compact'
-              placeholder="Ingrese el apellido"
-              error={errors.last_name?.message}
-              value={watch('last_name') || ''}
-              onChange={(e) => {
-                setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
-              }}
-            />
-          </div>
-
-          <div>
-            <Select
-              label="Tipo de documento *"
-              value={watch('document_type')}
-              size='compact'
-              options={DOCUMENT_TYPES}
-              error={errors.document_type?.message}
-              onChange={(value: string) => {
-                setValue('document_type', value);
-                clearErrors('document_type');
-                // Limpiar el número de documento cuando cambie el tipo
-                setValue('document_number', '');
-                clearErrors('document_number');
-              }}
-            />
-          </div>
-
-          <div>
-            <Input
-              size='compact'
-              label="Número de documento *"
-              placeholder="Ingrese el número de documento"
-              error={errors.document_number?.message}
-              value={watch('document_number') || ''}
-              onChange={(e) => {
-                setValue('document_number', e.target.value, { shouldDirty: true });
-              }}
-            />
-          </div>
-
-          <div>
-            <Input
-              type="email"
-              label="Correo electrónico *"
-              size='compact'
-              placeholder="Ingrese el correo electrónico"
-              error={errors.email?.message}
-              autoComplete="username"
-              disabled={!!editingWorker}
-              value={watch('email') || ''}
-              onChange={(e) => {
-                setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
-              }}
-            />
-            {editingWorker && (
-              <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>
-            )}
-          </div>
-
-          {!editingWorker && (
-            <div>
-              <PasswordInput
-                label="Contraseña *"
-                size='compact'
-                value={watch('password') || ''}
-                onChange={(e) => setValue('password', e.target.value)}
-                disabled={isLoading}
-                error={errors.password?.message}
-                autoComplete="new-password"
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                autoFocus={!editingWorker}
               />
             </div>
-          )}
 
-          <ModalFooter>
+            <div className="space-y-1.5">
+              <Input
+                label="Apellido *"
+                size='compact'
+                placeholder="Ej: Pérez"
+                error={errors.last_name?.message}
+                value={watch('last_name') || ''}
+                onChange={(e) => {
+                  setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
+                }}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              />
+            </div>
+
+            <div className="md:col-span-2 border-t border-slate-100 my-1 pt-3">
+              <h4 className="text-sm font-medium text-slate-900 mb-1 flex items-center gap-2">
+                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+                Identificación
+              </h4>
+            </div>
+
+            {/* Grupo 2: Documento */}
+            <div className="space-y-1.5">
+              <Select
+                label="Tipo de documento *"
+                value={watch('document_type')}
+                size='compact'
+                options={DOCUMENT_TYPES}
+                error={errors.document_type?.message}
+                className="bg-slate-50 border-slate-200"
+                onChange={(value: string) => {
+                  setValue('document_type', value);
+                  clearErrors('document_type');
+                  setValue('document_number', '');
+                  clearErrors('document_number');
+                }}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Input
+                size='compact'
+                label="Número de documento *"
+                placeholder="Ingrese número"
+                error={errors.document_number?.message}
+                value={watch('document_number') || ''}
+                onChange={(e) => {
+                  setValue('document_number', e.target.value, { shouldDirty: true });
+                }}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              />
+            </div>
+
+            <div className="md:col-span-2 border-t border-slate-100 my-1 pt-3">
+              <h4 className="text-sm font-medium text-slate-900 mb-1 flex items-center gap-2">
+                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+                Datos de Cuenta
+              </h4>
+            </div>
+
+            {/* Grupo 3: Cuenta */}
+            <div className="space-y-1.5">
+              <Input
+                type="email"
+                label="Correo electrónico *"
+                size='compact'
+                placeholder="nombre@empresa.com"
+                error={errors.email?.message}
+                autoComplete="username"
+                disabled={!!editingWorker}
+                value={watch('email') || ''}
+                onChange={(e) => {
+                  setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
+                }}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              />
+              {editingWorker && (
+                <p className="text-slate-400 text-xs ml-1 flex items-center gap-1">
+                  <span>🔒</span> El correo no se puede editar
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              {editingWorker ? (
+                <Input
+                  label="Rol de usuario *"
+                  value={ADMIN_USER_ROLES.find(role => role.value === watch('id_role').toString())?.label || ''}
+                  disabled
+                  size='compact'
+                  className="bg-slate-100 text-slate-500 border-transparent"
+                />
+              ) : (
+                <Select
+                  label="Rol de usuario *"
+                  value={watch('id_role').toString()}
+                  options={ADMIN_USER_ROLES}
+                  onChange={(value: string) => {
+                    setValue('id_role', parseInt(value));
+                    clearErrors('id_role');
+                  }}
+                  error={errors.id_role?.message}
+                  size='compact'
+                  className="bg-slate-50 border-slate-200"
+                />
+              )}
+            </div>
+
+            {/* Grupo 4: Contraseña */}
+            {!editingWorker && (
+              <div className="md:col-span-2 space-y-1.5">
+                <PasswordInput
+                  label="Contraseña *"
+                  size='compact'
+                  value={watch('password') || ''}
+                  onChange={(e) => setValue('password', e.target.value)}
+                  disabled={isLoading}
+                  error={errors.password?.message}
+                  autoComplete="new-password"
+                  className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                />
+              </div>
+            )}
+          </div>
+
+          <ModalFooter className="pt-2">
             <Button
               type="button"
+              variant="secondary"
               onClick={handleClose}
-              className="bg-gray-500 hover:bg-gray-600 text-white"
+              disabled={isLoading}
             >
               Cancelar
             </Button>
             <Button
               type="submit"
+              variant="primary"
               disabled={isLoading || (isEditing && Object.keys(dirtyFields).length === 0)}
-              className="bg-primary text-white disabled:opacity-50"
+              className="min-w-[120px]"
             >
               {isLoading ?
                 (editingWorker ? 'Actualizando...' : 'Guardando...') :
-                (editingWorker ? 'Actualizar' : 'Guardar')
+                (editingWorker ? 'Guardar Cambios' : 'Crear Usuario')
               }
             </Button>
           </ModalFooter>
         </form>
 
         {isLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-            <DeliveryLoader message={editingWorker ? 'Actualizando trabajador...' : 'Guardando trabajador...'} />
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
+            <DeliveryLoader message={editingWorker ? 'Actualizando...' : 'Guardando...'} />
           </div>
         )}
       </Modal>

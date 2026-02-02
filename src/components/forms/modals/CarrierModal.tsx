@@ -278,45 +278,24 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
         showCloseButton
       >
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-8 relative">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 relative">
           {apiError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded col-span-2">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4">
               {apiError}
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Fila 1: Correo | Contraseña */}
-            <div>
-              <Input
-                type="email"
-                label="Correo electrónico *"
-                size="compact"
-                value={watch('email') || ''}
-                onChange={(e) => {
-                  setValue('email', e.target.value.toUpperCase(), { shouldDirty: true });
-                }}
-                error={errors.email?.message}
-                autoComplete="username"
-                disabled={!!editingCarrier}
-              />
-              {editingCarrier && <p className="text-gray-500 text-xs mt-1">El correo no puede ser modificado</p>}
-            </div>
-            {!editingCarrier && (
-              <div>
-                <PasswordInput
-                  label="Contraseña *"
-                  size="compact"
-                  value={watch('password') || ''}
-                  onChange={(e) => setValue('password', e.target.value)}
-                  disabled={isLoading}
-                  error={'password' in errors ? errors.password?.message : undefined}
-                  autoComplete="new-password"
-                />
-              </div>
-            )}
 
-            {/* Fila 2: Nombre | Apellido */}
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+
+            {/* SECCIÓN 1: INFORMACIÓN PERSONAL */}
+            <div className="md:col-span-2">
+              <h4 className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
+                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+                Información Personal
+              </h4>
+            </div>
+
+            <div className="space-y-1.5">
               <Input
                 label="Nombre *"
                 size="compact"
@@ -325,9 +304,12 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.first_name?.message}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                autoFocus={!editingCarrier}
               />
             </div>
-            <div>
+
+            <div className="space-y-1.5">
               <Input
                 label="Apellido *"
                 size="compact"
@@ -336,11 +318,11 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.last_name?.message}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            {/* Fila 3: Tipo documento | Número de documento */}
-            <div>
+            <div className="space-y-1.5">
               <Select
                 label="Tipo de documento *"
                 size="compact"
@@ -353,9 +335,11 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   clearErrors('document_number');
                 }}
                 error={errors.document_type?.message}
+                className="bg-slate-50 border-slate-200"
               />
             </div>
-            <div>
+
+            <div className="space-y-1.5">
               <Input
                 label="Número de documento *"
                 size="compact"
@@ -364,11 +348,55 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('document_number', e.target.value, { shouldDirty: true });
                 }}
                 error={errors.document_number?.message}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            {/* Fila 4: Tipo de vehículo | Marca */}
-            <div className="md:col-span-1">
+            <div className="space-y-1.5">
+              <Input
+                type="email"
+                label="Correo electrónico *"
+                size="compact"
+                value={watch('email') || ''}
+                onChange={(e) => {
+                  setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
+                }}
+                error={errors.email?.message}
+                autoComplete="username"
+                disabled={!!editingCarrier}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              />
+              {editingCarrier && (
+                <p className="text-slate-400 text-xs mt-1 flex items-center gap-1">
+                  <span>🔒</span> El correo no puede ser modificado
+                </p>
+              )}
+            </div>
+
+            {!editingCarrier && (
+              <div className="space-y-1.5">
+                <PasswordInput
+                  label="Contraseña *"
+                  size="compact"
+                  value={watch('password') || ''}
+                  onChange={(e) => setValue('password', e.target.value)}
+                  disabled={isLoading}
+                  error={'password' in errors ? errors.password?.message : undefined}
+                  autoComplete="new-password"
+                  className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                />
+              </div>
+            )}
+
+            <div className="md:col-span-2 border-t border-slate-100 my-1 pt-3">
+              <h4 className="text-sm font-medium text-slate-900 mb-1 flex items-center gap-2">
+                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+                Datos del Vehículo
+              </h4>
+            </div>
+
+            {/* SECCIÓN 2: DATOS DEL VEHÍCULO */}
+            <div className="space-y-1.5">
               <Select
                 label="Tipo de vehículo *"
                 size="compact"
@@ -379,9 +407,11 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   clearErrors('vehicle_type');
                 }}
                 error={errors.vehicle_type?.message}
+                className="bg-slate-50 border-slate-200"
               />
             </div>
-            <div className="md:col-span-1">
+
+            <div className="space-y-1.5">
               <Input
                 label="Marca *"
                 size="compact"
@@ -390,11 +420,11 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('brand', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.brand?.message}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            {/* Fila 5: Modelo | Placa */}
-            <div className="md:col-span-1">
+            <div className="space-y-1.5">
               <Input
                 label="Modelo *"
                 size="compact"
@@ -403,9 +433,11 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('model', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.model?.message}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
               />
             </div>
-            <div className="md:col-span-1">
+
+            <div className="space-y-1.5">
               <Input
                 label="Placa *"
                 size="compact"
@@ -414,34 +446,40 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   setValue('plate_number', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.plate_number?.message}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                placeholder="Ej: ABC-123"
               />
             </div>
 
-            {/* Fila 6: Licencia */}
-            <div className="md:col-span-1">
+            <div className="md:col-span-2 space-y-1.5">
               <Input
                 label="Licencia *"
                 size="compact"
                 value={watch('license') || ''}
                 onChange={(e) => {
-                  setValue('license', e.target.value, { shouldDirty: true });
+                  setValue('license', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.license?.message}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
               />
             </div>
+
           </div>
-          <ModalFooter>
+
+          <ModalFooter className="pt-2">
             <Button
               type="button"
+              variant="secondary"
               onClick={handleClose}
-              className="bg-gray-500 hover:bg-gray-600 text-white"
+              className="bg-white border text-slate-700 hover:bg-slate-50"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
+              variant="primary"
               disabled={isLoading || (isEditing && Object.keys(dirtyFields).length === 0)}
-              className="bg-primary text-white disabled:opacity-50"
+              className="min-w-[120px]"
             >
               {isLoading ?
                 (editingCarrier ? 'Actualizando...' : 'Guardando...') :

@@ -152,7 +152,7 @@ export default function CompanySection({
       {/* Información Básica */}
       <section>
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
             <Building2 size={24} />
           </div>
           <div>
@@ -161,13 +161,13 @@ export default function CompanySection({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
           <div className="group">
             <Input
               label="Nombre de la Empresa"
               value={formData.company_name || 'No especificado'}
               disabled
-              className="bg-white/50"
+              className="bg-white/50 border-gray-200"
             />
           </div>
 
@@ -179,7 +179,7 @@ export default function CompanySection({
               placeholder="Ingresa el RUC de tu empresa"
               maxLength={11}
               disabled={!!savedRuc} // Bloqueado SOLO si ya está guardado en backend
-              className="bg-white"
+              className="bg-white border-gray-200"
             />
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function CompanySection({
       <section>
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
               <MapPin size={24} />
             </div>
             <div>
@@ -203,7 +203,7 @@ export default function CompanySection({
               onClick={() => openAddressModal()}
               variant="secondary"
               size="sm"
-              className="rounded-full px-4 border-slate-200 hover:border-[var(--button-hover-color)] hover:text-[var(--button-hover-color)] transition-all"
+              className="rounded-full px-4 border-gray-200 hover:border-emerald-600 hover:text-emerald-600 transition-all text-gray-600"
             >
               <Plus size={16} className="mr-1.5" />
               Nueva Dirección
@@ -212,15 +212,15 @@ export default function CompanySection({
         </div>
 
         {formData.addresses.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl group hover:border-[var(--button-hover-color)]/30 transition-colors">
-            <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 mb-4 group-hover:text-[var(--button-hover-color)] transition-colors">
+          <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl group hover:border-emerald-600/30 transition-colors">
+            <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-400 mb-4 group-hover:text-emerald-600 transition-colors">
               <MapPin size={32} />
             </div>
             <p className="text-gray-500 font-medium mb-6">No hay direcciones registradas para esta empresa</p>
             <Button
               type="button"
               onClick={() => openAddressModal()}
-              className="rounded-full px-8 shadow-lg shadow-[var(--button-hover-color)]/10"
+              className="rounded-full px-8 shadow-lg shadow-emerald-600/10 bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <Plus size={18} className="mr-2" />
               Agregar primera dirección
@@ -229,11 +229,11 @@ export default function CompanySection({
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {formData.addresses.map((address, index) => (
-              <div key={index} className="group relative p-6 bg-white border border-slate-100 rounded-2xl hover:border-[var(--button-hover-color)]/30 hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-300">
+              <div key={index} className="group relative p-6 bg-white border border-gray-100 rounded-2xl hover:border-emerald-600/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0 pr-12">
-                    <p className="font-bold text-gray-900 text-lg mb-2 truncate group-hover:text-[var(--button-hover-color)] transition-colors">{address.address}</p>
-                    <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg w-fit">
+                    <p className="font-bold text-gray-900 text-lg mb-2 truncate group-hover:text-emerald-700 transition-colors">{address.address}</p>
+                    <div className="flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg w-fit">
                       <MapPin size={14} />
                       <p className="text-sm font-medium">
                         {[
@@ -251,7 +251,7 @@ export default function CompanySection({
                       onClick={() => openAddressModal(index)}
                       variant="ghost"
                       size="icon"
-                      className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-600"
+                      className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600"
                       title="Editar dirección"
                     >
                       <Edit size={16} />
@@ -280,7 +280,7 @@ export default function CompanySection({
       <section>
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
               <Phone size={24} />
             </div>
             <div>
@@ -294,7 +294,7 @@ export default function CompanySection({
               onClick={addPhone}
               variant="secondary"
               size="sm"
-              className="rounded-full px-4 border-slate-200 hover:border-[var(--button-hover-color)] hover:text-[var(--button-hover-color)] transition-all"
+              className="rounded-full px-4 border-gray-200 hover:border-emerald-600 hover:text-emerald-600 transition-all text-gray-600"
             >
               <Plus size={16} className="mr-1.5" />
               Añadir Teléfono
@@ -304,7 +304,7 @@ export default function CompanySection({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
           {formData.phones.map((phone, index) => (
-            <div key={index} className="group flex items-end gap-3 p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:bg-white hover:border-[var(--button-hover-color)]/20 hover:shadow-lg hover:shadow-slate-100/50 transition-all">
+            <div key={index} className="group flex items-end gap-3 p-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-white hover:border-emerald-600/20 hover:shadow-lg hover:shadow-gray-100/50 transition-all">
               <div className="flex-1">
                 <Input
                   label={`Teléfono ${index + 1}`}
@@ -312,7 +312,7 @@ export default function CompanySection({
                   onChange={(e) => handlePhoneChange(index, e.target.value)}
                   placeholder="987 654 321"
                   maxLength={9}
-                  className="bg-transparent border-none shadow-none focus:ring-0 p-0 text-lg font-bold placeholder:text-slate-300"
+                  className="bg-transparent border-none shadow-none focus:ring-0 p-0 text-lg font-bold placeholder:text-gray-300 text-gray-900"
                 />
               </div>
               {formData.phones.length > 1 && (
@@ -321,7 +321,7 @@ export default function CompanySection({
                   onClick={() => removePhone(index)}
                   variant="ghost"
                   size="icon"
-                  className="w-10 h-10 rounded-full bg-slate-100/50 hover:bg-red-50 text-slate-400 hover:text-red-500 shrink-0 transition-colors"
+                  className="w-10 h-10 rounded-full bg-gray-100/50 hover:bg-red-50 text-gray-400 hover:text-red-500 shrink-0 transition-colors"
                   title="Eliminar teléfono"
                 >
                   <Trash2 size={16} />

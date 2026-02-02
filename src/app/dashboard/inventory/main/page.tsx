@@ -164,26 +164,27 @@ export default function WarehousePage() {
             filterFields,
             onExportExcel: handleExportExcel,
             onExportPdf: handleExportPdf,
+            totalItems,
           }}
         />
 
         {/* Loader */}
         {loading && (
-          <div className="grid place-items-center py-12">
+          <div className="flex justify-center items-center h-64">
             <DeliveryLoader message="Cargando productos..." />
           </div>
         )}
 
         {/* Error de carga de API */}
         {showApiError && (
-          <div className="p-6 bg-red-50 border border-red-100 rounded-xl text-center text-red-600">
-            Error al cargar los productos: {apiError}
+          <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
+            <p className="font-medium">Error al cargar los productos: {apiError}</p>
           </div>
         )}
 
         {/* Sin datos */}
         {!loading && !showApiError && filtered.length === 0 && (
-          <div className="p-12 bg-white rounded-2xl border border-dashed border-gray-200 text-center text-gray-500">
+          <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">
             <p>No hay productos disponibles en este momento.</p>
           </div>
         )}

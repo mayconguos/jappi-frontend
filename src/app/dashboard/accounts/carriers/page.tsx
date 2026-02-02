@@ -166,111 +166,112 @@ export default function CarriersPage() {
 
   // --- Render ---
   return (
-    <section className="p-6 space-y-6">
-      {/* Filtros carrier */}
-      <CarriersFilter
-        {...{
-          field,
-          setField,
-          value,
-          setValue,
-          filterFields,
-          onAdd: handleAddCarrier,
-        }}
-      />
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
 
-      {/* Loader */}
-      {loading && (
-        <div className="text-center py-4">
-          <DeliveryLoader message="Cargando transportistas..." />
-        </div>
-      )}
+      <div className="space-y-6">
+        {/* Filtros carrier */}
+        <CarriersFilter
+          {...{
+            field,
+            setField,
+            value,
+            setValue,
+            filterFields,
+            onAdd: handleAddCarrier,
+            totalItems,
+          }}
+        />
 
-      {/* Error de carga de API */}
-      {showApiError && (
-        <div className="text-center py-4 text-red-500">
-          Error al cargar los trabajadores: {apiError}
-        </div>
-      )}
+        {/* Lógica de Renderizado (Loader / Error / Tabla) */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <DeliveryLoader message="Cargando transportistas..." />
+          </div>
+        ) : showApiError ? (
+          <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
+            <p className="font-medium">Error al cargar: {apiError}</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <CarriersTable
+              {...{
+                carriers: currentItems,
+                currentPage,
+                onView: handleViewCarrier,
+                onEdit: handleEditCarrier,
+                onDelete: handleDeleteCarrier,
+              }}
+            />
 
-      {/* Sin datos */}
-      {!loading && !showApiError && filtered.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No hay transportistas disponibles.
-        </div>
-      )}
-
-      {/* Tabla y paginación */}
-      {!loading && (
-        <>
-          <CarriersTable
-            {...{
-              carriers: currentItems,
-              currentPage,
-              onView: handleViewCarrier,
-              onEdit: handleEditCarrier,
-              onDelete: handleDeleteCarrier,
-            }}
-          />
-          <Pagination
-            {...{
-              currentPage,
-              totalItems,
-              itemsPerPage: ITEMS_PER_PAGE,
-              onPageChange: handlePageChange,
-            }}
-          />
-          {/* Confirmación para eliminar */}
-          <Modal
-            isOpen={confirmModal.isOpen}
-            onClose={deleting ? () => { } : closeConfirmModal}
-            size="sm"
-            title={deleting ? "Eliminando transportista..." : "Confirmar eliminación"}
-            footer={
-              <ModalFooter>
-                {!deleting && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={closeConfirmModal}
-                    className="bg-white border-dashed border-gray-300 text-gray-600 hover:border-[#02997d] hover:text-[#02997d]"
-                  >
-                    Cancelar
-                  </Button>
-                )}
-                <Button
-                  onClick={confirmDeleteCarrier}
-                  disabled={deleting}
-                  className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg min-w-[100px]"
-                >
-                  {deleting ? "Eliminando..." : "Eliminar"}
-                </Button>
-              </ModalFooter>
-            }
-          >
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
-                {deleting ? (
-                  <DeliveryLoader size="sm" />
-                ) : (
-                  <XCircle className="w-6 h-6 text-red-600" />
-                )}
+            {totalItems > 0 ? (
+              <Pagination
+                {...{
+                  currentPage,
+                  totalItems,
+                  itemsPerPage: ITEMS_PER_PAGE,
+                  onPageChange: handlePageChange,
+                }}
+              />
+            ) : (
+              <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">
+                <p>No se encontraron resultados.</p>
               </div>
-              <p className="text-gray-600 text-base leading-relaxed">
-                {deleting
-                  ? "Por favor, espera un momento mientras procesamos la solicitud."
-                  : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}? Esta acción no se puede deshacer.`}
-              </p>
-            </div>
-          </Modal>
-          {deleting && (
-            <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
-              <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
-                <DeliveryLoader message="Eliminando transportista..." />
-              </div>
-            </div>
-          )}
-        </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Confirmación para eliminar */}
+      <Modal
+        isOpen={confirmModal.isOpen}
+        onClose={deleting ? () => { } : closeConfirmModal}
+        size="sm"
+        title={deleting ? "Eliminando transportista..." : "Confirmar eliminación"}
+        footer={
+          <ModalFooter>
+            {!deleting && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={closeConfirmModal}
+                className="bg-white border-dashed border-gray-300 text-gray-600 hover:border-[#02997d] hover:text-[#02997d]"
+              >
+                Cancelar
+              </Button>
+            )}
+            <Button
+              onClick={confirmDeleteCarrier}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg min-w-[100px]"
+            >
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+            {deleting ? (
+              <DeliveryLoader size="sm" />
+            ) : (
+              <XCircle className="w-6 h-6 text-red-600" />
+            )}
+          </div>
+          <p className="text-gray-600 text-base leading-relaxed">
+            {deleting
+              ? "Por favor, espera un momento mientras procesamos la solicitud."
+              : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}? Esta acción no se puede deshacer.`}
+          </p>
+        </div>
+      </Modal>
+
+      {/* Loader de eliminación global (overlay) */}
+      {deleting && (
+        <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
+          <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
+            <DeliveryLoader message="Eliminando transportista..." />
+          </div>
+        </div>
       )}
 
       {/* Modal para añadir o editar usuario */}
@@ -290,6 +291,7 @@ export default function CarriersPage() {
         carrier={carrierViewModal.data}
       />
 
+      {/* Modales de Éxito / Error */}
       {successModal && (
         <Modal
           isOpen={!!successModal}
@@ -343,6 +345,7 @@ export default function CarriersPage() {
           </div>
         </Modal>
       )}
-    </section>
+
+    </div>
   );
 }

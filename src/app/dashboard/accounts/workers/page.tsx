@@ -3,7 +3,7 @@
 
 // React
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Trash2 } from 'lucide-react';
 
 // Componentes
 import WorkersFilter from '@/components/filters/WorkersFilter';
@@ -46,7 +46,7 @@ export default function WorkersPage() {
   const [field, setField] = useState('');
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
@@ -67,27 +67,32 @@ export default function WorkersPage() {
 
   // --- Data Fetching ---
   const fetchWorkers = useCallback(async () => {
-    const response = await get('/user?type=workers');
-    if (response) {
-      const data = Array.isArray(response) ? response : [];
-      setWorkers(data);
-    } else {
-      setWorkers([]);
+    try {
+      const response = await get('/user?type=workers');
+      if (response && Array.isArray(response)) {
+        setWorkers(response);
+      } else {
+        setWorkers([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch workers", err);
+    } finally {
+      setLoading(false);
     }
   }, [get]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchWorkers().finally(() => setLoading(false));
+    fetchWorkers();
   }, [fetchWorkers]);
-
-  // Mostrar error de carga de API si ocurre
-  const showApiError = !loading && apiError && workers.length === 0;
 
   // --- Derived Data ---
   const filtered = useMemo(() => {
-    if (!field) return workers;
+    if (!field || !value) return workers; // Optimized check
     const val = value.toLowerCase();
+
+    // Safety check if field is valid key
+    if (!field) return workers;
+
     return workers.filter((worker) => {
       const fieldValue = worker[field as keyof Worker];
       return fieldValue ? fieldValue.toString().toLowerCase().includes(val) : false;
@@ -98,23 +103,23 @@ export default function WorkersPage() {
   const currentItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // --- Handlers ---
-  const handlePageChange: (page: number) => void = (page) => setCurrentPage(page);
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
-  const handleDeleteWorker: (worker: Worker) => void = (worker) => setConfirmModal({ isOpen: true, data: worker });
+  const handleDeleteWorker = (worker: Worker) => setConfirmModal({ isOpen: true, data: worker });
 
-  const handleEditWorker: (worker: Worker) => void = (worker) => workerModal.openModal(worker);
+  const handleEditWorker = (worker: Worker) => workerModal.openModal(worker);
 
-  const handleAddWorker: () => void = () => {
+  const handleAddWorker = () => {
     workerModal.openModal();
   };
 
-  const handleWorkerSubmit: (worker: Omit<Worker, 'id'>, editingWorker?: Worker | null) => void = (worker, editingWorker) => {
+  const handleWorkerSubmit = (worker: Omit<Worker, 'id'>, editingWorker?: Worker | null) => {
     if (editingWorker) {
       const updatedWorker = { ...editingWorker, ...worker, id: editingWorker.id };
       setWorkers(prev => prev.map(w => w.id === updatedWorker.id ? updatedWorker : w));
     } else {
-      const workerWithId = { ...worker, id: Date.now() };
-      setWorkers(prev => [...prev, workerWithId]);
+      const workerWithId = { ...worker, id: Date.now() }; // Mock ID generation
+      setWorkers(prev => [...prev, workerWithId as Worker]);
     }
   };
 
@@ -134,14 +139,20 @@ export default function WorkersPage() {
     if (confirmModal.data) {
       setDeleting(true);
       const workerId = confirmModal.data.id;
-      const response = await del(`/user/${workerId}`);
-      setDeleting(false);
-      closeConfirmModal();
-      if (response !== null) {
-        setWorkers(prev => prev.filter(w => w.id !== workerId));
-        setSuccessModal('El usuario ha sido eliminado correctamente.');
-      } else {
-        setErrorModal('No se pudo eliminar el usuario.');
+      try {
+        const response = await del(`/user/${workerId}`);
+        // Adjust based on your API response for success (CompaniesPage checks response truthiness)
+        if (response !== null) {
+          setWorkers(prev => prev.filter(w => w.id !== workerId));
+          setSuccessModal('El usuario ha sido eliminado correctamente.');
+          setConfirmModal({ isOpen: false, data: null });
+        } else {
+          setErrorModal('No se pudo eliminar el usuario.');
+        }
+      } catch (e) {
+        setErrorModal('Ocurrió un error al intentar eliminar el usuario.');
+      } finally {
+        setDeleting(false);
       }
     }
   };
@@ -155,63 +166,47 @@ export default function WorkersPage() {
 
   // --- Render ---
   return (
-    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
 
       <div className="space-y-6">
         {/* Filtros y botón para añadir worker */}
         <WorkersFilter
-          {...{
-            field,
-            setField,
-            value,
-            setValue,
-            filterFields,
-            onAdd: handleAddWorker,
-          }}
+          field={field}
+          setField={setField}
+          value={value}
+          setValue={setValue}
+          filterFields={filterFields}
+          onAdd={handleAddWorker}
+          totalItems={totalItems}
         />
 
-        {/* Loader */}
-        {loading && (
-          <div className="grid place-items-center py-12">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
             <DeliveryLoader message="Cargando usuarios..." />
           </div>
-        )}
-
-        {/* Error de carga de API */}
-        {showApiError && (
-          <div className="p-6 bg-red-50 border border-red-100 rounded-xl text-center text-red-600">
-            Error al cargar los trabajadores: {apiError}
+        ) : apiError && workers.length === 0 ? (
+          <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
+            <AlertTriangle size={32} />
+            <p className="font-medium">Error al cargar usuarios: {apiError}</p>
           </div>
-        )}
-
-        {/* Sin datos */}
-        {!loading && !showApiError && filtered.length === 0 && (
-          <div className="p-12 bg-white rounded-2xl border border-dashed border-gray-200 text-center text-gray-500">
-            <p>No hay trabajadores disponibles en este momento.</p>
-          </div>
-        )}
-
-        {/* Tabla y paginación */}
-        {!loading && !showApiError && filtered.length > 0 && (
+        ) : (
           <div className="space-y-4">
             <WorkersTable
-              {...{
-                workers: currentItems,
-                currentPage,
-                onEdit: handleEditWorker,
-                onDelete: handleDeleteWorker,
-              }}
+              workers={currentItems}
+              currentPage={currentPage}
+              onEdit={handleEditWorker}
+              onDelete={handleDeleteWorker}
             />
-            <div className="w-full pt-4">
-              <Pagination
-                {...{
-                  currentPage,
-                  totalItems,
-                  itemsPerPage: ITEMS_PER_PAGE,
-                  onPageChange: handlePageChange,
-                }}
-              />
-            </div>
+            {totalItems > 0 && (
+              <div className="pt-4 flex justify-center sm:justify-end">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -221,77 +216,68 @@ export default function WorkersPage() {
         isOpen={confirmModal.isOpen}
         onClose={deleting ? () => { } : closeConfirmModal}
         size="sm"
-        title={deleting ? "Eliminando usuario..." : "Confirmar eliminación"}
+        title="Confirmar Eliminación"
         footer={
-          <ModalFooter>
-            {!deleting && (
-              <Button
-                variant="secondary"
-                onClick={closeConfirmModal}
-                className="border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-              >
-                Cancelar
-              </Button>
-            )}
+          <ModalFooter className="flex justify-end gap-3">
             <Button
+              variant="secondary"
+              onClick={closeConfirmModal}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
               onClick={confirmDeleteWorker}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg min-w-[100px]"
             >
               {deleting ? "Eliminando..." : "Eliminar"}
             </Button>
           </ModalFooter>
         }
       >
-        <div className="flex flex-col items-center text-center">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
-            {deleting ? (
-              <DeliveryLoader size="sm" />
-            ) : (
-              <XCircle className="w-6 h-6 text-red-600" />
-            )}
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+            <Trash2 className="w-6 h-6 text-red-600" />
           </div>
-          <p className="text-gray-600 text-base leading-relaxed">
-            {deleting
-              ? "Por favor, espera un momento mientras procesamos la solicitud."
-              : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}? Esta acción no se puede deshacer.`}
+          <p className="text-slate-600 font-medium mb-1">
+            ¿Estás seguro de que deseas eliminar a <span className="font-bold text-slate-900">"{confirmModal.data?.first_name} {confirmModal.data?.last_name}"</span>?
+          </p>
+          <p className="text-sm text-slate-400">
+            Esta acción no se puede deshacer.
           </p>
         </div>
       </Modal>
 
-      {/* Modales de estado */}
+      {/* Worker Modal */}
       <WorkerModal
-        {...{
-          isOpen: workerModal.isOpen,
-          onClose: workerModal.closeModal,
-          onSubmit: handleWorkerModalSubmit,
-          editingWorker: workerModal.data,
-        }}
+        isOpen={workerModal.isOpen}
+        onClose={workerModal.closeModal}
+        onSubmit={handleWorkerModalSubmit}
+        editingWorker={workerModal.data}
       />
 
+      {/* Success Modal */}
       {successModal && (
         <Modal
           isOpen={!!successModal}
           onClose={closeStatusModals}
           size="sm"
-          title="¡Éxito!"
+          title="Operación Exitosa"
           footer={
             <ModalFooter className="justify-center">
-              <Button
-                onClick={closeStatusModals}
-                className="bg-green-600 hover:bg-green-700 text-white shadow-green-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
-              >
+              <Button onClick={closeStatusModals} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto">
                 Aceptar
               </Button>
             </ModalFooter>
           }
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-green-50">
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-4">
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
-            <p className="text-gray-600 text-base font-medium">
-              {typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
+            <p className="text-slate-600 font-medium">
+              {typeof successModal === 'string' ? successModal : 'Operación completada correctamente.'}
             </p>
           </div>
         </Modal>
@@ -305,20 +291,17 @@ export default function WorkersPage() {
           title="Error"
           footer={
             <ModalFooter className="justify-center">
-              <Button
-                onClick={closeStatusModals}
-                className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
-              >
+              <Button onClick={closeStatusModals} className="bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto">
                 Cerrar
               </Button>
             </ModalFooter>
           }
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
               <AlertTriangle className="w-6 h-6 text-red-600" />
             </div>
-            <p className="text-gray-600 text-base font-medium">{errorModal}</p>
+            <p className="text-slate-600 font-medium">{errorModal}</p>
           </div>
         </Modal>
       )}

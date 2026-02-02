@@ -26,7 +26,7 @@ export default function PersonalSection({ user }: PersonalSectionProps) {
   return (
     <div className="p-6 md:p-8 animate-in fade-in duration-500">
       <div className="flex items-center gap-4 mb-10">
-        <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+        <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
           <User size={24} />
         </div>
         <div>
@@ -39,10 +39,10 @@ export default function PersonalSection({ user }: PersonalSectionProps) {
         {details.map((item, idx) => (
           <div key={idx} className={`${item.fullWidth ? 'md:col-span-2' : ''} group`}>
             <div className="flex items-center gap-2 mb-2">
-              <item.icon size={16} className="text-slate-400 group-hover:text-[var(--button-hover-color)] transition-colors" />
-              <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{item.label}</span>
+              <item.icon size={16} className="text-gray-400 group-hover:text-emerald-600 transition-colors" />
+              <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{item.label}</span>
             </div>
-            <div className="bg-slate-50 border border-slate-100/50 rounded-xl px-4 py-3.5 transition-all group-hover:bg-white group-hover:shadow-md group-hover:shadow-slate-200/50 group-hover:border-[var(--button-hover-color)]/20">
+            <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 transition-all group-hover:bg-white group-hover:shadow-md group-hover:shadow-gray-200/50 group-hover:border-emerald-500/20">
               <p className="text-base font-medium text-gray-900">
                 {item.value || (
                   <span className="italic text-gray-400 font-normal">No especificado</span>

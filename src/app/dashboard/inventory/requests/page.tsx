@@ -1,13 +1,98 @@
+'use client';
+
+import { useState } from 'react';
+import RequestsFilter from '@/components/filters/RequestsFilter';
+import RequestsTable, { InboundRequest } from '@/components/tables/RequestsTable';
+import { Pagination } from '@/components/ui/pagination';
+import NewRequestModal from '@/components/forms/modals/NewRequestModal';
+import { useInventory } from '@/context/InventoryContext';
+
 export default function WarehouseRequestsPage() {
+  // Use Global Context
+  const { requests, addRequest } = useInventory();
+
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchValue, setSearchValue] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const itemsPerPage = 10;
+
+  // Filter Logic
+  const filteredRequests = requests.filter(req => {
+    const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
+    const matchesSearch = req.id.toString().includes(searchValue);
+    return matchesStatus && matchesSearch;
+  });
+
+  // Pagination Logic
+  const totalItems = filteredRequests.length;
+  // const totalPages = Math.ceil(totalItems / itemsPerPage); // Not needed for Pagination component
+  const currentItems = filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNewRequest = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCreateRequest = (items: any[]) => {
+    const newRequest = addRequest(items);
+
+    setIsModalOpen(false);
+
+    // Simulate Guide Generation
+    setTimeout(() => {
+      alert('✅ ¡Solicitud #' + newRequest.id + ' Creada! \n\nSe ha generado la Guía de Remisión. \nPor favor imprímela y pégala en tu caja.');
+    }, 500);
+  };
+
+  const handleViewRequest = (request: InboundRequest) => {
+    console.log('View Request', request);
+  };
+
+  const handleDownloadGuide = (request: InboundRequest) => {
+    console.log('Download Guide', request);
+    alert(`Descargando Guía para Orden #${request.id}`);
+  };
+
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Solicitudes de almacén</h1>
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <p className="text-lg text-gray-600">¡Hola mundo! Esta es la página de solicitudes de almacén.</p>
-        <p className="mt-4 text-sm text-gray-500">
-          Aquí se mostrará la funcionalidad para gestionar las solicitudes relacionadas con el almacén.
-        </p>
+    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
+
+      <div className="flex flex-col gap-2">
+        <p className="text-gray-500">Gestiona y anuncia el envío de tu mercadería hacia el almacén de Japi.</p>
       </div>
+
+      <div className="space-y-6">
+        <RequestsFilter
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          onNewRequest={handleNewRequest}
+          onExport={() => console.log('Exporting...')}
+          totalItems={totalItems}
+        />
+
+        <RequestsTable
+          requests={currentItems}
+          onView={handleViewRequest}
+          onDownloadGuide={handleDownloadGuide}
+        />
+
+        <div className="w-full pt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      </div>
+
+      <NewRequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateRequest}
+      />
     </div>
   );
 }

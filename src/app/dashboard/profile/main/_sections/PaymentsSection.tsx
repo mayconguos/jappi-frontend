@@ -61,11 +61,11 @@ export default function PaymentsSection({
 
     // Default (Fallback)
     return {
-      card: "bg-slate-800 text-white",
+      card: "bg-gray-800 text-white",
       input: "bg-white/10 border-white/10",
-      label: "text-slate-400",
+      label: "text-gray-400",
       value: "text-white",
-      iconBg: "bg-slate-700",
+      iconBg: "bg-gray-700",
       actionBtn: "hover:bg-white/10"
     };
   };
@@ -124,7 +124,7 @@ export default function PaymentsSection({
   };
 
   return (
-    <div className="p-6 space-y-8 animate-in fade-in zoom-in duration-500">
+    <div className="p-6 md:p-8 space-y-8 animate-in fade-in zoom-in duration-500">
 
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
@@ -137,7 +137,7 @@ export default function PaymentsSection({
             onClick={() => openFlow()}
             variant="secondary"
             size="sm"
-            className="rounded-full px-4 border-slate-200 hover:border-[var(--button-hover-color)] hover:text-[var(--button-hover-color)] transition-all"
+            className="rounded-full px-4 border-gray-200 hover:border-emerald-600 hover:text-emerald-600 transition-all font-semibold text-gray-600"
           >
             <Plus size={16} className="mr-1.5" />
             Vincular App
@@ -235,13 +235,13 @@ export default function PaymentsSection({
         {/* 2. Tarjeta "Agregar Nueva" (Siempre al final) */}
         <button
           onClick={() => openFlow()}
-          className="group relative flex flex-col items-center justify-center min-h-[320px] rounded-[24px] border-3 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-100 transition-all duration-300"
+          className="group relative flex flex-col items-center justify-center min-h-[320px] rounded-[24px] border-3 border-dashed border-gray-200 hover:border-emerald-300 bg-gray-50/50 hover:bg-white transition-all duration-300"
         >
-          <div className="w-20 h-20 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-300 group-hover:text-slate-600 group-hover:scale-110 transition-all duration-300 mb-4">
+          <div className="w-20 h-20 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-300 group-hover:text-emerald-500 group-hover:scale-110 transition-all duration-300 mb-4">
             <Plus size={40} />
           </div>
-          <span className="text-slate-500 font-bold text-lg group-hover:text-slate-800">Agregar Billetera</span>
-          <span className="text-slate-400 text-sm mt-1">Yape o Plin</span>
+          <span className="text-gray-500 font-bold text-lg group-hover:text-gray-800">Agregar Billetera</span>
+          <span className="text-gray-400 text-sm mt-1">Yape o Plin</span>
         </button>
 
       </div>
@@ -254,16 +254,18 @@ export default function PaymentsSection({
         size="md"
         footer={
           <ModalFooter>
-            <Button variant="secondary" onClick={() => setIsAddModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handlePreSave}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              disabled={!tempApp.phone_number || !tempApp.account_holder}
-            >
-              {editingIndex !== null ? "Actualizar" : "Guardar Datos"}
-            </Button>
+            <div className="flex justify-between w-full">
+              <Button variant="ghost" className="text-gray-500" onClick={() => setIsAddModalOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handlePreSave}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20"
+                disabled={!tempApp.phone_number || !tempApp.account_holder}
+              >
+                {editingIndex !== null ? "Actualizar" : "Guardar Datos"}
+              </Button>
+            </div>
           </ModalFooter>
         }
       >
@@ -271,7 +273,7 @@ export default function PaymentsSection({
           <div className="flex flex-col items-center gap-4 py-4">
             <button
               onClick={toggleTempBrand}
-              className="flex items-center gap-4 group p-4 rounded-3xl bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-all"
+              className="flex items-center gap-4 group p-4 rounded-3xl bg-gray-50 border border-gray-100 hover:border-emerald-200 transition-all w-full md:w-auto"
             >
               <div className={clsx(
                 "w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-105",
@@ -280,8 +282,8 @@ export default function PaymentsSection({
                 <span className="font-bold text-2xl">{tempApp.app_name === 'Yape' ? 'Y' : 'P'}</span>
               </div>
               <div className="flex flex-col items-start pr-4">
-                <span className="font-bold text-xl leading-none text-slate-800">{tempApp.app_name}</span>
-                <span className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-medium">Click para cambiar</span>
+                <span className="font-bold text-xl leading-none text-gray-800">{tempApp.app_name}</span>
+                <span className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-medium">Click para cambiar</span>
               </div>
             </button>
           </div>
@@ -293,6 +295,7 @@ export default function PaymentsSection({
               onChange={(e) => updateTempField('account_holder', e.target.value)}
               placeholder="Ej. Juan Pérez"
               icon={User}
+              className="bg-white border-gray-200"
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -302,6 +305,7 @@ export default function PaymentsSection({
                 placeholder="900 000 000"
                 maxLength={9}
                 icon={Smartphone}
+                className="bg-white border-gray-200"
               />
               <Input
                 label="DNI / RUC"
@@ -309,6 +313,7 @@ export default function PaymentsSection({
                 onChange={(e) => updateTempField('document_number', e.target.value)}
                 placeholder="Opcional"
                 icon={CreditCard}
+                className="bg-white border-gray-200"
               />
             </div>
           </div>
@@ -323,15 +328,17 @@ export default function PaymentsSection({
         size="sm"
         footer={
           <ModalFooter>
-            <Button variant="secondary" onClick={() => {
-              setIsConfirmModalOpen(false);
-              setIsAddModalOpen(true);
-            }}>
-              Atrás
-            </Button>
-            <Button onClick={confirmAction} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-              {editingIndex !== null ? "Confirmar Cambios" : "Sí, Agregar"}
-            </Button>
+            <div className="flex w-full justify-between">
+              <Button variant="ghost" onClick={() => {
+                setIsConfirmModalOpen(false);
+                setIsAddModalOpen(true);
+              }}>
+                Atrás
+              </Button>
+              <Button onClick={confirmAction} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20">
+                {editingIndex !== null ? "Confirmar Cambios" : "Sí, Agregar"}
+              </Button>
+            </div>
           </ModalFooter>
         }
       >
@@ -340,10 +347,10 @@ export default function PaymentsSection({
             <CheckCircle2 size={32} />
           </div>
           <div>
-            <h4 className="font-bold text-lg text-slate-900">
+            <h4 className="font-bold text-lg text-gray-900">
               {editingIndex !== null ? "¿Actualizar billetera?" : "¿Estás seguro?"}
             </h4>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               {editingIndex !== null
                 ? `Se actualizarán los datos de la cuenta de ${tempApp.app_name}.`
                 : `Se agregará una nueva cuenta de ${tempApp.app_name} a nombre de ${tempApp.account_holder}.`
@@ -353,7 +360,7 @@ export default function PaymentsSection({
         </div>
       </Modal>
 
-      <div className="flex justify-end pt-6 border-t border-slate-100">
+      <div className="flex justify-end pt-6 border-t border-gray-100">
         <SaveButton onSave={onSave} />
       </div>
     </div>

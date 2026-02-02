@@ -118,17 +118,18 @@ export function Modal({
 
         {/* Overlay/Backdrop */}
         <div
-          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
           onClick={handleOverlayClick}
           aria-hidden="true"
         />
 
         {/* Modal Content */}
         <div className={`
-          relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl border border-gray-100/50 transition-all sm:my-8 w-full
-          flex flex-col
+          relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full
+          flex flex-col ring-1 ring-black/5
           ${sizeClasses[size]}
           ${className}
+          animate-in fade-in zoom-in-95 duration-200
         `}>
 
           {/* Header */}

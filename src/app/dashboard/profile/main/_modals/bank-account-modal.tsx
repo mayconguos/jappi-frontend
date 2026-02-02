@@ -109,20 +109,23 @@ export function BankAccountModal({
 
   const footerContent = (
     <ModalFooter>
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={handleCancel}
-      >
-        Cancelar
-      </Button>
-      <Button
-        type="button"
-        onClick={handleSave}
-        className="shadow-lg shadow-[var(--button-hover-color)]/20"
-      >
-        {account ? 'Actualizar Cuenta' : 'Vincular Cuenta'}
-      </Button>
+      <div className="flex justify-between w-full">
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-gray-500"
+          onClick={handleCancel}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="button"
+          onClick={handleSave}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20"
+        >
+          {account ? 'Actualizar Cuenta' : 'Vincular Cuenta'}
+        </Button>
+      </div>
     </ModalFooter>
   );
 
@@ -137,14 +140,14 @@ export function BankAccountModal({
     >
       <div className="space-y-8 py-2">
         {/* Entidad y Tipo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
           <div className="space-y-1">
             <Select
               label="Institución Financiera *"
               value={formData.bank === 0 ? '' : formData.bank.toString()}
               onChange={(value) => setFormData(prev => ({ ...prev, bank: parseInt(value) || 0 }))}
               options={bankOptions}
-              className={errors.bank ? 'border-red-300' : ''}
+              className={`${errors.bank ? 'border-red-300' : 'border-gray-200'} bg-white`}
             />
             {errors.bank && <p className="text-[10px] text-red-500 font-bold uppercase ml-1 tracking-wider">{errors.bank}</p>}
           </div>
@@ -155,7 +158,7 @@ export function BankAccountModal({
               value={formData.account_type === 0 ? '' : formData.account_type.toString()}
               onChange={(value) => setFormData(prev => ({ ...prev, account_type: parseInt(value) || 0 }))}
               options={typeOptions}
-              className={errors.account_type ? 'border-red-300' : ''}
+              className={`${errors.account_type ? 'border-red-300' : 'border-gray-200'} bg-white`}
             />
             {errors.account_type && <p className="text-[10px] text-red-500 font-bold uppercase ml-1 tracking-wider">{errors.account_type}</p>}
           </div>
@@ -170,6 +173,7 @@ export function BankAccountModal({
               onChange={(e) => setFormData(prev => ({ ...prev, account_number: e.target.value }))}
               placeholder="0000-0000-0000000000"
               error={errors.account_number}
+              className="bg-white border-gray-200"
             />
           </div>
 
@@ -181,6 +185,7 @@ export function BankAccountModal({
               placeholder="000-000-000000000000-00"
               maxLength={20}
               error={errors.cci_number}
+              className="bg-white border-gray-200"
             />
           </div>
         </div>
@@ -193,6 +198,7 @@ export function BankAccountModal({
             onChange={(e) => setFormData(prev => ({ ...prev, account_holder: e.target.value }))}
             placeholder="Nombre completo del titular"
             error={errors.account_holder}
+            className="bg-white border-gray-200"
           />
           <p className="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100 text-[10px] text-emerald-800 font-medium leading-relaxed flex items-start gap-2">
             <ShieldCheck size={14} className="text-emerald-500 shrink-0 mt-0.5" />

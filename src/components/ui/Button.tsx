@@ -10,15 +10,15 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center font-medium transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#02997d] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg active:scale-95',
+  'inline-flex items-center justify-center font-medium transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#0D8F75] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg active:scale-95 hover:-translate-y-0.5',
   {
     variants: {
       variant: {
-        primary: 'bg-[#02997d] hover:bg-[#027d66] text-white shadow-sm border border-transparent',
-        secondary: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm',
-        ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent',
-        destructive: 'bg-red-600 hover:bg-red-700 text-white border border-transparent shadow-sm',
-        link: 'text-[#02997d] underline-offset-4 hover:underline !p-0 !h-auto',
+        primary: 'bg-[#0D8F75] hover:bg-[#0A705C] text-white shadow-lg shadow-[#0D8F75]/20 border border-transparent',
+        secondary: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow-md',
+        ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent shadow-none hover:translate-y-0 active:scale-100',
+        destructive: 'bg-red-600 hover:bg-red-700 text-white border border-transparent shadow-lg shadow-red-600/20',
+        link: 'text-[#0D8F75] underline-offset-4 hover:underline !p-0 !h-auto shadow-none hover:translate-y-0 active:scale-100',
       },
       size: {
         sm: 'h-8 px-3 text-xs',

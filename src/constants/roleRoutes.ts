@@ -66,6 +66,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/shipments/new', label: 'Registrar envío', icon: Send },
     { path: '/dashboard/shipments/list', label: 'Mis envíos', icon: Package },
     { path: '/dashboard/inventory/my-warehouse', label: 'Mi almacén', icon: Warehouse },
+    { path: '/dashboard/inventory/requests', label: 'Órdenes de Ingreso', icon: FileText },
     { path: '/dashboard/profile/main', label: 'Perfil de empresa', icon: User },
   ],
 
