@@ -1,33 +1,21 @@
-import { FileSpreadsheet, FileText, Search, Filter } from 'lucide-react';
 
-import { Select } from '@/components/ui/select';
+import { Search, Plus, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-interface FilterField {
-  value: string;
-  label: string;
-}
-
 interface ProductsFilterProps {
-  field: string;
-  setField: (field: string) => void;
-  value: string;
-  setValue: (value: string) => void;
-  filterFields: FilterField[];
-  onExportExcel: () => void;
-  onExportPdf: () => void;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+  onAdd: () => void;
+  onImport: () => void;
   totalItems: number;
 }
 
 export default function ProductsFilter({
-  field,
-  setField,
-  value,
-  setValue,
-  filterFields,
-  onExportExcel,
-  onExportPdf,
+  searchValue,
+  setSearchValue,
+  onAdd,
+  onImport,
   totalItems,
 }: ProductsFilterProps) {
   return (
@@ -38,23 +26,13 @@ export default function ProductsFilter({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 relative z-10 w-full xl:w-auto">
-        <div className="w-full sm:w-56">
-          <Select
-            label="Filtrar por"
-            value={field}
-            onChange={setField}
-            options={filterFields}
-            placeholder="Seleccionar campo"
-            icon={Filter}
-            className="bg-white border-slate-200"
-          />
-        </div>
-        <div className="w-full sm:w-80">
+        {/* Search Bar - Expanded width for products */}
+        <div className="w-full sm:w-96">
           <Input
             label="Búsqueda"
-            placeholder="Escribe para buscar..."
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
+            placeholder="Buscar por Nombre o SKU..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
             icon={Search}
             className="bg-white border-slate-200"
           />
@@ -64,31 +42,30 @@ export default function ProductsFilter({
       <div className="flex items-center gap-4 relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100 flex-wrap justify-between sm:justify-end w-full xl:w-auto">
         {/* Total Badge */}
         <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 shadow-sm flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
           Total: <span className="text-slate-900 font-bold">{totalItems}</span>
         </div>
 
         <div className="w-px h-8 bg-slate-200 hidden sm:block" />
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-sm font-medium text-gray-400 hidden lg:block mr-1">Exportar:</span>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <Button
             variant="secondary"
-            onClick={onExportExcel}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 border-slate-200 hover:border-emerald-200 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-all"
-            size="sm"
+            onClick={onImport}
+            className="flex-1 sm:flex-none gap-2 bg-white hover:bg-gray-50 text-gray-700 border-gray-200"
           >
-            <FileSpreadsheet size={16} />
-            <span className="hidden sm:inline">Excel</span>
+            <Upload size={18} />
+            <span className="hidden sm:inline">Importar Excel</span>
+            <span className="sm:hidden">Importar</span>
           </Button>
+
           <Button
-            variant="secondary"
-            onClick={onExportPdf}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all"
-            size="sm"
+            onClick={onAdd}
+            className="flex-1 sm:flex-none gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100"
           >
-            <FileText size={16} />
-            <span className="hidden sm:inline">PDF</span>
+            <Plus size={18} />
+            <span className="hidden sm:inline">Nuevo Producto</span>
+            <span className="sm:hidden">Nuevo</span>
           </Button>
         </div>
       </div>
