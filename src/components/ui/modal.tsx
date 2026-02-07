@@ -14,7 +14,7 @@ interface ModalProps {
   /**
    * Título del modal
    */
-  title?: string;
+  title?: React.ReactNode;
   /**
    * Descripción o subtítulo del modal
    */
