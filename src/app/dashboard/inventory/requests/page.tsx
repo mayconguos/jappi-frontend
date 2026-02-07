@@ -5,6 +5,7 @@ import RequestsFilter from '@/components/filters/RequestsFilter';
 import RequestsTable, { InboundRequest } from '@/components/tables/RequestsTable';
 import { Pagination } from '@/components/ui/pagination';
 import NewRequestModal from '@/components/forms/modals/NewRequestModal';
+import RequestDetailModal from '@/components/forms/modals/RequestDetailModal';
 import { useInventory } from '@/context/InventoryContext';
 
 export default function WarehouseRequestsPage() {
@@ -15,6 +16,7 @@ export default function WarehouseRequestsPage() {
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<InboundRequest | null>(null);
 
   const itemsPerPage = 10;
 
@@ -46,7 +48,7 @@ export default function WarehouseRequestsPage() {
   };
 
   const handleViewRequest = (request: InboundRequest) => {
-    console.log('View Request', request);
+    setSelectedRequest(request);
   };
 
   const handleDownloadGuide = (request: InboundRequest) => {
@@ -87,6 +89,12 @@ export default function WarehouseRequestsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateRequest}
+      />
+
+      <RequestDetailModal
+        isOpen={!!selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+        request={selectedRequest}
       />
     </div>
   );
