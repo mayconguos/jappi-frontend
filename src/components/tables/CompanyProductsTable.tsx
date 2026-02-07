@@ -7,7 +7,6 @@ export interface CatalogProduct {
     sku: string;
     product_name: string;
     description?: string;
-    category?: string;
     stock: number;
     status: 'active' | 'inactive';
     last_updated: string;

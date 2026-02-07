@@ -12,6 +12,7 @@ interface User {
   email: string;
   name: string;
   id_role: number;
+  id_company?: number;
 }
 
 interface AuthContextType {

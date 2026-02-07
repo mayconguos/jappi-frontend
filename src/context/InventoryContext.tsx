@@ -3,14 +3,16 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import { InboundRequest } from '@/components/tables/RequestsTable';
+import api from '@/app/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 // Initial Mock Data (Moved from pages)
 const INITIAL_PRODUCTS: CatalogProduct[] = [
-  { id: 101, sku: 'TSHIRT-WHT-S', product_name: 'Camiseta Básica Blanca S', category: 'Ropa', stock: 120, status: 'active', last_updated: '2024-02-01' },
-  { id: 102, sku: 'TSHIRT-WHT-M', product_name: 'Camiseta Básica Blanca M', category: 'Ropa', stock: 85, status: 'active', last_updated: '2024-02-02' },
-  { id: 103, sku: 'TSHIRT-WHT-L', product_name: 'Camiseta Básica Blanca L', category: 'Ropa', stock: 200, status: 'active', last_updated: '2024-02-03' },
-  { id: 104, sku: 'TSHIRT-BLK-S', product_name: 'Camiseta Básica Negra S', category: 'Ropa', stock: 50, status: 'active', last_updated: '2024-02-04' },
-  { id: 106, sku: 'HOODIE-GRY-L', product_name: 'Polera Gris L', category: 'Ropa', stock: 0, status: 'inactive', last_updated: '2024-01-20' },
+  { id: 101, sku: 'TSHIRT-WHT-S', product_name: 'Camiseta Básica Blanca S', stock: 120, status: 'active', last_updated: '2024-02-01' },
+  { id: 102, sku: 'TSHIRT-WHT-M', product_name: 'Camiseta Básica Blanca M', stock: 85, status: 'active', last_updated: '2024-02-02' },
+  { id: 103, sku: 'TSHIRT-WHT-L', product_name: 'Camiseta Básica Blanca L', stock: 200, status: 'active', last_updated: '2024-02-03' },
+  { id: 104, sku: 'TSHIRT-BLK-S', product_name: 'Camiseta Básica Negra S', stock: 50, status: 'active', last_updated: '2024-02-04' },
+  { id: 106, sku: 'HOODIE-GRY-L', product_name: 'Polera Gris L', stock: 0, status: 'inactive', last_updated: '2024-01-20' },
 ];
 
 const INITIAL_REQUESTS: InboundRequest[] = [
@@ -23,7 +25,7 @@ const INITIAL_REQUESTS: InboundRequest[] = [
 interface InventoryContextType {
   products: CatalogProduct[];
   requests: InboundRequest[];
-  addProduct: (product: Omit<CatalogProduct, 'id' | 'last_updated'>) => void;
+  addProduct: (product: Omit<CatalogProduct, 'id' | 'last_updated'>) => Promise<void>;
   updateProduct: (product: Omit<CatalogProduct, 'last_updated'> & { last_updated?: string }) => void;
   deleteProduct: (id: number) => void;
   addRequest: (items: any[]) => InboundRequest;
@@ -34,15 +36,44 @@ const InventoryContext = createContext<InventoryContextType | undefined>(undefin
 export function InventoryProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<CatalogProduct[]>(INITIAL_PRODUCTS);
   const [requests, setRequests] = useState<InboundRequest[]>(INITIAL_REQUESTS);
+  const { user } = useAuth();
 
-  const addProduct = (productData: Omit<CatalogProduct, 'id' | 'last_updated'>) => {
-    const newId = Math.max(...products.map(p => p.id), 0) + 1;
-    const newProduct: CatalogProduct = {
-      ...productData,
-      id: newId,
-      last_updated: new Date().toISOString()
-    };
-    setProducts([newProduct, ...products]);
+  const addProduct = async (productData: Omit<CatalogProduct, 'id' | 'last_updated'>) => {
+    try {
+      console.log('Current User in InventoryContext:', user);
+
+      if (!user?.id) {
+        console.error('No user ID found (user is null or missing id)');
+        // You might want to return here or handle it, but for now we log
+      }
+
+      const payload = {
+        SKU: productData.sku,
+        product_name: productData.product_name,
+        description: productData.description || "",
+        id_company: user?.id
+      };
+
+      // Call API
+      const response = await api.post('/inventory/product', payload);
+      const backendProduct = response.data;
+
+      // Map backend response to CatalogProduct interface
+      const productToAdd: CatalogProduct = {
+        id: backendProduct.id,
+        sku: backendProduct.SKU,
+        product_name: backendProduct.product_name,
+        description: backendProduct.description,
+        stock: backendProduct.quantity || 0,
+        status: 'active',
+        last_updated: backendProduct.modified_at || new Date().toISOString()
+      };
+
+      setProducts([productToAdd, ...products]);
+    } catch (error) {
+      console.error('Failed to create product:', error);
+      throw error;
+    }
   };
 
   const updateProduct = (updatedProduct: Omit<CatalogProduct, 'last_updated'> & { last_updated?: string }) => {
