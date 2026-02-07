@@ -87,7 +87,7 @@ export default function RequestsFilter({
             className="bg-[#02997d] hover:bg-[#027a64] text-white shadow-lg shadow-emerald-100 px-6 h-10 gap-2"
           >
             <Plus size={18} />
-            <span className="font-medium">Enviar Mercadería</span>
+            <span className="font-medium">Nueva Solicitud</span>
           </Button>
         </div>
       </div>
