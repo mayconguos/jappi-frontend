@@ -56,11 +56,6 @@ export default function WarehouseRequestsPage() {
 
   return (
     <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
-
-      <div className="flex flex-col gap-2">
-        <p className="text-gray-500">Gestiona y anuncia el envío de tu mercadería hacia el almacén de Japi.</p>
-      </div>
-
       <div className="space-y-6">
         <RequestsFilter
           statusFilter={statusFilter}

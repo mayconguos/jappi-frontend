@@ -6,80 +6,88 @@ import { InboundRequest } from '@/components/tables/RequestsTable';
 
 // Initial Mock Data (Moved from pages)
 const INITIAL_PRODUCTS: CatalogProduct[] = [
-    { id: 101, sku: 'TSHIRT-WHT-S', product_name: 'Camiseta Básica Blanca S', category: 'Ropa', stock: 120, status: 'active' },
-    { id: 102, sku: 'TSHIRT-WHT-M', product_name: 'Camiseta Básica Blanca M', category: 'Ropa', stock: 85, status: 'active' },
-    { id: 103, sku: 'TSHIRT-WHT-L', product_name: 'Camiseta Básica Blanca L', category: 'Ropa', stock: 200, status: 'active' },
-    { id: 104, sku: 'TSHIRT-BLK-S', product_name: 'Camiseta Básica Negra S', category: 'Ropa', stock: 50, status: 'active' },
-    { id: 106, sku: 'HOODIE-GRY-L', product_name: 'Polera Gris L', category: 'Ropa', stock: 0, status: 'inactive' },
+  { id: 101, sku: 'TSHIRT-WHT-S', product_name: 'Camiseta Básica Blanca S', category: 'Ropa', stock: 120, status: 'active', last_updated: '2024-02-01' },
+  { id: 102, sku: 'TSHIRT-WHT-M', product_name: 'Camiseta Básica Blanca M', category: 'Ropa', stock: 85, status: 'active', last_updated: '2024-02-02' },
+  { id: 103, sku: 'TSHIRT-WHT-L', product_name: 'Camiseta Básica Blanca L', category: 'Ropa', stock: 200, status: 'active', last_updated: '2024-02-03' },
+  { id: 104, sku: 'TSHIRT-BLK-S', product_name: 'Camiseta Básica Negra S', category: 'Ropa', stock: 50, status: 'active', last_updated: '2024-02-04' },
+  { id: 106, sku: 'HOODIE-GRY-L', product_name: 'Polera Gris L', category: 'Ropa', stock: 0, status: 'inactive', last_updated: '2024-01-20' },
 ];
 
 const INITIAL_REQUESTS: InboundRequest[] = [
-    { id: 1024, request_date: '2024-02-01', total_skus: 3, total_units: 150, status: 'pending', pdf_url: '#' },
-    { id: 1023, request_date: '2024-01-28', total_skus: 5, total_units: 500, status: 'in_transit', pdf_url: '#' },
-    { id: 1022, request_date: '2024-01-15', total_skus: 2, total_units: 50, status: 'received', pdf_url: '#' },
-    { id: 1021, request_date: '2024-01-10', total_skus: 10, total_units: 1200, status: 'received', pdf_url: '#' },
+  { id: 1024, request_date: '2024-02-01', total_skus: 3, total_units: 150, status: 'pending', pdf_url: '#' },
+  { id: 1023, request_date: '2024-01-28', total_skus: 5, total_units: 500, status: 'in_transit', pdf_url: '#' },
+  { id: 1022, request_date: '2024-01-15', total_skus: 2, total_units: 50, status: 'received', pdf_url: '#' },
+  { id: 1021, request_date: '2024-01-10', total_skus: 10, total_units: 1200, status: 'received', pdf_url: '#' },
 ];
 
 interface InventoryContextType {
-    products: CatalogProduct[];
-    requests: InboundRequest[];
-    addProduct: (product: Omit<CatalogProduct, 'id'>) => void;
-    updateProduct: (product: CatalogProduct) => void;
-    deleteProduct: (id: number) => void;
-    addRequest: (items: any[]) => InboundRequest;
+  products: CatalogProduct[];
+  requests: InboundRequest[];
+  addProduct: (product: Omit<CatalogProduct, 'id' | 'last_updated'>) => void;
+  updateProduct: (product: Omit<CatalogProduct, 'last_updated'> & { last_updated?: string }) => void;
+  deleteProduct: (id: number) => void;
+  addRequest: (items: any[]) => InboundRequest;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
 
 export function InventoryProvider({ children }: { children: ReactNode }) {
-    const [products, setProducts] = useState<CatalogProduct[]>(INITIAL_PRODUCTS);
-    const [requests, setRequests] = useState<InboundRequest[]>(INITIAL_REQUESTS);
+  const [products, setProducts] = useState<CatalogProduct[]>(INITIAL_PRODUCTS);
+  const [requests, setRequests] = useState<InboundRequest[]>(INITIAL_REQUESTS);
 
-    const addProduct = (productData: Omit<CatalogProduct, 'id'>) => {
-        const newId = Math.max(...products.map(p => p.id), 0) + 1;
-        const newProduct = { ...productData, id: newId };
-        setProducts([newProduct, ...products]);
+  const addProduct = (productData: Omit<CatalogProduct, 'id' | 'last_updated'>) => {
+    const newId = Math.max(...products.map(p => p.id), 0) + 1;
+    const newProduct: CatalogProduct = {
+      ...productData,
+      id: newId,
+      last_updated: new Date().toISOString()
     };
+    setProducts([newProduct, ...products]);
+  };
 
-    const updateProduct = (updatedProduct: CatalogProduct) => {
-        setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+  const updateProduct = (updatedProduct: Omit<CatalogProduct, 'last_updated'> & { last_updated?: string }) => {
+    const productWithTimestamp: CatalogProduct = {
+      ...updatedProduct,
+      last_updated: new Date().toISOString()
     };
+    setProducts(products.map(p => p.id === updatedProduct.id ? productWithTimestamp : p));
+  };
 
-    const deleteProduct = (id: number) => {
-        setProducts(products.filter(p => p.id !== id));
+  const deleteProduct = (id: number) => {
+    setProducts(products.filter(p => p.id !== id));
+  };
+
+  const addRequest = (items: any[]) => {
+    const newRequest: InboundRequest = {
+      id: Math.floor(Math.random() * 1000) + 2000,
+      request_date: new Date().toISOString().split('T')[0],
+      total_skus: items.length,
+      total_units: items.reduce((acc, item) => acc + item.quantity, 0),
+      status: 'pending',
+      pdf_url: '#'
     };
+    setRequests([newRequest, ...requests]);
+    return newRequest;
+  };
 
-    const addRequest = (items: any[]) => {
-        const newRequest: InboundRequest = {
-            id: Math.floor(Math.random() * 1000) + 2000,
-            request_date: new Date().toISOString().split('T')[0],
-            total_skus: items.length,
-            total_units: items.reduce((acc, item) => acc + item.quantity, 0),
-            status: 'pending',
-            pdf_url: '#'
-        };
-        setRequests([newRequest, ...requests]);
-        return newRequest;
-    };
-
-    return (
-        <InventoryContext.Provider value={{
-            products,
-            requests,
-            addProduct,
-            updateProduct,
-            deleteProduct,
-            addRequest
-        }}>
-            {children}
-        </InventoryContext.Provider>
-    );
+  return (
+    <InventoryContext.Provider value={{
+      products,
+      requests,
+      addProduct,
+      updateProduct,
+      deleteProduct,
+      addRequest
+    }}>
+      {children}
+    </InventoryContext.Provider>
+  );
 }
 
 export const useInventory = () => {
-    const context = useContext(InventoryContext);
-    if (context === undefined) {
-        throw new Error('useInventory must be used within an InventoryProvider');
-    }
-    return context;
+  const context = useContext(InventoryContext);
+  if (context === undefined) {
+    throw new Error('useInventory must be used within an InventoryProvider');
+  }
+  return context;
 };

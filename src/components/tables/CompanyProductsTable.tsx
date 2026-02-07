@@ -8,9 +8,9 @@ export interface CatalogProduct {
     product_name: string;
     description?: string;
     category?: string;
-    image_url?: string;
     stock: number;
     status: 'active' | 'inactive';
+    last_updated: string;
 }
 
 interface CompanyProductsTableProps {
@@ -31,9 +31,9 @@ export default function CompanyProductsTable({
                     <TableRow className="border-b border-gray-100 hover:bg-transparent">
                         <TableHead className="w-[150px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</TableHead>
                         <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</TableHead>
-                        <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoría</TableHead>
                         <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock Japi</TableHead>
                         <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
+                        <TableHead className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Última Act.</TableHead>
                         <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -56,12 +56,6 @@ export default function CompanyProductsTable({
                                 </div>
                             </TableCell>
 
-                            <TableCell className="py-4">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                                    {item.category || 'General'}
-                                </span>
-                            </TableCell>
-
                             <TableCell className="py-4 text-center">
                                 <span className={`text-sm font-bold ${item.stock > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
                                     {item.stock}
@@ -70,6 +64,10 @@ export default function CompanyProductsTable({
 
                             <TableCell className="py-4 text-center">
                                 <span className={`inline-flex w-2 h-2 rounded-full ${item.status === 'active' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'bg-gray-300'}`} />
+                            </TableCell>
+
+                            <TableCell className="py-4 text-right text-xs text-gray-500">
+                                {new Date(item.last_updated).toLocaleDateString()}
                             </TableCell>
 
                             <TableCell className="text-right pr-6 py-4">
