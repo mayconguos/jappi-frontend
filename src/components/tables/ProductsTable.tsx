@@ -1,12 +1,12 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Package, Search } from 'lucide-react';
-import { Product } from '@/app/dashboard/inventory/main/page';
+import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 
 interface ProductsTableProps {
-  products: Product[];
+  products: CatalogProduct[];
   currentPage: number;
-  onEdit?: (product: Product) => void;
-  onDelete?: (product: Product) => void;
+  onEdit?: (product: CatalogProduct) => void;
+  onDelete?: (product: CatalogProduct) => void;
 }
 
 export default function ProductsTable({
@@ -20,7 +20,6 @@ export default function ProductsTable({
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
             <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio</TableHead>
             <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock Actual</TableHead>
             <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Último Movimiento</TableHead>
           </TableRow>
@@ -42,28 +41,24 @@ export default function ProductsTable({
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-gray-900">{product.product_name}</span>
-                    <span className="text-xs text-gray-500">{product.company_name}</span>
+                    <span className="text-xs text-gray-500">{product.description}</span>
                   </div>
                 </div>
               </TableCell>
 
-              <TableCell className="py-4">
-                <span className="text-sm font-medium text-gray-700">S/ {Number(product.price).toFixed(2)}</span>
-              </TableCell>
-
               <TableCell className="py-4 text-center">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.current_stock > 10
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.quantity > 10
                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                   : 'bg-amber-50 text-amber-700 border border-amber-100'
                   }`}>
-                  {product.current_stock} und.
+                  {product.quantity} und.
                 </span>
               </TableCell>
 
               <TableCell className="text-right pr-6 py-4">
                 <div className="flex items-center justify-end gap-1.5 text-gray-500">
                   <span className="text-xs font-medium">
-                    {new Date(product.last_movement).toLocaleDateString('es-PE', {
+                    {new Date(product.last_updated).toLocaleDateString('es-PE', {
                       day: '2-digit',
                       month: 'short',
                       year: 'numeric'

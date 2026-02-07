@@ -7,7 +7,7 @@ export interface CatalogProduct {
     sku: string;
     product_name: string;
     description?: string;
-    stock: number;
+    quantity: number;
     status: 'active' | 'inactive';
     last_updated: string;
 }
@@ -56,8 +56,11 @@ export default function CompanyProductsTable({
                             </TableCell>
 
                             <TableCell className="py-4 text-center">
-                                <span className={`text-sm font-bold ${item.stock > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
-                                    {item.stock}
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.quantity > 10
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                        : 'bg-amber-50 text-amber-700 border border-amber-100'
+                                    }`}>
+                                    {item.quantity} und.
                                 </span>
                             </TableCell>
 

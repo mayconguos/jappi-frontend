@@ -140,7 +140,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
                           </TableCell>
                           <TableCell className="font-medium">{item.product_name}</TableCell>
                           <TableCell className="text-gray-500 text-xs font-mono">{item.sku}</TableCell>
-                          <TableCell className="text-right text-gray-500">{item.stock}</TableCell>
+                          <TableCell className="text-right text-gray-500">{item.quantity}</TableCell>
                         </TableRow>
                       );
                     })}

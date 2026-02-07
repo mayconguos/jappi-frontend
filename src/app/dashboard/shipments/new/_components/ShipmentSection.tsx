@@ -158,18 +158,16 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
           return;
         }
 
-        const response = await api.get(`/kardex/${user.id}`, {
+        const response = await api.get(`/inventory/${user.id}`, {
           headers: { authorization: `${token}` }
         });
-
-
 
         const data = Array.isArray(response.data) ? response.data : (response.data?.kardex || []);
 
         const mappedProducts = data.map((p: any) => ({
           id: String(p.id),
           description: p.product_name,
-          available_quantity: Number(p.current_stock),
+          available_quantity: Number(p.quantity),
           code: String(p.id)
         }));
 

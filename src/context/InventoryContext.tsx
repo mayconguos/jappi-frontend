@@ -2,18 +2,28 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
-import { InboundRequest } from '@/components/tables/RequestsTable';
+
 import api from '@/app/services/api';
 import { useAuth } from '@/context/AuthContext';
 
 // Initial Mock Data (Moved from pages)
 const INITIAL_PRODUCTS: CatalogProduct[] = [
-  { id: 101, sku: 'TSHIRT-WHT-S', product_name: 'Camiseta Básica Blanca S', stock: 120, status: 'active', last_updated: '2024-02-01' },
-  { id: 102, sku: 'TSHIRT-WHT-M', product_name: 'Camiseta Básica Blanca M', stock: 85, status: 'active', last_updated: '2024-02-02' },
-  { id: 103, sku: 'TSHIRT-WHT-L', product_name: 'Camiseta Básica Blanca L', stock: 200, status: 'active', last_updated: '2024-02-03' },
-  { id: 104, sku: 'TSHIRT-BLK-S', product_name: 'Camiseta Básica Negra S', stock: 50, status: 'active', last_updated: '2024-02-04' },
-  { id: 106, sku: 'HOODIE-GRY-L', product_name: 'Polera Gris L', stock: 0, status: 'inactive', last_updated: '2024-01-20' },
+  { id: 101, sku: 'TSHIRT-WHT-S', product_name: 'Camiseta Básica Blanca S', quantity: 120, status: 'active', last_updated: '2024-02-01' },
+  { id: 102, sku: 'TSHIRT-WHT-M', product_name: 'Camiseta Básica Blanca M', quantity: 85, status: 'active', last_updated: '2024-02-02' },
+  { id: 103, sku: 'TSHIRT-WHT-L', product_name: 'Camiseta Básica Blanca L', quantity: 200, status: 'active', last_updated: '2024-02-03' },
+  { id: 104, sku: 'TSHIRT-BLK-S', product_name: 'Camiseta Básica Negra S', quantity: 50, status: 'active', last_updated: '2024-02-04' },
+  { id: 106, sku: 'HOODIE-GRY-L', product_name: 'Polera Gris L', quantity: 0, status: 'inactive', last_updated: '2024-01-20' },
 ];
+
+export interface InboundRequest {
+  id: number;
+  request_date: string;
+  total_skus: number;
+  total_units: number;
+  status: 'pending' | 'in_transit' | 'received' | 'cancelled';
+  items?: any[];
+  pdf_url: string;
+}
 
 const INITIAL_REQUESTS: InboundRequest[] = [
   { id: 1024, request_date: '2024-02-01', total_skus: 3, total_units: 150, status: 'pending', pdf_url: '#' },
@@ -51,7 +61,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
         SKU: productData.sku,
         product_name: productData.product_name,
         description: productData.description || "",
-        id_company: user?.id
+        id_user: user?.id
       };
 
       // Call API
@@ -64,7 +74,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
         sku: backendProduct.SKU,
         product_name: backendProduct.product_name,
         description: backendProduct.description,
-        stock: backendProduct.quantity || 0,
+        quantity: backendProduct.quantity || 0,
         status: 'active',
         last_updated: backendProduct.modified_at || new Date().toISOString()
       };
