@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { CheckCircle2, ChevronDown } from 'lucide-react';
-import secureLocalStorage from 'react-secure-storage';
+import { useAuth } from '@/context/AuthContext';
 import { clsx } from 'clsx';
 import { Card } from '@/components/ui/card';
 import { Select } from '@/components/ui/select';
@@ -33,6 +33,7 @@ interface ShipmentSectionProps {
 export default function ShipmentSection({ form, onProductsChange, isActive, isCompleted, onContinue, onEdit }: ShipmentSectionProps) {
   const { formState: { errors }, watch, setValue, trigger, register } = form;
   const watchedValues = watch();
+  const { user } = useAuth();
 
   const selectedOriginType = watchedValues.service?.origin_type;
 
@@ -122,10 +123,8 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
     const fetchCompanyData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const user = secureLocalStorage.getItem('user') as { id?: number | string } | null;
 
         if (!user || !user.id) {
-          console.error('User ID not found in secure storage');
           return;
         }
 
@@ -145,20 +144,19 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
     };
 
     fetchCompanyData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const fetchWarehouseProducts = async () => {
       try {
         const token = localStorage.getItem('token');
-        const user = secureLocalStorage.getItem('user') as { id?: number | string } | null;
 
-        if (!user || !user.id) {
-          console.error('User not found');
+        if (!user || !user.id_company) {
+          console.error('User or Company ID not found');
           return;
         }
 
-        const response = await api.get(`/inventory/${user.id}`, {
+        const response = await api.get(`/inventory/${user.id_company}`, {
           headers: { authorization: `${token}` }
         });
 
@@ -180,7 +178,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
     if (selectedOriginType === 'warehouse') {
       fetchWarehouseProducts();
     }
-  }, [selectedOriginType]);
+  }, [selectedOriginType, user]);
 
   useEffect(() => {
     if (onProductsChange) {

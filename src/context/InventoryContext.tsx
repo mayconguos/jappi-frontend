@@ -6,14 +6,7 @@ import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import api from '@/app/services/api';
 import { useAuth } from '@/context/AuthContext';
 
-// Initial Mock Data (Moved from pages)
-const INITIAL_PRODUCTS: CatalogProduct[] = [
-  { id: 101, sku: 'TSHIRT-WHT-S', product_name: 'Camiseta Básica Blanca S', quantity: 120, status: 'active', last_updated: '2024-02-01' },
-  { id: 102, sku: 'TSHIRT-WHT-M', product_name: 'Camiseta Básica Blanca M', quantity: 85, status: 'active', last_updated: '2024-02-02' },
-  { id: 103, sku: 'TSHIRT-WHT-L', product_name: 'Camiseta Básica Blanca L', quantity: 200, status: 'active', last_updated: '2024-02-03' },
-  { id: 104, sku: 'TSHIRT-BLK-S', product_name: 'Camiseta Básica Negra S', quantity: 50, status: 'active', last_updated: '2024-02-04' },
-  { id: 106, sku: 'HOODIE-GRY-L', product_name: 'Polera Gris L', quantity: 0, status: 'inactive', last_updated: '2024-01-20' },
-];
+const INITIAL_PRODUCTS: CatalogProduct[] = [];
 
 export interface InboundRequest {
   id: number;
@@ -48,6 +41,37 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [requests, setRequests] = useState<InboundRequest[]>(INITIAL_REQUESTS);
   const { user } = useAuth();
 
+  const fetchInventory = async () => {
+    if (!user?.id_company) return;
+
+    try {
+      const response = await api.get(`/inventory/${user.id_company}`);
+      const data = Array.isArray(response.data) ? response.data : (response.data?.kardex || []);
+
+      const mappedProducts: CatalogProduct[] = data.map((p: any) => ({
+        id: p.id,
+        sku: p.SKU || `PROD-${p.id}`, // Fallback if SKU is missing
+        product_name: p.product_name,
+        description: p.description,
+        quantity: Number(p.quantity || 0),
+        status: p.status === 0 ? 'inactive' : 'active', // Assuming 1 is active, 0 inactive
+        last_updated: p.modified_at || new Date().toISOString()
+      }));
+
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (user?.id_company) {
+      fetchInventory();
+    } else {
+      setProducts([]);
+    }
+  }, [user]);
+
   const addProduct = async (productData: Omit<CatalogProduct, 'id' | 'last_updated'>) => {
     try {
       console.log('Current User in InventoryContext:', user);
@@ -61,7 +85,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
         SKU: productData.sku,
         product_name: productData.product_name,
         description: productData.description || "",
-        id_user: user?.id
+        id_company: user?.id_company
       };
 
       // Call API

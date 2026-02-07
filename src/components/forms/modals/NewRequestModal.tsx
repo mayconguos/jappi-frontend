@@ -10,6 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useInventory } from '@/context/InventoryContext';
 import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
+import api from '@/app/services/api';
+import { useAuth } from '@/context/AuthContext';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface SelectedProduct extends CatalogProduct {
   quantity: number;
@@ -29,6 +32,13 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
   const [step, setStep] = useState<1 | 2>(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState<SelectedProduct[]>([]);
+
+  // API Interaction States
+  const [isLoading, setIsLoading] = useState(false);
+  const [successModal, setSuccessModal] = useState<string | boolean>(false);
+  const [errorModal, setErrorModal] = useState<string | null>(null);
+
+  const { user } = useAuth();
 
   const filteredCatalog = products.filter(item =>
     item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,14 +68,49 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
     setStep(1);
   };
 
-  const handleSubmit = () => {
-    onSubmit(selectedItems);
-    setTimeout(() => {
+  const handleSubmit = async () => {
+    if (!user?.id_company) {
+      setErrorModal('No se pudo identificar la compañía del usuario.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        id_company: user.id_company,
+        items: selectedItems.map(item => ({
+          id_product: item.id,
+          quantity: Number(item.quantity)
+        }))
+      };
+
+      await api.post('/inventory/supply-request', payload);
+
+      setSuccessModal('La solicitud de abastecimiento ha sido creada exitosamente.');
+
+      // Notify parent if needed (e.g. to refresh list)
+      onSubmit(selectedItems);
+
+    } catch (error) {
+      console.error('Error creating supply request:', error);
+      setErrorModal('Hubo un error al procesar la solicitud. Por favor intenta nuevamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const closeStatusModals = () => {
+    if (successModal) {
+      // Logic after success: close everything and reset
+      setSuccessModal(false);
       setStep(1);
       setSelectedItems([]);
       setSearchTerm('');
       onClose();
-    }, 500);
+    } else {
+      // Just close error modal logic
+      setErrorModal(null);
+    }
   };
 
   // Handler for creating a new product
@@ -214,9 +259,11 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
           ) : (
             <Button
               onClick={handleSubmit}
+              disabled={isLoading}
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               Confirmar Envío
+              {isLoading && <span className="ml-2 animate-spin">⏳</span>}
             </Button>
           )}
         </ModalFooter>
@@ -229,6 +276,56 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
         onSubmit={handleCreateProduct}
         editingProduct={null} // Always creating new
       />
+
+      {/* Success Modal */}
+      {successModal && (
+        <Modal
+          isOpen={!!successModal}
+          onClose={closeStatusModals}
+          size="sm"
+          title="Operación Exitosa"
+          footer={
+            <ModalFooter className="justify-center">
+              <Button onClick={closeStatusModals} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto">
+                Aceptar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-4">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-slate-600 font-medium">
+              {typeof successModal === 'string' ? successModal : 'Operación completada correctamente.'}
+            </p>
+          </div>
+        </Modal>
+      )}
+
+      {/* Error Modal */}
+      {errorModal && (
+        <Modal
+          isOpen={!!errorModal}
+          onClose={closeStatusModals}
+          size="sm"
+          title="Error"
+          footer={
+            <ModalFooter className="justify-center">
+              <Button onClick={closeStatusModals} className="bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto">
+                Cerrar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <p className="text-slate-600 font-medium">{errorModal}</p>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }

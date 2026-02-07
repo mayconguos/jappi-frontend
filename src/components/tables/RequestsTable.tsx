@@ -49,13 +49,11 @@ export default function RequestsTable({
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="w-[80px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Orden</TableHead>
+          <TableRow>
+            <TableHead className="pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Orden</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha Creación</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Items (SKUs)</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Unidades</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Guía</TableHead>
+            <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" style={{ textAlign: 'center' }}>Guía</TableHead>
             <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -71,16 +69,6 @@ export default function RequestsTable({
 
               <TableCell className="py-4">
                 <span className="text-sm font-medium text-gray-900">{item.request_date}</span>
-              </TableCell>
-
-              <TableCell className="py-4 text-center">
-                <span className="text-sm text-gray-600">{item.total_skus}</span>
-              </TableCell>
-
-              <TableCell className="py-4 text-center">
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-100 border border-gray-200">
-                  <span className="text-xs font-bold text-gray-700">{item.total_units} un.</span>
-                </div>
               </TableCell>
 
               <TableCell className="py-4">
@@ -137,7 +125,7 @@ export default function RequestsTable({
             </TableRow>
           )}
         </TableBody>
-      </Table>
-    </div>
+      </Table >
+    </div >
   );
 }

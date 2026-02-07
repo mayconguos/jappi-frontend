@@ -80,13 +80,11 @@ export default function CompanyWarehousePage() {
           totalItems={products.length}
         />
 
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
-          <CompanyProductsTable
-            products={filteredProducts}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </div>
+        <CompanyProductsTable
+          products={filteredProducts}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
 
       <ProductModal
