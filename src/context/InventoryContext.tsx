@@ -18,12 +18,7 @@ export interface InboundRequest {
   pdf_url: string;
 }
 
-const INITIAL_REQUESTS: InboundRequest[] = [
-  { id: 1024, request_date: '2024-02-01', total_skus: 3, total_units: 150, status: 'pending', pdf_url: '#' },
-  { id: 1023, request_date: '2024-01-28', total_skus: 5, total_units: 500, status: 'in_transit', pdf_url: '#' },
-  { id: 1022, request_date: '2024-01-15', total_skus: 2, total_units: 50, status: 'received', pdf_url: '#' },
-  { id: 1021, request_date: '2024-01-10', total_skus: 10, total_units: 1200, status: 'received', pdf_url: '#' },
-];
+const INITIAL_REQUESTS: InboundRequest[] = [];
 
 interface InventoryContextType {
   products: CatalogProduct[];
@@ -59,8 +54,24 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       }));
 
       setProducts(mappedProducts);
+
+      // Fetch Requests
+      const requestsResponse = await api.get(`/inventory/supply-request/${user.id_company}`);
+      const requestsData = Array.isArray(requestsResponse.data) ? requestsResponse.data : [];
+
+      const mappedRequests: InboundRequest[] = requestsData.map((r: any) => ({
+        id: r.id,
+        request_date: new Date(r.created_at).toLocaleDateString(),
+        total_skus: 0,
+        total_units: 0,
+        status: (r.status?.toLowerCase() || 'pending') as any,
+        pdf_url: "#"
+      }));
+
+      setRequests(mappedRequests);
+
     } catch (error) {
-      console.error('Error fetching inventory:', error);
+      console.error('Error fetching inventory data:', error);
     }
   };
 
@@ -69,6 +80,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       fetchInventory();
     } else {
       setProducts([]);
+      setRequests([]);
     }
   }, [user]);
 
