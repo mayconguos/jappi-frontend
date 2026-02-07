@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Package, ArrowRight, MapPin, User } from 'lucide-react';
+import DeliveryDetailModal from '@/components/forms/modals/DeliveryDetailModal';
 
-const MOCK_DELIVERIES = [
+const INITIAL_DELIVERIES = [
   {
     id: 'TRK-9901-JP',
     date: '2024-02-06',
@@ -62,6 +64,25 @@ const getStatusBadge = (status: string) => {
 };
 
 export default function CarrierDeliveriesTable() {
+  const [deliveries, setDeliveries] = useState(INITIAL_DELIVERIES);
+  const [selectedDelivery, setSelectedDelivery] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenDetail = (delivery: any) => {
+    setSelectedDelivery(delivery);
+    setIsModalOpen(true);
+  };
+
+  const handleStatusChange = (id: string, newStatus: string) => {
+    setDeliveries(prev => prev.map(d =>
+      d.id === id ? { ...d, status: newStatus } : d
+    ));
+    // Update selected delivery as well so modal reflects change immediately
+    if (selectedDelivery && selectedDelivery.id === id) {
+      setSelectedDelivery({ ...selectedDelivery, status: newStatus });
+    }
+  };
+
   return (
     <>
       {/* Desktop View */}
@@ -71,22 +92,22 @@ export default function CarrierDeliveriesTable() {
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
               <TableHead className="w-[180px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Envío</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Destinatario</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ruta</TableHead>
               <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
               <TableHead className="w-[100px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_DELIVERIES.map((delivery) => (
-              <TableRow key={delivery.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
-                {/* Envío: Tracking + Fecha */}
+            {deliveries.map((delivery) => (
+              <TableRow
+                key={delivery.id}
+                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
+                onClick={() => handleOpenDetail(delivery)}
+              >
+                {/* Envío: Tracking */}
                 <TableCell className="pl-6 py-4">
                   <div className="flex flex-col gap-0.5">
                     <span className="font-mono text-xs font-medium text-blue-700">
                       {delivery.id}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {delivery.date}
                     </span>
                   </div>
                 </TableCell>
@@ -103,24 +124,10 @@ export default function CarrierDeliveriesTable() {
                       </span>
                       <div className="flex items-center gap-1.5 text-gray-500">
                         <MapPin size={12} />
-                        <span className="text-xs truncate max-w-[200px]" title={delivery.recipient_address}>
+                        <span className="text-xs truncate max-w-[300px]" title={delivery.recipient_address}>
                           {delivery.recipient_address}
                         </span>
                       </div>
-                    </div>
-                  </div>
-                </TableCell>
-
-                {/* Ruta */}
-                <TableCell className="py-4">
-                  <div className="flex flex-col gap-1.5 max-w-[280px]">
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
-                      <span className="truncate" title={delivery.origin}>{delivery.origin}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                      <span className="truncate" title={delivery.destination}>{delivery.destination}</span>
                     </div>
                   </div>
                 </TableCell>
@@ -138,6 +145,10 @@ export default function CarrierDeliveriesTable() {
                       variant="ghost"
                       className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all font-normal"
                       title="Ver Detalles"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDetail(delivery);
+                      }}
                     >
                       <Eye size={16} />
                     </Button>
@@ -151,52 +162,50 @@ export default function CarrierDeliveriesTable() {
 
       {/* Mobile View (Cards) */}
       <div className="md:hidden space-y-4">
-        {MOCK_DELIVERIES.map((delivery) => (
-          <div key={delivery.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden">
+        {deliveries.map((delivery) => (
+          <div
+            key={delivery.id}
+            className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
+            onClick={() => handleOpenDetail(delivery)}
+          >
             {/* Status Stripe */}
             <div className={`absolute left-0 top-0 bottom-0 w-1 ${delivery.status === 'pending' ? 'bg-yellow-400' :
               delivery.status === 'in_progress' ? 'bg-blue-500' :
                 delivery.status === 'completed' ? 'bg-emerald-500' : 'bg-red-500'
               }`} />
 
-            <div className="flex justify-between items-start mb-4 pl-2">
-              <div>
-                <span className="text-xs font-mono text-gray-400 block mb-0.5">{delivery.date}</span>
-                <div className="font-bold text-lg text-gray-900 tracking-tight">{delivery.id}</div>
-                <div className="text-sm text-gray-600 font-medium mt-1">{delivery.recipient}</div>
+            <div className="pl-3 pr-1 pt-1">
+              {/* Header: Tracking | Packages | Status */}
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 text-gray-500 mb-0.5">
+                    <span className="text-xs font-mono font-medium">{delivery.id}</span>
+                    <span className="text-[10px] uppercase tracking-wider bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-semibold">{delivery.items_count} pqt</span>
+                  </div>
+                  <div className="font-bold text-lg text-gray-900 leading-tight">{delivery.recipient}</div>
+                </div>
+                <div className="scale-90 origin-top-right shrink-0 ml-2">
+                  {getStatusBadge(delivery.status)}
+                </div>
               </div>
-              <div className="scale-90 origin-top-right">
-                {getStatusBadge(delivery.status)}
-              </div>
-            </div>
 
-            {/* Visual Route Timeline */}
-            <div className="relative pl-6 space-y-6 border-l-2 border-dashed border-gray-100 ml-3 mb-5">
-              <div className="relative">
-                <div className="absolute -left-[23px] top-1.5 w-3 h-3 bg-white border-2 border-gray-400 rounded-full shadow-sm"></div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Origen</p>
-                <p className="text-sm font-medium text-gray-900 leading-snug">{delivery.origin}</p>
+              {/* Address Block - Compact */}
+              <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 mb-1">
+                <MapPin className="text-blue-500 shrink-0" size={18} />
+                <p className="text-sm font-medium text-gray-800 leading-snug line-clamp-2">{delivery.destination}</p>
               </div>
-              <div className="relative">
-                <div className="absolute -left-[23px] top-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-full shadow-sm"></div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Destino</p>
-                <p className="text-sm font-medium text-gray-900 leading-snug">{delivery.destination}</p>
-              </div>
-            </div>
-
-            {/* Footer Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-50 pl-2">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Package size={16} className="text-gray-400" />
-                <span className="font-medium text-gray-700">{delivery.items_count}</span> paquetes
-              </div>
-              <Button size="sm" className="bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200">
-                Ver Detalles <ArrowRight size={14} className="ml-2" />
-              </Button>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Detail Modal */}
+      <DeliveryDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        delivery={selectedDelivery}
+        onStatusChange={handleStatusChange}
+      />
     </>
   );
 }
