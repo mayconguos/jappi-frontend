@@ -26,7 +26,7 @@ interface InventoryContextType {
   addProduct: (product: Omit<CatalogProduct, 'id' | 'last_updated'>) => Promise<void>;
   updateProduct: (product: Omit<CatalogProduct, 'last_updated'> & { last_updated?: string }) => void;
   deleteProduct: (id: number) => void;
-  addRequest: (items: any[]) => InboundRequest;
+  refreshInventory: () => Promise<void>;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
@@ -36,7 +36,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [requests, setRequests] = useState<InboundRequest[]>(INITIAL_REQUESTS);
   const { user } = useAuth();
 
-  const fetchInventory = async () => {
+  const refreshInventory = async () => {
     if (!user?.id_company) return;
 
     try {
@@ -77,7 +77,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
   React.useEffect(() => {
     if (user?.id_company) {
-      fetchInventory();
+      refreshInventory();
     } else {
       setProducts([]);
       setRequests([]);
@@ -134,18 +134,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     setProducts(products.filter(p => p.id !== id));
   };
 
-  const addRequest = (items: any[]) => {
-    const newRequest: InboundRequest = {
-      id: Math.floor(Math.random() * 1000) + 2000,
-      request_date: new Date().toISOString().split('T')[0],
-      total_skus: items.length,
-      total_units: items.reduce((acc, item) => acc + item.quantity, 0),
-      status: 'pending',
-      pdf_url: '#'
-    };
-    setRequests([newRequest, ...requests]);
-    return newRequest;
-  };
+
 
   return (
     <InventoryContext.Provider value={{
@@ -154,7 +143,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       addProduct,
       updateProduct,
       deleteProduct,
-      addRequest
+      refreshInventory
     }}>
       {children}
     </InventoryContext.Provider>

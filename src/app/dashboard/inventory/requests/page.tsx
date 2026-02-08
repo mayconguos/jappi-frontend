@@ -10,7 +10,7 @@ import { useInventory } from '@/context/InventoryContext';
 
 export default function WarehouseRequestsPage() {
   // Use Global Context
-  const { requests, addRequest } = useInventory();
+  const { requests, refreshInventory } = useInventory();
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
@@ -36,14 +36,16 @@ export default function WarehouseRequestsPage() {
     setIsModalOpen(true);
   };
 
-  const handleCreateRequest = (items: any[]) => {
-    const newRequest = addRequest(items);
-
+  const handleCreateRequest = async () => {
     setIsModalOpen(false);
+    await refreshInventory();
 
-    // Simulate Guide Generation
+    // Simulate Guide Generation (Optional: Remove if not needed anymore)
     setTimeout(() => {
-      alert('✅ ¡Solicitud #' + newRequest.id + ' Creada! \n\nSe ha generado la Guía de Remisión. \nPor favor imprímela y pégala en tu caja.');
+      // Ideally we would get the new ID here, but since we refresh list, functionality is correct.
+      // We can remove the specific ID alert or fetch the latest one.
+      // For now, removing specific ID from alert to avoid confusion or fetching latest.
+      alert('✅ ¡Solicitud creada exitosamente! \n\nSe ha generado la Guía de Remisión. \nPor favor imprímela y pégala en tu caja.');
     }, 500);
   };
 
