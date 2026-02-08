@@ -45,12 +45,13 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
       const mappedProducts: CatalogProduct[] = data.map((p: any) => ({
         id: p.id,
-        sku: p.SKU || `PROD-${p.id}`, // Fallback if SKU is missing
+        id_product: p.id_product,
+        sku: p.SKU || `PROD-${p.id}`,
         product_name: p.product_name,
         description: p.description,
         quantity: Number(p.quantity || 0),
-        status: p.status === 0 ? 'inactive' : 'active', // Assuming 1 is active, 0 inactive
-        last_updated: p.modified_at || new Date().toISOString()
+        status: p.status === 0 ? 'inactive' : 'active',
+        last_updated: p.modified_at
       }));
 
       setProducts(mappedProducts);
