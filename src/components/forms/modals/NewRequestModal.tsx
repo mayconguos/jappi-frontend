@@ -79,7 +79,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
       const payload = {
         id_company: user.id_company,
         items: selectedItems.map(item => ({
-          id_product: item.id,
+          id_product: item.id_product,
           quantity: Number(item.quantity)
         }))
       };

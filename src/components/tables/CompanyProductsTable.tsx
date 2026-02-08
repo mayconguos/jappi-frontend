@@ -5,6 +5,7 @@ import { clsx } from 'clsx';
 
 export interface CatalogProduct {
   id: number;
+  id_product?: number;
   sku: string;
   product_name: string;
   description?: string;
