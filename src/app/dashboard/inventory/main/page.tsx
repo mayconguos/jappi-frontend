@@ -1,62 +1,149 @@
 'use client';
 
-import { ArrowDownLeft } from 'lucide-react';
-import Link from 'next/link';
-import { useInventory } from '@/context/InventoryContext';
-
-// Components
-import InventoryStats from '@/components/dashboard/inventory/InventoryStats';
-import RecentActivityTable from '@/components/tables/RecentActivityTable';
-import InventoryAlerts from '@/components/dashboard/inventory/InventoryAlerts';
+import { useState } from 'react';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
+import ProductsFilter from '@/components/filters/ProductsFilter';
+import CompanyProductsTable, { CatalogProduct } from '@/components/tables/CompanyProductsTable';
+import ProductModal from '@/components/forms/modals/ProductModal';
+import { useProducts } from '@/hooks/useProducts';
+import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
 
 export default function InventoryMainPage() {
-  const { products, requests } = useInventory();
+  // Uso de Hook Local
+  const { products, addProduct, updateProduct, deleteProduct, loading } = useProducts();
 
-  // Calculate statistics
-  const totalProducts = products.length;
-  const lowStockList = products.filter(p => p.quantity < 10 && p.status === 'active');
-  const lowStockCount = lowStockList.length;
-  const activeRequests = requests.filter(r => r.status === 'pending' || r.status === 'in_transit').length;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
+
+  // Estados de Retroalimentación
+  const [isLoading, setIsLoading] = useState(false);
+  const [successModal, setSuccessModal] = useState<string | boolean>(false);
+  const [errorModal, setErrorModal] = useState<string | null>(null);
+
+  const filteredProducts = products.filter(p =>
+    p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleCreate = () => {
+    setEditingProduct(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (product: CatalogProduct) => {
+    setEditingProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (product: CatalogProduct) => {
+    if (confirm(`¿Estás seguro de eliminar el producto ${product.sku}?`)) {
+      deleteProduct(product.id);
+    }
+  };
+
+  const handleSubmitProduct = async (data: any) => {
+    setIsLoading(true);
+    try {
+      if (editingProduct) {
+        updateProduct({ ...editingProduct, ...data });
+        setIsModalOpen(false);
+        setSuccessModal('El producto ha sido actualizado correctamente.');
+      } else {
+        await addProduct({ stock: 0, ...data });
+        setIsModalOpen(false);
+        setSuccessModal('El producto ha sido creado correctamente.');
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorModal('Hubo un error al procesar el producto. Por favor intenta nuevamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const closeStatusModals = () => {
+    setSuccessModal(false);
+    setErrorModal(null);
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Resumen de Inventario
-          </h1>
-          <p className="text-slate-500 mt-1">
-            Vista general del estado de tu almacén y movimientos recientes.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            href="/dashboard/inventory/requests?new=true"
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
-          >
-            <ArrowDownLeft size={18} />
-            Nueva Solicitud
-          </Link>
-        </div>
+      <div className="space-y-6">
+        <ProductsFilter
+          searchValue={searchTerm}
+          setSearchValue={setSearchTerm}
+          onAdd={handleCreate}
+          onImport={() => alert('Próximamente: Carga masiva mediante Excel con validación de SKUs.')}
+          totalItems={products.length}
+        />
+
+        <CompanyProductsTable
+          products={filteredProducts}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
 
-      {/* KPI Stats */}
-      <InventoryStats
-        totalProducts={totalProducts}
-        lowStockProducts={lowStockCount}
-        activeRequests={activeRequests}
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => !isLoading && setIsModalOpen(false)}
+        onSubmit={handleSubmitProduct}
+        editingProduct={editingProduct}
+        isLoading={isLoading}
       />
 
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity Table */}
-        <RecentActivityTable requests={requests} />
+      {/* Modal de Éxito */}
+      {successModal && (
+        <Modal
+          isOpen={!!successModal}
+          onClose={closeStatusModals}
+          size="sm"
+          title="Operación Exitosa"
+          footer={
+            <ModalFooter className="justify-center">
+              <Button onClick={closeStatusModals} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto">
+                Aceptar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-4">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-slate-600 font-medium">
+              {typeof successModal === 'string' ? successModal : 'Operación completada correctamente.'}
+            </p>
+          </div>
+        </Modal>
+      )}
 
-        {/* Alerts & Quick Actions */}
-        <InventoryAlerts lowStockProducts={lowStockList} />
-      </div>
+      {/* Modal de Error */}
+      {errorModal && (
+        <Modal
+          isOpen={!!errorModal}
+          onClose={closeStatusModals}
+          size="sm"
+          title="Error"
+          footer={
+            <ModalFooter className="justify-center">
+              <Button onClick={closeStatusModals} className="bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto">
+                Cerrar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <p className="text-slate-600 font-medium">{errorModal}</p>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

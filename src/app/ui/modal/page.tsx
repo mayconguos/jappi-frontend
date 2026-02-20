@@ -12,7 +12,7 @@ export default function ModalExamples() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Modal Examples</h1>
 
-      {/* Small Modal Example */}
+      {/* Ejemplo de Modal Pequeño */}
       <div>
         <Button onClick={() => setSmallModalOpen(true)} className="bg-primary text-white">
           Open Small Modal
@@ -35,7 +35,7 @@ export default function ModalExamples() {
         </Modal>
       </div>
 
-      {/* Large Modal Example */}
+      {/* Ejemplo de Modal Grande */}
       <div>
         <Button onClick={() => setLargeModalOpen(true)} className="bg-primary text-white">
           Open Large Modal

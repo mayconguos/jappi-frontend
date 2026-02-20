@@ -8,6 +8,7 @@ export interface CatalogProduct {
   id_product?: number;
   sku: string;
   product_name: string;
+  company_name?: string;
   description?: string;
   quantity: number;
   status: 'active' | 'inactive';
@@ -44,32 +45,44 @@ export default function CompanyProductsTable({
   onEdit,
   onDelete,
 }: CompanyProductsTableProps) {
+  const showCompanyNameColumn = products.some(p => p.company_name);
+  const colSpanCount = showCompanyNameColumn ? 7 : 6; // 6 columnas originales + 1 para company_name
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-slate-50">
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="w-[150px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock Japi</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
-            <TableHead className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Última Act.</TableHead>
-            <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
+            <TableHead className="w-[100px] pl-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">SKU</TableHead>
+            {/* Mostrar nombre de la empresa si al menos un producto lo tiene (indicando vista de Admin) */}
+            {showCompanyNameColumn && (
+              <TableHead className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Empresa</TableHead>
+            )}
+            <TableHead className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Producto</TableHead>
+            <TableHead className="text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Stock Japi</TableHead>
+            <TableHead className="text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Estado</TableHead>
+            <TableHead className="text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Última Act.</TableHead>
+            <TableHead className="text-right pr-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {products.map((item) => (
             <TableRow
               key={item.id}
-              className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
+              className="border-b border-gray-50 hover:bg-slate-50/50 transition-colors group"
             >
-              <TableCell className="pl-6 py-4 font-mono text-xs font-medium text-gray-500">
+              <TableCell className="pl-6 py-4 font-mono text-xs font-medium text-slate-900">
                 {item.sku}
               </TableCell>
-
+              {/* Renderizar celda de nombre de empresa si corresponde */}
+              {showCompanyNameColumn && (
+                <TableCell className="py-4 text-slate-600">
+                  {item.company_name}
+                </TableCell>
+              )}
               <TableCell className="py-4">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-gray-900">{item.product_name}</span>
+                  <span className="text-sm font-medium text-slate-900">{item.product_name}</span>
                   {item.description && (
                     <span className="text-xs text-gray-400 truncate max-w-[200px]">{item.description}</span>
                   )}
@@ -101,7 +114,7 @@ export default function CompanyProductsTable({
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button
                     onClick={() => onEdit(item)}
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
                     className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full"
                   >
@@ -109,7 +122,7 @@ export default function CompanyProductsTable({
                   </Button>
                   <Button
                     onClick={() => onDelete(item)}
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
                     className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full"
                   >

@@ -15,7 +15,7 @@ const CardExamples = () => {
       <h1 className="text-2xl font-bold">Card Examples</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Basic Card */}
+        {/* Tarjeta Básica */}
         <Card>
           <CardHeader>
             <CardTitle>Basic Card</CardTitle>
@@ -26,7 +26,7 @@ const CardExamples = () => {
           </CardContent>
         </Card>
 
-        {/* Outlined/Flat Card (using flat variant as closest to 'outlined' or default with border) */}
+        {/* Tarjeta Plana/Sin Relieve (usando variante flat por ser la más cercana a 'outlined' o por defecto con borde) */}
         <Card variant="flat">
           <CardHeader>
             <CardTitle>Flat Card</CardTitle>
@@ -37,7 +37,7 @@ const CardExamples = () => {
           </CardContent>
         </Card>
 
-        {/* Hoverable Card */}
+        {/* Tarjeta con Efecto Hover */}
         <Card isHoverable>
           <CardHeader>
             <CardTitle>Hoverable Card</CardTitle>
@@ -48,7 +48,7 @@ const CardExamples = () => {
           </CardContent>
         </Card>
 
-        {/* Card with Footer */}
+        {/* Tarjeta con Pie de Página */}
         <Card>
           <CardHeader>
             <CardTitle>Card with Footer</CardTitle>

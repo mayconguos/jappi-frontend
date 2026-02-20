@@ -55,10 +55,6 @@ export default function CompaniesTable({
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-gray-900">{company.first_name} {company.last_name}</span>
                   <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1.5 text-gray-500">
-                      <Mail size={12} />
-                      <span className="text-xs">{company.email}</span>
-                    </div>
                     {company.phone_number && (
                       <div className="flex items-center gap-1.5 text-gray-500">
                         <Phone size={12} />

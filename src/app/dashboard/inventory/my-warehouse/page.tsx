@@ -5,13 +5,13 @@ import { CheckCircle, AlertTriangle } from 'lucide-react';
 import ProductsFilter from '@/components/filters/ProductsFilter';
 import CompanyProductsTable, { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
-import { useInventory } from '@/context/InventoryContext';
+import { useProducts } from '@/hooks/useProducts';
 import { Modal, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 
 export default function CompanyWarehousePage() {
-  // Use Global Context
-  const { products, addProduct, updateProduct, deleteProduct } = useInventory();
+  // Use Local Hook
+  const { products, addProduct, updateProduct, deleteProduct, loading } = useProducts();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);

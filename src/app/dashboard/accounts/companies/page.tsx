@@ -244,55 +244,51 @@ export default function CompaniesPage() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
 
-      <div className="space-y-6">
-        <CompaniesFilter
-          field={field}
-          setField={setField}
-          value={value}
-          setValue={setValue}
-          filterFields={FILTER_FIELDS}
-          onExportExcel={handleExportExcel}
-          onExportPdf={handleExportPdf}
-          totalItems={totalItems}
-        />
+      <CompaniesFilter
+        field={field}
+        setField={setField}
+        value={value}
+        setValue={setValue}
+        filterFields={FILTER_FIELDS}
+        onExportExcel={handleExportExcel}
+        onExportPdf={handleExportPdf}
+        totalItems={totalItems}
+      />
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <DeliveryLoader message="Cargando empresas..." />
-          </div>
-        ) : apiError && companies.length === 0 ? (
-          <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
-            <AlertTriangle size={32} />
-            <p className="font-medium">Error al cargar datos: {apiError}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <CompaniesTable
-              companies={currentItems}
-              currentPage={currentPage}
-              onView={handleViewCompany}
-              onDelete={handleDeleteClick}
-            />
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <DeliveryLoader message="Cargando empresas..." />
+        </div>
+      ) : apiError && companies.length === 0 ? (
+        <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
+          <AlertTriangle size={32} />
+          <p className="font-medium">Error al cargar datos: {apiError}</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <CompaniesTable
+            companies={currentItems}
+            currentPage={currentPage}
+            onView={handleViewCompany}
+            onDelete={handleDeleteClick}
+          />
 
-            {totalItems > 0 && (
-              <div className="pt-4 flex justify-center sm:justify-end">
-                <Pagination
-                  currentPage={currentPage}
-                  totalItems={totalItems}
-                  itemsPerPage={ITEMS_PER_PAGE}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          {totalItems > 0 && (
+            <div className="flex justify-center sm:justify-end">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* --- Modals --- */}
-
-      {/* Success Modal */}
+      {/* --- Modals are outside the flow anyway if null --- */}
       {successModal && (
         <Modal
           isOpen={!!successModal}
@@ -312,13 +308,12 @@ export default function CompaniesPage() {
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
             <p className="text-slate-600 font-medium">
-              {typeof successModal === 'string' ? successModal : 'Operación completada correctamente.'}
+              {successModal}
             </p>
           </div>
         </Modal>
       )}
 
-      {/* Error Modal */}
       {errorModal && (
         <Modal
           isOpen={!!errorModal}
@@ -342,7 +337,6 @@ export default function CompaniesPage() {
         </Modal>
       )}
 
-      {/* Details Modal */}
       <CompanyDetailsModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
@@ -350,7 +344,6 @@ export default function CompaniesPage() {
         loading={detailLoading}
       />
 
-      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -358,16 +351,10 @@ export default function CompaniesPage() {
         title="Confirmar Eliminación"
         footer={
           <ModalFooter className="flex justify-end gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => setDeleteModalOpen(false)}
-            >
+            <Button variant="secondary" onClick={() => setDeleteModalOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
-            >
+            <Button variant="destructive" onClick={handleConfirmDelete}>
               Eliminar
             </Button>
           </ModalFooter>
@@ -380,9 +367,7 @@ export default function CompaniesPage() {
           <p className="text-slate-600 font-medium mb-1">
             ¿Estás seguro que deseas eliminar la empresa <span className="font-bold text-slate-900">"{companyToDelete?.company_name}"</span>?
           </p>
-          <p className="text-sm text-slate-400">
-            Esta acción no se puede deshacer.
-          </p>
+          <p className="text-sm text-slate-400">Esta acción no se puede deshacer.</p>
         </div>
       </Modal>
     </div>

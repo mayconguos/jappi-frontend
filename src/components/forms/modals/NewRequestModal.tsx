@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Package, ArrowRight, Check, Search, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-import { useInventory } from '@/context/InventoryContext';
+import { useProducts } from '@/hooks/useProducts';
 import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
 import api from '@/app/services/api';
@@ -25,15 +25,38 @@ interface NewRequestModalProps {
 }
 
 export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewRequestModalProps) {
-  // State for nested Product Modal
+  // Estado para el modal anidado de Producto
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const { products, addProduct } = useInventory();
+  const { products, addProduct } = useProducts();
+  // Request Modal sends requests, so it still might need context for 'addRequest' if exists? No, requests are fetched in page.
+  // Actually, NewRequestModal calls onSubmit. The parent logic handles it. 
+  // Wait, NewRequestModal logic:
+  // It selects products from `products` list. 
+  // It calls `addProduct` (create new product)? Yes.
+
+  // No necesitamos useEffect fetchProducts porque el hook useProducts los obtiene al montarse.
+  // Sin embargo, useProducts los obtiene UNA VEZ cuando el hook se inicializa.
+  // If modal is closed and opened, component might not unmount? 
+  // If `NewRequestModal` is conditionally rendered `isModalOpen && <NewRequestModal>`, then it mounts every time.
+  // If it is `<NewRequestModal isOpen={isModalOpen} />`, it stays mounted.
+  // Let's check parent usage.
+  // Por lo general, los modales se renderizan condicionalmente o se ocultan con CSS. 
+  // En `RequestsPage`, es probable que sea: `isModalOpen && <NewRequestModal ... />` ?
+  // Supongamos un comportamiento estándar. Si permanece montado, es posible que deseemos actualizar los productos cuando `isOpen` cambie.
+  // El hook expone `refreshProducts`.
+
+  const { refreshProducts } = useProducts();
+  useEffect(() => {
+    if (isOpen) {
+      refreshProducts();
+    }
+  }, [isOpen]);
 
   const [step, setStep] = useState<1 | 2>(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState<SelectedProduct[]>([]);
 
-  // API Interaction States
+  // Estados de interacción con la API
   const [isLoading, setIsLoading] = useState(false);
   const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
@@ -88,7 +111,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
 
       setSuccessModal('La solicitud de abastecimiento ha sido creada exitosamente.');
 
-      // Notify parent if needed (e.g. to refresh list)
+      // Notificar al padre si es necesario (por ejemplo, para actualizar la lista)
       onSubmit(selectedItems);
 
     } catch (error) {
@@ -101,25 +124,25 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
 
   const closeStatusModals = () => {
     if (successModal) {
-      // Logic after success: close everything and reset
+      // Lógica tras el éxito: cerrar todo y resetear
       setSuccessModal(false);
       setStep(1);
       setSelectedItems([]);
       setSearchTerm('');
       onClose();
     } else {
-      // Just close error modal logic
+      // Lógica para cerrar solo el modal de error
       setErrorModal(null);
     }
   };
 
-  // Handler for creating a new product
+  // Manejador para crear un nuevo producto
   const handleCreateProduct = (data: any) => {
-    addProduct({ stock: 0, ...data }); // Add with 0 stock by default as per warehouse logic
+    addProduct({ stock: 0, ...data }); // Añadir con stock 0 por defecto según la lógica del almacén
     setIsProductModalOpen(false);
-    // Optionally: Auto-select the newly created product.
-    // However, since addProduct is void/doesn't return ID easily here without looking it up,
-    // we'll rely on it appearing in the list.
+    // Opcionalmente: Seleccionar automáticamente el producto recién creado.
+    // Sin embargo, dado que addProduct es void/no devuelve el ID fácilmente aquí sin buscarlo,
+    // confiaremos en que aparezca en la lista.
   };
 
   if (!isOpen) return null;
@@ -269,15 +292,15 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
         </ModalFooter>
       </Modal>
 
-      {/* Nested Product Modal */}
+      {/* Modal de Producto anidado */}
       <ProductModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onSubmit={handleCreateProduct}
-        editingProduct={null} // Always creating new
+        editingProduct={null} // Siempre creando uno nuevo
       />
 
-      {/* Success Modal */}
+      {/* Modal de Éxito */}
       {successModal && (
         <Modal
           isOpen={!!successModal}
@@ -303,7 +326,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
         </Modal>
       )}
 
-      {/* Error Modal */}
+      {/* Modal de Error */}
       {errorModal && (
         <Modal
           isOpen={!!errorModal}
