@@ -46,6 +46,7 @@ export default function WarehouseRequestsPage() {
         total_skus: 0,
         total_units: 0,
         status: (r.status?.toLowerCase() || 'pending') as any,
+        observation: r.observation || undefined,
         pdf_url: '#',
       }));
       setRequests(mapped);

@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Eye, FileText, Download } from 'lucide-react';
+import { Eye, FileText, Download, MessageSquareWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clsx } from 'clsx';
 
@@ -9,6 +9,7 @@ export interface InboundRequest {
   total_skus: number;
   total_units: number;
   status: 'pending' | 'received' | 'rejected';
+  observation?: string;
   pdf_url?: string;
 }
 
@@ -69,12 +70,23 @@ export default function RequestsTable({
               </TableCell>
 
               <TableCell className="py-4">
-                <span className={clsx(
-                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
-                  getStatusBadge(item.status)
-                )}>
-                  {getStatusLabel(item.status)}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={clsx(
+                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
+                    getStatusBadge(item.status)
+                  )}>
+                    {getStatusLabel(item.status)}
+                  </span>
+                  {/* Icono de observación: sólo si hay observation y fue recibido */}
+                  {item.status === 'received' && item.observation && (
+                    <span
+                      title={item.observation}
+                      className="inline-flex items-center text-amber-500 cursor-help"
+                    >
+                      <MessageSquareWarning size={15} />
+                    </span>
+                  )}
+                </div>
               </TableCell>
 
               <TableCell className="py-4 text-center">

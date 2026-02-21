@@ -3,9 +3,10 @@ import { Badge } from '@/components/ui/badge';
 import { Modal, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, Package, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { Loader2, Package, CheckCircle2, AlertTriangle, XCircle, MessageSquareWarning } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '@/app/services/api';
+import { useAuth } from '@/context/AuthContext';
 import { InboundRequest } from '@/components/tables/RequestsTable';
 
 interface RequestDetailModalProps {
@@ -43,6 +44,7 @@ export default function RequestDetailModal({
   isWarehouse = false,
   onStatusChange,
 }: RequestDetailModalProps) {
+  const { user } = useAuth();
   const [items, setItems] = useState<EditableItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +55,8 @@ export default function RequestDetailModal({
 
   // Estado para el paso de confirmación de cancelación
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  // Observación opcional (se muestra solo cuando hay diferencias en cantidades)
+  const [observation, setObservation] = useState('');
 
   useEffect(() => {
     if (isOpen && request) {
@@ -77,6 +81,7 @@ export default function RequestDetailModal({
       setItems([]);
       setUpdateError(null);
       setShowCancelConfirm(false);
+      setObservation('');
     }
   }, [isOpen, request]);
 
@@ -85,14 +90,17 @@ export default function RequestDetailModal({
     setIsConfirming(true);
     setUpdateError(null);
     try {
-      // TODO: reemplazar con el endpoint real cuando esté disponible
-      // await api.patch(`/inventory/supply-request/${request.id}/receive`, {
-      //   items: items.map(i => ({ id: i.id, received_quantity: i.received_quantity }))
-      // });
-      console.log(`[MOCK] PATCH /inventory/supply-request/${request.id}/receive`, {
-        items: items.map(i => ({ id: i.id, received_quantity: i.received_quantity })),
+      // Solo enviar los ítems cuya cantidad haya cambiado
+      const changedItems = items
+        .filter(i => i.received_quantity !== i.quantity)
+        .map(i => ({ id_product: i.id_product, quantity: i.received_quantity }));
+
+      await api.put(`/inventory/supply-request/${request.id}`, {
+        status: 'received',
+        observation: observation.trim() || undefined,
+        id_user: user?.id,
+        ...(changedItems.length > 0 && { items: changedItems }),
       });
-      await new Promise(res => setTimeout(res, 700));
       onStatusChange?.(request.id, 'received');
       onClose();
     } catch (err: any) {
@@ -302,10 +310,40 @@ export default function RequestDetailModal({
         </div>
 
         {canConfirm && hasDiff && items.length > 0 && (
-          <p className="text-xs text-amber-600 flex items-center gap-1.5">
-            <AlertTriangle size={12} />
-            Hay diferencias entre lo solicitado y lo recibido. Se registrará la cantidad real.
-          </p>
+          <div className="space-y-2">
+            <p className="text-xs text-amber-600 flex items-center gap-1.5">
+              <AlertTriangle size={12} />
+              Hay diferencias entre lo solicitado y lo recibido. Se registrará la cantidad real.
+            </p>
+            {/* Observación opcional */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">
+                Observación
+                <span className="ml-1 text-gray-400 font-normal">(opcional)</span>
+              </label>
+              <textarea
+                value={observation}
+                onChange={e => setObservation(e.target.value)}
+                placeholder="Describe brevemente por qué cambiaron las cantidades..."
+                rows={3}
+                className="w-full px-3 py-2 text-sm border border-amber-200 bg-amber-50/50 rounded-lg
+                  placeholder:text-gray-400 text-gray-800 resize-none
+                  focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300
+                  transition-colors"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Observación registrada (solo lectura, para solicitudes ya recibidas) */}
+        {request.status === 'received' && request.observation && (
+          <div className="flex items-start gap-3 px-4 py-3.5 rounded-lg border border-amber-200 bg-amber-50 text-sm">
+            <MessageSquareWarning size={16} className="text-amber-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-800 mb-0.5">Observación del almacén</p>
+              <p className="text-amber-700 leading-relaxed">{request.observation}</p>
+            </div>
+          </div>
         )}
       </div>
     </Modal>
