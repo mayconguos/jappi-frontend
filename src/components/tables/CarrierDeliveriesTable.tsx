@@ -4,153 +4,116 @@ import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Package, ArrowRight, MapPin, User } from 'lucide-react';
+import { Eye, MapPin, User } from 'lucide-react';
 import DeliveryDetailModal from '@/components/forms/modals/DeliveryDetailModal';
 
-const INITIAL_DELIVERIES = [
-  {
-    id: 'TRK-9901-JP',
-    date: '2024-02-06',
-    recipient: 'Juan Pérez',
-    recipient_address: 'Av. Larco 101, Miraflores',
-    origin: 'Almacén Central Japi',
-    destination: 'Av. Larco 101, Miraflores',
-    items_count: 1,
-    status: 'pending', // pending, in_progress, completed, failed
-  },
-  {
-    id: 'TRK-9902-JP',
-    date: '2024-02-06',
-    recipient: 'Empresa ABC S.A.C.',
-    recipient_address: 'Jr. Camana 500, Lima',
-    origin: 'Almacén Central Japi',
-    destination: 'Jr. Camana 500, Lima',
-    items_count: 3,
-    status: 'in_progress',
-  },
-  {
-    id: 'TRK-9890-JP',
-    date: '2024-02-05',
-    recipient: 'María Lopez',
-    recipient_address: 'Av. Salaverry 2020, Jesus Maria',
-    origin: 'Almacén Central Japi',
-    destination: 'Av. Salaverry 2020, Jesus Maria',
-    items_count: 2,
-    status: 'completed',
-  },
-  {
-    id: 'TRK-9885-JP',
-    date: '2024-02-04',
-    recipient: 'Carlos Ruiz',
-    recipient_address: 'Calle Los Pinos 123, San Isidro',
-    origin: 'Almacén Central Japi',
-    destination: 'Calle Los Pinos 123, San Isidro',
-    items_count: 1,
-    status: 'failed',
-  },
+interface Delivery {
+  id: string;
+  date: string;
+  recipient: string;
+  recipient_address: string;
+  origin: string;
+  destination: string;
+  items_count: number;
+  status: 'pending' | 'completed';
+}
+
+const INITIAL_DELIVERIES: Delivery[] = [
+  { id: 'TRK-9901-JP', date: '2024-02-06', recipient: 'Juan Pérez', recipient_address: 'Av. Larco 101, Miraflores', origin: 'Almacén Central Jappi', destination: 'Av. Larco 101, Miraflores', items_count: 1, status: 'pending' },
+  { id: 'TRK-9902-JP', date: '2024-02-06', recipient: 'Empresa ABC S.A.C.', recipient_address: 'Jr. Camaná 500, Lima', origin: 'Almacén Central Jappi', destination: 'Jr. Camaná 500, Lima', items_count: 3, status: 'pending' },
+  { id: 'TRK-9903-JP', date: '2024-02-06', recipient: 'Sofía Mendoza', recipient_address: 'Av. Benavides 1200, Surco', origin: 'Almacén Central Jappi', destination: 'Av. Benavides 1200, Surco', items_count: 2, status: 'pending' },
+  { id: 'TRK-9904-JP', date: '2024-02-06', recipient: 'Tech Park SAC', recipient_address: 'Calle Monte Bello 340, San Isidro', origin: 'Almacén Central Jappi', destination: 'Calle Monte Bello 340, San Isidro', items_count: 5, status: 'pending' },
+  { id: 'TRK-9905-JP', date: '2024-02-06', recipient: 'Luis Herrera', recipient_address: 'Jr. Ucayali 280, Lima', origin: 'Almacén Central Jappi', destination: 'Jr. Ucayali 280, Lima', items_count: 1, status: 'pending' },
+  { id: 'TRK-9906-JP', date: '2024-02-06', recipient: 'Distribuidora Sur', recipient_address: 'Av. Tomás Marsano 900, Surquillo', origin: 'Almacén Central Jappi', destination: 'Av. Tomás Marsano 900, Surquillo', items_count: 4, status: 'pending' },
+  { id: 'TRK-9907-JP', date: '2024-02-06', recipient: 'Ana Rojas', recipient_address: 'Ca. Los Ficus 67, La Molina', origin: 'Almacén Central Jappi', destination: 'Ca. Los Ficus 67, La Molina', items_count: 2, status: 'pending' },
+  { id: 'TRK-9890-JP', date: '2024-02-05', recipient: 'María Lopez', recipient_address: 'Av. Salaverry 2020, Jesús María', origin: 'Almacén Central Jappi', destination: 'Av. Salaverry 2020, Jesús María', items_count: 2, status: 'completed' },
+  { id: 'TRK-9885-JP', date: '2024-02-04', recipient: 'Carlos Ruiz', recipient_address: 'Calle Los Pinos 123, San Isidro', origin: 'Almacén Central Jappi', destination: 'Calle Los Pinos 123, San Isidro', items_count: 1, status: 'completed' },
+  { id: 'TRK-9880-JP', date: '2024-02-04', recipient: 'Importex Peru', recipient_address: 'Av. Argentina 800, Callao', origin: 'Almacén Central Jappi', destination: 'Av. Argentina 800, Callao', items_count: 6, status: 'completed' },
 ];
 
-const getStatusBadge = (status: string) => {
+const STATUS_ORDER: Record<Delivery['status'], number> = { pending: 0, completed: 1 };
+
+const getStatusBadge = (status: Delivery['status']) => {
   switch (status) {
-    case 'completed':
-      return <Badge variant="success">Entregado</Badge>;
-    case 'in_progress':
-      return <Badge variant="info">En Ruta</Badge>;
-    case 'failed':
-      return <Badge variant="destructive">Fallido</Badge>;
-    default:
-      return <Badge variant="warning">Pendiente</Badge>;
+    case 'completed': return <Badge variant="success">Entregado</Badge>;
+    default: return <Badge variant="info">En Ruta</Badge>;
   }
 };
 
 export default function CarrierDeliveriesTable() {
   const [deliveries, setDeliveries] = useState(INITIAL_DELIVERIES);
-  const [selectedDelivery, setSelectedDelivery] = useState<any>(null);
+  const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenDetail = (delivery: any) => {
+  const sorted = [...deliveries].sort(
+    (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
+  );
+
+  const handleOpenDetail = (delivery: Delivery) => {
     setSelectedDelivery(delivery);
     setIsModalOpen(true);
   };
 
   const handleStatusChange = (id: string, newStatus: string) => {
-    setDeliveries(prev => prev.map(d =>
-      d.id === id ? { ...d, status: newStatus } : d
-    ));
-    // Update selected delivery as well so modal reflects change immediately
-    if (selectedDelivery && selectedDelivery.id === id) {
-      setSelectedDelivery({ ...selectedDelivery, status: newStatus });
+    const s = newStatus as Delivery['status'];
+    setDeliveries(prev => prev.map(d => d.id === id ? { ...d, status: s } : d));
+    if (selectedDelivery?.id === id) {
+      setSelectedDelivery({ ...selectedDelivery, status: s });
     }
   };
 
   return (
     <>
-      {/* Desktop View */}
+      {/* Vista Desktop */}
       <div className="hidden md:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
-              <TableHead className="w-[180px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Envío</TableHead>
+              <TableHead className="w-[140px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Destinatario</TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
               <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
-              <TableHead className="w-[100px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
+              <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {deliveries.map((delivery) => (
+            {sorted.map((delivery) => (
               <TableRow
                 key={delivery.id}
                 className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                 onClick={() => handleOpenDetail(delivery)}
               >
-                {/* Envío: Tracking */}
-                <TableCell className="pl-6 py-4">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="font-mono text-xs font-medium text-blue-700">
-                      {delivery.id}
+                <TableCell className="pl-6 py-4 font-mono text-xs text-blue-700 font-medium h-16">
+                  {delivery.id}
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 min-w-[2.25rem] rounded-full flex items-center justify-center bg-blue-50 text-blue-600 ring-1 ring-blue-100/50">
+                      <User size={16} />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[180px]" title={delivery.recipient}>
+                      {delivery.recipient}
                     </span>
                   </div>
                 </TableCell>
-
-                {/* Destinatario: Avatar + Nombre + Dirección */}
                 <TableCell className="py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 min-w-[2.25rem] rounded-full flex items-center justify-center bg-blue-50 text-blue-600 ring-1 ring-blue-100/50 text-xs font-medium">
-                      <User size={16} />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium text-gray-900 line-clamp-1" title={delivery.recipient}>
-                        {delivery.recipient}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-gray-500">
-                        <MapPin size={12} />
-                        <span className="text-xs truncate max-w-[300px]" title={delivery.recipient_address}>
-                          {delivery.recipient_address}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-600 max-w-[280px]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                    <span className="truncate" title={delivery.destination}>{delivery.destination}</span>
                   </div>
                 </TableCell>
-
-                {/* Estado */}
                 <TableCell className="py-4 text-center">
                   {getStatusBadge(delivery.status)}
                 </TableCell>
-
-                {/* Acciones */}
                 <TableCell className="text-right pr-6 py-4">
                   <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all font-normal"
-                      title="Ver Detalles"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenDetail(delivery);
-                      }}
+                      variant="ghost" size="sm"
+                      className="h-8 gap-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all font-normal"
+                      onClick={(e) => { e.stopPropagation(); handleOpenDetail(delivery); }}
                     >
                       <Eye size={16} />
+                      <span className="text-xs">Ver</span>
                     </Button>
                   </div>
                 </TableCell>
@@ -160,46 +123,32 @@ export default function CarrierDeliveriesTable() {
         </Table>
       </div>
 
-      {/* Mobile View (Cards) */}
-      <div className="md:hidden space-y-4">
-        {deliveries.map((delivery) => (
+      {/* Vista Móvil (Cards compactas) */}
+      <div className="md:hidden space-y-2">
+        {sorted.map((delivery) => (
           <div
             key={delivery.id}
-            className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
+            className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
             onClick={() => handleOpenDetail(delivery)}
           >
-            {/* Status Stripe */}
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${delivery.status === 'pending' ? 'bg-yellow-400' :
-              delivery.status === 'in_progress' ? 'bg-blue-500' :
-                delivery.status === 'completed' ? 'bg-emerald-500' : 'bg-red-500'
-              }`} />
+            {/* Franja de estado izquierda */}
+            <div className={`absolute left-0 top-0 bottom-0 w-1 ${delivery.status === 'pending' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
 
-            <div className="pl-3 pr-1 pt-1">
-              {/* Header: Tracking | Packages | Status */}
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2 text-gray-500 mb-0.5">
-                    <span className="text-xs font-mono font-medium">{delivery.id}</span>
-                    <span className="text-[10px] uppercase tracking-wider bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-semibold">{delivery.items_count} pqt</span>
-                  </div>
-                  <div className="font-bold text-lg text-gray-900 leading-tight">{delivery.recipient}</div>
-                </div>
-                <div className="scale-90 origin-top-right shrink-0 ml-2">
-                  {getStatusBadge(delivery.status)}
-                </div>
-              </div>
+            <div className="pl-3">
+              {/* Destinatario */}
+              <p className="text-sm font-semibold text-gray-900 leading-tight truncate mb-1.5">{delivery.recipient}</p>
 
-              {/* Address Block - Compact */}
-              <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 mb-1">
-                <MapPin className="text-blue-500 shrink-0" size={18} />
-                <p className="text-sm font-medium text-gray-800 leading-snug line-clamp-2">{delivery.destination}</p>
+              {/* Dirección destino */}
+              <div className="flex items-start gap-1.5 text-[11px] text-gray-500">
+                <MapPin size={11} className="text-gray-400 shrink-0 mt-0.5" />
+                <span className="truncate">{delivery.destination}</span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Detail Modal */}
+      {/* Modal de Detalle */}
       <DeliveryDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

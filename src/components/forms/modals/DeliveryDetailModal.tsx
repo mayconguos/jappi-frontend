@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Camera, MapPin, User, Package, Navigation, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import CameraCapture from '@/components/ui/camera-capture';
 
@@ -22,10 +22,6 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
 
   if (!delivery) return null;
 
-  const handleStartRoute = () => {
-    onStatusChange(delivery.id, 'in_progress');
-    onClose();
-  };
 
   const handleFinishClick = () => {
     setShowProofScreen(true);
@@ -61,14 +57,11 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed': return <Badge variant="success">Entregado</Badge>;
-      case 'in_progress': return <Badge variant="info">En Ruta</Badge>;
-      case 'failed': return <Badge variant="destructive">Fallido</Badge>;
-      default: return <Badge variant="warning">Pendiente</Badge>;
+      default: return <Badge variant="info">En Ruta</Badge>;
     }
   };
 
   const isPending = delivery.status === 'pending';
-  const isInProgress = delivery.status === 'in_progress';
   const isCompleted = delivery.status === 'completed';
 
   return (
@@ -84,57 +77,49 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
           showProofScreen ? 'Prueba de Entrega' : (
             <div className="flex flex-col gap-1">
               <span className="leading-tight">Detalle de Entrega</span>
-              <span className="font-mono text-sm font-normal text-gray-500">{delivery.id}</span>
             </div>
           )
         }
         size="lg"
         showCloseButton
       >
-        <div className="min-h-[300px]">
+        <div>
           {!showProofScreen ? (
-            <div className="space-y-6">
-              {/* Header Status */}
-              <div className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
-                <span className="text-xs text-gray-400 font-mono uppercase tracking-wider">Estado Actual:</span>
-                <div>{getStatusBadge(delivery.status)}</div>
-              </div>
-
+            <div className="space-y-2">
               {/* Recipient Info */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                    <User size={16} className="text-blue-600" /> Datos del Destinatario
-                  </h3>
-                  <div className="pl-6 space-y-1">
-                    <p className="font-medium text-gray-900">{delivery.recipient}</p>
-                    <p className="text-sm text-gray-500">DNI: 45829102</p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Sección Usuario */}
+                <div className="flex items-start gap-2">
+                  <User size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-md font-semibold text-gray-900">
+                      {delivery.recipient}
+                    </h3>
                     <p className="text-sm text-gray-500">Tel: +51 999 888 777</p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                    <Package size={16} className="text-blue-600" /> Detalles del Paquete
-                  </h3>
-                  <div className="pl-6 space-y-1">
-                    <p className="text-sm text-gray-700"><span className="font-medium">{delivery.items_count}</span> bultos</p>
-                    <p className="text-sm text-gray-500">Peso: 2.5 kg</p>
-                    <p className="text-sm text-gray-500">Tipo: Electrónicos</p>
+                {/* Sección Bultos */}
+                <div className="flex items-start gap-2">
+                  <Package size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-md font-semibold text-gray-900">
+                      <span className="font-medium">{delivery.items_count}</span> bultos
+                    </h3>
                   </div>
                 </div>
-              </div>
 
-              {/* Address */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  <MapPin size={16} className="text-blue-600" /> Dirección de Entrega
-                </h3>
-                <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex gap-3 items-start">
-                  <MapPin className="text-blue-600 shrink-0 mt-0.5" size={18} />
+                {/* Sección Dirección */}
+                <div className="flex items-start gap-2">
+                  <MapPin size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-blue-900">{delivery.recipient_address}</p>
-                    <p className="text-xs text-blue-600 mt-0.5">Referencia: Frente al parque central, puerta de rejas negras.</p>
+                    <h3 className="text-md font-semibold text-gray-900">
+                      {delivery.recipient_address}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Referencia: Frente al parque central, puerta de rejas negras.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -144,7 +129,7 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3 items-start">
                 <AlertCircle className="text-yellow-600 shrink-0 mt-0.5" size={18} />
                 <p className="text-sm text-yellow-800">
-                  Para finalizar la entrega, es obligatorio subir 3 evidencias fotográficas. Asegúrate de que sean claras.
+                  Agrega al menos 1 foto clara para completar la entrega.
                 </p>
               </div>
 
@@ -208,12 +193,7 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
           {!showProofScreen ? (
             <>
               <Button variant="ghost" onClick={onClose}>Cerrar</Button>
-              {isPending && (
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2" onClick={handleStartRoute}>
-                  <Navigation size={16} /> Iniciar Ruta
-                </Button>
-              )}
-              {isInProgress && (
+              {(isPending || !isCompleted) && (
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2" onClick={handleFinishClick}>
                   <CheckCircle2 size={16} /> Finalizar Entrega
                 </Button>
