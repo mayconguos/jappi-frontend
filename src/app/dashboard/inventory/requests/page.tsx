@@ -10,7 +10,7 @@ import { useInventory } from '@/context/InventoryContext';
 
 export default function WarehouseRequestsPage() {
   // Use Global Context
-  const { requests, refreshInventory } = useInventory();
+  const { requests, refreshRequests } = useInventory();
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
@@ -38,7 +38,7 @@ export default function WarehouseRequestsPage() {
 
   const handleCreateRequest = async () => {
     setIsModalOpen(false);
-    await refreshInventory();
+    await refreshRequests();
 
     // Simulate Guide Generation (Optional: Remove if not needed anymore)
     setTimeout(() => {

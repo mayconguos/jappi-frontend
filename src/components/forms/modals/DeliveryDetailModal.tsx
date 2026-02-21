@@ -18,12 +18,15 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
   const [isUploading, setIsUploading] = useState(false);
   const [showProofScreen, setShowProofScreen] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [photoSlots, setPhotoSlots] = useState(1);
   const [activeCameraSlot, setActiveCameraSlot] = useState<number | null>(null);
 
   if (!delivery) return null;
 
 
   const handleFinishClick = () => {
+    setPhotoSlots(1);
+    setPhotos([]);
     setShowProofScreen(true);
   };
 
@@ -41,14 +44,15 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
   };
 
   const handleConfirmDelivery = () => {
-    if (photos.filter(Boolean).length < 3) return;
+    if (photos.filter(Boolean).length < 1) return;
 
     setIsUploading(true);
-    // Simulate API call
+    // Simula llamada API
     setTimeout(() => {
       onStatusChange(delivery.id, 'completed');
       setIsUploading(false);
       setShowProofScreen(false);
+      setPhotoSlots(1);
       setPhotos([]);
       onClose();
     }, 2000);
@@ -125,41 +129,39 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
               </div>
             </div>
           ) : (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3 items-start">
-                <AlertCircle className="text-yellow-600 shrink-0 mt-0.5" size={18} />
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-8 duration-300">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-3 items-start">
+                <AlertCircle className="text-yellow-600 shrink-0 mt-0.5" size={16} />
                 <p className="text-sm text-yellow-800">
                   Agrega al menos 1 foto clara para completar la entrega.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[0, 1, 2].map((idx) => (
+              {/* Slots dinámicos */}
+              <div className="grid grid-cols-3 gap-3">
+                {Array.from({ length: photoSlots }).map((_, idx) => (
                   <div
                     key={idx}
-                    className={`
-                            aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 relative transition-all overflow-hidden group
-                            ${photos[idx]
+                    className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 relative transition-all overflow-hidden group ${photos[idx]
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
                         : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50 text-gray-400 cursor-pointer'
-                      }
-                        `}
+                      }`}
                     onClick={() => !photos[idx] && handlePhotoClick(idx)}
                   >
                     {photos[idx] ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photos[idx]} alt="Evidence" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                        <img src={photos[idx]} alt={`Foto ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover opacity-80" />
                         <div className="absolute top-2 right-2 z-10">
                           <Button
                             size="icon"
                             variant="destructive"
-                            className="h-6 w-6 rounded-full opacity-100 hover:scale-110 transition-transform shadow-sm"
+                            className="h-6 w-6 rounded-full hover:scale-110 transition-transform shadow-sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              const newPhotos = [...photos];
-                              newPhotos[idx] = '';
-                              setPhotos(newPhotos);
+                              const next = [...photos];
+                              next[idx] = '';
+                              setPhotos(next);
                             }}
                           >
                             <span className="text-xs">×</span>
@@ -172,18 +174,27 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                       </>
                     ) : (
                       <>
-                        <Camera size={32} />
-                        <span className="text-xs font-medium text-center px-4">
-                          {idx === 0 ? 'Fachada' : idx === 1 ? 'Paquete' : 'Recibido'}
-                        </span>
+                        <Camera size={28} />
+                        <span className="text-xs font-medium">Foto {idx + 1}</span>
                       </>
                     )}
                   </div>
                 ))}
+
+                {/* Botón agregar foto */}
+                {photoSlots < 3 && photos[photoSlots - 1] && (
+                  <div
+                    className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-gray-50 cursor-pointer transition-all"
+                    onClick={() => setPhotoSlots(s => s + 1)}
+                  >
+                    <span className="text-2xl leading-none">+</span>
+                    <span className="text-[11px] font-medium text-center">Agregar foto</span>
+                  </div>
+                )}
               </div>
 
-              <p className="text-center text-xs text-gray-500">
-                Toca cada recuadro para tomar foto
+              <p className="text-center text-xs text-gray-400">
+                Toca cada recuadro para tomar la foto
               </p>
             </div>
           )}
@@ -207,7 +218,7 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
               <Button
                 className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
                 onClick={handleConfirmDelivery}
-                disabled={photos.filter(Boolean).length < 3 || isUploading}
+                disabled={photos.filter(Boolean).length < 1 || isUploading}
               >
                 {isUploading ? 'Subiendo...' : 'Confirmar Entrega'}
               </Button>
