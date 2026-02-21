@@ -7,10 +7,16 @@ import { Pagination } from '@/components/ui/pagination';
 import NewRequestModal from '@/components/forms/modals/NewRequestModal';
 import RequestDetailModal from '@/components/forms/modals/RequestDetailModal';
 import { useAuth } from '@/context/AuthContext';
+import { getRoleNameFromNumber } from '@/utils/roleUtils';
 import api from '@/app/services/api';
 
 export default function WarehouseRequestsPage() {
   const { user } = useAuth();
+
+  // Detectar si el usuario es del almacén Jappi (no puede crear solicitudes y ve todas)
+  const roleName = getRoleNameFromNumber(user?.id_role ?? 0);
+  const isWarehouse = roleName === 'almacen';
+
   const idCompany = user?.id_company;
 
   const [requests, setRequests] = useState<InboundRequest[]>([]);
@@ -22,11 +28,17 @@ export default function WarehouseRequestsPage() {
 
   const itemsPerPage = 10;
 
-  // Obtener solicitudes directamente desde la página
   const fetchRequests = async () => {
-    if (!idCompany) return;
     try {
-      const response = await api.get(`/inventory/supply-request/${idCompany}`);
+      // Almacén → todas las solicitudes sin filtrar por empresa
+      // Cliente → solo las solicitudes de su empresa
+      const endpoint = isWarehouse
+        ? '/inventory/supply-request'
+        : `/inventory/supply-request/${idCompany}`;
+
+      if (!isWarehouse && !idCompany) return;
+
+      const response = await api.get(endpoint);
       const data = Array.isArray(response.data) ? response.data : [];
       const mapped: InboundRequest[] = data.map((r: any) => ({
         id: r.id,
@@ -42,10 +54,11 @@ export default function WarehouseRequestsPage() {
     }
   };
 
-  // Solo se ejecuta cuando idCompany cambia (primitivo → comparación por valor)
+  // Para el cliente: idCompany es la dependencia (primitivo)
+  // Para almacén: se ejecuta una vez al montar (isWarehouse es estable)
   useEffect(() => {
     fetchRequests();
-  }, [idCompany]);
+  }, [idCompany, isWarehouse]);
 
   // Lógica de filtrado
   const filteredRequests = requests.filter(req => {
@@ -58,14 +71,9 @@ export default function WarehouseRequestsPage() {
   const totalItems = filteredRequests.length;
   const currentItems = filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const handleNewRequest = () => {
-    setIsModalOpen(true);
-  };
-
   const handleCreateRequest = async () => {
     setIsModalOpen(false);
     await fetchRequests();
-
     setTimeout(() => {
       alert('✅ ¡Solicitud creada exitosamente! \n\nSe ha generado la Guía de Remisión. \nPor favor imprímela y pégala en tu caja.');
     }, 500);
@@ -73,6 +81,12 @@ export default function WarehouseRequestsPage() {
 
   const handleViewRequest = (request: InboundRequest) => {
     setSelectedRequest(request);
+  };
+
+  // Actualiza el estado de la solicitud en la lista local (sin re-fetch)
+  const handleStatusChange = (requestId: number, newStatus: InboundRequest['status']) => {
+    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
+    setSelectedRequest(null);
   };
 
   const handleDownloadGuide = (request: InboundRequest) => {
@@ -88,9 +102,10 @@ export default function WarehouseRequestsPage() {
           setStatusFilter={setStatusFilter}
           searchValue={searchValue}
           setSearchValue={setSearchValue}
-          onNewRequest={handleNewRequest}
+          onNewRequest={() => setIsModalOpen(true)}
           onExport={() => console.log('Exporting...')}
           totalItems={totalItems}
+          showNewRequest={!isWarehouse}
         />
 
         <RequestsTable
@@ -109,16 +124,21 @@ export default function WarehouseRequestsPage() {
         </div>
       </div>
 
-      <NewRequestModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateRequest}
-      />
+      {/* Solo clientes pueden crear solicitudes */}
+      {!isWarehouse && (
+        <NewRequestModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreateRequest}
+        />
+      )}
 
       <RequestDetailModal
         isOpen={!!selectedRequest}
         onClose={() => setSelectedRequest(null)}
         request={selectedRequest}
+        isWarehouse={isWarehouse}
+        onStatusChange={handleStatusChange}
       />
     </div>
   );

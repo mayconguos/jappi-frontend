@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Modal, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, Package } from 'lucide-react';
+import { Loader2, Package, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '@/app/services/api';
 import { InboundRequest } from '@/components/tables/RequestsTable';
@@ -12,6 +12,10 @@ interface RequestDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   request: InboundRequest | null;
+  /** Solo el almacén Jappi puede confirmar recepción y editar cantidades */
+  isWarehouse?: boolean;
+  /** Callback para actualizar el estado en la lista del padre */
+  onStatusChange?: (requestId: number, newStatus: InboundRequest['status']) => void;
 }
 
 interface RequestItem {
@@ -22,40 +26,114 @@ interface RequestItem {
   product_name: string;
 }
 
+interface EditableItem extends RequestItem {
+  received_quantity: number;
+}
+
+const statusLabel: Record<InboundRequest['status'], string> = {
+  pending: 'Pendiente',
+  received: 'Recibido',
+  cancelled: 'Cancelado',
+};
+
 export default function RequestDetailModal({
   isOpen,
   onClose,
   request,
+  isWarehouse = false,
+  onStatusChange,
 }: RequestDetailModalProps) {
-  const [items, setItems] = useState<RequestItem[]>([]);
+  const [items, setItems] = useState<EditableItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
+  // Estado para el paso de confirmación de cancelación
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   useEffect(() => {
     if (isOpen && request) {
       const fetchDetails = async () => {
         setIsLoading(true);
         setError(null);
+        setUpdateError(null);
+        setShowCancelConfirm(false);
         try {
           const response = await api.get(`/inventory/supply-request/detail/${request.id}`);
-          setItems(Array.isArray(response.data) ? response.data : []);
+          const raw: RequestItem[] = Array.isArray(response.data) ? response.data : [];
+          setItems(raw.map(item => ({ ...item, received_quantity: item.quantity })));
         } catch (err) {
-          console.error("Error fetching request details:", err);
-          setError("No se pudieron cargar los detalles de la solicitud.");
+          console.error('Error fetching request details:', err);
+          setError('No se pudieron cargar los detalles de la solicitud.');
         } finally {
           setIsLoading(false);
         }
       };
-
       fetchDetails();
     } else {
-      setItems([]); // Clear on close
+      setItems([]);
+      setUpdateError(null);
+      setShowCancelConfirm(false);
     }
   }, [isOpen, request]);
 
+  const handleConfirmReception = async () => {
+    if (!request) return;
+    setIsConfirming(true);
+    setUpdateError(null);
+    try {
+      // TODO: reemplazar con el endpoint real cuando esté disponible
+      // await api.patch(`/inventory/supply-request/${request.id}/receive`, {
+      //   items: items.map(i => ({ id: i.id, received_quantity: i.received_quantity }))
+      // });
+      console.log(`[MOCK] PATCH /inventory/supply-request/${request.id}/receive`, {
+        items: items.map(i => ({ id: i.id, received_quantity: i.received_quantity })),
+      });
+      await new Promise(res => setTimeout(res, 700));
+      onStatusChange?.(request.id, 'received');
+      onClose();
+    } catch (err: any) {
+      setUpdateError(err?.response?.data?.message || 'Error al confirmar la recepción. Intenta nuevamente.');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    if (!request) return;
+    setIsCancelling(true);
+    setUpdateError(null);
+    try {
+      // TODO: reemplazar con el endpoint real cuando esté disponible
+      // await api.patch(`/inventory/supply-request/${request.id}/cancel`);
+      console.log(`[MOCK] PATCH /inventory/supply-request/${request.id}/cancel`);
+      await new Promise(res => setTimeout(res, 600));
+      onStatusChange?.(request.id, 'cancelled');
+      onClose();
+    } catch (err: any) {
+      setUpdateError(err?.response?.data?.message || 'Error al cancelar la solicitud. Intenta nuevamente.');
+      setShowCancelConfirm(false);
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const updateReceivedQty = (id: number, value: string) => {
+    const qty = Math.max(0, parseInt(value) || 0);
+    setItems(prev => prev.map(i => i.id === id ? { ...i, received_quantity: qty } : i));
+  };
+
   if (!request) return null;
 
-  const totalUnits = items.reduce((acc, item) => acc + item.quantity, 0);
+  const totalRequested = items.reduce((acc, i) => acc + i.quantity, 0);
+  const totalReceived = items.reduce((acc, i) => acc + i.received_quantity, 0);
+  const canConfirm = isWarehouse && request.status === 'pending';
+  const canCancel = request.status === 'pending'; // ambos roles pueden cancelar
+  const hasDiff = items.some(i => i.received_quantity !== i.quantity);
+  const isActing = isConfirming || isCancelling;
 
   return (
     <Modal
@@ -65,46 +143,113 @@ export default function RequestDetailModal({
       title={`Solicitud #${request.id}`}
       footer={
         <ModalFooter>
-          <Button onClick={onClose} variant="secondary">
-            Cerrar
-          </Button>
+          {/* Si está en modo confirmación de cancelación, mostrar el flujo destructivo */}
+          {showCancelConfirm ? (
+            <>
+              <p className="text-sm text-gray-600 mr-auto">¿Seguro que deseas cancelar esta solicitud?</p>
+              <Button
+                variant="secondary"
+                onClick={() => setShowCancelConfirm(false)}
+                disabled={isCancelling}
+              >
+                No, volver
+              </Button>
+              <Button
+                onClick={handleCancelRequest}
+                disabled={isCancelling}
+                className="bg-red-600 hover:bg-red-700 text-white gap-2"
+              >
+                {isCancelling
+                  ? <><Loader2 size={16} className="animate-spin" /> Cancelando...</>
+                  : <><XCircle size={16} /> Sí, cancelar</>
+                }
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button onClick={onClose} variant="secondary" disabled={isActing}>
+                Cerrar
+              </Button>
+
+              {canCancel && (
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowCancelConfirm(true)}
+                  disabled={isActing}
+                  className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 gap-2"
+                >
+                  <XCircle size={16} />
+                  Cancelar Solicitud
+                </Button>
+              )}
+
+              {canConfirm && (
+                <Button
+                  onClick={handleConfirmReception}
+                  disabled={isActing}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                >
+                  {isConfirming
+                    ? <><Loader2 size={16} className="animate-spin" /> Confirmando...</>
+                    : <><CheckCircle2 size={16} /> Confirmar Recepción</>
+                  }
+                </Button>
+              )}
+            </>
+          )}
         </ModalFooter>
       }
     >
-      <div className="space-y-6">
-        {/* Header Summary */}
+      <div className="space-y-5">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <Badge variant="outline" className={clsx(
-              "capitalize px-3 py-1 text-sm font-medium",
-              request.status === 'pending' && "bg-yellow-50 text-yellow-700 border-yellow-200",
-              request.status === 'in_transit' && "bg-blue-50 text-blue-700 border-blue-200",
-              request.status === 'received' && "bg-green-50 text-green-700 border-green-200",
-              request.status === 'cancelled' && "bg-red-50 text-red-700 border-red-200"
+              'capitalize px-3 py-1 text-sm font-medium',
+              request.status === 'pending' && 'bg-yellow-50 text-yellow-700 border-yellow-200',
+              request.status === 'received' && 'bg-green-50 text-green-700 border-green-200',
+              request.status === 'cancelled' && 'bg-red-50 text-red-700 border-red-200',
             )}>
-              {request.status === 'pending' && 'Pendiente'}
-              {request.status === 'in_transit' && 'En Tránsito'}
-              {request.status === 'received' && 'Recibido'}
-              {request.status === 'cancelled' && 'Cancelado'}
+              {statusLabel[request.status]}
             </Badge>
             <span className="text-sm text-gray-400">|</span>
-            <span className="text-sm text-gray-500">
-              Creada el {request.request_date}
-            </span>
+            <span className="text-sm text-gray-500">Creada el {request.request_date}</span>
           </div>
 
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Package size={16} />
-              <span><span className="font-semibold text-gray-900">{items.length}</span> Items</span>
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-1.5">
+              <Package size={15} />
+              <span><span className="font-semibold text-gray-900">{items.length}</span> SKUs</span>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <span><span className="font-semibold text-gray-900">{totalUnits}</span> Unidades</span>
+            <div>
+              <span className="font-semibold text-gray-900">{totalRequested}</span>
+              {canConfirm && totalReceived !== totalRequested && (
+                <span className="text-amber-600 ml-1">→ {totalReceived} recibidas</span>
+              )}
+              <span className="ml-1">unds. solicitadas</span>
             </div>
           </div>
         </div>
 
-        {/* Content */}
+        {/* Banner instructivo para el almacén */}
+        {canConfirm && !showCancelConfirm && (
+          <div className="flex items-start gap-3 px-4 py-3 rounded-lg border bg-emerald-50 border-emerald-100 text-emerald-700 text-sm">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+            <span>
+              Ajusta las <strong>cantidades recibidas</strong> si difieren de las solicitadas, luego confirma la recepción.
+            </span>
+          </div>
+        )}
+
+        {/* Error */}
+        {updateError && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-lg border bg-red-50 border-red-100 text-red-700 text-sm">
+            <AlertTriangle size={16} className="shrink-0" />
+            {updateError}
+          </div>
+        )}
+
+        {/* Tabla de productos */}
         <div>
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
@@ -121,36 +266,61 @@ export default function RequestDetailModal({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50/80 hover:bg-gray-50/80">
-                    <TableHead className="w-[70%]">Producto / SKU</TableHead>
-                    <TableHead className="text-right">Cantidad</TableHead>
+                    <TableHead className="w-[50%]">Producto / SKU</TableHead>
+                    <TableHead className="text-right">Solicitado</TableHead>
+                    {canConfirm && <TableHead className="text-right w-36">Recibido</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {items.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-center py-12 text-gray-500">
+                      <TableCell colSpan={canConfirm ? 3 : 2} className="text-center py-12 text-gray-500">
                         No hay items en esta solicitud.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    items.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-gray-50/50">
-                        <TableCell>
-                          <div className="font-medium text-gray-900">{item.product_name}</div>
-                          {item.SKU && <div className="text-xs text-gray-500 font-mono mt-0.5">{item.SKU}</div>}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className="font-semibold text-gray-900">{item.quantity}</span>
-                          <span className="text-xs text-gray-500 ml-1">unds.</span>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    items.map(item => {
+                      const isDiff = item.received_quantity !== item.quantity;
+                      return (
+                        <TableRow key={item.id} className={clsx('hover:bg-gray-50/50', isDiff && canConfirm && 'bg-amber-50/40')}>
+                          <TableCell>
+                            <div className="font-medium text-gray-900">{item.product_name}</div>
+                            {item.SKU && <div className="text-xs text-gray-500 font-mono mt-0.5">{item.SKU}</div>}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span className="font-semibold text-gray-900">{item.quantity}</span>
+                            <span className="text-xs text-gray-500 ml-1">unds.</span>
+                          </TableCell>
+                          {canConfirm && (
+                            <TableCell className="text-right">
+                              <input
+                                type="number"
+                                min="0"
+                                value={item.received_quantity}
+                                onChange={e => updateReceivedQty(item.id, e.target.value)}
+                                className={clsx(
+                                  'w-24 text-right px-2 py-1 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-400',
+                                  isDiff ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-gray-200 bg-white text-gray-900'
+                                )}
+                              />
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
             </div>
           )}
         </div>
+
+        {canConfirm && hasDiff && items.length > 0 && (
+          <p className="text-xs text-amber-600 flex items-center gap-1.5">
+            <AlertTriangle size={12} />
+            Hay diferencias entre lo solicitado y lo recibido. Se registrará la cantidad real.
+          </p>
+        )}
       </div>
     </Modal>
   );

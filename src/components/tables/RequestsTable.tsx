@@ -8,7 +8,7 @@ export interface InboundRequest {
   request_date: string;
   total_skus: number;
   total_units: number;
-  status: 'pending' | 'in_transit' | 'received' | 'cancelled';
+  status: 'pending' | 'received' | 'cancelled';
   pdf_url?: string;
 }
 
@@ -22,8 +22,6 @@ const getStatusBadge = (status: string) => {
   switch (status) {
     case 'received':
       return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    case 'in_transit':
-      return 'bg-blue-50 text-blue-700 border-blue-100';
     case 'cancelled':
       return 'bg-red-50 text-red-700 border-red-100';
     default: // pending
@@ -34,7 +32,6 @@ const getStatusBadge = (status: string) => {
 const getStatusLabel = (status: string) => {
   switch (status) {
     case 'received': return 'Recibido';
-    case 'in_transit': return 'En Tránsito';
     case 'cancelled': return 'Cancelado';
     default: return 'Pendiente';
   }

@@ -11,6 +11,8 @@ interface RequestsFilterProps {
   onNewRequest: () => void;
   onExport: () => void;
   totalItems: number;
+  /** Ocultar el botón para roles que no pueden crear solicitudes (ej: almacén) */
+  showNewRequest?: boolean;
 }
 
 export default function RequestsFilter({
@@ -21,6 +23,7 @@ export default function RequestsFilter({
   onNewRequest,
   onExport,
   totalItems,
+  showNewRequest = true,
 }: RequestsFilterProps) {
   return (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
@@ -40,8 +43,8 @@ export default function RequestsFilter({
               options={[
                 { label: 'Todos', value: 'all' },
                 { label: 'Pendientes', value: 'pending' },
-                { label: 'En Tránsito', value: 'in_transit' },
                 { label: 'Recibidos', value: 'received' },
+                { label: 'Cancelados', value: 'cancelled' },
               ]}
               icon={Filter}
               className="bg-white border-slate-200"
@@ -82,13 +85,15 @@ export default function RequestsFilter({
             <Download size={18} />
           </Button>
 
-          <Button
-            onClick={onNewRequest}
-            className="bg-[#02997d] hover:bg-[#027a64] text-white shadow-lg shadow-emerald-100 px-6 h-10 gap-2"
-          >
-            <Plus size={18} />
-            <span className="font-medium">Nueva Solicitud</span>
-          </Button>
+          {showNewRequest && (
+            <Button
+              onClick={onNewRequest}
+              className="bg-[#02997d] hover:bg-[#027a64] text-white shadow-lg shadow-emerald-100 px-6 h-10 gap-2"
+            >
+              <Plus size={18} />
+              <span className="font-medium">Nueva Solicitud</span>
+            </Button>
+          )}
         </div>
       </div>
     </div>
