@@ -55,8 +55,10 @@ export default function RequestDetailModal({
 
   // Estado para el paso de confirmación de cancelación
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  // Observación opcional (se muestra solo cuando hay diferencias en cantidades)
+  // Observación de recepción (cuando cambian cantidades)
   const [observation, setObservation] = useState('');
+  // Motivo de rechazo/cancelación
+  const [cancelObservation, setCancelObservation] = useState('');
 
   useEffect(() => {
     if (isOpen && request) {
@@ -82,6 +84,7 @@ export default function RequestDetailModal({
       setUpdateError(null);
       setShowCancelConfirm(false);
       setObservation('');
+      setCancelObservation('');
     }
   }, [isOpen, request]);
 
@@ -115,10 +118,11 @@ export default function RequestDetailModal({
     setIsCancelling(true);
     setUpdateError(null);
     try {
-      // TODO: reemplazar con el endpoint real cuando esté disponible
-      // await api.patch(`/inventory/supply-request/${request.id}/cancel`);
-      console.log(`[MOCK] PATCH /inventory/supply-request/${request.id}/cancel`);
-      await new Promise(res => setTimeout(res, 600));
+      await api.put(`/inventory/supply-request/${request.id}`, {
+        status: 'rejected',
+        observation: cancelObservation.trim() || undefined,
+        id_user: user?.id,
+      });
       onStatusChange?.(request.id, 'rejected');
       onClose();
     } catch (err: any) {
@@ -138,7 +142,7 @@ export default function RequestDetailModal({
 
   const totalRequested = items.reduce((acc, i) => acc + i.quantity, 0);
   const totalReceived = items.reduce((acc, i) => acc + i.received_quantity, 0);
-  const canConfirm = isWarehouse && request.status === 'pending';
+  const canConfirm = isWarehouse && request.status === 'pending' && !showCancelConfirm;
   const canCancel = request.status === 'pending'; // ambos roles pueden cancelar
   const hasDiff = items.some(i => i.received_quantity !== i.quantity);
   const isActing = isConfirming || isCancelling;
@@ -154,10 +158,9 @@ export default function RequestDetailModal({
           {/* Si está en modo confirmación de cancelación, mostrar el flujo destructivo */}
           {showCancelConfirm ? (
             <>
-              <p className="text-sm text-gray-600 mr-auto">¿Seguro que deseas cancelar esta solicitud?</p>
               <Button
                 variant="secondary"
-                onClick={() => setShowCancelConfirm(false)}
+                onClick={() => { setShowCancelConfirm(false); setCancelObservation(''); }}
                 disabled={isCancelling}
               >
                 No, volver
@@ -168,8 +171,8 @@ export default function RequestDetailModal({
                 className="bg-red-600 hover:bg-red-700 text-white gap-2"
               >
                 {isCancelling
-                  ? <><Loader2 size={16} className="animate-spin" /> Cancelando...</>
-                  : <><XCircle size={16} /> Sí, cancelar</>
+                  ? <><Loader2 size={16} className="animate-spin" /> Rechazando...</>
+                  : <><XCircle size={16} /> Sí, rechazar</>
                 }
               </Button>
             </>
@@ -226,12 +229,40 @@ export default function RequestDetailModal({
         </div>
 
         {/* Banner instructivo para el almacén */}
-        {canConfirm && !showCancelConfirm && (
+        {canConfirm && (
           <div className="flex items-start gap-3 px-4 py-3 rounded-lg border bg-emerald-50 border-emerald-100 text-emerald-700 text-sm">
             <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
             <span>
               Ajusta las <strong>cantidades recibidas</strong> si difieren de las solicitadas, luego confirma la recepción.
             </span>
+          </div>
+        )}
+
+        {/* Panel de confirmación de rechazo: ocupa el cuerpo del modal */}
+        {showCancelConfirm && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-2 text-red-700">
+              <XCircle size={18} className="shrink-0" />
+              <p className="font-semibold text-sm">¿Seguro que deseas rechazar esta solicitud?</p>
+            </div>
+            <p className="text-xs text-red-600">Esta acción no se puede deshacer. La solicitud quedará marcada como Rechazada.</p>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-red-700">
+                Motivo del rechazo
+                <span className="ml-1 text-red-400 font-normal">(opcional)</span>
+              </label>
+              <textarea
+                value={cancelObservation}
+                onChange={e => setCancelObservation(e.target.value)}
+                placeholder="Describe brevemente el motivo del rechazo..."
+                rows={3}
+                disabled={isCancelling}
+                className="w-full px-3 py-2 text-sm border border-red-200 bg-white rounded-lg
+                  placeholder:text-gray-400 text-gray-800 resize-none
+                  focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-300
+                  transition-colors disabled:opacity-60"
+              />
+            </div>
           </div>
         )}
 
@@ -335,13 +366,22 @@ export default function RequestDetailModal({
           </div>
         )}
 
-        {/* Observación registrada (solo lectura, para solicitudes ya recibidas) */}
-        {request.status === 'received' && request.observation && (
+        {/* Observación registrada (solo lectura) — recibido con diferencias o rechazado */}
+        {request.observation && request.status === 'received' && (
           <div className="flex items-start gap-3 px-4 py-3.5 rounded-lg border border-amber-200 bg-amber-50 text-sm">
             <MessageSquareWarning size={16} className="text-amber-500 mt-0.5 shrink-0" />
             <div>
               <p className="font-semibold text-amber-800 mb-0.5">Observación del almacén</p>
               <p className="text-amber-700 leading-relaxed">{request.observation}</p>
+            </div>
+          </div>
+        )}
+        {request.observation && request.status === 'rejected' && (
+          <div className="flex items-start gap-3 px-4 py-3.5 rounded-lg border border-red-200 bg-red-50 text-sm">
+            <XCircle size={16} className="text-red-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-semibold text-red-800 mb-0.5">Motivo del rechazo</p>
+              <p className="text-red-700 leading-relaxed">{request.observation}</p>
             </div>
           </div>
         )}
