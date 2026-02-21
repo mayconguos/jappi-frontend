@@ -13,7 +13,7 @@ interface RequestDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   request: InboundRequest | null;
-  /** Solo el almacén Jappi puede confirmar recepción y editar cantidades */
+  /** Solo el almacén Japi puede confirmar recepción y editar cantidades */
   isWarehouse?: boolean;
   /** Callback para actualizar el estado en la lista del padre */
   onStatusChange?: (requestId: number, newStatus: InboundRequest['status']) => void;

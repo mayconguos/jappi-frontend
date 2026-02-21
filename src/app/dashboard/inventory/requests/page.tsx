@@ -13,7 +13,7 @@ import api from '@/app/services/api';
 export default function WarehouseRequestsPage() {
   const { user } = useAuth();
 
-  // Detectar si el usuario es del almacén Jappi (no puede crear solicitudes y ve todas)
+  // Detectar si el usuario es del almacén Japi (no puede crear solicitudes y ve todas)
   const roleName = getRoleNameFromNumber(user?.id_role ?? 0);
   const isWarehouse = roleName === 'almacen';
 

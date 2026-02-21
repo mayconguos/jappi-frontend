@@ -138,7 +138,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
                   {user?.name || 'Usuario'}
                 </p>
                 <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                  {user?.email || 'admin@jappi.com'}
+                  {user?.email || 'admin@japi.com'}
                 </p>
               </div>
             )}

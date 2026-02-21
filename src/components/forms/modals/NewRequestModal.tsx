@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Modal, { ModalFooter } from '@/components/ui/modal';
-import { ArrowRight, Check, Search, Trash2, Truck, Package, MapPin, Calendar, Clock, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Check, Search, Trash2, Truck, Package, MapPin, Calendar, CheckCircle, AlertTriangle, Phone } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 import { useProducts } from '@/hooks/useProducts';
 import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
+import { Select } from '@/components/ui/select';
 import api from '@/app/services/api';
 import { useAuth } from '@/context/AuthContext';
 
@@ -20,9 +21,9 @@ interface SelectedProduct extends CatalogProduct {
 // Estado del recojo programado
 interface PickupData {
   address: string;
+  id_address: number | null;
+  phone: string;
   date: string;
-  timeSlot: 'morning' | 'afternoon' | 'evening' | null;
-  notes: string;
 }
 
 interface NewRequestModalProps {
@@ -61,10 +62,16 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
   const [wantsPickup, setWantsPickup] = useState<boolean | null>(null);
   const [pickupData, setPickupData] = useState<PickupData>({
     address: '',
+    id_address: null,
+    phone: '',
     date: '',
-    timeSlot: null,
-    notes: '',
   });
+
+  // Datos de la empresa: direcciones y teléfonos guardados
+  const [companyData, setCompanyData] = useState<{
+    addresses: Array<{ label: string; value: string; id: number }>;
+    phones: Array<{ label: string; value: string }>;
+  }>({ addresses: [], phones: [] });
 
   // Estados de interacción con la API
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +79,29 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
   const [errorModal, setErrorModal] = useState<string | null>(null);
 
   const { user } = useAuth();
+
+  // Cuando el usuario elige "Sí, que Japi recoja", carga las direcciones y teléfonos de la empresa
+  useEffect(() => {
+    if (wantsPickup !== true || !user?.id) return;
+    const fetchCompanyData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await api.get(`/user/company/detail/${user.id}`, {
+          headers: { authorization: `${token}` },
+        });
+        const company = res.data?.company;
+        if (company) {
+          setCompanyData({
+            addresses: (company.addresses || []).map((a: any) => ({ label: a.address, value: a.address, id: a.id })),
+            phones: (company.phones || []).map((p: string) => ({ label: p, value: p })),
+          });
+        }
+      } catch (err) {
+        console.error('Error cargando datos de empresa:', err);
+      }
+    };
+    fetchCompanyData();
+  }, [wantsPickup, user]);
 
   const filteredCatalog = products.filter(item =>
     item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,7 +135,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
 
   // Validar que el formulario de recojo esté completo si eligió SÍ
   const isPickupFormValid = wantsPickup === false ||
-    (wantsPickup === true && pickupData.address.trim() && pickupData.date && pickupData.timeSlot);
+    (wantsPickup === true && pickupData.id_address !== null && pickupData.phone.trim() && pickupData.date);
 
   const handleSubmit = async () => {
     if (!user?.id_company) {
@@ -115,28 +145,33 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
 
     setIsLoading(true);
     try {
-      // 1. Crear la solicitud de abastecimiento
-      const payload = {
-        id_company: user.id_company,
-        items: selectedItems.map(item => ({
-          id_product: item.id_product,
-          quantity: Number(item.quantity)
-        }))
-      };
-      await api.post('/inventory/supply-request', payload);
+      const items = selectedItems.map(item => ({
+        id_product: item.id_product,
+        quantity: Number(item.quantity),
+      }));
 
-      // 2. Si quiere recojo, mockear la llamada al servicio de pickup (aún no implementado en backend)
       if (wantsPickup === true) {
-        console.log('[MOCK] Programando recojo:', {
+        // Solicitud con recojo programado → un solo endpoint
+        const pickupDate = new Date(pickupData.date).toISOString();
+        const payload = {
           id_company: user.id_company,
-          address: pickupData.address,
-          date: pickupData.date,
-          time_slot: pickupData.timeSlot,
-          notes: pickupData.notes,
-        });
-        // TODO: reemplazar con → await api.post('/pickup/schedule', pickupPayload);
+          items,
+          pickup: {
+            status: 'pending',
+            pickup_date: pickupDate,
+            id_address: pickupData.id_address,
+            phone: pickupData.phone,
+          },
+        };
+        await api.post('/inventory/supply-request', payload);
         setSuccessModal('¡Solicitud creada! Hemos programado el recojo de tus productos. Te notificaremos cuando el motorizado sea asignado.');
       } else {
+        // Solicitud sin recojo
+        const payload = {
+          id_company: user.id_company,
+          items,
+        };
+        await api.post('/inventory/supply-request', payload);
         setSuccessModal('La solicitud de abastecimiento ha sido creada exitosamente.');
       }
 
@@ -157,7 +192,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
       setSelectedItems([]);
       setSearchTerm('');
       setWantsPickup(null);
-      setPickupData({ address: '', date: '', timeSlot: null, notes: '' });
+      setPickupData({ address: '', id_address: null, phone: '', date: '' });
       onClose();
     } else {
       setErrorModal(null);
@@ -178,7 +213,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
   const titleMap: Record<number, string> = {
     1: 'Seleccionar Productos',
     2: 'Definir Cantidades',
-    3: '¿Deseas que Jappi recoja?',
+    3: '¿Deseas que Japi recoja?',
   };
 
   if (!isOpen) return null;
@@ -270,7 +305,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
                   </TableBody>
                 </Table>
               </div>
-              <p className="text-xs text-gray-400 text-right">{selectedItems.length} producto{selectedItems.length !== 1 ? 's' : ''} seleccionado{selectedItems.length !== 1 ? 's' : ''}</p>
+              <p className="text-xs mb-2 text-gray-400 text-right">{selectedItems.length} producto{selectedItems.length !== 1 ? 's' : ''} seleccionado{selectedItems.length !== 1 ? 's' : ''}</p>
             </div>
           )}
 
@@ -324,38 +359,11 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
           {step === 3 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <p className="text-sm text-gray-500">
-                Tus productos están listos para ser enviados al almacén Jappi. ¿Necesitas que nuestro motorizado pase a recogerlos?
+                Tus productos están listos para ser enviados al almacén Japi. ¿Necesitas que nuestro motorizado pase a recogerlos?
               </p>
 
               {/* Tarjetas de opción */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Opción SÍ */}
-                <button
-                  type="button"
-                  onClick={() => setWantsPickup(true)}
-                  className={`relative flex flex-col items-center gap-3 p-5 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer
-                    ${wantsPickup === true
-                      ? 'border-blue-500 bg-blue-50 shadow-sm'
-                      : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/30'
-                    }`}
-                >
-                  {wantsPickup === true && (
-                    <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
-                      <Check size={10} className="text-white" />
-                    </div>
-                  )}
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${wantsPickup === true ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                    <Truck size={22} className={wantsPickup === true ? 'text-blue-600' : 'text-gray-400'} />
-                  </div>
-                  <div>
-                    <p className={`font-semibold text-sm ${wantsPickup === true ? 'text-blue-700' : 'text-gray-700'}`}>
-                      Sí, que Jappi recoja
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5 leading-tight">
-                      Un motorizado irá a buscar tus productos
-                    </p>
-                  </div>
-                </button>
+              <div className="flex flex-row gap-3">
 
                 {/* Opción NO */}
                 <button
@@ -384,82 +392,88 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
                     </p>
                   </div>
                 </button>
+
+                {/* Opción SÍ */}
+                <button
+                  type="button"
+                  onClick={() => setWantsPickup(true)}
+                  className={`relative flex flex-col items-center gap-3 p-5 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer
+                    ${wantsPickup === true
+                      ? 'border-blue-500 bg-blue-50 shadow-sm'
+                      : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/30'
+                    }`}
+                >
+                  {wantsPickup === true && (
+                    <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                      <Check size={10} className="text-white" />
+                    </div>
+                  )}
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${wantsPickup === true ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                    <Truck size={22} className={wantsPickup === true ? 'text-blue-600' : 'text-gray-400'} />
+                  </div>
+                  <div>
+                    <p className={`font-semibold text-sm ${wantsPickup === true ? 'text-blue-700' : 'text-gray-700'}`}>
+                      Sí, que Japi recoja
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5 leading-tight">
+                      Un motorizado irá a buscar tus productos
+                    </p>
+                  </div>
+                </button>
+
+
               </div>
 
               {/* Formulario de recojo (solo si eligió SÍ) */}
               {wantsPickup === true && (
-                <div className="space-y-4 border border-blue-100 rounded-xl p-4 bg-blue-50/40 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="space-y-4 mb-4 border border-blue-100 rounded-xl p-4 bg-blue-50/40 animate-in fade-in slide-in-from-top-2 duration-300">
                   <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider">Datos del recojo</p>
 
-                  {/* Dirección */}
+                  {/* Dirección de recojo */}
                   <div className="space-y-1.5">
-                    <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
-                      <MapPin size={12} className="text-blue-500" />
-                      Dirección de recojo
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ej: Av. Larco 101, Miraflores"
+                    <label className="text-xs font-medium text-gray-600">Dirección de recojo</label>
+                    <Select
                       value={pickupData.address}
-                      onChange={e => setPickupData(p => ({ ...p, address: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white placeholder-gray-400"
+                      options={companyData.addresses.length > 0
+                        ? companyData.addresses
+                        : [{ label: 'Sin direcciones registradas', value: '' }]
+                      }
+                      onChange={addr => {
+                        const found = companyData.addresses.find(a => a.value === addr);
+                        setPickupData(p => ({ ...p, address: addr, id_address: found?.id ?? null }));
+                      }}
                     />
                   </div>
 
-                  {/* Fecha */}
-                  <div className="space-y-1.5">
-                    <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
-                      <Calendar size={12} className="text-blue-500" />
-                      Fecha preferida
-                    </label>
-                    <input
-                      type="date"
-                      min={todayIso}
-                      value={pickupData.date}
-                      onChange={e => setPickupData(p => ({ ...p, date: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white text-gray-700"
-                    />
-                  </div>
-
-                  {/* Franja horaria */}
-                  <div className="space-y-1.5">
-                    <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
-                      <Clock size={12} className="text-blue-500" />
-                      Franja horaria
-                    </label>
-                    <div className="flex gap-2">
-                      {TIME_SLOTS.map(slot => (
-                        <button
-                          key={slot.id}
-                          type="button"
-                          onClick={() => setPickupData(p => ({ ...p, timeSlot: slot.id }))}
-                          className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-all duration-150
-                            ${pickupData.timeSlot === slot.id
-                              ? 'border-blue-500 bg-blue-500 text-white'
-                              : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'
-                            }`}
-                        >
-                          <span className="font-semibold block">{slot.label}</span>
-                          <span className="opacity-80 font-normal">{slot.hours}</span>
-                        </button>
-                      ))}
+                  {/* Teléfono + Fecha en la misma fila */}
+                  <div className="flex flex-row gap-3">
+                    {/* Teléfono */}
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-medium text-gray-600">Teléfono de contacto</label>
+                      <Select
+                        value={pickupData.phone}
+                        options={companyData.phones.length > 0
+                          ? companyData.phones
+                          : [{ label: 'Sin teléfonos registrados', value: '' }]
+                        }
+                        onChange={phone => setPickupData(p => ({ ...p, phone }))}
+                      />
                     </div>
-                  </div>
 
-                  {/* Notas opcionales */}
-                  <div className="space-y-1.5">
-                    <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
-                      <FileText size={12} className="text-blue-500" />
-                      Notas adicionales
-                      <span className="text-gray-400 font-normal">(opcional)</span>
-                    </label>
-                    <textarea
-                      placeholder="Ej: Timbre no funciona, llamar al celular. 2do piso."
-                      value={pickupData.notes}
-                      onChange={e => setPickupData(p => ({ ...p, notes: e.target.value }))}
-                      rows={2}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white placeholder-gray-400 resize-none"
-                    />
+                    {/* Fecha */}
+                    <div className="space-y-1.5 flex-1">
+                      <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
+                        <Calendar size={12} className="text-blue-500" />
+                        Fecha de recojo
+                      </label>
+                      <input
+                        type="date"
+                        min={todayIso}
+                        value={pickupData.date}
+                        onChange={e => setPickupData(p => ({ ...p, date: e.target.value }))}
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white text-gray-700"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
