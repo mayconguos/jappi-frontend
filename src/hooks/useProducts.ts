@@ -4,7 +4,7 @@ import api from '@/app/services/api';
 import { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import { getRoleNameFromNumber } from '@/utils/roleUtils';
 
-export function useProducts() {
+export function useProducts({ autoFetch = true }: { autoFetch?: boolean } = {}) {
   const { user } = useAuth();
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,16 +25,12 @@ export function useProducts() {
         : `/inventory/${user.id_company}`;
 
       const response = await api.get(endpoint);
-      // El endpoint de Admin devuelve un array directamente. El endpoint de Cliente podría devolver un objeto con kardex.
-      // Snippets previos mostraron un array para /inventory.
-      // La lógica previa para Clientes manejaba `response.data` o `response.data.kardex`.
-
       const data = Array.isArray(response.data) ? response.data : (response.data?.kardex || []);
 
       const mappedProducts: CatalogProduct[] = data.map((p: any) => ({
         id: p.id,
         id_product: p.id_product,
-        company_name: p.company_name, // Solo presente en la vista de admin normalmente
+        company_name: p.company_name,
         sku: p.SKU || `PROD-${p.id}`,
         product_name: p.product_name,
         description: p.description,
@@ -52,9 +48,13 @@ export function useProducts() {
     }
   }, [user]);
 
+  // Solo auto-fetcha al montar si autoFetch: true.
+  // Usar autoFetch: false cuando el componente controla manualmente cuándo fetchear.
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (autoFetch) {
+      fetchProducts();
+    }
+  }, [fetchProducts, autoFetch]);
 
   const addProduct = async (productData: Omit<CatalogProduct, 'id' | 'last_updated'>) => {
     try {

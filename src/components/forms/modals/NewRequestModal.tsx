@@ -25,27 +25,14 @@ interface NewRequestModalProps {
 }
 
 export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewRequestModalProps) {
+  // autoFetch: false → no fetcha al montar la página.
+  // Solo fetcha cuando el modal se abre (ver useEffect con [isOpen] abajo).
+  const { products, addProduct, refreshProducts } = useProducts({ autoFetch: false });
+
   // Estado para el modal anidado de Producto
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const { products, addProduct } = useProducts();
-  // Request Modal sends requests, so it still might need context for 'addRequest' if exists? No, requests are fetched in page.
-  // Actually, NewRequestModal calls onSubmit. The parent logic handles it. 
-  // Wait, NewRequestModal logic:
-  // It selects products from `products` list. 
-  // It calls `addProduct` (create new product)? Yes.
 
-  // No necesitamos useEffect fetchProducts porque el hook useProducts los obtiene al montarse.
-  // Sin embargo, useProducts los obtiene UNA VEZ cuando el hook se inicializa.
-  // If modal is closed and opened, component might not unmount? 
-  // If `NewRequestModal` is conditionally rendered `isModalOpen && <NewRequestModal>`, then it mounts every time.
-  // If it is `<NewRequestModal isOpen={isModalOpen} />`, it stays mounted.
-  // Let's check parent usage.
-  // Por lo general, los modales se renderizan condicionalmente o se ocultan con CSS. 
-  // En `RequestsPage`, es probable que sea: `isModalOpen && <NewRequestModal ... />` ?
-  // Supongamos un comportamiento estándar. Si permanece montado, es posible que deseemos actualizar los productos cuando `isOpen` cambie.
-  // El hook expone `refreshProducts`.
-
-  const { refreshProducts } = useProducts();
+  // Solo obtener productos cuando el modal se abre, no al montar la página
   useEffect(() => {
     if (isOpen) {
       refreshProducts();
