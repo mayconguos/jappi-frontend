@@ -13,9 +13,9 @@ import api from '@/app/services/api';
 export default function WarehouseRequestsPage() {
   const { user } = useAuth();
 
-  // Detectar si el usuario es del almacén Japi (no puede crear solicitudes y ve todas)
+  // Detectar si el usuario debe ver la vista de almacén (admin y almacén ven todas las solicitudes)
   const roleName = getRoleNameFromNumber(user?.id_role ?? 0);
-  const isWarehouse = roleName === 'almacen';
+  const isWarehouse = roleName === 'almacen' || roleName === 'admin';
 
   const idCompany = user?.id_company;
 
@@ -48,6 +48,7 @@ export default function WarehouseRequestsPage() {
         status: (r.status?.toLowerCase() || 'pending') as any,
         observation: r.observation || undefined,
         pdf_url: '#',
+        company_name: r.company_name || r.company?.name || undefined,
       }));
       setRequests(mapped);
     } catch (error) {
@@ -113,6 +114,7 @@ export default function WarehouseRequestsPage() {
           requests={currentItems}
           onView={handleViewRequest}
           onDownloadGuide={handleDownloadGuide}
+          isWarehouse={isWarehouse}
         />
 
         <div className="w-full pt-4">

@@ -178,10 +178,6 @@ export default function RequestDetailModal({
             </>
           ) : (
             <>
-              <Button onClick={onClose} variant="secondary" disabled={isActing}>
-                Cerrar
-              </Button>
-
               {canCancel && (
                 <Button
                   variant="secondary"
@@ -190,7 +186,7 @@ export default function RequestDetailModal({
                   className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 gap-2"
                 >
                   <XCircle size={16} />
-                  Cancelar Solicitud
+                  {isWarehouse ? 'Rechazar Solicitud' : 'Cancelar Solicitud'}
                 </Button>
               )}
 

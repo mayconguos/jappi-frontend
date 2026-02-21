@@ -11,12 +11,14 @@ export interface InboundRequest {
   status: 'pending' | 'received' | 'rejected';
   observation?: string;
   pdf_url?: string;
+  company_name?: string;
 }
 
 interface RequestsTableProps {
   requests: InboundRequest[];
   onView: (request: InboundRequest) => void;
   onDownloadGuide: (request: InboundRequest) => void;
+  isWarehouse?: boolean;
 }
 
 const getStatusBadge = (status: string) => {
@@ -41,7 +43,8 @@ const getStatusLabel = (status: string) => {
 export default function RequestsTable({
   requests,
   onView,
-  onDownloadGuide
+  onDownloadGuide,
+  isWarehouse = false,
 }: RequestsTableProps) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -50,6 +53,9 @@ export default function RequestsTable({
           <TableRow>
             <TableHead className="pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Orden</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha Creación</TableHead>
+            {isWarehouse && (
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</TableHead>
+            )}
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
             <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" style={{ textAlign: 'center' }}>Guía</TableHead>
             <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
@@ -68,6 +74,12 @@ export default function RequestsTable({
               <TableCell className="py-4">
                 <span className="text-sm font-medium text-gray-900">{item.request_date}</span>
               </TableCell>
+
+              {isWarehouse && (
+                <TableCell className="py-4">
+                  <span className="text-sm text-gray-700">{item.company_name ?? <span className="text-gray-300 text-xs">—</span>}</span>
+                </TableCell>
+              )}
 
               <TableCell className="py-4">
                 <div className="flex items-center gap-2">
