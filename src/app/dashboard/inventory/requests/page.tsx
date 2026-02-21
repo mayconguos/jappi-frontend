@@ -1,17 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RequestsFilter from '@/components/filters/RequestsFilter';
 import RequestsTable, { InboundRequest } from '@/components/tables/RequestsTable';
 import { Pagination } from '@/components/ui/pagination';
 import NewRequestModal from '@/components/forms/modals/NewRequestModal';
 import RequestDetailModal from '@/components/forms/modals/RequestDetailModal';
-import { useInventory } from '@/context/InventoryContext';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/app/services/api';
 
 export default function WarehouseRequestsPage() {
-  // Use Global Context
-  const { requests, refreshRequests } = useInventory();
+  const { user } = useAuth();
+  const idCompany = user?.id_company;
 
+  const [requests, setRequests] = useState<InboundRequest[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,16 +22,40 @@ export default function WarehouseRequestsPage() {
 
   const itemsPerPage = 10;
 
-  // Filter Logic
+  // Obtener solicitudes directamente desde la página
+  const fetchRequests = async () => {
+    if (!idCompany) return;
+    try {
+      const response = await api.get(`/inventory/supply-request/${idCompany}`);
+      const data = Array.isArray(response.data) ? response.data : [];
+      const mapped: InboundRequest[] = data.map((r: any) => ({
+        id: r.id,
+        request_date: new Date(r.created_at).toLocaleDateString(),
+        total_skus: 0,
+        total_units: 0,
+        status: (r.status?.toLowerCase() || 'pending') as any,
+        pdf_url: '#',
+      }));
+      setRequests(mapped);
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+    }
+  };
+
+  // Solo se ejecuta cuando idCompany cambia (primitivo → comparación por valor)
+  useEffect(() => {
+    fetchRequests();
+  }, [idCompany]);
+
+  // Lógica de filtrado
   const filteredRequests = requests.filter(req => {
     const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
     const matchesSearch = req.id.toString().includes(searchValue);
     return matchesStatus && matchesSearch;
   });
 
-  // Pagination Logic
+  // Paginación
   const totalItems = filteredRequests.length;
-  // const totalPages = Math.ceil(totalItems / itemsPerPage); // Not needed for Pagination component
   const currentItems = filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleNewRequest = () => {
@@ -38,13 +64,9 @@ export default function WarehouseRequestsPage() {
 
   const handleCreateRequest = async () => {
     setIsModalOpen(false);
-    await refreshRequests();
+    await fetchRequests();
 
-    // Simulate Guide Generation (Optional: Remove if not needed anymore)
     setTimeout(() => {
-      // Ideally we would get the new ID here, but since we refresh list, functionality is correct.
-      // We can remove the specific ID alert or fetch the latest one.
-      // For now, removing specific ID from alert to avoid confusion or fetching latest.
       alert('✅ ¡Solicitud creada exitosamente! \n\nSe ha generado la Guía de Remisión. \nPor favor imprímela y pégala en tu caja.');
     }, 500);
   };
