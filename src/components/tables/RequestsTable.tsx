@@ -8,7 +8,7 @@ export interface InboundRequest {
   request_date: string;
   total_skus: number;
   total_units: number;
-  status: 'pending' | 'received' | 'cancelled';
+  status: 'pending' | 'received' | 'rejected';
   pdf_url?: string;
 }
 
@@ -22,7 +22,7 @@ const getStatusBadge = (status: string) => {
   switch (status) {
     case 'received':
       return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    case 'cancelled':
+    case 'rejected':
       return 'bg-red-50 text-red-700 border-red-100';
     default: // pending
       return 'bg-amber-50 text-amber-700 border-amber-100';
@@ -32,7 +32,7 @@ const getStatusBadge = (status: string) => {
 const getStatusLabel = (status: string) => {
   switch (status) {
     case 'received': return 'Recibido';
-    case 'cancelled': return 'Cancelado';
+    case 'rejected': return 'Rechazado';
     default: return 'Pendiente';
   }
 };

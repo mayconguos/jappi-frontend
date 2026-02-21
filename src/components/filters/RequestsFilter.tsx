@@ -44,7 +44,7 @@ export default function RequestsFilter({
                 { label: 'Todos', value: 'all' },
                 { label: 'Pendientes', value: 'pending' },
                 { label: 'Recibidos', value: 'received' },
-                { label: 'Cancelados', value: 'cancelled' },
+                { label: 'Rechazados', value: 'rejected' },
               ]}
               icon={Filter}
               className="bg-white border-slate-200"

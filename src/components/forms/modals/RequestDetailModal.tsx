@@ -33,7 +33,7 @@ interface EditableItem extends RequestItem {
 const statusLabel: Record<InboundRequest['status'], string> = {
   pending: 'Pendiente',
   received: 'Recibido',
-  cancelled: 'Cancelado',
+  rejected: 'Rechazado',
 };
 
 export default function RequestDetailModal({
@@ -111,7 +111,7 @@ export default function RequestDetailModal({
       // await api.patch(`/inventory/supply-request/${request.id}/cancel`);
       console.log(`[MOCK] PATCH /inventory/supply-request/${request.id}/cancel`);
       await new Promise(res => setTimeout(res, 600));
-      onStatusChange?.(request.id, 'cancelled');
+      onStatusChange?.(request.id, 'rejected');
       onClose();
     } catch (err: any) {
       setUpdateError(err?.response?.data?.message || 'Error al cancelar la solicitud. Intenta nuevamente.');
@@ -208,26 +208,12 @@ export default function RequestDetailModal({
               'capitalize px-3 py-1 text-sm font-medium',
               request.status === 'pending' && 'bg-yellow-50 text-yellow-700 border-yellow-200',
               request.status === 'received' && 'bg-green-50 text-green-700 border-green-200',
-              request.status === 'cancelled' && 'bg-red-50 text-red-700 border-red-200',
+              request.status === 'rejected' && 'bg-red-50 text-red-700 border-red-200',
             )}>
               {statusLabel[request.status]}
             </Badge>
             <span className="text-sm text-gray-400">|</span>
             <span className="text-sm text-gray-500">Creada el {request.request_date}</span>
-          </div>
-
-          <div className="flex items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1.5">
-              <Package size={15} />
-              <span><span className="font-semibold text-gray-900">{items.length}</span> SKUs</span>
-            </div>
-            <div>
-              <span className="font-semibold text-gray-900">{totalRequested}</span>
-              {canConfirm && totalReceived !== totalRequested && (
-                <span className="text-amber-600 ml-1">→ {totalReceived} recibidas</span>
-              )}
-              <span className="ml-1">unds. solicitadas</span>
-            </div>
           </div>
         </div>
 

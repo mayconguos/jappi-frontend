@@ -28,14 +28,14 @@ export default function LoginForm() {
       // email: 'almacen@japiexpress.com',
       // password: 'japientregas24680'
       // ------ Cliente ------
-      email: 'velia.guerra@gmail.com',
-      password: 'administracion2015'
+      // email: 'velia.guerra@gmail.com',
+      // password: 'administracion2015'
       // ------ Motorizado ------
       // email: 'lionelramos@japiexpress.com',
       // password: 'lionelramos'
       // ------ Almacen ------
-      // email: 'almacen.2@japiexpress.com',
-      // password: 'japientregas24680'
+      email: 'almacen.2@japiexpress.com',
+      password: 'japientregas24680'
     }
   });
 

@@ -2,7 +2,7 @@ import { ArrowDownLeft, Eye, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { InboundRequest } from '@/context/InventoryContext';
+import { InboundRequest } from '@/components/tables/RequestsTable';
 
 interface RecentActivityTableProps {
   requests: InboundRequest[];
