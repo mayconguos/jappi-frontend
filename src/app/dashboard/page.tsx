@@ -72,7 +72,7 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="mt-4">
-            <h3 className="text-sm font-medium text-gray-500">En Tránsito</h3>
+            <h3 className="text-sm font-medium text-gray-500">En Ruta</h3>
             <p className="text-3xl font-bold text-slate-900 mt-1">8</p>
           </div>
         </div>
