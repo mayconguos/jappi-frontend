@@ -19,6 +19,7 @@ interface PickupsTableProps {
 const STATUS_META: Record<PickupStatus, { label: string; badge: string; dot: string }> = {
   pending: { label: 'Pendiente', badge: 'bg-amber-50  text-amber-700  border-amber-100', dot: 'bg-amber-400' },
   scheduled: { label: 'Programado', badge: 'bg-blue-50   text-blue-700   border-blue-100', dot: 'bg-blue-400' },
+  picked_up: { label: 'Recogido', badge: 'bg-indigo-50 text-indigo-700 border-indigo-100', dot: 'bg-indigo-400' },
   received: { label: 'Recibido', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
 };
 
@@ -33,10 +34,12 @@ export default function PickupsTable({
   isFetchingCouriers,
   onFetchCouriers,
 }: PickupsTableProps) {
-  const statusOptions = Object.entries(STATUS_META).map(([value, { label }]) => ({
-    label,
-    value,
-  }));
+  const statusOptions = Object.entries(STATUS_META)
+    .filter(([value]) => value !== 'picked_up') // Admins can't manually set to picked_up
+    .map(([value, { label }]) => ({
+      label,
+      value,
+    }));
 
   const carrierOptions = [
     { label: 'Sin asignar', value: 'Sin asignar' },
