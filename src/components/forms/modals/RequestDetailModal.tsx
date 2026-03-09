@@ -191,16 +191,26 @@ export default function RequestDetailModal({
               )}
 
               {canConfirm && (
-                <Button
-                  onClick={handleConfirmReception}
-                  disabled={isActing}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-                >
-                  {isConfirming
-                    ? <><Loader2 size={16} className="animate-spin" /> Confirmando...</>
-                    : <><CheckCircle2 size={16} /> Confirmar Recepción</>
-                  }
-                </Button>
+                <div className="flex flex-col items-end gap-2">
+                  {hasDiff && !observation.trim() && (
+                    <span className="text-[10px] text-red-500 font-medium animate-pulse">
+                      * Ingresa una observación por las diferencias
+                    </span>
+                  )}
+                  <Button
+                    onClick={handleConfirmReception}
+                    disabled={isActing || (hasDiff && !observation.trim())}
+                    className={clsx(
+                      "text-white gap-2 transition-all",
+                      (hasDiff && !observation.trim()) ? "bg-gray-300 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700"
+                    )}
+                  >
+                    {isConfirming
+                      ? <><Loader2 size={16} className="animate-spin" /> Confirmando...</>
+                      : <><CheckCircle2 size={16} /> Confirmar Recepción</>
+                    }
+                  </Button>
+                </div>
               )}
             </>
           )}
@@ -337,26 +347,30 @@ export default function RequestDetailModal({
         </div>
 
         {canConfirm && hasDiff && items.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs text-amber-600 flex items-center gap-1.5">
-              <AlertTriangle size={12} />
-              Hay diferencias entre lo solicitado y lo recibido. Se registrará la cantidad real.
+          <div className="space-y-3 p-4 rounded-xl border border-amber-200 bg-amber-50/50 animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
+              <AlertTriangle size={16} />
+              <span>Diferencias detectadas</span>
+            </div>
+            
+            <p className="text-xs text-amber-600 leading-relaxed">
+              Hay discrepancias entre lo solicitado y lo recibido. <strong>Debes ingresar una observación</strong> explicando el motivo para poder confirmar la recepción.
             </p>
-            {/* Observación opcional */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600">
-                Observación
-                <span className="ml-1 text-gray-400 font-normal">(opcional)</span>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-amber-800 flex items-center justify-between">
+                <span>Observación de recepción</span>
+                <span className="text-[10px] bg-amber-200 px-1.5 py-0.5 rounded text-amber-900 uppercase tracking-wider">Obligatorio</span>
               </label>
               <textarea
                 value={observation}
                 onChange={e => setObservation(e.target.value)}
-                placeholder="Describe brevemente por qué cambiaron las cantidades..."
+                placeholder="Ej: Solo llegaron 5 unidades en buen estado, el resto se devolvió..."
                 rows={3}
-                className="w-full px-3 py-2 text-sm border border-amber-200 bg-amber-50/50 rounded-lg
+                className="w-full px-3 py-2 text-sm border border-amber-300 bg-white rounded-lg
                   placeholder:text-gray-400 text-gray-800 resize-none
-                  focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300
-                  transition-colors"
+                  focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500
+                  transition-all"
               />
             </div>
           </div>
