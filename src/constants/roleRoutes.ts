@@ -42,6 +42,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/pickups/history', label: 'Historial de recojos', icon: History },
     { path: '/dashboard/pickups/supply', label: 'Recojos abastecimiento', icon: Truck },
     { path: '/dashboard/inventory/requests', label: 'Solicitudes de almacén', icon: FileText },
+    { path: '/dashboard/inventory/kardex', label: 'Kardex', icon: ClipboardCheck },
   ],
 
   coordinacion: [
