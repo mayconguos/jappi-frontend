@@ -11,7 +11,10 @@ import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Select } from '@/components/ui/select';
 
 const productSchema = z.object({
-  sku: z.string().min(2, 'El SKU debe tener al menos 2 caracteres').toUpperCase(),
+  sku: z.string()
+    .min(2, 'El SKU debe tener al menos 2 caracteres')
+    .max(20, 'El SKU no puede tener más de 20 caracteres')
+    .regex(/^[A-Z0-9_-]+$/, 'Solo se permiten letras mayúsculas, números, guiones y guiones bajos'),
   product_name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
   description: z.string().optional(),
   status: z.enum(['active', 'inactive']),
@@ -67,7 +70,11 @@ export default function ProductModal({ isOpen, onClose, onSubmit, editingProduct
             placeholder="Ej. CAM-ROJA-S"
             error={errors.sku?.message}
             {...register('sku')}
-            onChange={(e) => setValue('sku', e.target.value.toUpperCase())}
+            onChange={(e) => {
+              const value = e.target.value.toUpperCase();
+              const filtered = value.replace(/[^A-Z0-9_-]/g, '').slice(0, 20);
+              setValue('sku', filtered, { shouldValidate: true });
+            }}
             className="uppercase font-mono disabled:bg-gray-100 disabled:text-gray-500"
             autoFocus
             disabled={!!editingProduct || isLoading}

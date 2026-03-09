@@ -23,7 +23,7 @@ const FullScreenDeliveryLoader: React.FC<FullScreenDeliveryLoaderProps> = ({
         <div className="mt-6">
           <div className="max-w-md mx-auto">
             <p className="text-sm text-gray-500">
-              Esto puede tomar unos momentos...
+              Esto puede tomar un momento...
             </p>
           </div>
         </div>
