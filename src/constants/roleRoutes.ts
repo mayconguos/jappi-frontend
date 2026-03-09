@@ -40,6 +40,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/accounts/workers', label: 'Usuarios internos', icon: IdCard },
     { path: '/dashboard/accounts/pending', label: 'Activación de cuentas', icon: UserCheck },
     { path: '/dashboard/pickups/history', label: 'Historial de recojos', icon: History },
+    { path: '/dashboard/pickups/supply', label: 'Recojos abastecimiento', icon: Truck },
     { path: '/dashboard/inventory/requests', label: 'Solicitudes de almacén', icon: FileText },
   ],
 
@@ -52,6 +53,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Truck },
     { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
     { path: '/dashboard/pickups/history', label: 'Historial de recojos', icon: History },
+    { path: '/dashboard/pickups/supply', label: 'Recojos abastecimiento', icon: Truck },
     { path: '/dashboard/inventory/requests', label: 'Solicitudes de almacén', icon: FileText },
   ],
 
@@ -61,6 +63,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
     { path: '/dashboard/shipments/calendar', label: 'Envíos por fecha', icon: Calendar },
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
+    { path: '/dashboard/pickups/supply', label: 'Recojos de abastecimiento', icon: Truck },
   ],
 
   empresa: [
