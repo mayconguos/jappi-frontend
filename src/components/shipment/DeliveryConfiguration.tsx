@@ -12,6 +12,8 @@ interface DeliveryConfigurationProps {
   deliveryDate: string | undefined;
   onDateChange: (value: string) => void;
   dateError?: string;
+  codIncludesDelivery?: boolean;
+  onCodIncludesDeliveryChange?: (value: boolean) => void;
 }
 
 export default function DeliveryConfiguration({
@@ -22,7 +24,9 @@ export default function DeliveryConfiguration({
   codAmountError,
   deliveryDate,
   onDateChange,
-  dateError
+  dateError,
+  codIncludesDelivery,
+  onCodIncludesDeliveryChange
 }: DeliveryConfigurationProps) {
   return (
     <div className="md:col-span-2 mb-6">
@@ -95,7 +99,7 @@ export default function DeliveryConfiguration({
         {/* Column 1: Collection Amount (Conditional) */}
         <div>
           {deliveryMode === 'pay_on_delivery' && (
-            <div className="animate-in fade-in slide-in-from-top-2 duration-300 h-full">
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300 h-full flex flex-col gap-3">
               <Input
                 label="¿Cuánto debe cobrar el motorizado? *"
                 type="number"
@@ -104,6 +108,15 @@ export default function DeliveryConfiguration({
                 {...registerCodAmount}
                 error={codAmountError}
               />
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer pl-1 mt-1">
+                <input
+                  type="checkbox"
+                  checked={codIncludesDelivery || false}
+                  onChange={(e) => onCodIncludesDeliveryChange?.(e.target.checked)}
+                  className="rounded border-gray-300 text-[#02997d] focus:ring-[#02997d] w-4 h-4"
+                />
+                El monto a cobrar incluye el costo de delivery
+              </label>
             </div>
           )}
         </div>

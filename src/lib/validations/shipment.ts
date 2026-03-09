@@ -114,6 +114,7 @@ const serviceSchema = z.object({
     .number()
     .min(0, 'El monto debe ser mayor o igual a 0')
     .optional(),
+  cod_includes_delivery: z.boolean().optional(),
   pickup_cost: z
     .number()
     .min(0, 'El costo de recojo no puede ser negativo')

@@ -115,9 +115,7 @@ export default function CreateShipmentPage() {
     // Campos básicos
     const fieldsToValidate = [
       'service.origin_type',
-      'service.type',
-      'service.delivery_mode',
-      'service.delivery_date'
+      'service.type'
     ];
 
     if (currentOriginType === 'pickup') {
@@ -152,7 +150,9 @@ export default function CreateShipmentPage() {
       'recipient.phone',
       'recipient.address.address',
       'recipient.address.id_region',
-      'recipient.address.id_district'
+      'recipient.address.id_district',
+      'service.delivery_mode',
+      'service.delivery_date'
     ];
 
     if (districtHasSectors) {

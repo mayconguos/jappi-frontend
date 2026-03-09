@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import DeliveryConfiguration from '@/components/shipment/DeliveryConfiguration';
 
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
 import { type ShipmentFormData } from '@/lib/validations/shipment';
@@ -22,7 +23,7 @@ interface RecipientSectionProps {
 
 export default function RecipientSection({ form, isActive, isCompleted, onContinue, onEdit, onBack }: RecipientSectionProps) {
   const { getRegionOptions, getDistrictOptions, getSectorOptions } = useLocationCatalog();
-  const { formState: { errors }, watch, setValue, trigger } = form;
+  const { formState: { errors }, watch, setValue, trigger, register } = form;
   const watchedValues = watch();
   const [isValidating, setIsValidating] = useState(false);
 
@@ -206,6 +207,14 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                 )}
               </div>
 
+              {/* Costo de delivery Referencial (Mock) */}
+              {selectedDistrict && (
+                <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg text-sm flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
+                  <span className="font-bold text-xs">Costo referencial de envío:</span>
+                  <span className="font-bold text-xs">S/ {(parseInt(selectedDistrict.toString()) % 3 === 0 ? 15.00 : parseInt(selectedDistrict.toString()) % 2 === 0 ? 12.00 : 10.00).toFixed(2)}</span>
+                </div>
+              )}
+
               {/* Fila 2: Dirección Exacta - Separada */}
               <div className="mb-4">
                 <Input
@@ -222,7 +231,6 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                 />
               </div>
 
-              {/* Fila 3: Referencia - Separada */}
               <div>
                 <Input
                   label="Referencia"
@@ -236,6 +244,37 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                   placeholder="Ej. Portón negro, frente al parque..."
                 />
               </div>
+            </div>
+
+            {/* Configuración de Entrega (Modo de Entrega / COD / Fecha) */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm mt-6">
+              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+                Configuración de Entrega
+              </h4>
+              <DeliveryConfiguration
+                deliveryMode={watchedValues.service?.delivery_mode}
+                onModeChange={async (val) => {
+                  setValue('service.delivery_mode', val);
+                  await trigger('service.delivery_mode');
+                }}
+                error={errors.service?.delivery_mode?.message}
+                registerCodAmount={register('service.cod_amount', {
+                  required: watchedValues.service?.delivery_mode === 'pay_on_delivery' ? "Ingresa el monto a cobrar" : false,
+                  valueAsNumber: true
+                })}
+                codAmountError={errors.service?.cod_amount?.message}
+                codIncludesDelivery={watchedValues.service?.cod_includes_delivery}
+                onCodIncludesDeliveryChange={async (val) => {
+                  setValue('service.cod_includes_delivery', val);
+                  await trigger('service.cod_includes_delivery');
+                }}
+                deliveryDate={watchedValues.service?.delivery_date}
+                onDateChange={async (val) => {
+                  setValue('service.delivery_date', val);
+                  await trigger('service.delivery_date');
+                }}
+                dateError={errors.service?.delivery_date?.message}
+              />
             </div>
 
             {/* BOTÓN DE NAVEGACIÓN */}

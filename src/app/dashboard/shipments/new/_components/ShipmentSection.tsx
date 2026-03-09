@@ -14,7 +14,6 @@ import { DELIVERY_MODES } from '@/constants/formOptions';
 // Import new dumb components
 import ShipmentOriginSelector from '@/components/shipment/ShipmentOriginSelector';
 import ServiceLevelSelector from '@/components/shipment/ServiceLevelSelector';
-import DeliveryConfiguration from '@/components/shipment/DeliveryConfiguration';
 import PickupDetailsForm from '@/components/shipment/PickupDetailsForm';
 import PackageListForm from '@/components/shipment/PackageListForm';
 
@@ -265,27 +264,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
                 />
 
                 {/* 3. Delivery Configuration */}
-                <div className="md:col-span-2">
-                  <DeliveryConfiguration
-                    deliveryMode={watchedValues.service?.delivery_mode}
-                    onModeChange={async (val) => {
-                      setValue('service.delivery_mode', val);
-                      await trigger('service.delivery_mode');
-                    }}
-                    error={errors.service?.delivery_mode?.message}
-                    registerCodAmount={register('service.cod_amount', {
-                      required: watchedValues.service?.delivery_mode === 'pay_on_delivery' ? "Ingresa el monto a cobrar" : false,
-                      valueAsNumber: true
-                    })}
-                    codAmountError={errors.service?.cod_amount?.message}
-                    deliveryDate={watchedValues.service?.delivery_date}
-                    onDateChange={async (val) => {
-                      setValue('service.delivery_date', val);
-                      await trigger('service.delivery_date');
-                    }}
-                    dateError={errors.service?.delivery_date?.message}
-                  />
-                </div>
+
 
                 {/* 4. Pickup Details Form */}
                 {selectedOriginType === 'pickup' && (
