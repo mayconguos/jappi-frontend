@@ -19,7 +19,8 @@ export type Role =
   | 'coordinacion'
   | 'almacen'
   | 'empresa'
-  | 'transportista';
+  | 'transportista'
+  | 'despacho';
 
 export interface RouteItem {
   path: string;
@@ -43,15 +44,15 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
   ],
 
   coordinacion: [
-    // { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
-    // { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
-    // { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
-    // { path: '/dashboard/shipments/calendar', label: 'Envíos por fecha', icon: Calendar },
-    // { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
-    // { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Truck },
-    // { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
-    // { path: '/dashboard/pickups/history', label: 'Historial de recojos', icon: History },
-    // { path: '/dashboard/inventory/requests', label: 'Solicitudes de almacén', icon: FileText },
+    { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
+    { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
+    { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    { path: '/dashboard/shipments/calendar', label: 'Envíos por fecha', icon: Calendar },
+    { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
+    { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Truck },
+    { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
+    { path: '/dashboard/pickups/history', label: 'Historial de recojos', icon: History },
+    { path: '/dashboard/inventory/requests', label: 'Solicitudes de almacén', icon: FileText },
   ],
 
   almacen: [
@@ -75,5 +76,9 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/carrier/pickups', label: 'Recojos asignados', icon: Truck },
     { path: '/dashboard/carrier/history', label: 'Historial de entregas', icon: History },
     { path: '/dashboard/carrier/pickup-history', label: 'Historial de recojos', icon: History },
+  ],
+
+  despacho: [
+    { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
   ],
 };

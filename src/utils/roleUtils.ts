@@ -7,7 +7,8 @@ export const getRoleNameFromNumber = (roleNumber: number): Role | null => {
     2: 'empresa',
     3: 'transportista',
     4: 'almacen',
-    5: 'coordinacion'
+    5: 'coordinacion',
+    6: 'despacho'
   };
   return roleMap[roleNumber] || null;
 };
@@ -31,6 +32,8 @@ export const getRedirectPathForUser = (roleNumber: number): string => {
       return '/dashboard/carrier/pickups';
     case 'almacen':
       return '/dashboard/inventory/requests';
+    case 'despacho':
+      return '/dashboard/inventory/dispatches';
     default:
       return '/dashboard';
   }
