@@ -1,13 +1,14 @@
 import { UseFormReturn } from 'react-hook-form';
 import { MapPin, CheckCircle2, ChevronDown, User, Phone, Mail } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import DeliveryConfiguration from '@/components/shipment/DeliveryConfiguration';
+import api from '@/app/services/api';
 
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
 import { type ShipmentFormData } from '@/lib/validations/shipment';
@@ -26,11 +27,61 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
   const { formState: { errors }, watch, setValue, trigger, register } = form;
   const watchedValues = watch();
   const [isValidating, setIsValidating] = useState(false);
+  const [referencePrice, setReferencePrice] = useState<number | null>(null);
+  const [isLoadingPrice, setIsLoadingPrice] = useState(false);
 
   const selectedRegion = watchedValues.recipient?.address?.id_region;
   const selectedDistrict = watchedValues.recipient?.address?.id_district;
+  const selectedSector = watchedValues.recipient?.address?.id_sector;
 
   const districtHasSectors = selectedDistrict ? getSectorOptions(selectedDistrict).length > 0 : false;
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    if (!selectedDistrict) {
+      setReferencePrice(null);
+      return;
+    }
+    
+    if (districtHasSectors && !selectedSector) {
+      setReferencePrice(null);
+      return;
+    }
+
+    const fetchPrice = async () => {
+      setIsLoadingPrice(true);
+      try {
+        const sectorId = districtHasSectors ? selectedSector : 1;
+        const res = await api.get(`/catalog/locations/price/${selectedDistrict}/${sectorId}`);
+        const data = res.data;
+        
+        let price = null;
+        if (typeof data === 'number' || typeof data === 'string') {
+           price = Number(data);
+        } else if (data && typeof data === 'object') {
+           price = data.price ?? data.cost ?? data.amount ?? (Array.isArray(data) && data[0]?.price) ?? null;
+        }
+
+        if (isMounted && price !== null && !isNaN(price)) {
+          setReferencePrice(Number(price));
+        } else {
+          if (isMounted) setReferencePrice(null);
+        }
+      } catch (err) {
+        console.error('Error fetching reference price:', err);
+        if (isMounted) setReferencePrice(null);
+      } finally {
+        if (isMounted) setIsLoadingPrice(false);
+      }
+    };
+
+    fetchPrice();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedDistrict, selectedSector, districtHasSectors]);
 
   const regionOptions = getRegionOptions();
   const recipientDistrictOptions = getDistrictOptions(selectedRegion || 0);
@@ -207,11 +258,13 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                 )}
               </div>
 
-              {/* Costo de delivery Referencial (Mock) */}
-              {selectedDistrict && (
-                <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg text-sm flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
+              {/* Costo de delivery Referencial (Real via Endpoint) */}
+              {selectedDistrict && (referencePrice !== null || isLoadingPrice) && (
+                <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
                   <span className="font-bold text-xs">Costo referencial de envío:</span>
-                  <span className="font-bold text-xs">S/ {(parseInt(selectedDistrict.toString()) % 3 === 0 ? 15.00 : parseInt(selectedDistrict.toString()) % 2 === 0 ? 12.00 : 10.00).toFixed(2)}</span>
+                  <span className="font-bold text-xs">
+                    {isLoadingPrice ? 'Calculando...' : `S/ ${referencePrice?.toFixed(2)}`}
+                  </span>
                 </div>
               )}
 
