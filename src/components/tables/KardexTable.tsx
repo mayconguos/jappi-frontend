@@ -1,7 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, ArrowUpRight, ArrowDownRight, RefreshCw, Package } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, RefreshCw, Package, User } from 'lucide-react';
 
 export const MOVEMENT_MAPPING: Record<string, { label: string; baseType: 'IN' | 'OUT' | 'ADJUSTMENT' }> = {
   // Entradas
@@ -19,21 +18,22 @@ export const MOVEMENT_MAPPING: Record<string, { label: string; baseType: 'IN' | 
 
 export interface KardexMovement {
   id: number;
+  id_product: number;
   company_name: string;
   product_name: string;
   movement_type: string;
   quantity: number;
   movement_date: string;
   balance: number;
+  created_by?: string;
 }
 
 interface KardexTableProps {
   movements: KardexMovement[];
   currentPage: number;
-  onViewDetail: (movement: KardexMovement) => void;
 }
 
-export default function KardexTable({ movements, currentPage, onViewDetail }: KardexTableProps) {
+export default function KardexTable({ movements, currentPage }: KardexTableProps) {
 
   const getMovementIcon = (baseType: 'IN' | 'OUT' | 'ADJUSTMENT') => {
     switch (baseType) {
@@ -57,11 +57,11 @@ export default function KardexTable({ movements, currentPage, onViewDetail }: Ka
         <TableHeader>
           <TableRow className="border-b border-gray-100 bg-gray-50/50">
             <TableHead className="w-[140px] pl-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha / Hora</TableHead>
-            <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Producto y Empresa</TableHead>
+            <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Producto</TableHead>
             <TableHead className="text-center w-[160px] text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo Mov. / Origen</TableHead>
             <TableHead className="text-right w-[100px] text-xs font-bold text-gray-500 uppercase tracking-wider">Cantidad</TableHead>
             <TableHead className="text-right w-[120px] text-xs font-bold text-gray-500 uppercase tracking-wider">Saldo Final</TableHead>
-            <TableHead className="text-right pr-6 w-[80px] text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</TableHead>
+            <TableHead className="text-right pr-6 w-[160px] text-xs font-bold text-gray-500 uppercase tracking-wider">Realizado por</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -93,16 +93,10 @@ export default function KardexTable({ movements, currentPage, onViewDetail }: Ka
                 </TableCell>
 
                 <TableCell className="py-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center shrink-0 mt-0.5 border border-gray-200">
-                      <Package size={14} className="text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-900 leading-snug line-clamp-1" title={mov.product_name}>
-                        {mov.product_name}
-                      </p>
-                      <p className="text-xs font-medium text-gray-500">{mov.company_name}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 leading-snug line-clamp-1" title={mov.product_name}>
+                      {mov.product_name}
+                    </p>
                   </div>
                 </TableCell>
 
@@ -126,16 +120,11 @@ export default function KardexTable({ movements, currentPage, onViewDetail }: Ka
                 </TableCell>
 
                 <TableCell className="text-right pr-6 py-4">
-                  <div className="flex justify-end">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => onViewDetail(mov)}
-                      className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-                      title="Ver Detalle"
-                    >
-                      <Eye size={16} />
-                    </Button>
+                  <div className="flex items-center justify-end gap-2 text-gray-600">
+                    <User size={14} className="text-gray-400" />
+                    <span className="text-sm font-medium leading-snug truncate max-w-[120px]" title={mov.created_by || 'Sistema / API'}>
+                      {mov.created_by || 'Sistema / API'}
+                    </span>
                   </div>
                 </TableCell>
               </TableRow>

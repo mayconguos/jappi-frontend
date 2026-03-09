@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShieldCheck, Package, RefreshCw, AlertTriangle, UserCheck, Calendar, FileText } from 'lucide-react';
+import { ShieldCheck, Package, RefreshCw, Search, Building2 } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
-import { Modal, ModalFooter } from '@/components/ui/modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
-import { Button } from '@/components/ui/button';
 
 import KardexFilter from '@/components/filters/KardexFilter';
 import KardexTable, { KardexMovement, MOVEMENT_MAPPING } from '@/components/tables/KardexTable';
@@ -23,19 +21,65 @@ export default function KardexPage() {
   const [movementType, setMovementType] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Modal Detail
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [selectedMovement, setSelectedMovement] = useState<KardexMovement | null>(null);
+  // Buscadores
+  const [companySearchText, setCompanySearchText] = useState('');
+
+  // Listas Dinámicas
+  const [companiesList, setCompaniesList] = useState<any[]>([]);
+  const [isLoadingCompanies, setIsLoadingCompanies] = useState(false);
+
+  // IDs seleccionados para el filtro principal
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
   const { get } = useApi<any>();
+
+  // Endpoint real para obtener empresas
+  const fetchCompanies = async (query: string) => {
+    setIsLoadingCompanies(true);
+    try {
+      const resp = await get('/user?type=companies');
+      const allCompanies = Array.isArray(resp) ? resp : (resp?.data || []);
+
+      // Filtramos localmente por el nombre de la empresa si hay un query
+      const filtered = allCompanies.filter((c: any) => {
+        const compName = c.company_name || '';
+        return compName.toLowerCase().includes(query.toLowerCase());
+      });
+
+      // Ordenamos alfabéticamente para mejor experiencia
+      filtered.sort((a: any, b: any) => (a.company_name || '').localeCompare(b.company_name || ''));
+
+      setCompaniesList(filtered);
+    } catch (error) {
+      console.error("Error cargando empresas:", error);
+      setCompaniesList([]);
+    } finally {
+      setIsLoadingCompanies(false);
+    }
+  };
+
+  // Triggers de busqueda
+  useEffect(() => {
+    if (companySearchText.length > 2 || companySearchText === '') {
+      const timeoutId = setTimeout(() => {
+        fetchCompanies(companySearchText);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [companySearchText]);
 
   useEffect(() => {
     let active = true;
     const loadData = async () => {
+      if (!selectedCompanyId) {
+        setMovements([]);
+        setIsInitialLoading(false);
+        return;
+      }
+
       setIsInitialLoading(true);
       try {
-        // NOTA: Se ha forzado ID=1 estático ya que la vista actual no cuenta con un contexto de ID por URL.
-        const resp = await get('/inventory/kardex/1');
+        const resp = await get(`/inventory/kardex/${selectedCompanyId}`);
         if (active) {
           setMovements(Array.isArray(resp) ? resp : (resp?.data || []));
         }
@@ -47,17 +91,19 @@ export default function KardexPage() {
     };
     loadData();
     return () => { active = false; };
-  }, [get]);
+  }, [get, selectedCompanyId]);
 
   // Reiniciar paginación si cambian los filtros
   useEffect(() => setCurrentPage(1), [searchTerm, dateRange, movementType]);
 
   const filteredMovements = useMemo(() => {
     return movements.filter((mov) => {
-      // Filtro Search Term
+      // Filtro Search Term General (Busca por producto, código/SKU (id_product) y empresa)
+      const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        (mov.company_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (mov.product_name?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+        (mov.company_name?.toLowerCase() || '').includes(searchLower) ||
+        (mov.product_name?.toLowerCase() || '').includes(searchLower) ||
+        (String(mov.id_product) || '').includes(searchLower);
       if (!matchesSearch) return false;
 
       // Filtro Tipo
@@ -98,10 +144,73 @@ export default function KardexPage() {
   const totalItems = filteredMovements.length;
   const currentItems = filteredMovements.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  const handleViewDetail = (mov: KardexMovement) => {
-    setSelectedMovement(mov);
-    setDetailModalOpen(true);
-  };
+  if (selectedCompanyId === null) {
+    return (
+      <div className="w-full max-w-[800px] mx-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in duration-500">
+
+        <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm w-full relative overflow-hidden">
+          {/* Decors */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-20 -mt-20 z-0"></div>
+
+          <div className="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto mb-10">
+            <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-indigo-200">
+              <Building2 size={32} />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">Consulta de Kardex</h1>
+            <p className="text-gray-500 text-base">Seleccione una empresa cliente para auditar todos sus movimientos de entradas, salidas y saldos históricos.</p>
+          </div>
+
+          <div className="relative z-10 max-w-xl mx-auto">
+
+            {/* Selector Empresa */}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col gap-4 transition-all hover:bg-slate-50 hover:border-indigo-100">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-white p-2 rounded-lg shadow-sm text-gray-600">
+                  <Search size={20} />
+                </div>
+                <h3 className="font-semibold text-gray-900">Buscar Empresa</h3>
+              </div>
+
+              <div className="flex flex-col gap-2 relative">
+                <div className="relative mb-2">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    <Search size={16} />
+                  </div>
+                  <input
+                    type="text"
+                    value={companySearchText}
+                    onChange={(e) => setCompanySearchText(e.target.value)}
+                    placeholder="Escribe el nombre de la empresa..."
+                    className="w-full pl-9 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+                  />
+                </div>
+
+                {isLoadingCompanies ? (
+                  <div className="py-8 flex justify-center"><RefreshCw className="animate-spin text-indigo-400" size={20} /></div>
+                ) : companiesList.length === 0 ? (
+                  <div className="py-4 text-center text-sm text-gray-500 bg-white rounded-lg border border-dashed border-gray-200">No se encontraron empresas</div>
+                ) : (
+                  <div className="max-h-[300px] overflow-y-auto pr-1 flex flex-col gap-2 custom-scrollbar">
+                    {companiesList.map(comp => (
+                      <button
+                        key={comp.id_company || comp.id}
+                        onClick={() => setSelectedCompanyId(comp.id_company)}
+                        className={`text-left px-4 py-3 rounded-lg text-sm font-medium transition-all flex justify-between items-center ${selectedCompanyId === comp.id_company ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-700 border border-gray-200 hover:border-indigo-300 hover:shadow-sm'}`}
+                      >
+                        {comp.company_name || 'Empresa sin nombre'}
+                        {selectedCompanyId === comp.id_company && <ShieldCheck size={16} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isInitialLoading) {
     return (
@@ -111,27 +220,25 @@ export default function KardexPage() {
     );
   }
 
-  // Desestructuración segura
-  const {
-    id = 0, company_name = '', product_name = '',
-    movement_type = 'initial_stock', quantity = 0, balance = 0, movement_date = ''
-  } = selectedMovement || {};
-
-  const configDetail = MOVEMENT_MAPPING[movement_type] || { label: movement_type, baseType: 'ADJUSTMENT' };
-  const isInputDetail = configDetail.baseType === 'IN';
-
-  let formattedDateDetail = 'Sin fecha';
-  let formattedTimeDetail = '';
-  if (movement_date) {
-    try {
-      const dt = new Date(movement_date);
-      formattedDateDetail = dt.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
-      formattedTimeDetail = dt.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-    } catch (e) { }
-  }
-
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
+
+      {/* Identificador actual */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+            <Building2 size={24} />
+          </div>
+          <div>
+            <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider">Histórico General</p>
+            <h1 className="text-xl font-bold text-gray-900">{companiesList.find(c => c.id_company === selectedCompanyId)?.company_name}</h1>
+          </div>
+        </div>
+        <button onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }} className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <RefreshCw size={14} />
+          Cambiar Empresa
+        </button>
+      </div>
 
       {/* Cards de Resumen Rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
@@ -180,7 +287,6 @@ export default function KardexPage() {
         <KardexTable
           movements={currentItems}
           currentPage={currentPage}
-          onViewDetail={handleViewDetail}
         />
 
         {totalItems > 0 && (
@@ -197,60 +303,6 @@ export default function KardexPage() {
           </div>
         )}
       </div>
-
-      {/* Modal Detalle Básico */}
-      <Modal
-        isOpen={detailModalOpen}
-        onClose={() => setDetailModalOpen(false)}
-        size="md"
-        title="Detalle del Movimiento"
-        footer={
-          <ModalFooter className="flex justify-end">
-            <Button variant="secondary" onClick={() => setDetailModalOpen(false)}>Cerrar</Button>
-          </ModalFooter>
-        }
-      >
-        {selectedMovement && (
-          <div className="py-2 flex flex-col gap-5">
-
-            {/* Header del modal */}
-            <div className="flex justify-between items-start pb-4 border-b border-gray-100">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 leading-tight">{product_name}</h3>
-                <p className="text-sm text-gray-500 mt-1">{company_name}</p>
-              </div>
-              <div className={`px-3 py-1.5 rounded-lg border font-bold text-sm flex gap-2 items-center ${configDetail.baseType === 'IN' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                configDetail.baseType === 'OUT' ? 'bg-red-50 border-red-200 text-red-700' :
-                  'bg-blue-50 border-blue-200 text-blue-700'
-                }`}>
-                {configDetail.label}
-                <span className="text-lg font-mono tracking-tight">{isInputDetail ? '+' : configDetail.baseType === 'OUT' ? '-' : ''}{quantity}</span>
-              </div>
-            </div>
-
-            {/* Grid de metadata */}
-            <div className="grid grid-cols-2 gap-y-4 gap-x-6">
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><Calendar size={12} /> Fecha y Hora</p>
-                <p className="text-sm font-medium text-gray-800">{formattedDateDetail} a las {formattedTimeDetail}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><UserCheck size={12} /> Origen Movimiento</p>
-                <p className="text-sm font-medium text-gray-800">Sistema / APP</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><FileText size={12} /> ID Referencia</p>
-                <button className="text-sm font-bold text-indigo-600 hover:text-indigo-800 hover:underline">#{id}</button>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><AlertTriangle size={12} /> Saldo Post-Movimiento</p>
-                <p className="text-sm font-mono font-bold bg-gray-100 px-2.5 py-1 rounded w-max text-gray-900">{balance} unidades</p>
-              </div>
-            </div>
-
-          </div>
-        )}
-      </Modal>
 
     </div>
   );

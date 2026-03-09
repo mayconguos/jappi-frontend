@@ -32,14 +32,11 @@ export default function KardexFilter({
         
         {/* Buscador */}
         <div className="relative flex-1 max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search size={18} className="text-gray-400" />
-          </div>
           <Input 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full" 
-            placeholder="Buscar por código SKU o nombre..." 
+            className="w-full" 
+            placeholder="Buscar por nombre..." 
           />
         </div>
 
