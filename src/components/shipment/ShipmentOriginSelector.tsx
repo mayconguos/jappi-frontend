@@ -32,7 +32,7 @@ export default function ShipmentOriginSelector({ value, onChange, error }: Shipm
           </div>
           <div>
             <h5 className={clsx("font-semibold text-sm mb-1", value === 'pickup' ? "text-[#02997d]" : "text-gray-900")}>
-              Con Recojo a Domicilio
+              Con Recojo
             </h5>
             <p className="text-xs text-gray-500 leading-relaxed">
               Vamos a tu dirección a recoger los paquetes.

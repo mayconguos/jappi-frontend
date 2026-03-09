@@ -306,6 +306,12 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
                         await trigger('sender.phone');
                       }}
                       phoneError={errors.sender?.phone?.message}
+                      pickupCostValue={watchedValues.service?.pickup_cost || 0}
+                      onPickupCostChange={async (val) => {
+                        setValue('service.pickup_cost', val);
+                        // Trigger de validación manual (opcional, aunque el schema lo evalúa en Submit)
+                      }}
+                      pickupCostError={errors.service?.pickup_cost?.message}
                     />
                   </div>
                 )}

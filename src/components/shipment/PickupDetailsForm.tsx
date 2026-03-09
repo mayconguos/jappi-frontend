@@ -12,6 +12,9 @@ interface PickupDetailsFormProps {
   phoneValue: string;
   onPhoneChange: (value: string) => void;
   phoneError?: string;
+  pickupCostValue?: number;
+  onPickupCostChange?: (value: number) => void;
+  pickupCostError?: string;
 }
 
 export default function PickupDetailsForm({
@@ -23,7 +26,10 @@ export default function PickupDetailsForm({
   addressError,
   phoneValue,
   onPhoneChange,
-  phoneError
+  phoneError,
+  pickupCostValue = 0,
+  onPickupCostChange,
+  pickupCostError
 }: PickupDetailsFormProps) {
   const [showCustomAddress, setShowCustomAddress] = useState(false);
   const [showCustomPhone, setShowCustomPhone] = useState(false);
@@ -118,6 +124,20 @@ export default function PickupDetailsForm({
             </button>
           </div>
         )}
+
+        <div className="flex flex-col md:col-span-1">
+          <Input
+            label="Costo de recojo"
+            type="number"
+            prefix="S/"
+            placeholder="0.00"
+            value={pickupCostValue}
+            onChange={(e) => onPickupCostChange?.(Number(e.target.value))}
+            error={pickupCostError}
+            min={0}
+            step="0.01"
+          />
+        </div>
       </div>
     </div>
   );

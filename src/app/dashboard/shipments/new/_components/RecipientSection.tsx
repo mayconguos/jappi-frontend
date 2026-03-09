@@ -146,24 +146,6 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                 />
               </div>
 
-              <div className="col-span-full">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Mail size={14} className="text-gray-400" />
-                  <label className="text-sm font-medium text-gray-700">Correo electrónico (Opcional)</label>
-                </div>
-                <Input
-                  type="email"
-                  value={watchedValues.recipient?.email || ''}
-                  onChange={async (e) => {
-                    const value = e.target.value;
-                    setValue('recipient.email', value.toLowerCase());
-                    await trigger('recipient.email');
-                  }}
-                  error={errors.recipient?.email?.message}
-                  className="h-10 border-gray-200 focus:border-[#02997d]"
-                  placeholder="juan@ejemplo.com"
-                />
-              </div>
             </div>
 
             {/* Dirección de Entrega (Bloque Contenido) */}
