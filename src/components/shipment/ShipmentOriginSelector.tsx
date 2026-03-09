@@ -2,8 +2,8 @@ import { Truck, Warehouse } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface ShipmentOriginSelectorProps {
-  value: 'pickup' | 'warehouse' | undefined;
-  onChange: (value: 'pickup' | 'warehouse') => void;
+  value: 'pickup' | 'stock' | undefined;
+  onChange: (value: 'pickup' | 'stock') => void;
   error?: string;
 }
 
@@ -40,24 +40,24 @@ export default function ShipmentOriginSelector({ value, onChange, error }: Shipm
           </div>
         </div>
 
-        {/* Card 2: Warehouse */}
+        {/* Card 2: Stock */}
         <div
-          onClick={() => onChange('warehouse')}
+          onClick={() => onChange('stock')}
           className={clsx(
             "cursor-pointer rounded-xl p-4 border transition-all duration-200 flex items-start gap-4 h-full",
-            value === 'warehouse'
+            value === 'stock'
               ? "border-2 border-[#02997d] bg-[#02997d]/5 ring-1 ring-[#02997d]"
               : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
           )}
         >
           <div className={clsx(
             "w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors",
-            value === 'warehouse' ? "bg-[#02997d] text-white" : "bg-slate-100 text-slate-600"
+            value === 'stock' ? "bg-[#02997d] text-white" : "bg-slate-100 text-slate-600"
           )}>
             <Warehouse size={20} />
           </div>
           <div>
-            <h5 className={clsx("font-semibold text-sm mb-1", value === 'warehouse' ? "text-[#02997d]" : "text-gray-900")}>
+            <h5 className={clsx("font-semibold text-sm mb-1", value === 'stock' ? "text-[#02997d]" : "text-gray-900")}>
               Desde Almacén Japi
             </h5>
             <p className="text-xs text-gray-500 leading-relaxed">

@@ -17,7 +17,7 @@ export default function ShipmentSummary({ watchedValues, isSubmitting, disabled 
   // Datos de Ruta
   const originDistrict = watchedValues?.sender?.address?.id_district
     ? REGIONES_LIMA.find(r => r.value === watchedValues.sender?.address?.id_district)?.label
-    : (watchedValues?.service?.origin_type === 'warehouse' ? 'Almacén Japi' : '-');
+    : (watchedValues?.service?.origin_type === 'stock' ? 'Almacén Japi' : '-');
 
   const destDistrictId = watchedValues?.recipient?.address?.id_district;
   // Nota: Para distritos reales necesitaríamos el catálogo completo, aquí simulamos o mostramos el ID si no tenemos el nombre mapeado síncronamente
@@ -45,7 +45,7 @@ export default function ShipmentSummary({ watchedValues, isSubmitting, disabled 
             <div className="text-sm">
               <span className="text-gray-500 text-xs block">Origen</span>
               <span className="font-medium text-gray-900 line-clamp-1">
-                {watchedValues?.service?.origin_type === 'warehouse' ? 'Almacén Japi' : (watchedValues?.sender?.address?.address || 'Dirección de Recojo')}
+                {watchedValues?.service?.origin_type === 'stock' ? 'Almacén Japi' : (watchedValues?.sender?.address?.address || 'Dirección de Recojo')}
               </span>
             </div>
             <div className="text-sm">

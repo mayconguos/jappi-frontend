@@ -175,7 +175,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
       }
     };
 
-    if (selectedOriginType === 'warehouse') {
+    if (selectedOriginType === 'stock') {
       fetchWarehouseProducts();
     }
   }, [selectedOriginType, user]);
@@ -249,7 +249,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
 
                 {/* 1. Origin Selector */}
                 <ShipmentOriginSelector
-                  value={watchedValues.service?.origin_type as 'pickup' | 'warehouse' | undefined}
+                  value={watchedValues.service?.origin_type as 'pickup' | 'stock' | undefined}
                   onChange={async (val) => {
                     setValue('service.origin_type', val);
                     await trigger('service.origin_type');
@@ -291,7 +291,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
                 {selectedOriginType === 'pickup' && (
                   <div className="md:col-span-2">
                     <PickupDetailsForm
-                      originType={selectedOriginType as 'pickup' | 'warehouse' | undefined}
+                      originType={selectedOriginType as 'pickup' | 'stock' | undefined}
                       addresses={addressOptions}
                       phones={phoneOptions}
                       addressValue={watchedValues.sender?.address?.address || ''}
@@ -313,7 +313,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
 
               {/* 5. Package List Form */}
               <PackageListForm
-                originType={selectedOriginType as 'pickup' | 'warehouse' | undefined}
+                originType={selectedOriginType as 'pickup' | 'stock' | undefined}
                 items={productsList}
                 onAdd={addProduct}
                 onRemove={removeProduct}

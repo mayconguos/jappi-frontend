@@ -3,7 +3,7 @@ import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
 interface PickupDetailsFormProps {
-  originType: 'pickup' | 'warehouse' | undefined;
+  originType: 'pickup' | 'stock' | undefined;
   addresses: Array<{ label: string; value: string }>;
   phones: Array<{ label: string; value: string }>;
   addressValue: string;

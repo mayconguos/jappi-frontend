@@ -25,23 +25,18 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       // ------ Administrador ------
-      email: 'admin@japiexpress.com',
-      password: '123456'
+      // email: 'admin@japiexpress.com',
       // ------ Cliente ------
-      // email: 'velia.guerra@gmail.com',
-      // password: 'administracion2015'
+      email: 'empresa@gmail.com',
       // ------ Motorizado ------
       // email: 'motorizado@japiexpress.com',
-      // password: 'lionelramos'
       // ------ Almacen ------
       // email: 'almacen@japiexpress.com',
-      // password: 'japientregas24680'
       // ------ Coordinacion ------
       // email: 'coordinacion@japiexpress.com',
-      // password: '123456'
       // ------ Despacho ------
       // email: 'despacho@japiexpress.com',
-      // password: '123456'
+      password: '123456'
     }
   });
 

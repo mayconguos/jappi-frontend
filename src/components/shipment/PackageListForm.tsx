@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 
 interface PackageListFormProps {
-  originType: 'pickup' | 'warehouse' | undefined;
+  originType: 'pickup' | 'stock' | undefined;
   // Pickup props
   items: Array<{ id: string; description: string; quantity: number }>;
   onAdd: (item: { description: string; quantity: number }) => void;
@@ -65,7 +65,7 @@ export default function PackageListForm({
     [warehouseAvailableItems]
   );
 
-  if (originType === 'warehouse') {
+  if (originType === 'stock') {
     return (
       <div className="animate-in fade-in slide-in-from-top-4 duration-500">
         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 border-t border-gray-100 pt-6 flex items-center gap-2">

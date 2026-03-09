@@ -130,7 +130,7 @@ export default function CreateShipmentPage() {
     let hasProducts = true;
     if (currentOriginType === 'pickup') {
       hasProducts = productsData.pickup.length > 0;
-    } else if (currentOriginType === 'warehouse') {
+    } else if (currentOriginType === 'stock') {
       hasProducts = productsData.warehouse.length > 0;
     }
 
