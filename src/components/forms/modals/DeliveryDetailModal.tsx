@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle, MessageCircle, Phone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import CameraCapture from '@/components/ui/camera-capture';
 
@@ -100,7 +100,27 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                     <h3 className="text-md font-semibold text-gray-900">
                       {delivery.recipient}
                     </h3>
-                    <p className="text-sm text-gray-500">Tel: +51 999 888 777</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-sm text-gray-500">{delivery.recipient_phone}</p>
+                      <div className="flex gap-1.5">
+                        <a
+                          href={`tel:${delivery.recipient_phone.replace(/\D/g, '')}`}
+                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
+                        >
+                          <Phone size={12} className="fill-blue-700/10" />
+                          Llamar
+                        </a>
+                        <a
+                          href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${delivery.recipient}, te saluda el motorizado de Jappi. Estoy por entregar tu pedido ${delivery.id} en ${delivery.recipient_address}.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-xs font-medium border border-emerald-100"
+                        >
+                          <MessageCircle size={12} className="fill-emerald-700/10" />
+                          Chat
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -143,8 +163,8 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                   <div
                     key={idx}
                     className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 relative transition-all overflow-hidden group ${photos[idx]
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
-                        : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50 text-gray-400 cursor-pointer'
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
+                      : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50 text-gray-400 cursor-pointer'
                       }`}
                     onClick={() => !photos[idx] && handlePhotoClick(idx)}
                   >

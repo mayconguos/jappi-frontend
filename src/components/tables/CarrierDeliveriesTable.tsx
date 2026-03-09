@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, MapPin, User } from 'lucide-react';
+import { Eye, MapPin, User, MessageCircle, Phone } from 'lucide-react';
 import DeliveryDetailModal from '@/components/forms/modals/DeliveryDetailModal';
 
 interface Delivery {
   id: string;
   date: string;
   recipient: string;
+  recipient_phone: string;
   recipient_address: string;
   origin: string;
   destination: string;
@@ -24,6 +25,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9901-JP',
     date: '2024-02-06',
     recipient: 'Juan Pérez',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Av. Larco 101, Miraflores',
     origin: 'Almacén Central Japi',
     destination: 'Av. Larco 101, Miraflores',
@@ -35,6 +37,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9902-JP',
     date: '2024-02-06',
     recipient: 'Empresa ABC S.A.C.',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Jr. Camaná 500, Lima',
     origin: 'Almacén Central Japi',
     destination: 'Jr. Camaná 500, Lima',
@@ -46,6 +49,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9903-JP',
     date: '2024-02-06',
     recipient: 'Sofía Mendoza',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Av. Benavides 1200, Surco',
     origin: 'Almacén Central Japi',
     destination: 'Av. Benavides 1200, Surco',
@@ -57,6 +61,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9904-JP',
     date: '2024-02-06',
     recipient: 'Tech Park SAC',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Calle Monte Bello 340, San Isidro',
     origin: 'Almacén Central Japi',
     destination: 'Calle Monte Bello 340, San Isidro',
@@ -68,6 +73,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9905-JP',
     date: '2024-02-06',
     recipient: 'Luis Herrera',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Jr. Ucayali 280, Lima',
     origin: 'Almacén Central Japi',
     destination: 'Jr. Ucayali 280, Lima',
@@ -79,6 +85,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9906-JP',
     date: '2024-02-06',
     recipient: 'Distribuidora Sur',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Av. Tomás Marsano 900, Surquillo',
     origin: 'Almacén Central Japi',
     destination: 'Av. Tomás Marsano 900, Surquillo',
@@ -90,6 +97,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9907-JP',
     date: '2024-02-06',
     recipient: 'Ana Rojas',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Ca. Los Ficus 67, La Molina',
     origin: 'Almacén Central Japi',
     destination: 'Ca. Los Ficus 67, La Molina',
@@ -101,6 +109,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9890-JP',
     date: '2024-02-05',
     recipient: 'María Lopez',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Av. Salaverry 2020, Jesús María',
     origin: 'Almacén Central Japi',
     destination: 'Av. Salaverry 2020, Jesús María',
@@ -112,6 +121,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9885-JP',
     date: '2024-02-04',
     recipient: 'Carlos Ruiz',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Calle Los Pinos 123, San Isidro',
     origin: 'Almacén Central Japi',
     destination: 'Calle Los Pinos 123, San Isidro',
@@ -123,6 +133,7 @@ const INITIAL_DELIVERIES: Delivery[] = [
     id: 'TRK-9880-JP',
     date: '2024-02-04',
     recipient: 'Importex Peru',
+    recipient_phone: '+51 976 548 966',
     recipient_address: 'Av. Argentina 800, Callao',
     origin: 'Almacén Central Japi',
     destination: 'Av. Argentina 800, Callao',
@@ -213,6 +224,7 @@ export default function CarrierDeliveriesTable() {
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
               <TableHead className="w-[140px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Destinatario</TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Teléfono</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
               <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
               <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
@@ -243,6 +255,30 @@ export default function CarrierDeliveriesTable() {
                       <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[180px]" title={delivery.recipient}>
                         {delivery.recipient}
                       </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${delivery.recipient}, te saluda el motorizado de Jappi Express. Estoy en camino para entregar tu pedido ${delivery.id} en ${delivery.destination}. ¿Te encuentras disponible?`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-xs font-medium border border-emerald-100"
+                        title="WhatsApp"
+                      >
+                        <MessageCircle size={14} className="fill-emerald-700/10" />
+                        WhatsApp
+                      </a>
+                      <a
+                        href={`tel:${delivery.recipient_phone.replace(/\D/g, '')}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
+                        title="Llamar"
+                      >
+                        <Phone size={14} className="fill-blue-700/10" />
+                        Llamar
+                      </a>
                     </div>
                   </TableCell>
                   <TableCell className="py-4">
@@ -291,7 +327,27 @@ export default function CarrierDeliveriesTable() {
 
               <div className="pl-3">
                 {/* Destinatario */}
-                <p className="text-sm font-semibold text-gray-900 leading-tight truncate mb-1.5">{delivery.recipient}</p>
+                <div className="flex justify-between items-start gap-2 mb-1">
+                  <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{delivery.recipient}</p>
+                  <div className="flex gap-2">
+                    <a
+                      href={`tel:${delivery.recipient_phone.replace(/\D/g, '')}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm active:scale-90 transition-transform"
+                    >
+                      <Phone size={14} />
+                    </a>
+                    <a
+                      href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${delivery.recipient}, te saluda el motorizado de Jappi Express. Estoy por ahí con tu pedido ${delivery.id}.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm active:scale-90 transition-transform"
+                    >
+                      <MessageCircle size={14} />
+                    </a>
+                  </div>
+                </div>
 
                 {/* Distrito */}
                 <div className="flex items-start gap-1.5 text-[11px] text-gray-500">
