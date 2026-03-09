@@ -8,15 +8,8 @@ import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Button } from '@/components/ui/button';
 
 import KardexFilter from '@/components/filters/KardexFilter';
-import KardexTable, { KardexMovement } from '@/components/tables/KardexTable';
-
-// ─── MOCK DATA TEMPORAL ──────────────────────────────────────────
-const MOCK_KARDEX_MOVEMENTS: KardexMovement[] = [
-  { id: 'MOV-1004', date: '09 Mar 2026', time: '14:30', product_sku: 'SKU-775-A', product_name: 'Cajas de Zapatos Modelo X', movement_type: 'OUT', quantity: 15, balance: 85, reference_document: 'Despacho #802', user: 'Admin' },
-  { id: 'MOV-1003', date: '09 Mar 2026', time: '10:15', product_sku: 'SKU-775-A', product_name: 'Cajas de Zapatos Modelo X', movement_type: 'IN', quantity: 50, balance: 100, reference_document: 'Recojo #9001', user: 'Admin' },
-  { id: 'MOV-1002', date: '08 Mar 2026', time: '16:45', product_sku: 'SKU-102-B', product_name: 'Teclados Mecánicos TKL', movement_type: 'OUT', quantity: 5, balance: 12, reference_document: 'Despacho #801', user: 'Juan Perez' },
-  { id: 'MOV-1001', date: '08 Mar 2026', time: '09:00', product_sku: 'SKU-102-B', product_name: 'Teclados Mecánicos TKL', movement_type: 'ADJUSTMENT', quantity: 2, balance: 17, reference_document: 'Auditoría Mensual', user: 'Admin' },
-];
+import KardexTable, { KardexMovement, MOVEMENT_MAPPING } from '@/components/tables/KardexTable';
+import { useApi } from '@/hooks/useApi';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -34,16 +27,27 @@ export default function KardexPage() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedMovement, setSelectedMovement] = useState<KardexMovement | null>(null);
 
+  const { get } = useApi<any>();
+
   useEffect(() => {
-    // Simulando fetch de la API
+    let active = true;
     const loadData = async () => {
       setIsInitialLoading(true);
-      await new Promise(res => setTimeout(res, 800));
-      setMovements(MOCK_KARDEX_MOVEMENTS);
-      setIsInitialLoading(false);
+      try {
+        // NOTA: Se ha forzado ID=1 estático ya que la vista actual no cuenta con un contexto de ID por URL.
+        const resp = await get('/inventory/kardex/1');
+        if (active) {
+          setMovements(Array.isArray(resp) ? resp : (resp?.data || []));
+        }
+      } catch (err) {
+        if (active) setMovements([]);
+      } finally {
+        if (active) setIsInitialLoading(false);
+      }
     };
     loadData();
-  }, []);
+    return () => { active = false; };
+  }, [get]);
 
   // Reiniciar paginación si cambian los filtros
   useEffect(() => setCurrentPage(1), [searchTerm, dateRange, movementType]);
@@ -52,19 +56,44 @@ export default function KardexPage() {
     return movements.filter((mov) => {
       // Filtro Search Term
       const matchesSearch =
-        mov.product_sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        mov.product_name.toLowerCase().includes(searchTerm.toLowerCase());
+        (mov.company_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (mov.product_name?.toLowerCase() || '').includes(searchTerm.toLowerCase());
       if (!matchesSearch) return false;
 
       // Filtro Tipo
-      if (movementType !== 'all' && mov.movement_type !== movementType) return false;
+      if (movementType !== 'all') {
+        const config = MOVEMENT_MAPPING[mov.movement_type];
+        if (!config || config.baseType !== movementType) return false;
+      }
 
-      // Filtro Fechas (aproximado usando el string nativo html date YYYY-MM-DD vs DD MMM YYYY del mock)
-      // En entorno de prod se manejarían milisegundos reales o timestamps iso.
+      // Filtro Fechas (aproximado simple, comprobaremos si la fecha está dentro de dateRange)
+      if (dateRange.from && mov.movement_date) {
+        const mDate = new Date(mov.movement_date);
+        const fDate = new Date(dateRange.from);
+        fDate.setHours(0, 0, 0, 0);
+        if (mDate < fDate) return false;
+      }
+      if (dateRange.to && mov.movement_date) {
+        const mDate = new Date(mov.movement_date);
+        const tDate = new Date(dateRange.to);
+        tDate.setHours(23, 59, 59, 999);
+        if (mDate > tDate) return false;
+      }
 
       return true;
     });
   }, [movements, searchTerm, movementType, dateRange]);
+
+  const metrics = useMemo(() => {
+    let inTotal = 0;
+    let outTotal = 0;
+    movements.forEach(m => {
+      const bType = MOVEMENT_MAPPING[m.movement_type]?.baseType;
+      if (bType === 'IN') inTotal += m.quantity;
+      if (bType === 'OUT') outTotal += m.quantity;
+    });
+    return { inTotal, outTotal };
+  }, [movements]);
 
   const totalItems = filteredMovements.length;
   const currentItems = filteredMovements.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -84,9 +113,22 @@ export default function KardexPage() {
 
   // Desestructuración segura
   const {
-    id = '', date = '', time = '', product_name = '', product_sku = '',
-    movement_type = 'IN', quantity = 0, balance = 0, reference_document = '', user = ''
+    id = 0, company_name = '', product_name = '',
+    movement_type = 'initial_stock', quantity = 0, balance = 0, movement_date = ''
   } = selectedMovement || {};
+
+  const configDetail = MOVEMENT_MAPPING[movement_type] || { label: movement_type, baseType: 'ADJUSTMENT' };
+  const isInputDetail = configDetail.baseType === 'IN';
+
+  let formattedDateDetail = 'Sin fecha';
+  let formattedTimeDetail = '';
+  if (movement_date) {
+    try {
+      const dt = new Date(movement_date);
+      formattedDateDetail = dt.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+      formattedTimeDetail = dt.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { }
+  }
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
@@ -99,7 +141,7 @@ export default function KardexPage() {
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Entradas Totales</p>
-            <h3 className="text-2xl font-bold text-gray-900">50 <span className="text-sm font-normal text-emerald-600 ml-1">unidades</span></h3>
+            <h3 className="text-2xl font-bold text-gray-900">{metrics.inTotal} <span className="text-sm font-normal text-emerald-600 ml-1">unidades</span></h3>
           </div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
@@ -108,7 +150,7 @@ export default function KardexPage() {
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Salidas Totales</p>
-            <h3 className="text-2xl font-bold text-gray-900">20 <span className="text-sm font-normal text-red-600 ml-1">unidades</span></h3>
+            <h3 className="text-2xl font-bold text-gray-900">{metrics.outTotal} <span className="text-sm font-normal text-red-600 ml-1">unidades</span></h3>
           </div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-indigo-100 shadow-sm flex items-center gap-4">
@@ -175,14 +217,14 @@ export default function KardexPage() {
             <div className="flex justify-between items-start pb-4 border-b border-gray-100">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 leading-tight">{product_name}</h3>
-                <p className="text-sm text-gray-500 font-mono mt-1">SKU: {product_sku}</p>
+                <p className="text-sm text-gray-500 mt-1">{company_name}</p>
               </div>
-              <div className={`px-3 py-1.5 rounded-lg border font-bold text-sm flex gap-2 items-center ${movement_type === 'IN' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                  movement_type === 'OUT' ? 'bg-red-50 border-red-200 text-red-700' :
-                    'bg-blue-50 border-blue-200 text-blue-700'
+              <div className={`px-3 py-1.5 rounded-lg border font-bold text-sm flex gap-2 items-center ${configDetail.baseType === 'IN' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                configDetail.baseType === 'OUT' ? 'bg-red-50 border-red-200 text-red-700' :
+                  'bg-blue-50 border-blue-200 text-blue-700'
                 }`}>
-                {movement_type === 'IN' ? 'Entrada' : movement_type === 'OUT' ? 'Salida' : 'Ajuste'}
-                <span className="text-lg font-mono tracking-tight">{movement_type === 'IN' ? '+' : movement_type === 'OUT' ? '-' : ''}{quantity}</span>
+                {configDetail.label}
+                <span className="text-lg font-mono tracking-tight">{isInputDetail ? '+' : configDetail.baseType === 'OUT' ? '-' : ''}{quantity}</span>
               </div>
             </div>
 
@@ -190,15 +232,15 @@ export default function KardexPage() {
             <div className="grid grid-cols-2 gap-y-4 gap-x-6">
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><Calendar size={12} /> Fecha y Hora</p>
-                <p className="text-sm font-medium text-gray-800">{date} a las {time}</p>
+                <p className="text-sm font-medium text-gray-800">{formattedDateDetail} a las {formattedTimeDetail}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><UserCheck size={12} /> Responsable</p>
-                <p className="text-sm font-medium text-gray-800">{user}</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><UserCheck size={12} /> Origen Movimiento</p>
+                <p className="text-sm font-medium text-gray-800">Sistema / APP</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><FileText size={12} /> Doc. Referencia</p>
-                <button className="text-sm font-bold text-indigo-600 hover:text-indigo-800 hover:underline">{reference_document}</button>
+                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><FileText size={12} /> ID Referencia</p>
+                <button className="text-sm font-bold text-indigo-600 hover:text-indigo-800 hover:underline">#{id}</button>
               </div>
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1"><AlertTriangle size={12} /> Saldo Post-Movimiento</p>
