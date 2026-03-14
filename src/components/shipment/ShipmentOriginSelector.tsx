@@ -35,7 +35,7 @@ export default function ShipmentOriginSelector({ value, onChange, error }: Shipm
               Con Recojo
             </h5>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Vamos a tu dirección a recoger los paquetes.
+              Vamos a tu dirección a recoger los pedidos.
             </p>
           </div>
         </div>

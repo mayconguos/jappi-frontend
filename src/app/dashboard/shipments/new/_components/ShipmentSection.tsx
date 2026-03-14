@@ -256,14 +256,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
                   error={errors.service?.origin_type?.message}
                 />
 
-                {/* 2. Service Level Selector */}
-                <ServiceLevelSelector
-                  value={watchedValues.service?.type as 'express' | 'regular' | 'change' | undefined}
-                  onChange={handleServiceTypeChange}
-                  error={errors.service?.type?.message}
-                />
 
-                {/* 3. Delivery Configuration */}
 
 
                 {/* 4. Pickup Details Form */}
@@ -310,6 +303,16 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
                 isCompleted={isCompleted}
                 onEdit={onEdit}
               />
+
+              {/* Grid separado para mantener la estructura de columnas si se quiere aplicar en general, o directo como div */}
+              <div className={clsx("grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4", isCompleted && "pointer-events-none grayscale-[0.1]")}>
+                {/* 2. Service Level Selector (Movido aquí) */}
+                <ServiceLevelSelector
+                  value={watchedValues.service?.type as 'express' | 'regular' | 'change' | undefined}
+                  onChange={handleServiceTypeChange}
+                  error={errors.service?.type?.message}
+                />
+              </div>
             </div>
 
             {/* Footer con Botón Continuar */}

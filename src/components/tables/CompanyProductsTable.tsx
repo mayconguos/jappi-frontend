@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Edit2, Trash2, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clsx } from 'clsx';
+import { useAuth } from '@/context/AuthContext';
 
 export interface CatalogProduct {
   id: number;
@@ -45,7 +46,10 @@ export default function CompanyProductsTable({
   onEdit,
   onDelete,
 }: CompanyProductsTableProps) {
-  const showCompanyNameColumn = products.some(p => p.company_name);
+  const { user } = useAuth();
+  
+  // Hide the column if the user is an 'empresa' (role 2).
+  const showCompanyNameColumn = user?.id_role !== 2 && products.some(p => p.company_name);
   const colSpanCount = showCompanyNameColumn ? 7 : 6; // 6 columnas originales + 1 para company_name
 
   return (
@@ -53,15 +57,15 @@ export default function CompanyProductsTable({
       <Table>
         <TableHeader className="bg-slate-50">
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="w-[100px] pl-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">SKU</TableHead>
+            <TableHead className="w-[120px] pl-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">SKU</TableHead>
             {/* Mostrar nombre de la empresa si al menos un producto lo tiene (indicando vista de Admin) */}
             {showCompanyNameColumn && (
               <TableHead className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Empresa</TableHead>
             )}
-            <TableHead className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Producto</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Stock Japi</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Estado</TableHead>
-            <TableHead className="text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Última Act.</TableHead>
+            <TableHead className="text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Producto</TableHead>
+            <TableHead className="w-[120px] text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Stock Japi</TableHead>
+            <TableHead className="w-[120px] text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Estado</TableHead>
+            <TableHead className="w-[120px] text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Última Act.</TableHead>
             <TableHead className="text-right pr-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -80,7 +84,7 @@ export default function CompanyProductsTable({
                   {item.company_name}
                 </TableCell>
               )}
-              <TableCell className="py-4">
+              <TableCell className="py-4 text-left">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium text-slate-900">{item.product_name}</span>
                   {item.description && (
@@ -90,8 +94,18 @@ export default function CompanyProductsTable({
               </TableCell>
 
               <TableCell className="py-4 text-center">
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-100 border border-gray-200">
-                  <span className="text-xs font-bold text-gray-700">{item.quantity} und.</span>
+                <div className={clsx(
+                  "inline-flex items-center px-2.5 py-0.5 rounded-full border",
+                  item.quantity < 10 
+                    ? "bg-red-50 border-red-200" 
+                    : "bg-gray-100 border-gray-200"
+                )}>
+                  <span className={clsx(
+                    "text-xs font-bold",
+                    item.quantity < 10 ? "text-red-700" : "text-gray-700"
+                  )}>
+                    {item.quantity} und.
+                  </span>
                 </div>
               </TableCell>
 
@@ -111,7 +125,7 @@ export default function CompanyProductsTable({
               </TableCell>
 
               <TableCell className="text-right pr-6 py-4">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center justify-end gap-2 transition-opacity">
                   <Button
                     onClick={() => onEdit(item)}
                     variant="secondary"
@@ -134,7 +148,7 @@ export default function CompanyProductsTable({
           ))}
           {products.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="h-32 text-center text-gray-500">
+              <TableCell colSpan={colSpanCount} className="h-32 text-center text-gray-500">
                 <div className="flex flex-col items-center justify-center gap-2">
                   <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-2">
                     <Box className="text-gray-300" size={24} />
