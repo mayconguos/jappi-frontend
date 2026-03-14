@@ -14,6 +14,8 @@ import ShipmentSection from './_components/ShipmentSection';
 import RecipientSection from './_components/RecipientSection';
 import PaymentSection from './_components/PaymentSection';
 import ShipmentSummary from './_components/ShipmentSummary';
+import StatusModal, { StatusType } from '@/components/ui/status-modal';
+import { useModal } from '@/components/ui/modal';
 
 export default function CreateShipmentPage() {
   const router = useRouter();
@@ -25,6 +27,25 @@ export default function CreateShipmentPage() {
     pickup: [],
     warehouse: []
   });
+  
+  // Estado para el modal de estado
+  const { isOpen: isStatusOpen, openModal: openStatus, closeModal: closeStatus } = useModal();
+  const [statusConfig, setStatusConfig] = useState<{
+    type: StatusType;
+    title: string;
+    message: string;
+    actionLabel?: string;
+    onAction?: () => void;
+  }>({
+    type: 'info',
+    title: '',
+    message: ''
+  });
+
+  const showStatus = (config: typeof statusConfig) => {
+    setStatusConfig(config);
+    openStatus();
+  };
 
   // Estados para el flujo en cascada
   const [isShipmentComplete, setIsShipmentComplete] = useState(false);
@@ -133,7 +154,11 @@ export default function CreateShipmentPage() {
     }
 
     if (!hasProducts) {
-      alert('Debes agregar al menos un producto para continuar.');
+      showStatus({
+        type: 'warning',
+        title: 'Productos requeridos',
+        message: 'Debes agregar al menos un producto para continuar con el registro del envío.'
+      });
       return false;
     }
 
@@ -203,7 +228,11 @@ export default function CreateShipmentPage() {
 
       // Validación final de seguridad
       if (!isShipmentComplete || !isRecipientComplete) {
-        alert('Por favor completa todas las secciones antes de continuar.');
+        showStatus({
+          type: 'error',
+          title: 'Secciones incompletas',
+          message: 'Por favor, completa todas las secciones antes de intentar registrar el envío.'
+        });
         return;
       }
 
@@ -213,12 +242,22 @@ export default function CreateShipmentPage() {
 
       // Simulación
       await new Promise(resolve => setTimeout(resolve, 1500));
-      alert('¡Envío registrado exitosamente!');
-      router.push('/dashboard/shipments/list');
+      
+      showStatus({
+        type: 'success',
+        title: '¡Envío Exitoso!',
+        message: 'Tu envío ha sido registrado correctamente en el sistema.',
+        actionLabel: 'Ver mis envíos',
+        onAction: () => router.push('/dashboard/shipments/list')
+      });
 
     } catch (error) {
       console.error('Error al registrar envío:', error);
-      alert('Error al registrar el envío');
+      showStatus({
+        type: 'error',
+        title: 'Error de registro',
+        message: 'Ocurrió un problema al procesar tu solicitud. Por favor, inténtalo de nuevo.'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -303,6 +342,13 @@ export default function CreateShipmentPage() {
         </div>
 
       </form>
+
+      {/* Modal de Estado Global */}
+      <StatusModal
+        isOpen={isStatusOpen}
+        onClose={closeStatus}
+        {...statusConfig}
+      />
     </div>
   );
 }
