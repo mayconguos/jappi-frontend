@@ -68,13 +68,15 @@ export default function KardexPage() {
 
   // Triggers de busqueda
   useEffect(() => {
+    if (user?.id_role === 2) return; // Skip fetch for "empresa" user 
+
     if (companySearchText.length > 2 || companySearchText === '') {
       const timeoutId = setTimeout(() => {
         fetchCompanies(companySearchText);
       }, 500);
       return () => clearTimeout(timeoutId);
     }
-  }, [companySearchText]);
+  }, [companySearchText, user?.id_role]);
 
   useEffect(() => {
     let active = true;
