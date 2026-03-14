@@ -9,6 +9,8 @@ import RequestDetailModal from '@/components/forms/modals/RequestDetailModal';
 import { useAuth } from '@/context/AuthContext';
 import { getRoleNameFromNumber } from '@/utils/roleUtils';
 import api from '@/app/services/api';
+import StatusModal, { StatusType } from '@/components/ui/status-modal';
+import { useModal } from '@/components/ui/modal';
 
 export default function WarehouseRequestsPage() {
   const { user } = useAuth();
@@ -25,6 +27,19 @@ export default function WarehouseRequestsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<InboundRequest | null>(null);
+
+  // Modal de estado global
+  const { isOpen: isStatusOpen, openModal: openStatus, closeModal: closeStatus } = useModal();
+  const [statusConfig, setStatusConfig] = useState<{
+    type: StatusType;
+    title: string;
+    message: string;
+    actionLabel?: string;
+  }>({
+    type: 'info',
+    title: '',
+    message: ''
+  });
 
   const itemsPerPage = 10;
 
@@ -77,7 +92,13 @@ export default function WarehouseRequestsPage() {
     setIsModalOpen(false);
     await fetchRequests();
     setTimeout(() => {
-      alert('✅ ¡Solicitud creada exitosamente! \n\nSe ha generado la Guía de Remisión. \nPor favor imprímela y pégala en tu caja.');
+      setStatusConfig({
+        type: 'success',
+        title: '¡Solicitud creada!',
+        message: 'Se ha generado la Guía de Remisión. Por favor imprímela y pégala en tu caja.',
+        actionLabel: 'Entendido'
+      });
+      openStatus();
     }, 500);
   };
 
@@ -93,7 +114,12 @@ export default function WarehouseRequestsPage() {
 
   const handleDownloadGuide = (request: InboundRequest) => {
     console.log('Download Guide', request);
-    alert(`Descargando Guía para Orden #${request.id}`);
+    setStatusConfig({
+      type: 'info',
+      title: 'Descargando Guía',
+      message: `La Guía de Remisión para la orden #${request.id} comenzará a descargarse enseguida.`,
+    });
+    openStatus();
   };
 
   return (
@@ -142,6 +168,12 @@ export default function WarehouseRequestsPage() {
         request={selectedRequest}
         isWarehouse={isWarehouse}
         onStatusChange={handleStatusChange}
+      />
+
+      <StatusModal
+        isOpen={isStatusOpen}
+        onClose={closeStatus}
+        {...statusConfig}
       />
     </div>
   );

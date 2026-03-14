@@ -6,10 +6,11 @@ import ProductsFilter from '@/components/filters/ProductsFilter';
 import CompanyProductsTable, { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
 import { useProducts } from '@/hooks/useProducts';
-import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Modal, ModalFooter, useModal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import StatusModal, { StatusType } from '@/components/ui/status-modal';
 
-export default function InventoryMainPage() {
+export default function GeneralWarehousePage() {
   // Uso de Hook Local
   const { products, addProduct, updateProduct, deleteProduct, loading } = useProducts();
 
@@ -21,6 +22,22 @@ export default function InventoryMainPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
+
+  // Modal de confirmación para eliminar
+  const [productToDelete, setProductToDelete] = useState<CatalogProduct | null>(null);
+
+  // Status Modal Global para Alertas
+  const { isOpen: isStatusOpen, openModal: openStatus, closeModal: closeStatus } = useModal();
+  const [statusConfig, setStatusConfig] = useState<{
+    type: StatusType;
+    title: string;
+    message: string;
+    actionLabel?: string;
+  }>({
+    type: 'info',
+    title: '',
+    message: ''
+  });
 
   const filteredProducts = products.filter(p =>
     p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,8 +55,22 @@ export default function InventoryMainPage() {
   };
 
   const handleDelete = (product: CatalogProduct) => {
-    if (confirm(`¿Estás seguro de eliminar el producto ${product.sku}?`)) {
-      deleteProduct(product.id);
+    setProductToDelete(product);
+  };
+
+  const confirmDelete = async () => {
+    if (productToDelete) {
+      setIsLoading(true);
+      try {
+        await deleteProduct(productToDelete.id);
+        setSuccessModal(`El producto ${productToDelete.sku} ha sido eliminado correctamente.`);
+      } catch (error) {
+        console.error(error);
+        setErrorModal('Error al intentar eliminar el producto.');
+      } finally {
+        setIsLoading(false);
+        setProductToDelete(null);
+      }
     }
   };
 
@@ -76,7 +107,14 @@ export default function InventoryMainPage() {
           searchValue={searchTerm}
           setSearchValue={setSearchTerm}
           onAdd={handleCreate}
-          onImport={() => alert('Próximamente: Carga masiva mediante Excel con validación de SKUs.')}
+          onImport={() => {
+            setStatusConfig({
+              type: 'warning',
+              title: 'Próximamente',
+              message: 'La carga masiva mediante Excel con validación de SKUs estará disponible pronto.'
+            });
+            openStatus();
+          }}
           totalItems={products.length}
         />
 
@@ -144,6 +182,39 @@ export default function InventoryMainPage() {
           </div>
         </Modal>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {productToDelete && (
+        <Modal
+          isOpen={!!productToDelete}
+          onClose={() => !isLoading && setProductToDelete(null)}
+          size="sm"
+          title="Eliminar Producto"
+          footer={
+            <ModalFooter className="justify-end w-full space-x-2">
+              <Button type="button" variant="ghost" onClick={() => setProductToDelete(null)} disabled={isLoading}>
+                Cancelar
+              </Button>
+              <Button type="button" variant="destructive" onClick={confirmDelete} isLoading={isLoading}>
+                Eliminar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="py-4">
+            <p className="text-gray-600">
+              ¿Estás seguro de que deseas eliminar el producto con SKU <span className="font-semibold text-gray-900">{productToDelete.sku}</span>? Esta acción no se puede deshacer.
+            </p>
+          </div>
+        </Modal>
+      )}
+
+      {/* Global Status Modal para notificaciones sueltas */}
+      <StatusModal
+        isOpen={isStatusOpen}
+        onClose={closeStatus}
+        {...statusConfig}
+      />
     </div>
   );
 }

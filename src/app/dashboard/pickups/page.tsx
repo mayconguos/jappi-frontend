@@ -116,6 +116,9 @@ export default function PickupsPage() {
   const [pendingStatusChange, setPendingStatusChange] = useState<{ pickupId: number; status: PickupStatus } | null>(null);
   const [successModal, setSuccessModal] = useState<string | null>(null);
   const [warningModal, setWarningModal] = useState<{ title: string; message: string } | null>(null);
+  
+  // --- Cancel Pickup State ---
+  const [pickupToCancel, setPickupToCancel] = useState<number | null>(null);
 
   const { get } = useApi<any>();
 
@@ -295,8 +298,14 @@ export default function PickupsPage() {
   };
 
   const handleCancel = (id: number) => {
-    if (confirm('¿Estás seguro que deseas cancelar este recojo?')) {
-      setPickups(prev => prev.filter(p => p.id !== id));
+    setPickupToCancel(id);
+  };
+
+  const confirmCancel = () => {
+    if (pickupToCancel !== null) {
+      setPickups(prev => prev.filter(p => p.id !== pickupToCancel));
+      setPickupToCancel(null);
+      setSuccessModal('El recojo ha sido cancelado exitosamente.');
     }
   };
 
@@ -351,6 +360,40 @@ export default function PickupsPage() {
           </div>
         )}
       </div>
+
+      {/* Confirmation Cancel Modal */}
+      <Modal
+        isOpen={pickupToCancel !== null}
+        onClose={() => setPickupToCancel(null)}
+        size="sm"
+        title="Cancelar Recojo"
+        footer={
+          <ModalFooter className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setPickupToCancel(null)}
+            >
+              Cerrar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmCancel}
+            >
+              Cancelar Recojo
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+            <AlertTriangle className="w-6 h-6 text-red-600" />
+          </div>
+          <p className="text-slate-600 font-medium mb-1">
+            ¿Estás seguro que deseas cancelar este recojo?
+          </p>
+          <p className="text-sm text-slate-400">Esta acción removerá el recojo de la lista permanentemente.</p>
+        </div>
+      </Modal>
 
       {/* Confirmation Modal */}
       <Modal
