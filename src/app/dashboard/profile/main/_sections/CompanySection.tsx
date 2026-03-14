@@ -245,7 +245,7 @@ export default function CompanySection({
                     </div>
                   </div>
 
-                  <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-4 right-4 flex items-center gap-2 transition-opacity">
                     <Button
                       type="button"
                       onClick={() => openAddressModal(index)}

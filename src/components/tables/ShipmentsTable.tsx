@@ -94,7 +94,7 @@ export default function ShipmentsTable({
                             </TableCell>
 
                             <TableCell className="text-right pr-6 py-4">
-                                <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center justify-end transition-opacity">
                                     <Button
                                         onClick={() => onView(item)}
                                         variant="ghost"

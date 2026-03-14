@@ -233,7 +233,7 @@ export default function CarrierPickupsTable() {
                   {getStatusBadge(pickup.status)}
                 </TableCell>
                 <TableCell className="text-right pr-6 py-4">
-                  <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center justify-end transition-opacity">
                     <Button
                       variant="ghost" size="sm"
                       className="h-8 gap-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all font-normal"
