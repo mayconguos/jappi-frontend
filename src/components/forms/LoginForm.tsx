@@ -27,7 +27,7 @@ export default function LoginForm() {
       // ------ Administrador ------
       // email: 'admin@japiexpress.com',
       // ------ Cliente ------
-      email: 'empresa@gmail.com',
+      email: 'empresa@japiexpress.com',
       // ------ Motorizado ------
       // email: 'motorizado@japiexpress.com',
       // ------ Almacen ------

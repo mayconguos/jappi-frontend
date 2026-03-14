@@ -26,6 +26,7 @@ export interface KardexMovement {
   movement_date: string;
   balance: number;
   created_by?: string;
+  sku?: string;
 }
 
 interface KardexTableProps {
@@ -57,11 +58,12 @@ export default function KardexTable({ movements, currentPage }: KardexTableProps
         <TableHeader>
           <TableRow className="border-b border-gray-100 bg-gray-50/50">
             <TableHead className="w-[140px] pl-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha / Hora</TableHead>
+            <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">SKU</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Producto</TableHead>
-            <TableHead className="text-center w-[160px] text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo Mov. / Origen</TableHead>
-            <TableHead className="text-right w-[100px] text-xs font-bold text-gray-500 uppercase tracking-wider">Cantidad</TableHead>
-            <TableHead className="text-right w-[120px] text-xs font-bold text-gray-500 uppercase tracking-wider">Saldo Final</TableHead>
-            <TableHead className="text-right pr-6 w-[160px] text-xs font-bold text-gray-500 uppercase tracking-wider">Realizado por</TableHead>
+            <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo Mov. / Origen</TableHead>
+            <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Cantidad</TableHead>
+            <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Saldo Final</TableHead>
+            <TableHead className="text-right pr-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Realizado por</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -93,27 +95,31 @@ export default function KardexTable({ movements, currentPage }: KardexTableProps
                 </TableCell>
 
                 <TableCell className="py-4">
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 leading-snug line-clamp-1" title={mov.product_name}>
-                      {mov.product_name}
-                    </p>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-700">{mov.sku}</span>
                   </div>
                 </TableCell>
 
-                <TableCell className="py-4 text-center">
+                <TableCell className="py-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-700">{mov.product_name}</span>
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-4">
                   <Badge variant="outline" className={`gap-1.5 justify-center w-[140px] ${getMovementColor(config.baseType)}`}>
                     {getMovementIcon(config.baseType)}
                     <span className="truncate">{config.label}</span>
                   </Badge>
                 </TableCell>
 
-                <TableCell className="py-4 text-right">
+                <TableCell className="py-4 text-center">
                   <span className={`text-sm font-bold font-mono tracking-tight ${isInput ? 'text-emerald-600' : config.baseType === 'OUT' ? 'text-red-600' : 'text-blue-600'}`}>
                     {isInput ? '+' : config.baseType === 'OUT' ? '-' : ''}{mov.quantity}
                   </span>
                 </TableCell>
 
-                <TableCell className="py-4 text-right">
+                <TableCell className="py-4 text-center">
                   <span className="text-sm font-bold font-mono text-gray-900 bg-gray-100 px-2.5 py-1 rounded">
                     {mov.balance}
                   </span>

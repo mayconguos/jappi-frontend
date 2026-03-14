@@ -36,7 +36,7 @@ export default function KardexFilter({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full" 
-            placeholder="Buscar por nombre..." 
+            placeholder="Buscar por SKU o nombre..." 
           />
         </div>
 

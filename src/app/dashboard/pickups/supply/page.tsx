@@ -193,7 +193,7 @@ export default function SupplyPickupsPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-2 animate-in fade-in duration-500">
 
       <PickupsFilter
         field={field}

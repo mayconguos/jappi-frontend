@@ -103,6 +103,7 @@ export default function KardexPage() {
       const matchesSearch =
         (mov.company_name?.toLowerCase() || '').includes(searchLower) ||
         (mov.product_name?.toLowerCase() || '').includes(searchLower) ||
+        (mov.sku?.toLowerCase() || '').includes(searchLower) ||
         (String(mov.id_product) || '').includes(searchLower);
       if (!matchesSearch) return false;
 
@@ -221,7 +222,7 @@ export default function KardexPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-2 animate-in fade-in duration-500">
 
       {/* Identificador actual */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
