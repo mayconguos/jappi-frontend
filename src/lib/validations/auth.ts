@@ -64,6 +64,7 @@ export const registerSchema = z.object({
   }),
 
   company: z.object({
+    is_corporate: z.boolean().optional(),
     company_name: z
       .string()
       .min(2, 'Debe tener al menos 2 caracteres')
@@ -77,17 +78,7 @@ export const registerSchema = z.object({
       .array(commonValidations.phone)
       .min(1, 'Debes registrar al menos un número de teléfono'),
 
-    ruc: z
-      .string()
-      .optional()
-      .or(z.literal(''))
-      .refine(
-        (value) => {
-          if (!value || value === '') return true; // opcional
-          return /^\d{11}$/.test(value);
-        },
-        'Debe tener exactamente 11 dígitos numéricos'
-      ),
+    ruc: z.string().optional().or(z.literal('')),
 
     bank_accounts: z.array(bankAccountSchema).optional(),
 
@@ -103,6 +94,33 @@ export const registerSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: result.error.issues[0]?.message || 'Número de documento inválido',
       path: ['user', 'document_number'],
+    });
+  }
+
+  // Validar RUC obligatorio si es corporativo o si ha ingresado algo
+  const { is_corporate, ruc } = data.company;
+  const hasRuc = ruc && ruc.trim() !== '';
+
+  if (is_corporate) {
+    if (!hasRuc) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'El RUC es obligatorio para clientes corporativos',
+        path: ['company', 'ruc'],
+      });
+    } else if (!/^\d{11}$/.test(ruc)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Debe tener exactamente 11 dígitos numéricos',
+        path: ['company', 'ruc'],
+      });
+    }
+  } else if (hasRuc && !/^\d{11}$/.test(ruc)) {
+    // Si no es corporativo pero proporcionó RUC, debe ser válido
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Debe tener exactamente 11 dígitos numéricos',
+      path: ['company', 'ruc'],
     });
   }
 });

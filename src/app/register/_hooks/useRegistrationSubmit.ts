@@ -26,6 +26,7 @@ export function useRegistrationSubmit({
     return {
       user: data.user,
       company: {
+        is_corporate: data.company.is_corporate ?? false,
         company_name: data.company.company_name,
         addresses: data.company.addresses.map(address => ({
           address: address.address,

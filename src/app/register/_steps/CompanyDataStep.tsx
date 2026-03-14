@@ -58,6 +58,28 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
 
   return (
     <div className="space-y-6">
+      {/* Checkbox de Cliente Corporativo */}
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="is_corporate"
+          name="company.is_corporate"
+          className="w-4 h-4 text-[#02997d] bg-gray-100 border-gray-300 rounded focus:ring-[#02997d] cursor-pointer"
+          checked={watchedValues.company?.is_corporate || false}
+          onChange={async (e) => {
+            setValue('company.is_corporate', e.target.checked);
+            // Re-evaluar RUC inmediatamente tras cambiar este toggle ya que depende de él
+            await trigger('company.ruc');
+          }}
+        />
+        <label
+          htmlFor="is_corporate"
+          className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+        >
+          ¿Es cliente corporativo?
+        </label>
+      </div>
+
       {/* Datos básicos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
@@ -79,7 +101,7 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
         <Input
           name="company.ruc"
           type="text"
-          label="RUC"
+          label={watchedValues.company?.is_corporate ? 'RUC *' : 'RUC (Opcional)'}
           maxLength={11}
           autoComplete="off"
           error={errors.company?.ruc?.message}
