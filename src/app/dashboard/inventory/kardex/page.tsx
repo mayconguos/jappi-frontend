@@ -8,10 +8,12 @@ import DeliveryLoader from '@/components/ui/delivery-loader';
 import KardexFilter from '@/components/filters/KardexFilter';
 import KardexTable, { KardexMovement, MOVEMENT_MAPPING } from '@/components/tables/KardexTable';
 import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function KardexPage() {
+  const { user } = useAuth();
   const [movements, setMovements] = useState<KardexMovement[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -30,6 +32,12 @@ export default function KardexPage() {
 
   // IDs seleccionados para el filtro principal
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user?.id_role === 2 && user?.id_company) {
+      setSelectedCompanyId(user.id_company);
+    }
+  }, [user]);
 
   const { get } = useApi<any>();
 
@@ -232,13 +240,17 @@ export default function KardexPage() {
           </div>
           <div>
             <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider">Histórico General</p>
-            <h1 className="text-xl font-bold text-gray-900">{companiesList.find(c => c.id_company === selectedCompanyId)?.company_name}</h1>
+            <h1 className="text-xl font-bold text-gray-900">
+              {user?.id_role === 2 ? user?.name : companiesList.find(c => c.id_company === selectedCompanyId)?.company_name}
+            </h1>
           </div>
         </div>
-        <button onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }} className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-          <RefreshCw size={14} />
-          Cambiar Empresa
-        </button>
+        {user?.id_role !== 2 && (
+          <button onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }} className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <RefreshCw size={14} />
+            Cambiar Empresa
+          </button>
+        )}
       </div>
 
       {/* Cards de Resumen Rápidas */}

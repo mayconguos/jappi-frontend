@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useCamera } from '@/hooks/use-camera';
+import { useCamera } from '@/hooks/useCamera';
 import { Button } from '@/components/ui/button';
 import { X, Camera as CameraIcon, RotateCcw, Check } from 'lucide-react';
 
