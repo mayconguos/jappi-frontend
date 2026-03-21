@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 interface ProductsFilterProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
-  onAdd: () => void;
-  onImport: () => void;
+  onAdd?: () => void;
+  onImport?: () => void;
   totalItems: number;
+  hideActions?: boolean;
 }
 
 export default function ProductsFilter({
@@ -17,6 +18,7 @@ export default function ProductsFilter({
   onAdd,
   onImport,
   totalItems,
+  hideActions = false,
 }: ProductsFilterProps) {
   return (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
@@ -46,28 +48,36 @@ export default function ProductsFilter({
           Total: <span className="text-slate-900 font-bold">{totalItems}</span>
         </div>
 
-        <div className="w-px h-8 bg-slate-200 hidden sm:block" />
+        {!hideActions && (
+          <>
+            <div className="w-px h-8 bg-slate-200 hidden sm:block" />
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Button
-            variant="secondary"
-            onClick={onImport}
-            className="flex-1 sm:flex-none gap-2 bg-white hover:bg-gray-50 text-gray-700 border-gray-200"
-          >
-            <Upload size={18} />
-            <span className="hidden sm:inline">Importar Excel</span>
-            <span className="sm:hidden">Importar</span>
-          </Button>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              {onImport && (
+                <Button
+                  variant="secondary"
+                  onClick={onImport}
+                  className="flex-1 sm:flex-none gap-2 bg-white hover:bg-gray-50 text-gray-700 border-gray-200"
+                >
+                  <Upload size={18} />
+                  <span className="hidden sm:inline">Importar Excel</span>
+                  <span className="sm:hidden">Importar</span>
+                </Button>
+              )}
 
-          <Button
-            onClick={onAdd}
-            className="flex-1 sm:flex-none gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100"
-          >
-            <Plus size={18} />
-            <span className="hidden sm:inline">Nuevo Producto</span>
-            <span className="sm:hidden">Nuevo</span>
-          </Button>
-        </div>
+              {onAdd && (
+                <Button
+                  onClick={onAdd}
+                  className="flex-1 sm:flex-none gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100"
+                >
+                  <Plus size={18} />
+                  <span className="hidden sm:inline">Nuevo Producto</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

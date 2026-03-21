@@ -106,16 +106,8 @@ export default function GeneralWarehousePage() {
         <ProductsFilter
           searchValue={searchTerm}
           setSearchValue={setSearchTerm}
-          onAdd={handleCreate}
-          onImport={() => {
-            setStatusConfig({
-              type: 'warning',
-              title: 'Próximamente',
-              message: 'La carga masiva mediante Excel con validación de SKUs estará disponible pronto.'
-            });
-            openStatus();
-          }}
           totalItems={products.length}
+          hideActions={true}
         />
 
         <CompanyProductsTable
