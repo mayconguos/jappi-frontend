@@ -123,6 +123,15 @@ export default function PickupsPage() {
   const [successModal, setSuccessModal] = useState<string | null>(null);
   const [warningModal, setWarningModal] = useState<{ title: string; message: string } | null>(null);
 
+  // --- View Pickup State ---
+  const [viewDetails, setViewDetails] = useState<{
+    isOpen: boolean;
+    pickup: Pickup | null;
+    items: { id: number; product_name: string; quantity: number }[];
+    loading: boolean;
+    error: string | null;
+  }>({ isOpen: false, pickup: null, items: [], loading: false, error: null });
+
   // --- Cancel Pickup State ---
   const [pickupToCancel, setPickupToCancel] = useState<number | null>(null);
 
@@ -205,8 +214,15 @@ export default function PickupsPage() {
   const handleExportExcel = () => console.log('Exporting Excel...');
   const handleExportPdf = () => console.log('Exporting PDF...');
 
-  const handleViewPickup = (pickup: Pickup) => {
-    console.log('Viewing pickup', pickup);
+  const handleViewPickup = async (pickup: Pickup) => {
+    setViewDetails({ isOpen: true, pickup, items: [], loading: true, error: null });
+    try {
+      const resp = await get(`/shipping/pickup/detail/${pickup.id}`);
+      const items = Array.isArray(resp) ? resp : (resp?.data || []);
+      setViewDetails(prev => ({ ...prev, loading: false, items }));
+    } catch (err: any) {
+      setViewDetails(prev => ({ ...prev, loading: false, error: err.message || 'Error al cargar los detalles' }));
+    }
   };
 
   const handleStatusChange = (id: number, status: PickupStatus) => {
@@ -366,6 +382,77 @@ export default function PickupsPage() {
           )}
         </div>
       )}
+
+      {/* View Details Modal */}
+      <Modal
+        isOpen={viewDetails.isOpen}
+        onClose={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}
+        size="md"
+        title={`Detalles del Recojo #${viewDetails.pickup?.id}`}
+        footer={
+          <ModalFooter className="flex justify-end pt-2">
+            <Button onClick={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}>
+              Cerrar
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="py-2 space-y-6">
+          {viewDetails.loading ? (
+            <div className="h-40 flex items-center justify-center">
+              <DeliveryLoader message="Cargando detalles..." />
+            </div>
+          ) : viewDetails.error ? (
+            <div className="flex flex-col items-center justify-center py-8 text-red-500">
+              <AlertTriangle size={32} className="mb-3" />
+              <p className="font-medium text-red-800">{viewDetails.error}</p>
+            </div>
+          ) : (
+            <div className="animate-in fade-in duration-300 space-y-5">
+              <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div className="col-span-2">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Vendedor / Tienda</span>
+                  <span className="font-semibold text-slate-900 block mt-1.5">{viewDetails.pickup?.seller}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Dirección de Recojo</span>
+                  <span className="font-medium text-slate-700 block mt-1.5">{viewDetails.pickup?.address}</span>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                  Productos a Recoger
+                </h4>
+                {viewDetails.items.length > 0 ? (
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                        <tr>
+                          <th className="px-4 py-2 border-b border-slate-200">Producto</th>
+                          <th className="px-4 py-2 border-b border-slate-200 text-center w-24">Cant.</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {viewDetails.items.map(item => (
+                          <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-4 py-3 font-medium text-slate-800 break-words">{item.product_name}</td>
+                            <td className="px-4 py-3 text-center text-slate-900 font-bold bg-slate-50/30">{item.quantity}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    No se encontraron productos asociados al recojo.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
 
       {/* Confirmation Cancel Modal */}
       <Modal
