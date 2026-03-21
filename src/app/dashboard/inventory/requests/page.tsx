@@ -11,6 +11,7 @@ import { getRoleNameFromNumber } from '@/utils/roleUtils';
 import api from '@/app/services/api';
 import StatusModal, { StatusType } from '@/components/ui/status-modal';
 import { useModal } from '@/components/ui/modal';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 
 export default function WarehouseRequestsPage() {
   const { user } = useAuth();
@@ -27,6 +28,7 @@ export default function WarehouseRequestsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<InboundRequest | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Modal de estado global
   const { isOpen: isStatusOpen, openModal: openStatus, closeModal: closeStatus } = useModal();
@@ -44,6 +46,7 @@ export default function WarehouseRequestsPage() {
   const itemsPerPage = 10;
 
   const fetchRequests = async () => {
+    setIsLoading(true);
     try {
       // Almacén → todas las solicitudes sin filtrar por empresa
       // Cliente → solo las solicitudes de su empresa
@@ -51,7 +54,10 @@ export default function WarehouseRequestsPage() {
         ? '/inventory/supply-request'
         : `/inventory/supply-request/${idCompany}`;
 
-      if (!isWarehouse && !idCompany) return;
+      if (!isWarehouse && !idCompany) {
+        setIsLoading(false);
+        return;
+      }
 
       const response = await api.get(endpoint);
       const data = Array.isArray(response.data) ? response.data : [];
@@ -68,6 +74,8 @@ export default function WarehouseRequestsPage() {
       setRequests(mapped);
     } catch (error) {
       console.error('Error fetching requests:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,21 +144,37 @@ export default function WarehouseRequestsPage() {
           showNewRequest={!isWarehouse}
         />
 
-        <RequestsTable
-          requests={currentItems}
-          onView={handleViewRequest}
-          onDownloadGuide={handleDownloadGuide}
-          isWarehouse={isWarehouse}
-        />
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <DeliveryLoader message="Cargando solicitudes..." />
+          </div>
+        ) : (
+          <>
+            <RequestsTable
+              requests={currentItems}
+              onView={handleViewRequest}
+              onDownloadGuide={handleDownloadGuide}
+              isWarehouse={isWarehouse}
+            />
 
-        <div className="w-full pt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+            {totalItems > 0 ? (
+              <div className="w-full pt-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200 mt-4">
+                <p className="text-slate-400">
+                  {searchValue ? `No se encontraron resultados para "${searchValue}"` : 'No hay solicitudes de abastecimiento registradas'}
+                </p>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Solo clientes pueden crear solicitudes */}

@@ -311,14 +311,6 @@ export default function PickupsPage() {
     }
   };
 
-  if (isInitialLoading) {
-    return (
-      <div className="w-full h-[70vh] flex flex-col items-center justify-center gap-4">
-        <DeliveryLoader message="Cargando información de recojos..." />
-      </div>
-    );
-  }
-
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
       <PickupsFilter
@@ -332,36 +324,44 @@ export default function PickupsPage() {
         totalItems={totalItems}
       />
 
-      <div className="flex flex-col gap-6">
-        <PickupsTable
-          pickups={currentItems}
-          currentPage={currentPage}
-          onView={handleViewPickup}
-          onStatusChange={handleStatusChange}
-          onCarrierChange={handleCarrierSelect}
-          onCancel={handleCancel}
-          couriers={couriers}
-          isFetchingCouriers={isFetchingCouriers}
-          onFetchCouriers={fetchCouriers}
-        />
+      {isInitialLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <DeliveryLoader message="Cargando información de recojos..." />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <PickupsTable
+            pickups={currentItems}
+            currentPage={currentPage}
+            onView={handleViewPickup}
+            onStatusChange={handleStatusChange}
+            onCarrierChange={handleCarrierSelect}
+            onCancel={handleCancel}
+            couriers={couriers}
+            isFetchingCouriers={isFetchingCouriers}
+            onFetchCouriers={fetchCouriers}
+          />
 
-        {totalItems > 0 && (
-          <div className="flex justify-center sm:justify-end">
-            <Pagination
-              currentPage={currentPage}
-              totalItems={totalItems}
-              itemsPerPage={ITEMS_PER_PAGE}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
+          {totalItems > 0 && (
+            <div className="flex justify-center sm:justify-end">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
 
-        {totalItems === 0 && value && (
-          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
-            <p className="text-slate-400">No se encontraron resultados para "{value}"</p>
-          </div>
-        )}
-      </div>
+          {totalItems === 0 && (
+            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
+              <p className="text-slate-400">
+                {value ? `No se encontraron resultados para "${value}"` : 'No hay recojos registrados'}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Confirmation Cancel Modal */}
       <Modal

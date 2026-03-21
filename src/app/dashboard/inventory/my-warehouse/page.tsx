@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 import ProductsFilter from '@/components/filters/ProductsFilter';
 import CompanyProductsTable, { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
@@ -121,11 +122,17 @@ export default function CompanyWarehousePage() {
           totalItems={products.length}
         />
 
-        <CompanyProductsTable
-          products={filteredProducts}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <DeliveryLoader message="Cargando catálogo..." />
+          </div>
+        ) : (
+          <CompanyProductsTable
+            products={filteredProducts}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
 
       <ProductModal

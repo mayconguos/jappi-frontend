@@ -184,13 +184,7 @@ export default function SupplyPickupsPage() {
     setSuccessModal('El recojo ha sido aprobado y ahora se encuentra en la bandeja principal de recojos.');
   };
 
-  if (isInitialLoading) {
-    return (
-      <div className="w-full h-[70vh] flex flex-col items-center justify-center gap-4">
-        <DeliveryLoader message="Cargando autorizaciones pendientes..." />
-      </div>
-    );
-  }
+  // Initial early return block for loading is moved to component body
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-2 animate-in fade-in duration-500">
@@ -206,25 +200,33 @@ export default function SupplyPickupsPage() {
         totalItems={totalItems}
       />
 
-      <div className="flex flex-col gap-6">
-        <SupplyPickupsTable
-          pickups={currentItems}
-          currentPage={currentPage}
-          onValidate={handleValidateClick}
-        />
+      {isInitialLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <DeliveryLoader message="Cargando autorizaciones pendientes..." />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <SupplyPickupsTable
+            pickups={currentItems}
+            currentPage={currentPage}
+            onValidate={handleValidateClick}
+          />
 
-        {totalItems > 0 && (
-          <div className="flex justify-center sm:justify-end">
-            <Pagination currentPage={currentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setCurrentPage} />
-          </div>
-        )}
+          {totalItems > 0 && (
+            <div className="flex justify-center sm:justify-end">
+              <Pagination currentPage={currentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setCurrentPage} />
+            </div>
+          )}
 
-        {totalItems === 0 && value && (
-          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
-            <p className="text-slate-400">No se encontraron resultados para "{value}"</p>
-          </div>
-        )}
-      </div>
+          {totalItems === 0 && (
+            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
+              <p className="text-slate-400">
+                {value ? `No se encontraron resultados para "${value}"` : 'No hay autorizaciones pendientes'}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal de Validación */}
       <Modal
