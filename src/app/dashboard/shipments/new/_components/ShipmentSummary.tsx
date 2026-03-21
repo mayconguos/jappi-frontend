@@ -25,8 +25,6 @@ export default function ShipmentSummary({ watchedValues, isSubmitting, disabled 
   // Por simplicidad visual inmediata:
   const destDistrict = destDistrictId ? 'Distrito Seleccionado' : '-';
 
-  const packageDesc = watchedValues?.package?.description || '-';
-  const packageWeight = watchedValues?.package?.weight || 0;
 
   return (
     <Card variant="flat" className="bg-white border-gray-200 shadow-sm sticky top-24">

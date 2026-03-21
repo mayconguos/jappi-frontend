@@ -31,9 +31,6 @@ export default function PickupDetailsForm({
   onPickupCostChange,
   pickupCostError
 }: PickupDetailsFormProps) {
-  const [showCustomAddress, setShowCustomAddress] = useState(false);
-  const [showCustomPhone, setShowCustomPhone] = useState(false);
-
   if (originType !== 'pickup') return null;
 
   return (
@@ -41,89 +38,25 @@ export default function PickupDetailsForm({
       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-t border-gray-100 pt-4">Datos de Recojo</h4>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-        {!showCustomAddress ? (
-          <div className="md:col-span-2">
-            <Select
-              label="Dirección de recojo *"
-              value={addressValue || ''}
-              options={[
-                ...addresses,
-                { label: '+ Escribir nueva dirección', value: 'custom' }
-              ]}
-              onChange={(value) => {
-                if (value === 'custom') {
-                  setShowCustomAddress(true);
-                  onAddressChange('');
-                } else {
-                  onAddressChange(value);
-                }
-              }}
-              error={addressError}
-            />
-          </div>
-        ) : (
-          <div className="space-y-2 md:col-span-2">
-            <Input
-              label="Dirección de recojo personalizada *"
-              value={addressValue || ''}
-              onChange={(e) => onAddressChange(e.target.value.toUpperCase())}
-              error={addressError}
-              placeholder="ESCRIBIR NUEVA DIRECCIÓN"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setShowCustomAddress(false);
-                onAddressChange('');
-              }}
-              className="text-xs text-[#02997d] hover:text-emerald-700 font-medium ml-1"
-            >
-              ← Volver a direcciones guardadas
-            </button>
-          </div>
-        )}
+        <div className="md:col-span-2">
+          <Select
+            label="Dirección de recojo *"
+            value={addressValue || ''}
+            options={addresses}
+            onChange={onAddressChange}
+            error={addressError}
+          />
+        </div>
 
-        {!showCustomPhone ? (
-          <div>
-            <Select
-              label="Teléfono de contacto *"
-              value={phoneValue || ''}
-              options={[
-                ...phones,
-                { label: '+ Escribir nuevo teléfono', value: 'custom' }
-              ]}
-              onChange={(value) => {
-                if (value === 'custom') {
-                  setShowCustomPhone(true);
-                  onPhoneChange('');
-                } else {
-                  onPhoneChange(value);
-                }
-              }}
-              error={phoneError}
-            />
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <Input
-              label="Teléfono personalizado *"
-              value={phoneValue || ''}
-              onChange={(e) => onPhoneChange(e.target.value)}
-              error={phoneError}
-              placeholder="ESCRIBIR NUEVO TELÉFONO"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setShowCustomPhone(false);
-                onPhoneChange('');
-              }}
-              className="text-xs text-[#02997d] hover:text-emerald-700 font-medium ml-1"
-            >
-              ← Cancelar
-            </button>
-          </div>
-        )}
+        <div>
+          <Select
+            label="Teléfono de contacto *"
+            value={phoneValue || ''}
+            options={phones}
+            onChange={onPhoneChange}
+            error={phoneError}
+          />
+        </div>
 
         <div className="flex flex-col md:col-span-1">
           <Input

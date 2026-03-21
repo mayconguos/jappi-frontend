@@ -37,7 +37,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
   const selectedOriginType = watchedValues.service?.origin_type;
 
   const [companyData, setCompanyData] = useState<{
-    addresses: Array<{ address: string; id_region: number; id_district: number; id_sector?: number }>;
+    addresses: Array<{ id: number; address: string; id_region: number; id_district: number; id_sector?: number }>;
     phones: string[];
   }>({
     addresses: [],
@@ -191,7 +191,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
   // Transformed data for props
   const addressOptions = companyData.addresses.map((addr) => ({
     label: addr.address,
-    value: addr.address
+    value: String(addr.id)
   }));
   const phoneOptions = companyData.phones.map((phone) => ({
     label: phone,
@@ -266,12 +266,20 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
                       originType={selectedOriginType as 'pickup' | 'stock' | undefined}
                       addresses={addressOptions}
                       phones={phoneOptions}
-                      addressValue={watchedValues.sender?.address?.address || ''}
+                      addressValue={watchedValues.sender?.address?.id_address?.toString() || ''}
                       onAddressChange={async (val) => {
-                        setValue('sender.address.address', val);
-                        await trigger('sender.address.address');
+                        const selectedId = Number(val);
+                        const selectedAddr = companyData.addresses.find(a => a.id === selectedId);
+                        if (selectedAddr) {
+                          setValue('sender.address.id_address', selectedId);
+                          setValue('sender.address.address', selectedAddr.address);
+                          setValue('sender.address.id_region', selectedAddr.id_region);
+                          setValue('sender.address.id_district', selectedAddr.id_district);
+                          setValue('sender.address.id_sector', selectedAddr.id_sector || 0);
+                          await trigger('sender.address');
+                        }
                       }}
-                      addressError={errors.sender?.address?.address?.message}
+                      addressError={errors.sender?.address?.id_address?.message}
                       phoneValue={watchedValues.sender?.phone || ''}
                       onPhoneChange={async (val) => {
                         setValue('sender.phone', val);

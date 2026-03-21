@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 
 import { shipmentSchema, type ShipmentFormData } from '@/lib/validations/shipment';
 import { useLocationCatalog } from '@/hooks/useLocationCatalog';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/app/services/api';
 
 import { Button } from '@/components/ui/button';
 
@@ -19,6 +21,7 @@ import { useModal } from '@/components/ui/modal';
 
 export default function CreateShipmentPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [productsData, setProductsData] = useState<{
     pickup: Array<{ description: string; quantity: number; id: string }>;
@@ -27,7 +30,7 @@ export default function CreateShipmentPage() {
     pickup: [],
     warehouse: []
   });
-  
+
   // Estado para el modal de estado
   const { isOpen: isStatusOpen, openModal: openStatus, closeModal: closeStatus } = useModal();
   const [statusConfig, setStatusConfig] = useState<{
@@ -64,24 +67,19 @@ export default function CreateShipmentPage() {
     defaultValues: {
       sender: {
         full_name: 'EMPRESA REMITENTE',
-        document_type: 'RUC',
-        document_number: '20123456789',
         phone: '987654321',
-        email: 'contacto@empresa.com',
         address: {
+          id_address: 0,
           address: 'Dirección de Recojo',
-          id_region: 1,
-          id_district: 1,
+          id_region: 0,
+          id_district: 0,
           id_sector: 0,
           reference: ''
         }
       },
       recipient: {
         full_name: '',
-        document_type: '',
-        document_number: '',
         phone: '',
-        email: '',
         address: {
           address: '',
           id_region: 0,
@@ -89,12 +87,6 @@ export default function CreateShipmentPage() {
           id_sector: 0,
           reference: ''
         }
-      },
-      package: {
-        description: '',
-        weight: 0,
-        declared_value: 0,
-        special_instructions: ''
       },
       service: {
         origin_type: '',
@@ -236,13 +228,74 @@ export default function CreateShipmentPage() {
         return;
       }
 
-      // TODO: Llamada real a la API
-      // const productsToSend = data.service.origin_type === 'pickup' ? productsData.pickup : productsData.warehouse;
-      // await api.post('/shipments', { ...data, products: productsToSend });
+      // Validación de contexto de usuario
+      const idCompany = user?.id_company || user?.id;
+      if (!idCompany) {
+        showStatus({
+          type: 'error',
+          title: 'Error de sesión',
+          message: 'No se pudo identificar a la empresa asociada. Por favor, vuelve a iniciar sesión.',
+          actionLabel: 'Ir al Login',
+          onAction: () => router.push('/login')
+        });
+        return;
+      }
 
-      // Simulación
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      // Construcción del request body estructurado según backend
+      const rawProducts = data.service.origin_type === 'pickup' ? productsData.pickup : productsData.warehouse;
+      const parsedProducts = rawProducts.map(p => ({
+        product_name: p.description,
+        quantity: p.quantity,
+        ...(p.id && data.service.origin_type === 'stock' ? { id: p.id } : {})
+      }));
+
+      const isCod = data.service.delivery_mode === 'pay_on_delivery';
+
+      const requestBody = {
+        id_company: idCompany,
+        origin_type: data.service.origin_type, // pickup / stock
+        service_type: data.service.type, // regular / express
+        shipping_mode: data.service.delivery_mode, // delivery_only / pay_on_delivery
+        date: data.service.delivery_date,
+
+        ...(isCod ? {
+          delivery_include: data.service.cod_includes_delivery,
+          total_amount: data.service.cod_amount,
+          payment_method: data.service.payment_method,
+          payment_destination: data.service.payment_form,
+        } : {}),
+
+        delivery: {
+          customer_name: data.recipient.full_name,
+          address: {
+            address: data.recipient.address.address,
+            id_region: data.recipient.address.id_region,
+            id_district: data.recipient.address.id_district,
+            id_sector: data.recipient.address.id_sector || 0
+          },
+          phone: data.recipient.phone
+        },
+
+        ...(data.service.origin_type === 'pickup' ? {
+          pickup: {
+            id_address: data.sender.address.id_address || 0,
+            phone: data.sender.phone
+          }
+        } : {}),
+
+        products: parsedProducts
+      };
+
+      // Llamada real a la API
+      await api.post('/shipping', requestBody);
+
+      // Resetear la vista para prevenir envíos duplicados (UX Best Practice)
+      form.reset();
+      setIsShipmentComplete(false);
+      setIsRecipientComplete(false);
+      setProductsData({ pickup: [], warehouse: [] });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
       showStatus({
         type: 'success',
         title: '¡Envío Exitoso!',
@@ -251,12 +304,14 @@ export default function CreateShipmentPage() {
         onAction: () => router.push('/dashboard/shipments/list')
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al registrar envío:', error);
+      const errorMessage = error.response?.data?.message || 'Ocurrió un problema al procesar tu solicitud. Por favor, inténtalo de nuevo.';
+      
       showStatus({
         type: 'error',
         title: 'Error de registro',
-        message: 'Ocurrió un problema al procesar tu solicitud. Por favor, inténtalo de nuevo.'
+        message: errorMessage
       });
     } finally {
       setIsSubmitting(false);
@@ -270,7 +325,7 @@ export default function CreateShipmentPage() {
       {/* Page Header Removed as requested */}
 
 
-      <form id="shipment-form" onSubmit={hookFormHandleSubmit(onSubmit)} className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
+      <form id="shipment-form" onSubmit={hookFormHandleSubmit(onSubmit, (errors) => console.log('ERRORES DE VALIDACIÓN:', errors))} className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
 
         {/* COLUMNA IZQUIERDA: Formularios (Span 8) */}
         <div className="lg:col-span-8 space-y-6">
