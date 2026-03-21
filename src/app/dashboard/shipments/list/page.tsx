@@ -225,7 +225,7 @@ export default function ShipmentsPage() {
       <Modal
         isOpen={!!selectedShipment}
         onClose={handleCloseModal}
-        size="lg"
+        size="xl"
         title={`Detalle de Envío #${selectedShipment?.id}`}
         showCloseButton={true}
         footer={
@@ -242,100 +242,124 @@ export default function ShipmentsPage() {
         }
       >
         {selectedShipment && (
-          <div className="space-y-6">
-            {/* General Info Card */}
-            <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Información General</h4>
-              <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Vendedor</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.vendedor}</p>
+          <div className="flex flex-col gap-4">
+            
+            {/* Primera Fila: General & Producto */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* General Info Card */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                  Información General
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Vendedor</p>
+                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.vendedor}>{selectedShipment.vendedor}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Comprador</p>
+                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.comprador}>{selectedShipment.comprador}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Teléfono</p>
+                    <p className="font-semibold text-gray-900">{selectedShipment.telefono}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Fecha Entrega</p>
+                    <p className="font-semibold text-gray-900">{selectedShipment.fechaEntrega}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Comprador</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.comprador}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Teléfono</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.telefono}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Fecha de Entrega</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.fechaEntrega}</p>
+              </div>
+
+              {/* Product Info Card */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                  Detalles del Producto
+                </h4>
+                <div className="flex flex-col flex-1 justify-between gap-3">
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-1">Producto(s)</p>
+                    <p className="font-medium text-gray-800 bg-white px-3 py-2 rounded-lg border border-gray-200 text-xs line-clamp-2" title={selectedShipment.producto}>
+                      {selectedShipment.producto}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-end mt-auto">
+                    <div>
+                      <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Cantidad</p>
+                      <p className="font-semibold text-gray-900">{selectedShipment.cantidad}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Monto Total</p>
+                      <p className="font-bold text-emerald-600 text-lg leading-none">{selectedShipment.montoTotal}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Product Info Card */}
-            <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Detalles del Producto</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                <div className="md:col-span-2">
-                  <p className="text-gray-500 text-xs mb-1">Producto(s)</p>
-                  <p className="font-medium text-gray-900 bg-white p-3 rounded-lg border border-gray-200">{selectedShipment.producto}</p>
+            {/* Segunda Fila: Pago, Entrega & Motorizado */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Payment & Delivery Info Card */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Pago y Entrega
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Método Pago</p>
+                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.metodoPago}>{selectedShipment.metodoPago}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Modo Entrega</p>
+                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.modoEntrega}>{selectedShipment.modoEntrega}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Costo Delivery</p>
+                    <p className="font-semibold text-gray-900">{selectedShipment.delivery}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Distrito</p>
+                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.distrito}>{selectedShipment.distrito}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Estado</p>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                      {selectedShipment.estado}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Motivo</p>
+                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.motivo}>{selectedShipment.motivo}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Cantidad</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.cantidad}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Monto Total</p>
-                  <p className="font-bold text-emerald-600 text-lg">{selectedShipment.montoTotal}</p>
+              </div>
+
+              {/* Motorizado Info Card */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  Datos del Motorizado
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm flex-1 content-start">
+                  <div className="col-span-2">
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Nombre</p>
+                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.motorizado}>{selectedShipment.motorizado}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">DNI</p>
+                    <p className="font-semibold text-gray-900">{selectedShipment.dniMoto}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Placa</p>
+                    <p className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 w-fit">{selectedShipment.placa}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Payment & Delivery Info Card */}
-            <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Pago y Entrega</h4>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6 text-sm">
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Método de Pago</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.metodoPago}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Modo de Entrega</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.modoEntrega}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Costo Delivery</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.delivery}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Distrito</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.distrito}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Estado</p>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
-                    {selectedShipment.estado}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Motivo</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.motivo}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Motorizado Info Card */}
-            <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Datos del Motorizado</h4>
-              <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Nombre</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.motorizado}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">DNI</p>
-                  <p className="font-medium text-gray-900">{selectedShipment.dniMoto}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs mb-1">Placa</p>
-                  <p className="font-medium text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded border border-yellow-200 w-fit">{selectedShipment.placa}</p>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </Modal>

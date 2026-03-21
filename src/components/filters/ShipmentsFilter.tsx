@@ -36,7 +36,7 @@ export default function ShipmentsFilter({
         <div className="flex items-end gap-2 w-full sm:w-auto">
           <div className="w-full flex justify-start sm:w-auto flex-col gap-[7px]">
             <label className="text-[13px] font-semibold text-slate-700 ml-1">Fecha</label>
-            <div className="flex items-center gap-1 border border-slate-200 rounded-xl p-1 h-11 bg-white relative transition-colors focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500">
+            <div className="flex items-center border border-slate-200 rounded-xl p-1 h-11 bg-white relative transition-colors focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500">
               {/* <Calendar size={16} className="text-gray-400 absolute left-3" /> */}
               <input
                 type="date"
