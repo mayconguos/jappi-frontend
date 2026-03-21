@@ -130,7 +130,7 @@ export default function ShipmentsPage() {
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [filterField, setFilterField] = useState('');
   const [searchValue, setSearchValue] = useState('');
-  const [dateValue, setDateValue] = useState('');
+  const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({ from: undefined, to: undefined });
 
   const handleOpenModal = (shipment: Shipment) => {
     setSelectedShipment(shipment);
@@ -151,6 +151,28 @@ export default function ShipmentsPage() {
         item.producto.toLowerCase().includes(searchLower)
       );
     }
+
+    // Filter by Date Range (MOCK_SHIPMENTS dates are DD-MM-YYYY)
+    if (dateRange.from && item.fechaEntrega) {
+      const parts = item.fechaEntrega.split('-');
+      if (parts.length === 3) {
+        const mDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+        const fDate = new Date(dateRange.from);
+        fDate.setHours(0, 0, 0, 0);
+        if (mDate < fDate) return false;
+      }
+    }
+    
+    if (dateRange.to && item.fechaEntrega) {
+      const parts = item.fechaEntrega.split('-');
+      if (parts.length === 3) {
+        const mDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+        const tDate = new Date(dateRange.to);
+        tDate.setHours(23, 59, 59, 999);
+        if (mDate > tDate) return false;
+      }
+    }
+
     return true;
   });
 
@@ -159,7 +181,7 @@ export default function ShipmentsPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchValue, filterField, dateValue]);
+  }, [searchValue, filterField, dateRange]);
 
   const totalItems = filteredShipments.length;
   const currentItems = filteredShipments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -174,9 +196,8 @@ export default function ShipmentsPage() {
           setFilterField={setFilterField}
           searchValue={searchValue}
           setSearchValue={setSearchValue}
-          dateValue={dateValue}
-          setDateValue={setDateValue}
-          onConsult={() => { }}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
           onExport={() => { }}
           totalItems={filteredShipments.length}
         />
