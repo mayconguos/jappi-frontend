@@ -1,7 +1,7 @@
 import { UseFormReturn } from 'react-hook-form';
 import { MapPin, CheckCircle2, Edit2, User, Phone, Mail } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -34,7 +34,42 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
   const selectedDistrict = watchedValues.recipient?.address?.id_district;
   const selectedSector = watchedValues.recipient?.address?.id_sector;
 
+  const addressRef = useRef<HTMLDivElement>(null);
+  const configRef = useRef<HTMLDivElement>(null);
+
   const districtHasSectors = selectedDistrict ? getSectorOptions(selectedDistrict).length > 0 : false;
+
+  const isPersonalComplete = 
+    (watchedValues.recipient?.full_name?.length || 0) > 2 && 
+    (watchedValues.recipient?.phone?.length || 0) >= 9;
+
+  const isAddressComplete = 
+    isPersonalComplete && 
+    (watchedValues.recipient?.address?.id_region || 0) > 0 &&
+    (watchedValues.recipient?.address?.id_district || 0) > 0 &&
+    (watchedValues.recipient?.address?.address?.length || 0) > 4 &&
+    (!districtHasSectors || (watchedValues.recipient?.address?.id_sector || 0) > 0);
+
+  const prevPersonalComplete = useRef(isPersonalComplete);
+  const prevAddressComplete = useRef(isAddressComplete);
+
+  useEffect(() => {
+    if (isActive && !prevPersonalComplete.current && isPersonalComplete) {
+      setTimeout(() => {
+        addressRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    }
+    prevPersonalComplete.current = isPersonalComplete;
+  }, [isPersonalComplete, isActive]);
+
+  useEffect(() => {
+    if (isActive && !prevAddressComplete.current && isAddressComplete) {
+      setTimeout(() => {
+        configRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+    prevAddressComplete.current = isAddressComplete;
+  }, [isAddressComplete, isActive]);
 
   useEffect(() => {
     let isMounted = true;
@@ -205,7 +240,8 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
             </div>
 
             {/* Dirección de Entrega (Bloque Contenido) */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
+            {isPersonalComplete && (
+              <div ref={addressRef} className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
               <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <MapPin size={14} /> Dirección de Entrega
               </h4>
@@ -302,12 +338,15 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                 />
               </div>
             </div>
+            )}
 
             {/* Configuración de Entrega (Modo de Entrega / COD / Fecha) */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm mt-6">
-              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
-                Configuración de Entrega
-              </h4>
+            <div ref={configRef}>
+              {isAddressComplete && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm mt-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+                  Configuración de Entrega
+                </h4>
               <DeliveryConfiguration
                 deliveryMode={watchedValues.service?.delivery_mode}
                 onModeChange={async (val) => {
@@ -330,13 +369,15 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                   setValue('service.delivery_date', val);
                   await trigger('service.delivery_date');
                 }}
-                dateError={errors.service?.delivery_date?.message}
-              />
+                  dateError={errors.service?.delivery_date?.message}
+                />
+              </div>
+              )}
             </div>
 
             {/* BOTÓN DE NAVEGACIÓN */}
-            {!isCompleted && isActive && (
-              <div className="pt-8 flex justify-end border-t border-gray-50 mt-4">
+            {!isCompleted && isActive && isAddressComplete && (
+              <div className="pt-8 flex justify-end border-t border-gray-50 mt-4 animate-in fade-in duration-500">
                 <Button
                   type="button"
                   onClick={handleContinue}
