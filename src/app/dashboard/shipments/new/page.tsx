@@ -265,16 +265,14 @@ export default function CreateShipmentPage() {
           payment_destination: data.service.payment_form,
         } : {}),
 
-        delivery: {
-          customer_name: data.recipient.full_name,
-          address: {
-            address: data.recipient.address.address,
-            id_region: data.recipient.address.id_region,
-            id_district: data.recipient.address.id_district,
-            id_sector: data.recipient.address.id_sector || 0
-          },
-          phone: data.recipient.phone
+        customer_name: data.recipient.full_name,
+        address: {
+          address: data.recipient.address.address,
+          id_region: data.recipient.address.id_region,
+          id_district: data.recipient.address.id_district,
+          id_sector: data.recipient.address.id_sector || 0
         },
+        phone: data.recipient.phone,
 
         ...(data.service.origin_type === 'pickup' ? {
           pickup: {

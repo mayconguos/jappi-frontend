@@ -103,17 +103,17 @@ export default function BankingSection({
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-12 animate-in fade-in duration-500">
+    <div className="p-4 md:p-6 space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
       {/* Cuentas Bancarias */}
       <section>
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
-              <Landmark size={24} />
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-700 shrink-0">
+              <Landmark size={20} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 tracking-tight">Cuentas Bancarias</h3>
-              <p className="text-sm text-gray-500 mt-0.5">Configura dónde recibirás tus abonos ({bankAccounts.length}/4)</p>
+              <h3 className="text-lg font-bold text-gray-900 tracking-tight">Cuentas Bancarias</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Configura dónde recibirás tus abonos ({bankAccounts.length}/4)</p>
             </div>
           </div>
           {bankAccounts.length < 4 && (
@@ -122,9 +122,9 @@ export default function BankingSection({
               onClick={addBankAccount}
               variant="secondary"
               size="sm"
-              className="rounded-full px-4 border-gray-200 hover:border-emerald-600 hover:text-emerald-600 transition-all font-semibold text-gray-600"
+              className="h-8 rounded-lg px-3 text-xs border-gray-200 hover:border-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all font-medium text-gray-600 shadow-sm bg-white"
             >
-              <Plus size={16} className="mr-1.5" />
+              <Plus size={14} className="mr-1.5" />
               Nueva Cuenta
             </Button>
           )}
@@ -222,7 +222,7 @@ export default function BankingSection({
       </section>
 
       {/* Botón de guardar */}
-      <div className="flex justify-end pt-8 border-t border-gray-100">
+      <div className="flex justify-end pt-5 mt-2 border-t border-gray-100">
         <SaveButton onSave={onSave} />
       </div>
 
