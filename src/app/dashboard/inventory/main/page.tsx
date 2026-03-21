@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { Pagination } from '@/components/ui/pagination';
 import ProductsFilter from '@/components/filters/ProductsFilter';
 import CompanyProductsTable, { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
@@ -15,6 +16,13 @@ export default function GeneralWarehousePage() {
   const { products, addProduct, updateProduct, deleteProduct, loading } = useProducts();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
 
@@ -42,6 +50,12 @@ export default function GeneralWarehousePage() {
   const filteredProducts = products.filter(p =>
     p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalItems = filteredProducts.length;
+  const currentItems = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   const handleCreate = () => {
@@ -111,10 +125,21 @@ export default function GeneralWarehousePage() {
         />
 
         <CompanyProductsTable
-          products={filteredProducts}
+          products={currentItems}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
+
+        {totalItems > 0 && (
+          <div className="flex justify-center sm:justify-end">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
 
       <ProductModal

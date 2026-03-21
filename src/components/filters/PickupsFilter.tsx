@@ -81,7 +81,7 @@ export default function PickupsFilter({
             <FileSpreadsheet size={16} />
             <span className="hidden sm:inline">Excel</span>
           </Button>
-          <Button
+          {/* <Button
             variant="secondary"
             onClick={onExportPdf}
             className="flex items-center gap-2 border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all"
@@ -89,7 +89,7 @@ export default function PickupsFilter({
           >
             <FileText size={16} />
             <span className="hidden sm:inline">PDF</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>

@@ -31,7 +31,6 @@ export default function ProductsFilter({
         {/* Search Bar - Expanded width for products */}
         <div className="w-full sm:w-96">
           <Input
-            label="Búsqueda"
             placeholder="Buscar por Nombre o SKU..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
