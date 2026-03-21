@@ -63,7 +63,7 @@ export default function CompanyProductsTable({
               <TableHead className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Empresa</TableHead>
             )}
             <TableHead className="text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Producto</TableHead>
-            <TableHead className="w-[120px] text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Stock Japi</TableHead>
+            <TableHead className="w-[120px] text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Stock</TableHead>
             <TableHead className="w-[120px] text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Estado</TableHead>
             <TableHead className="w-[120px] text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Última Act.</TableHead>
             <TableHead className="text-right pr-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">Acciones</TableHead>

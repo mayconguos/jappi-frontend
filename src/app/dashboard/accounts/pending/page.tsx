@@ -27,6 +27,7 @@ export default function ActivationsPage() {
   const [errorModal, setErrorModal] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingActivate, setLoadingActivate] = useState(false);
+  const [isCorporateVal, setIsCorporateVal] = useState(false);
 
   const fetchUnverifiedCompanies = useCallback(async () => {
     const response = await get('/user?status=unverified&type=companies');
@@ -43,10 +44,10 @@ export default function ActivationsPage() {
     fetchUnverifiedCompanies().finally(() => setLoading(false));
   }, [fetchUnverifiedCompanies]);
 
-  const handleActivateUser = useCallback(async (id: number) => {
+  const handleActivateUser = useCallback(async (id: number, isCorporate: boolean) => {
     setLoadingActivate(true);
     try {
-      await put(`/user/activate/${id}`, {});
+      await put(`/user/activate/${id}`, { is_corporate: isCorporate });
       setUnverifiedCompanies((prev) => prev.filter((user) => user.id !== id));
       setSuccessModal(`La empresa ha sido activada correctamente.`);
     } catch {
@@ -101,7 +102,10 @@ export default function ActivationsPage() {
           <div className="space-y-4">
             <PendingTable
               companies={filteredCompanies}
-              onActivate={(company) => setConfirmModal({ isOpen: true, user: company, action: 'activate' })}
+              onActivate={(company) => {
+                setIsCorporateVal(company.is_corporate ?? false);
+                setConfirmModal({ isOpen: true, user: company, action: 'activate' });
+              }}
               onReject={(company) => setConfirmModal({ isOpen: true, user: company, action: 'delete' })}
             />
           </div>
@@ -137,7 +141,7 @@ export default function ActivationsPage() {
               onClick={() => {
                 if (confirmModal.user) {
                   if (confirmModal.action === 'activate') {
-                    handleActivateUser(confirmModal.user.id);
+                    handleActivateUser(confirmModal.user.id, isCorporateVal);
                   } else if (confirmModal.action === 'delete') {
                     handleDeleteUser(confirmModal.user.id);
                   }
@@ -178,6 +182,27 @@ export default function ActivationsPage() {
                 <span className="text-gray-500 font-medium">Correo:</span>
                 <span className="font-medium text-gray-700 truncate" title={confirmModal.user.email}>{confirmModal.user.email}</span>
               </div>
+              
+              {confirmModal.action === 'activate' && (
+                <div className="mt-5 pt-4 border-t border-gray-200">
+                  <label className="flex items-center justify-between cursor-pointer group">
+                    <div>
+                      <span className="text-sm font-semibold text-gray-900 block mb-0.5 group-hover:text-indigo-600 transition-colors">¿Es cliente corporativo?</span>
+                      <span className="text-xs text-gray-500 block">Identifica si esta cuenta tendrá facturación corporativa especial.</span>
+                    </div>
+                    <div className="relative">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only" 
+                        checked={isCorporateVal}
+                        onChange={(e) => setIsCorporateVal(e.target.checked)}
+                      />
+                      <div className={`block w-14 h-8 rounded-full transition-colors ${isCorporateVal ? 'bg-indigo-500' : 'bg-gray-300'}`}></div>
+                      <div className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${isCorporateVal ? 'translate-x-6' : ''}`}></div>
+                    </div>
+                  </label>
+                </div>
+              )}
             </div>
           )}
         </div>

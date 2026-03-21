@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Eye, MapPin, User, Package, MessageSquareWarning, XCircle, Loader2 } from 'lucide-react';
+import { Eye, MapPin, User, Package, MessageSquareWarning, XCircle, Loader2, Phone } from 'lucide-react';
 import { Pickup, PickupStatus, Courier } from '@/app/dashboard/pickups/page';
 import { Select } from '@/components/ui/select';
 
@@ -55,16 +55,18 @@ export default function PickupsTable({
         <TableHeader>
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
             <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Vendedor</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección / Distrito</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Transportista</TableHead>
-            <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Bultos</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
-            <TableHead className="w-[120px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
+            <TableHead className="w-[160px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Vendedor</TableHead>
+            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
+            <TableHead className="w-[130px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Distrito</TableHead>
+            <TableHead className="w-[200px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Transportista</TableHead>
+            <TableHead className="w-[80px] text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Pedidos</TableHead>
+            <TableHead className="w-[180px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
+            <TableHead className="w-[100px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {pickups.map((pickup, index) => {
+            
             return (
               <TableRow
                 key={pickup.id}
@@ -76,25 +78,32 @@ export default function PickupsTable({
 
                 <TableCell className="py-4">
                   <div className="flex items-center gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">{pickup.seller}</span>
+                    <div className="flex flex-col gap-0.5 mt-0.5">
+                      <span className="text-sm font-medium text-gray-900 leading-tight">{pickup.seller}</span>
+                      <div className="flex items-center gap-1.5 text-gray-500">
+                        <Phone size={12} className="text-gray-400 shrink-0" />
+                        <span className="text-xs font-mono">{pickup.phone}</span>
+                      </div>
                     </div>
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-4 max-w-[260px]">
+                  <div className="flex items-start gap-2">
+                    <MapPin size={14} className="text-gray-400 shrink-0 mt-0.5" />
+                    <p className="text-sm text-gray-900 leading-snug break-words" title={pickup.address}>
+                      {pickup.address}
+                    </p>
                   </div>
                 </TableCell>
 
                 <TableCell className="py-4">
-                  <div className="flex items-start gap-2 max-w-[250px]">
-                    <MapPin size={14} className="text-gray-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-gray-900 leading-snug line-clamp-1" title={pickup.address}>
-                        {pickup.address}
-                      </p>
-                      <p className="text-xs text-gray-500">{pickup.district}</p>
-                    </div>
-                  </div>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 whitespace-nowrap">
+                    {pickup.district}
+                  </span>
                 </TableCell>
 
-                <TableCell className="py-4 w-[240px]">
+                <TableCell className="py-4">
                   <div
                     className="flex items-center gap-2 relative group-select"
                     onClick={() => (couriers.length === 0 && pickup.status !== 'received') && onFetchCouriers()}
@@ -104,7 +113,7 @@ export default function PickupsTable({
                       value={pickup.carrier}
                       onChange={(val) => onCarrierChange(pickup.id, val)}
                       options={carrierOptions}
-                      className="min-w-[200px]"
+                      className="w-full min-w-[160px]"
                       disabled={isFetchingCouriers || pickup.status === 'received'}
                     />
                     {isFetchingCouriers && pickup.status !== 'received' && (
@@ -121,14 +130,14 @@ export default function PickupsTable({
                   </span>
                 </TableCell>
 
-                <TableCell className="py-4 w-[200px]">
+                <TableCell className="py-4">
                   <div className="flex items-center gap-2">
                     <Select
                       size="compact"
                       value={pickup.status}
                       onChange={(val) => onStatusChange(pickup.id, val as PickupStatus)}
                       options={statusOptions}
-                      className="min-w-[150px]"
+                      className="w-full min-w-[140px]"
                       disabled={pickup.status === 'received'}
                     />
                     {pickup.observation && (
@@ -166,7 +175,7 @@ export default function PickupsTable({
           })}
           {pickups.length === 0 && (
             <TableRow>
-              <TableCell colSpan={7} className="h-48 text-center text-gray-500">
+              <TableCell colSpan={8} className="h-48 text-center text-gray-500">
                 <div className="flex flex-col items-center gap-2">
                   <Package size={32} className="text-gray-300" />
                   <p className="text-sm">No se encontraron recojos</p>

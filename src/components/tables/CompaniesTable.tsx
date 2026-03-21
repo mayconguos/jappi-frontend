@@ -41,12 +41,8 @@ export default function CompaniesTable({
 
               <TableCell className="py-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 min-w-[2.5rem] rounded-full bg-gray-100 flex items-center justify-center text-gray-500 ring-1 ring-gray-100/50">
-                    <Building2 size={18} />
-                  </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-gray-900">{company.company_name}</span>
-                    <span className="text-xs text-gray-500">ID: <span className="font-mono">{company.id}</span></span>
                   </div>
                 </div>
               </TableCell>

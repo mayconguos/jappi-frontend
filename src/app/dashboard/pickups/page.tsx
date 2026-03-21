@@ -26,6 +26,7 @@ export interface Pickup {
   created_at: string;
   pickup_date: string;
   seller: string;
+  phone: string;
   carrier: string;
   district: string;
   address: string;
@@ -78,6 +79,7 @@ const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
     created_at: dateStr,
     pickup_date: dateStr,
     seller: apiPickup.company_name,
+    phone: apiPickup.phone || 'Sin teléfono',
     carrier: apiPickup.driver_name || 'Sin asignar',
     district: apiPickup.district_name,
     address: apiPickup.address,

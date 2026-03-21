@@ -86,9 +86,12 @@ export default function CompanyWarehousePage() {
         setIsModalOpen(false);
         setSuccessModal('El producto ha sido creado correctamente.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setErrorModal('Hubo un error al procesar el producto. Por favor intenta nuevamente.');
+      const errorMessage =
+        error?.response?.data?.message ||
+        'Hubo un error al procesar el producto. Por favor intenta nuevamente.';
+      setErrorModal(errorMessage);
     } finally {
       setIsLoading(false);
     }
