@@ -37,7 +37,7 @@ export default function ServiceLevelSelector({ value, onChange, error }: Service
               </h5>
             </div>
             <p className="text-xs text-gray-500 leading-snug">
-              Recojo programado para el día siguiente.
+              Envio el mismo día.
             </p>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function ServiceLevelSelector({ value, onChange, error }: Service
               </h5>
             </div>
             <p className="text-xs text-gray-500 leading-snug">
-              Prioridad Alta. Recojo el mismo día.
+              Prioridad alta, se recoge y entrega de inmediato.
             </p>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function ServiceLevelSelector({ value, onChange, error }: Service
               </h5>
             </div>
             <p className="text-xs text-gray-500 leading-snug">
-              Entrega y recojo simultáneo (Logística Inversa).
+              Entrega del pedido y recojo del que nos indique.
             </p>
           </div>
         </div>

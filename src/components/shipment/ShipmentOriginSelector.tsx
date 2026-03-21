@@ -35,7 +35,7 @@ export default function ShipmentOriginSelector({ value, onChange, error }: Shipm
               Con Recojo
             </h5>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Vamos a tu dirección a recoger los pedidos.
+              Vamos a la direccion que nos indiques a recoger tus envios del día.
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function ShipmentOriginSelector({ value, onChange, error }: Shipm
               Desde Almacén Japi
             </h5>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Usar stock que ya tienes guardado en nuestro almacén.
+              Se usará el stock que ya tienes guardado en nuestro almacen.
             </p>
           </div>
         </div>

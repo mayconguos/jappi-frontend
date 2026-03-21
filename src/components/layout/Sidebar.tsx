@@ -113,12 +113,12 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
               'hidden md:flex items-center w-full mb-4 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 group',
               isCollapsed ? 'justify-center' : 'gap-3 px-3'
             )}
-            title={isCollapsed ? 'Expandir' : 'Colapsar menú'}
+            title={isCollapsed ? 'Expandir' : 'Comprimir menú'}
           >
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
 
             {!isCollapsed && (
-              <span className="font-medium text-sm">Colapsar menú</span>
+              <span className="font-medium text-sm">Comprimir menú</span>
             )}
           </button>
 

@@ -1,5 +1,5 @@
 import { UseFormReturn } from 'react-hook-form';
-import { MapPin, CheckCircle2, ChevronDown, User, Phone, Mail } from 'lucide-react';
+import { MapPin, CheckCircle2, Edit2, User, Phone, Mail } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState, useEffect } from 'react';
 
@@ -146,9 +146,10 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
             <button
               type="button"
               onClick={onEdit}
-              className="text-sm text-gray-400 hover:text-gray-600 font-medium flex items-center transition-colors"
+              className="px-4 py-1.5 text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-[#02997d] hover:text-[#02997d] hover:bg-[#02997d]/5 transition-all flex items-center shadow-sm"
             >
-              Editar <ChevronDown size={14} className="ml-1" />
+              <Edit2 size={14} className="mr-1.5" />
+              Modificar
             </button>
           )}
         </div>

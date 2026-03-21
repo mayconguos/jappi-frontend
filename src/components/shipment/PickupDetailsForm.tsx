@@ -58,7 +58,7 @@ export default function PickupDetailsForm({
           />
         </div>
 
-        <div className="flex flex-col md:col-span-1">
+        {/* <div className="flex flex-col md:col-span-1">
           <Input
             label="Costo de recojo"
             type="number"
@@ -70,7 +70,7 @@ export default function PickupDetailsForm({
             min={0}
             step="0.01"
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

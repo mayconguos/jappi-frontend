@@ -223,8 +223,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             {/* Grupo 1: Nombre */}
             <div className="md:col-span-2">
-              <h4 className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-2">
                 Información Personal
               </h4>
             </div>
@@ -239,7 +238,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                 onChange={(e) => {
                   setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:border-emerald-500 transition-colors"
                 autoFocus={!editingWorker}
               />
             </div>
@@ -254,13 +253,12 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                 onChange={(e) => {
                   setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:border-emerald-500 transition-colors"
               />
             </div>
 
-            <div className="md:col-span-2 border-t border-slate-100 my-1 pt-3">
-              <h4 className="text-sm font-medium text-slate-900 mb-1 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+            <div className="md:col-span-2 mt-2">
+              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-2">
                 Identificación
               </h4>
             </div>
@@ -273,7 +271,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                 size='compact'
                 options={DOCUMENT_TYPES}
                 error={errors.document_type?.message}
-                className="bg-slate-50 border-slate-200"
+                className="bg-white border-slate-200 focus:border-emerald-500 transition-colors"
                 onChange={(value: string) => {
                   setValue('document_type', value);
                   clearErrors('document_type');
@@ -293,13 +291,12 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                 onChange={(e) => {
                   setValue('document_number', e.target.value, { shouldDirty: true });
                 }}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:border-emerald-500 transition-colors"
               />
             </div>
 
-            <div className="md:col-span-2 border-t border-slate-100 my-1 pt-3">
-              <h4 className="text-sm font-medium text-slate-900 mb-1 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+            <div className="md:col-span-2 mt-2">
+              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-2">
                 Datos de Cuenta
               </h4>
             </div>
@@ -318,7 +315,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                 onChange={(e) => {
                   setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
                 }}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:border-emerald-500 transition-colors"
               />
               {editingWorker && (
                 <p className="text-slate-400 text-xs ml-1 flex items-center gap-1">
@@ -347,7 +344,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                   }}
                   error={errors.id_role?.message}
                   size='compact'
-                  className="bg-slate-50 border-slate-200"
+                  className="bg-white border-slate-200 focus:border-emerald-500 transition-colors"
                 />
               )}
             </div>
@@ -363,7 +360,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
                   disabled={isLoading}
                   error={errors.password?.message}
                   autoComplete="new-password"
-                  className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                  className="bg-white border-slate-200 focus:border-emerald-500 transition-colors"
                 />
               </div>
             )}
