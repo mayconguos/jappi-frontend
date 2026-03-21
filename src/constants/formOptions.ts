@@ -56,6 +56,6 @@ export const PAYMENT_METHODS = [
 ];
 
 export const PAYMENT_FORMS = [
-  { label: 'Abono a Japi', value: 'japy_payment' },
+  { label: 'Abono a Japi', value: 'japi_payment' },
   { label: 'Abono a vendedor', value: 'seller_payment' },
 ];

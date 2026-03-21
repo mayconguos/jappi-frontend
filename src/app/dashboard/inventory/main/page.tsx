@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 import ProductsFilter from '@/components/filters/ProductsFilter';
 import CompanyProductsTable, { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
@@ -124,20 +125,28 @@ export default function GeneralWarehousePage() {
           hideActions={true}
         />
 
-        <CompanyProductsTable
-          products={currentItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-
-        {totalItems > 0 && (
-          <div className="flex justify-center sm:justify-end">
-            <Pagination
-              currentPage={currentPage}
-              totalItems={totalItems}
-              itemsPerPage={ITEMS_PER_PAGE}
-              onPageChange={setCurrentPage}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <DeliveryLoader message="Cargando productos..." />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            <CompanyProductsTable
+              products={currentItems}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
+
+            {totalItems > 0 && (
+              <div className="flex justify-center sm:justify-end">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
