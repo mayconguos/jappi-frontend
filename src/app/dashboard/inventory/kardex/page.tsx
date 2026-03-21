@@ -228,26 +228,29 @@ export default function KardexPage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-2 animate-in fade-in duration-500">
 
-      {/* Identificador actual */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
-            <Building2 size={24} />
+      {/* Identificador actual (Solo visible para Admin/Operador) */}
+      {user?.id_role !== 2 && (
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+              <Building2 size={24} />
+            </div>
+            <div>
+              <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider">Histórico General</p>
+              <h1 className="text-xl font-bold text-gray-900">
+                {companiesList.find(c => c.id_company === selectedCompanyId)?.company_name}
+              </h1>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider">Histórico General</p>
-            <h1 className="text-xl font-bold text-gray-900">
-              {user?.id_role === 2 ? user?.name : companiesList.find(c => c.id_company === selectedCompanyId)?.company_name}
-            </h1>
-          </div>
-        </div>
-        {user?.id_role !== 2 && (
-          <button onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }} className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button 
+            onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }} 
+            className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
             <RefreshCw size={14} />
             Cambiar Empresa
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Cards de Resumen Rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
