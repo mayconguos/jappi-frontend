@@ -33,6 +33,7 @@ export interface Pickup {
   packages: number;
   status: PickupStatus;
   observation?: string;
+  origin: 'pickup' | 'warehouse';
 }
 
 export interface ApiPickup {
@@ -47,7 +48,9 @@ export interface ApiPickup {
     product_name: string;
     quantity: number;
   }[];
+  package_count?: number;
   driver_name: string | null;
+  origin?: string;
 }
 
 export interface Courier {
@@ -76,6 +79,7 @@ const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
 
   return {
     id: apiPickup.id,
+    origin: apiPickup.origin === 'supply' ? 'warehouse' : 'pickup',
     created_at: dateStr,
     pickup_date: dateStr,
     seller: apiPickup.company_name,
@@ -83,7 +87,7 @@ const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
     carrier: apiPickup.driver_name || 'Sin asignar',
     district: apiPickup.district_name,
     address: apiPickup.address,
-    packages: Array.isArray(items) ? items.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0,
+    packages: apiPickup.package_count || 0,
     status: apiPickup.status,
     observation: undefined,
   };
@@ -118,7 +122,7 @@ export default function PickupsPage() {
   const [pendingStatusChange, setPendingStatusChange] = useState<{ pickupId: number; status: PickupStatus } | null>(null);
   const [successModal, setSuccessModal] = useState<string | null>(null);
   const [warningModal, setWarningModal] = useState<{ title: string; message: string } | null>(null);
-  
+
   // --- Cancel Pickup State ---
   const [pickupToCancel, setPickupToCancel] = useState<number | null>(null);
 

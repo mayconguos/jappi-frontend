@@ -58,6 +58,7 @@ export default function PickupsTable({
             <TableHead className="w-[160px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Vendedor</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
             <TableHead className="w-[130px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Distrito</TableHead>
+            <TableHead className="w-[120px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Origen</TableHead>
             <TableHead className="w-[200px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Transportista</TableHead>
             <TableHead className="w-[80px] text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Pedidos</TableHead>
             <TableHead className="w-[180px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
@@ -100,6 +101,12 @@ export default function PickupsTable({
                 <TableCell className="py-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 whitespace-nowrap">
                     {pickup.district}
+                  </span>
+                </TableCell>
+
+                <TableCell className="py-4">
+                  <span className="text-[13px] font-semibold text-slate-600 whitespace-nowrap">
+                    {pickup.origin === 'warehouse' ? 'Sol. Abast.' : 'Envío'}
                   </span>
                 </TableCell>
 
@@ -175,7 +182,7 @@ export default function PickupsTable({
           })}
           {pickups.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} className="h-48 text-center text-gray-500">
+              <TableCell colSpan={9} className="h-48 text-center text-gray-500">
                 <div className="flex flex-col items-center gap-2">
                   <Package size={32} className="text-gray-300" />
                   <p className="text-sm">No se encontraron recojos</p>
