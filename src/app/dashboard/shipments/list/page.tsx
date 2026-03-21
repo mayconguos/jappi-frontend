@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Modal, { ModalFooter } from '@/components/ui/modal';
+import { Pagination } from '@/components/ui/pagination';
 
 // Components
 import ShipmentsFilter from '@/components/filters/ShipmentsFilter';
@@ -153,6 +154,16 @@ export default function ShipmentsPage() {
     return true;
   });
 
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchValue, filterField, dateValue]);
+
+  const totalItems = filteredShipments.length;
+  const currentItems = filteredShipments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return (
     <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
 
@@ -173,9 +184,19 @@ export default function ShipmentsPage() {
         {/* Table */}
         <div className="space-y-4">
           <ShipmentsTable
-            shipments={filteredShipments}
+            shipments={currentItems}
             onView={handleOpenModal}
           />
+          {totalItems > 0 && (
+            <div className="flex justify-center sm:justify-end mt-4">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </div>
       </div>
 

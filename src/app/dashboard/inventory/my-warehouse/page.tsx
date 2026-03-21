@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import ProductsFilter from '@/components/filters/ProductsFilter';
@@ -11,6 +11,9 @@ import { Modal, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import StatusModal, { StatusType } from '@/components/ui/status-modal';
 import { useModal } from '@/components/ui/modal';
+import { Pagination } from '@/components/ui/pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function CompanyWarehousePage() {
   // Use Local Hook
@@ -43,6 +46,19 @@ export default function CompanyWarehousePage() {
   const filteredProducts = products.filter(p =>
     p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reiniciar la página al cambiar la búsqueda
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const totalItems = filteredProducts.length;
+  const currentItems = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   const handleCreate = () => {
@@ -127,11 +143,23 @@ export default function CompanyWarehousePage() {
             <DeliveryLoader message="Cargando catálogo..." />
           </div>
         ) : (
-          <CompanyProductsTable
-            products={filteredProducts}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          <div className="flex flex-col gap-6">
+            <CompanyProductsTable
+              products={currentItems}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+            {totalItems > 0 && (
+              <div className="flex justify-center sm:justify-end">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+          </div>
         )}
       </div>
 

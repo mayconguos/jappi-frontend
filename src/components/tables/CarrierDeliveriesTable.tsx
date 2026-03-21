@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, MapPin, User, MessageCircle, Phone } from 'lucide-react';
@@ -169,6 +170,17 @@ export default function CarrierDeliveriesTable() {
     .filter(d => selectedDistrict === 'all' || d.district === selectedDistrict)
     .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
 
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Restart page on district change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedDistrict]);
+
+  const totalItems = sorted.length;
+  const currentItems = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   const handleOpenDetail = (delivery: Delivery) => {
     setSelectedDelivery(delivery);
     setIsModalOpen(true);
@@ -238,7 +250,7 @@ export default function CarrierDeliveriesTable() {
                 </TableCell>
               </TableRow>
             ) : (
-              sorted.map((delivery) => (
+              currentItems.map((delivery) => (
                 <TableRow
                   key={delivery.id}
                   className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
@@ -316,7 +328,7 @@ export default function CarrierDeliveriesTable() {
             No hay entregas en <span className="font-medium text-gray-500">{selectedDistrict}</span>
           </div>
         ) : (
-          sorted.map((delivery) => (
+          currentItems.map((delivery) => (
             <div
               key={delivery.id}
               className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
@@ -359,6 +371,17 @@ export default function CarrierDeliveriesTable() {
           ))
         )}
       </div>
+
+      {totalItems > 0 && (
+        <div className="flex justify-center sm:justify-end mt-4 pb-4 px-4">
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       {/* Modal de Detalle */}
       <DeliveryDetailModal

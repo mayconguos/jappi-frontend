@@ -4,8 +4,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Package, ArrowRight, Eye, MessageCircle, Phone } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PickupDetailModal from '@/components/forms/modals/PickupDetailModal';
+import { Pagination } from '@/components/ui/pagination';
 
 interface Pickup {
   id: string;
@@ -156,6 +157,12 @@ export default function CarrierPickupsTable() {
     (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
   );
 
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalItems = sortedPickups.length;
+  const currentItems = sortedPickups.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return (
     <>
       {/* Desktop View */}
@@ -173,7 +180,7 @@ export default function CarrierPickupsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedPickups.map((pickup) => (
+            {currentItems.map((pickup) => (
               <TableRow
                 key={pickup.id}
                 className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
@@ -252,7 +259,7 @@ export default function CarrierPickupsTable() {
 
       {/* Vista Móvil (Cards compactas) */}
       <div className="md:hidden space-y-2">
-        {sortedPickups.map((pickup) => (
+        {currentItems.map((pickup) => (
           <div
             key={pickup.id}
             className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
@@ -296,6 +303,17 @@ export default function CarrierPickupsTable() {
           </div>
         ))}
       </div>
+
+      {totalItems > 0 && (
+        <div className="flex justify-center sm:justify-end mt-4 pb-4 px-4">
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       {/* Modal de Detalle de Recojo */}
       <PickupDetailModal

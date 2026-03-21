@@ -11,6 +11,7 @@ import DeliveryLoader from '@/components/ui/delivery-loader';
 // Components
 import PendingFilter from '@/components/filters/PendingFilter';
 import PendingTable, { UnverifiedCompany } from '@/components/tables/PendingTable';
+import { Pagination } from '@/components/ui/pagination';
 
 export default function ActivationsPage() {
   const [unverifiedCompanies, setUnverifiedCompanies] = useState<UnverifiedCompany[]>([]);
@@ -78,6 +79,19 @@ export default function ActivationsPage() {
     company.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const totalItems = filteredCompanies.length;
+  const currentItems = filteredCompanies.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE, 
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
 
@@ -101,13 +115,23 @@ export default function ActivationsPage() {
         ) : (
           <div className="space-y-4">
             <PendingTable
-              companies={filteredCompanies}
+              companies={currentItems}
               onActivate={(company) => {
                 setIsCorporateVal(company.is_corporate ?? false);
                 setConfirmModal({ isOpen: true, user: company, action: 'activate' });
               }}
               onReject={(company) => setConfirmModal({ isOpen: true, user: company, action: 'delete' })}
             />
+            {totalItems > 0 && (
+              <div className="flex justify-center sm:justify-end mt-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
