@@ -7,6 +7,7 @@ import { Worker } from '@/app/dashboard/accounts/workers/page';
 interface WorkersTableProps {
   workers: Worker[];
   currentPage: number;
+  itemsPerPage?: number;
   onEdit: (worker: Worker) => void;
   onDelete: (worker: Worker) => void;
 }
@@ -14,6 +15,7 @@ interface WorkersTableProps {
 export default function WorkersTable({
   workers,
   currentPage,
+  itemsPerPage = 10,
   onEdit,
   onDelete,
 }: WorkersTableProps) {
@@ -36,7 +38,7 @@ export default function WorkersTable({
               className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
             >
               <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
-                {(currentPage - 1) * 10 + index + 1}
+                {(currentPage - 1) * itemsPerPage + index + 1}
               </TableCell>
 
               <TableCell className="py-4">

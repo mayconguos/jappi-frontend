@@ -77,7 +77,9 @@ export default function CarriersPage() {
     const response = await get('/user?type=couriers');
     if (response) {
       const data = Array.isArray(response) ? response : [];
-      setCarriers(data);
+      // Ordenar por ID descendente (más recientes primero)
+      const sortedData = [...data].sort((a, b) => b.id - a.id);
+      setCarriers(sortedData);
     } else {
       setCarriers([]);
     }
@@ -197,6 +199,7 @@ export default function CarriersPage() {
               {...{
                 carriers: currentItems,
                 currentPage,
+                itemsPerPage: ITEMS_PER_PAGE,
                 onView: handleViewCarrier,
                 onEdit: handleEditCarrier,
                 onDelete: handleDeleteCarrier,
