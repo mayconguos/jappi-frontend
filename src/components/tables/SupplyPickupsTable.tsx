@@ -17,7 +17,7 @@ export default function SupplyPickupsTable({
   itemsPerPage,
   onValidate,
 }: SupplyPickupsTableProps) {
-  
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <Table>
@@ -26,6 +26,7 @@ export default function SupplyPickupsTable({
             <TableHead className="w-[50px] pl-6 text-xs font-bold text-gray-500 uppercase tracking-wider">#</TableHead>
             <TableHead className="w-[80px] text-xs font-bold text-gray-500 uppercase tracking-wider">ID</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Remitente / Solicitud</TableHead>
+            <TableHead className="w-[110px] text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Fecha</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Dirección de Recojo</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</TableHead>
             <TableHead className="w-[140px] text-right pr-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</TableHead>
@@ -33,7 +34,7 @@ export default function SupplyPickupsTable({
         </TableHeader>
         <TableBody>
           {pickups.map((pickup, index) => {
-            
+
             return (
               <TableRow
                 key={pickup.id}
@@ -53,6 +54,12 @@ export default function SupplyPickupsTable({
                       <FileText size={10} /> Solicitud base #{pickup.request_id}
                     </span>
                   </div>
+                </TableCell>
+
+                <TableCell className="py-4 text-center">
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-2 py-1 rounded">
+                    {pickup.pickup_date}
+                  </span>
                 </TableCell>
 
                 <TableCell className="py-4">
@@ -91,7 +98,7 @@ export default function SupplyPickupsTable({
           })}
           {pickups.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="h-48 text-center text-gray-500">
+              <TableCell colSpan={7} className="h-48 text-center text-gray-500">
                 <div className="flex flex-col items-center gap-2">
                   <Package size={32} className="text-gray-300" />
                   <p className="text-sm">No hay aprobaciones de recojo pendientes</p>

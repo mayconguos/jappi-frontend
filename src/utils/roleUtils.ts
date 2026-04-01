@@ -25,7 +25,7 @@ export const getRedirectPathForUser = (roleNumber: number): string => {
     case 'admin':
       return '/dashboard/accounts/pending';
     case 'coordinacion':
-      return '/dashboard/shipments/calendar';
+      return '/dashboard/shipments/all';
     case 'empresa':
       return '/dashboard/shipments/new';
     case 'transportista':

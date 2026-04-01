@@ -56,6 +56,7 @@ export default function PickupsTable({
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
             <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
             <TableHead className="w-[160px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Vendedor</TableHead>
+            <TableHead className="w-[110px] text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Fecha</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
             <TableHead className="w-[130px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Distrito</TableHead>
             <TableHead className="w-[120px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Origen</TableHead>
@@ -67,7 +68,7 @@ export default function PickupsTable({
         </TableHeader>
         <TableBody>
           {pickups.map((pickup, index) => {
-            
+
             return (
               <TableRow
                 key={pickup.id}
@@ -87,6 +88,12 @@ export default function PickupsTable({
                       </div>
                     </div>
                   </div>
+                </TableCell>
+
+                <TableCell className="py-4 text-center">
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-2 py-1 rounded">
+                    {pickup.pickup_date}
+                  </span>
                 </TableCell>
 
                 <TableCell className="py-4 max-w-[260px]">
@@ -182,7 +189,7 @@ export default function PickupsTable({
           })}
           {pickups.length === 0 && (
             <TableRow>
-              <TableCell colSpan={9} className="h-48 text-center text-gray-500">
+              <TableCell colSpan={10} className="h-48 text-center text-gray-500">
                 <div className="flex flex-col items-center gap-2">
                   <Package size={32} className="text-gray-300" />
                   <p className="text-sm">No se encontraron recojos</p>

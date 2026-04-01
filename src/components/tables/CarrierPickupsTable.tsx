@@ -173,6 +173,7 @@ export default function CarrierPickupsTable() {
               <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
               <TableHead className="w-[140px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Remitente</TableHead>
+              <TableHead className="w-[110px] text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Fecha</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contacto</TableHead>
               <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Paquetes</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ruta (Origen - Destino)</TableHead>
@@ -196,6 +197,11 @@ export default function CarrierPickupsTable() {
                 <TableCell className="py-4">
                   <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[180px]" title={pickup.sender}>
                     {pickup.sender}
+                  </span>
+                </TableCell>
+                <TableCell className="py-4 text-center">
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-2 py-1 rounded">
+                    {pickup.date}
                   </span>
                 </TableCell>
                 <TableCell className="py-4">

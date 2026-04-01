@@ -61,7 +61,11 @@ export interface Courier {
 
 // ─── Helper de Mapeo ───────────────────────────────────────────
 const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
-  const dateStr = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const date = apiPickup.pickup_date ? new Date(apiPickup.pickup_date) : new Date();
+  const dateStr = !isNaN(date.getTime())
+    ? date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : 'Fecha inválida';
+
   const items = apiPickup.items || [];
   return {
     id: apiPickup.id,
@@ -92,6 +96,13 @@ export default function SupplyPickupsPage() {
   const [field, setField] = useState('all');
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  // Default to today for both from and to
+  const todayDate = new Date().toISOString().split('T')[0];
+  const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({ 
+    from: todayDate, 
+    to: todayDate 
+  });
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const { get, put } = useApi<any>();
@@ -113,7 +124,7 @@ export default function SupplyPickupsPage() {
       try {
         const resp = await get('/shipping/pickup/supply-request');
         const data = Array.isArray(resp) ? resp : (resp as any)?.data;
-        
+
         if (data && Array.isArray(data)) {
           console.log('Recojos Abastecimiento API Response:', data);
           setPickups(data.map(mapApiPickupToPickup));
@@ -130,19 +141,43 @@ export default function SupplyPickupsPage() {
     fetchSupplyPickups();
   }, [get]);
 
-  useEffect(() => setCurrentPage(1), [field, value]);
+  useEffect(() => setCurrentPage(1), [field, value, dateRange]);
 
   const filteredPickups = useMemo(() => {
-    if (!value) return pickups;
+    let filtered = pickups;
+
+    // Filter by Date Range
+    if (dateRange.from) {
+      const fDate = new Date(dateRange.from);
+      fDate.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(p => {
+        const pDate = new Date(p.pickup_date.split('/').reverse().join('-')); // DD/MM/YYYY to YYYY-MM-DD
+        pDate.setHours(0, 0, 0, 0);
+        return pDate >= fDate;
+      });
+    }
+
+    if (dateRange.to) {
+      const tDate = new Date(dateRange.to);
+      tDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(p => {
+        const pDate = new Date(p.pickup_date.split('/').reverse().join('-'));
+        pDate.setHours(23, 59, 59, 999);
+        return pDate <= tDate;
+      });
+    }
+
+    if (!value) return filtered;
+
     const searchTerm = value.toLowerCase();
-    return pickups.filter((p) => {
+    return filtered.filter((p) => {
       if (field === 'all') {
         return p.seller.toLowerCase().includes(searchTerm) || p.district.toLowerCase().includes(searchTerm);
       }
       const fieldValue = p[field as keyof Pickup];
       return fieldValue ? String(fieldValue).toLowerCase().includes(searchTerm) : false;
     });
-  }, [field, value, pickups]);
+  }, [field, value, pickups, dateRange]);
 
   const totalItems = filteredPickups.length;
   const currentItems = filteredPickups.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -197,6 +232,8 @@ export default function SupplyPickupsPage() {
         filterFields={FILTER_FIELDS}
         onExportExcel={() => console.log('Exporting')}
         onExportPdf={() => console.log('Exporting')}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
         totalItems={totalItems}
       />
 
@@ -297,12 +334,12 @@ export default function SupplyPickupsPage() {
         title="Confirmación Final"
         footer={
           <ModalFooter className="flex justify-end gap-3">
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               onClick={() => {
                 setIsFinalConfirmOpen(false);
                 setIsConfirmValidationOpen(true); // Regresar al modal anterior
-              }} 
+              }}
               disabled={isValidating}
             >
               Regresar

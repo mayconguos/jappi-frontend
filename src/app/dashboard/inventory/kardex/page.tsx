@@ -242,8 +242,8 @@ export default function KardexPage() {
               </h1>
             </div>
           </div>
-          <button 
-            onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }} 
+          <button
+            onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }}
             className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <RefreshCw size={14} />
@@ -253,7 +253,7 @@ export default function KardexPage() {
       )}
 
       {/* Cards de Resumen Rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
         <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <Package size={24} />
@@ -281,7 +281,7 @@ export default function KardexPage() {
             <h3 className="text-xl font-bold text-gray-900">Actualizado</h3>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <KardexFilter
         searchTerm={searchTerm}

@@ -109,6 +109,13 @@ export default function PickupsPage() {
   const [field, setField] = useState('all');
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  // Default to today for both from and to
+  const todayDate = new Date().toISOString().split('T')[0];
+  const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({ 
+    from: todayDate, 
+    to: todayDate 
+  });
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // --- Carrier Flow State ---
@@ -183,13 +190,36 @@ export default function PickupsPage() {
   // --- Reset page on filter change ---
   useEffect(() => {
     setCurrentPage(1);
-  }, [field, value]);
+  }, [field, value, dateRange]);
 
   const filteredPickups = useMemo(() => {
-    if (!value) return pickups;
+    let filtered = pickups;
+
+    // Filter by Date Range
+    if (dateRange.from) {
+      const fDate = new Date(dateRange.from);
+      fDate.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(p => {
+        const pDate = new Date(p.pickup_date.split('/').reverse().join('-')); // DD/MM/YYYY to YYYY-MM-DD
+        pDate.setHours(0, 0, 0, 0);
+        return pDate >= fDate;
+      });
+    }
+
+    if (dateRange.to) {
+      const tDate = new Date(dateRange.to);
+      tDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(p => {
+        const pDate = new Date(p.pickup_date.split('/').reverse().join('-'));
+        pDate.setHours(23, 59, 59, 999);
+        return pDate <= tDate;
+      });
+    }
+
+    if (!value) return filtered;
 
     const searchTerm = value.toLowerCase();
-    return pickups.filter((p) => {
+    return filtered.filter((p) => {
       if (field === 'all') {
         return (
           p.seller.toLowerCase().includes(searchTerm) ||
@@ -203,7 +233,7 @@ export default function PickupsPage() {
         ? String(fieldValue).toLowerCase().includes(searchTerm)
         : false;
     });
-  }, [field, value, pickups]);
+  }, [field, value, pickups, dateRange]);
 
   const totalItems = filteredPickups.length;
   const currentItems = filteredPickups.slice(
@@ -341,6 +371,8 @@ export default function PickupsPage() {
         filterFields={FILTER_FIELDS}
         onExportExcel={handleExportExcel}
         onExportPdf={handleExportPdf}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
         totalItems={totalItems}
       />
 

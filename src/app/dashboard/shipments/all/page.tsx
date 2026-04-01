@@ -14,7 +14,7 @@ import { useApi } from '@/hooks/useApi';
 import ShipmentsFilter from '@/components/filters/ShipmentsFilter';
 import ShipmentsTable, { Shipment } from '@/components/tables/ShipmentsTable';
 
-export default function DeliveriesByDatePage() {
+export default function AllShipmentsPage() {
   const { user } = useAuth();
   const { get, loading } = useApi<Shipment[]>();
   const [allShipments, setAllShipments] = useState<Shipment[]>([]);

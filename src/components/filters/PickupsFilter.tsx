@@ -17,6 +17,8 @@ interface PickupsFilterProps {
   filterFields: FilterField[];
   onExportExcel: () => void;
   onExportPdf: () => void;
+  dateRange: { from: string | undefined; to: string | undefined };
+  setDateRange: (range: { from: string | undefined; to: string | undefined }) => void;
   totalItems: number;
 }
 
@@ -28,6 +30,8 @@ export default function PickupsFilter({
   filterFields,
   onExportExcel,
   onExportPdf,
+  dateRange,
+  setDateRange,
   totalItems
 }: PickupsFilterProps) {
   return (
@@ -37,27 +41,61 @@ export default function PickupsFilter({
         <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32" />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 relative z-10 w-full xl:w-auto">
-        <div className="w-full sm:w-56">
-          <Select
-            label="Filtrar por"
-            value={field}
-            onChange={setField}
-            options={filterFields}
-            placeholder="Seleccionar campo"
-            icon={Filter}
-            className="bg-white border-slate-200"
-          />
+      <div className="flex flex-col lg:flex-row items-end gap-4 relative z-10 w-full xl:w-auto">
+        {/* Date Group */}
+        <div className="flex items-end gap-2 w-full sm:w-auto">
+          <div className="w-full flex justify-start sm:w-auto flex-col">
+            <label className="block mb-1.5 text-sm font-medium text-gray-700">Fecha</label>
+            <div className="flex items-center border border-gray-300 rounded-lg p-1 h-10 bg-white relative shadow-sm transition-all duration-200 ease-in-out focus-within:border-[#02997d] focus-within:ring-2 focus-within:ring-[#02997d]/20">
+              <input
+                type="date"
+                value={dateRange.from || ''}
+                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                className="text-sm pl-2 pr-2 py-1 focus:outline-none bg-transparent border-none w-[125px] cursor-pointer text-gray-900 font-medium font-sans"
+              />
+              <span className="text-gray-300 text-xs">-</span>
+              <input
+                type="date"
+                value={dateRange.to || ''}
+                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                className="text-sm px-2 py-1 focus:outline-none bg-transparent border-none w-[125px] cursor-pointer text-gray-900 font-medium font-sans"
+              />
+              {(dateRange.from || dateRange.to) && (
+                <button
+                  onClick={() => setDateRange({ from: undefined, to: undefined })}
+                  className="text-xs text-slate-400 hover:text-red-500 px-2 h-full border-l border-slate-100 transition-colors"
+                  title="Limpiar fechas"
+                >
+                  X
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="w-full sm:w-80">
-          <Input
-            label="Búsqueda"
-            placeholder="Escribe para buscar..."
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            icon={Search}
-            className="bg-white border-slate-200"
-          />
+
+        {/* Filter & Search Group */}
+        <div className="flex flex-col sm:flex-row items-end gap-4 w-full lg:w-auto">
+          <div className="w-full sm:w-48">
+            <Select
+              label="Filtrar por"
+              value={field}
+              onChange={setField}
+              options={filterFields}
+              placeholder="Campo"
+              icon={Filter}
+              className="bg-white border-slate-200"
+            />
+          </div>
+          <div className="w-full sm:w-64">
+            <Input
+              label="Búsqueda"
+              placeholder="Buscar..."
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              icon={Search}
+              className="bg-white border-slate-200"
+            />
+          </div>
         </div>
       </div>
 
