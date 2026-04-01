@@ -4,133 +4,41 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Pagination } from '@/components/ui/pagination';
+import { Loader2, Package, MapPin, Phone, Calendar, BadgeDollarSign, Info } from 'lucide-react';
+
+// Hooks & Context
+import { useAuth } from '@/context/AuthContext';
+import { useApi } from '@/hooks/useApi';
 
 // Components
 import ShipmentsFilter from '@/components/filters/ShipmentsFilter';
 import ShipmentsTable, { Shipment } from '@/components/tables/ShipmentsTable';
 
-const MOCK_SHIPMENTS: Shipment[] = [
-  {
-    id: 1,
-    vendedor: "sakira's collection",
-    producto: "1 FALDA TALLA M Y 1 BLUSA TALLA S",
-    cantidad: 1,
-    fechaEntrega: "27-12-2024",
-    comprador: "Maria Igreda",
-    telefono: "963004636",
-    montoTotal: "S/0.00",
-    metodoPago: "No tiene",
-    modoEntrega: "solo Entregar",
-    distrito: "San Luis",
-    estado: "entregado",
-    delivery: "S/10.00",
-    dniMoto: "76743332",
-    motorizado: "JOSE ARAYA",
-    placa: "2375-7D",
-    motivo: "No tiene"
-  },
-  {
-    id: 2,
-    vendedor: "sakira's collection",
-    producto: "1 BLUSA COLOR ROJO TALLA M",
-    cantidad: 1,
-    fechaEntrega: "23-12-2024",
-    comprador: "Brenda Veliz Huanca",
-    telefono: "998823226",
-    montoTotal: "S/60.00",
-    metodoPago: "Efectivo",
-    modoEntrega: "contra-entrega",
-    distrito: "El Agustino",
-    estado: "entregado",
-    delivery: "S/12.00",
-    dniMoto: "76743332",
-    motorizado: "JOSE ARAYA",
-    placa: "2375-7D",
-    motivo: "No tiene"
-  },
-  {
-    id: 3,
-    vendedor: "sakira's collection",
-    producto: "1 enterizo color negro talla L",
-    cantidad: 1,
-    fechaEntrega: "23-12-2024",
-    comprador: "Fiorella Lopez Cordova",
-    telefono: "920149485",
-    montoTotal: "S/50.00",
-    metodoPago: "Abono a Japi",
-    modoEntrega: "contra-entrega",
-    distrito: "San Isidro",
-    estado: "entregado",
-    delivery: "S/10.00",
-    dniMoto: "76743332",
-    motorizado: "JOSE ARAYA",
-    placa: "2375-7D",
-    motivo: "No tiene"
-  },
-  {
-    id: 4,
-    vendedor: "sakira's collection",
-    producto: "FALDA COLOR NEGRO",
-    cantidad: 1,
-    fechaEntrega: "28-05-2024",
-    comprador: "Ana Chavez Scott",
-    telefono: "985678150",
-    montoTotal: "S/0.00",
-    metodoPago: "No tiene",
-    modoEntrega: "solo Entregar",
-    distrito: "San Isidro",
-    estado: "entregado",
-    delivery: "S/10.00",
-    dniMoto: "No tiene",
-    motorizado: "No tiene",
-    placa: "No tiene",
-    motivo: "No tiene"
-  },
-  {
-    id: 5,
-    vendedor: "sakira's collection",
-    producto: "FALDA TALLA L",
-    cantidad: 1,
-    fechaEntrega: "22-05-2024",
-    comprador: "Alberto Sanchez",
-    telefono: "964238696",
-    montoTotal: "S/79.00",
-    metodoPago: "Abono a vendedor",
-    modoEntrega: "contra-entrega",
-    distrito: "Santiago de Surco",
-    estado: "entregado",
-    delivery: "S/13.00",
-    dniMoto: "76743332",
-    motorizado: "JOSE ARAYA",
-    placa: "2375-7D",
-    motivo: "No tiene"
-  },
-  {
-    id: 6,
-    vendedor: "sakira's collection",
-    producto: "FALDA TALLA L",
-    cantidad: 1,
-    fechaEntrega: "04-04-2024",
-    comprador: "Eliana Roa",
-    telefono: "993018402",
-    montoTotal: "S/0.00",
-    metodoPago: "No tiene",
-    modoEntrega: "solo Entregar",
-    distrito: "Santiago de Surco",
-    estado: "entregado",
-    delivery: "S/13.00",
-    dniMoto: "No tiene",
-    motorizado: "No tiene",
-    placa: "No tiene",
-    motivo: "No tiene"
-  },
-];
-
 export default function ShipmentsPage() {
+  const { user } = useAuth();
+  const { get, loading } = useApi<Shipment[]>();
+  const [allShipments, setAllShipments] = useState<Shipment[]>([]);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [filterField, setFilterField] = useState('');
   const [searchValue, setSearchValue] = useState('');
   const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({ from: undefined, to: undefined });
+
+  // Fetch Data
+  useEffect(() => {
+    const fetchShipments = async () => {
+      const idCompany = user?.id_company || user?.id; // Fallback to user ID if company ID is not available
+      if (idCompany) {
+        const data = await get(`/shipping/${idCompany}`);
+        if (data) {
+          setAllShipments(data);
+        }
+      }
+    };
+
+    if (user) {
+      fetchShipments();
+    }
+  }, [user, get]);
 
   const handleOpenModal = (shipment: Shipment) => {
     setSelectedShipment(shipment);
@@ -140,37 +48,42 @@ export default function ShipmentsPage() {
     setSelectedShipment(null);
   };
 
-  // Filter Logic (Simple implementation for mock)
-  const filteredShipments = MOCK_SHIPMENTS.filter(item => {
+  // Filter Logic
+  const filteredShipments = allShipments.filter(item => {
     // Basic search filter
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
-      return (
-        item.vendedor.toLowerCase().includes(searchLower) ||
-        item.comprador.toLowerCase().includes(searchLower) ||
-        item.producto.toLowerCase().includes(searchLower)
-      );
+
+      if (filterField && filterField in item) {
+        const value = item[filterField as keyof Shipment];
+        if (!value?.toString().toLowerCase().includes(searchLower)) return false;
+      } else {
+        // General search if no specific field is selected
+        const matchesSearch =
+          item.company_name.toLowerCase().includes(searchLower) ||
+          item.customer_name.toLowerCase().includes(searchLower) ||
+          item.product_name.toLowerCase().includes(searchLower) ||
+          item.id.toString().includes(searchLower);
+
+        if (!matchesSearch) return false;
+      }
     }
 
-    // Filter by Date Range (MOCK_SHIPMENTS dates are DD-MM-YYYY)
-    if (dateRange.from && item.fechaEntrega) {
-      const parts = item.fechaEntrega.split('-');
-      if (parts.length === 3) {
-        const mDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
-        const fDate = new Date(dateRange.from);
-        fDate.setHours(0, 0, 0, 0);
-        if (mDate < fDate) return false;
-      }
+    // Filter by Date Range
+    if (dateRange.from && item.shipping_date) {
+      const shipDate = new Date(item.shipping_date);
+      shipDate.setHours(0, 0, 0, 0);
+      const fDate = new Date(dateRange.from);
+      fDate.setHours(0, 0, 0, 0);
+      if (shipDate < fDate) return false;
     }
-    
-    if (dateRange.to && item.fechaEntrega) {
-      const parts = item.fechaEntrega.split('-');
-      if (parts.length === 3) {
-        const mDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
-        const tDate = new Date(dateRange.to);
-        tDate.setHours(23, 59, 59, 999);
-        if (mDate > tDate) return false;
-      }
+
+    if (dateRange.to && item.shipping_date) {
+      const shipDate = new Date(item.shipping_date);
+      shipDate.setHours(23, 59, 59, 999);
+      const tDate = new Date(dateRange.to);
+      tDate.setHours(23, 59, 59, 999);
+      if (shipDate > tDate) return false;
     }
 
     return true;
@@ -202,21 +115,30 @@ export default function ShipmentsPage() {
           totalItems={filteredShipments.length}
         />
 
-        {/* Table */}
+        {/* Table Area */}
         <div className="space-y-4">
-          <ShipmentsTable
-            shipments={currentItems}
-            onView={handleOpenModal}
-          />
-          {totalItems > 0 && (
-            <div className="flex justify-center sm:justify-end mt-4">
-              <Pagination
-                currentPage={currentPage}
-                totalItems={totalItems}
-                itemsPerPage={ITEMS_PER_PAGE}
-                onPageChange={setCurrentPage}
-              />
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-64 bg-white rounded-xl border border-gray-100 shadow-sm">
+              <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mb-4" />
+              <p className="text-gray-500 font-medium">Cargando envíos...</p>
             </div>
+          ) : (
+            <>
+              <ShipmentsTable
+                shipments={currentItems}
+                onView={handleOpenModal}
+              />
+              {totalItems > 0 && (
+                <div className="flex justify-center sm:justify-end mt-4">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalItems={totalItems}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -226,7 +148,7 @@ export default function ShipmentsPage() {
         isOpen={!!selectedShipment}
         onClose={handleCloseModal}
         size="xl"
-        title={`Detalle de Envío #${selectedShipment?.id}`}
+        title={`Detalle de Envío #${selectedShipment?.id.toString().padStart(5, '0')}`}
         showCloseButton={true}
         footer={
           <ModalFooter>
@@ -242,119 +164,111 @@ export default function ShipmentsPage() {
         }
       >
         {selectedShipment && (
-          <div className="flex flex-col gap-4">
-            
-            {/* Primera Fila: General & Producto */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* General Info Card */}
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                  Información General
+          <div className="flex flex-col gap-6">
+
+            {/* Primera Fila: Cliente & Producto */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Client Info Card */}
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                  Información del Cliente
                 </h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Vendedor</p>
-                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.vendedor}>{selectedShipment.vendedor}</p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                      <Package className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold">Cliente</p>
+                      <p className="font-semibold text-gray-900 text-sm leading-tight">{selectedShipment.customer_name}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Comprador</p>
-                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.comprador}>{selectedShipment.comprador}</p>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                      <Phone className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold">Teléfono</p>
+                      <p className="font-semibold text-gray-900 text-sm">{selectedShipment.phone}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Teléfono</p>
-                    <p className="font-semibold text-gray-900">{selectedShipment.telefono}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Fecha Entrega</p>
-                    <p className="font-semibold text-gray-900">{selectedShipment.fechaEntrega}</p>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold">Dirección de Entrega</p>
+                      <p className="font-medium text-gray-700 text-sm leading-snug">{selectedShipment.address}</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Product Info Card */}
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                  Detalles del Producto
+              {/* Order Detail Card */}
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                  Detalles del Pedido
                 </h4>
-                <div className="flex flex-col flex-1 justify-between gap-3">
+                <div className="space-y-4 flex-1">
                   <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-1">Producto(s)</p>
-                    <p className="font-medium text-gray-800 bg-white px-3 py-2 rounded-lg border border-gray-200 text-xs line-clamp-2" title={selectedShipment.producto}>
-                      {selectedShipment.producto}
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-end mt-auto">
-                    <div>
-                      <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Cantidad</p>
-                      <p className="font-semibold text-gray-900">{selectedShipment.cantidad}</p>
+                    <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold mb-2">Producto(s)</p>
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-sm font-medium text-gray-800 leading-relaxed italic">
+                        "{selectedShipment.product_name}"
+                      </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Monto Total</p>
-                      <p className="font-bold text-emerald-600 text-lg leading-none">{selectedShipment.montoTotal}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-gray-400 text-[10px] uppercase tracking-wide font-bold mb-1">Fecha Programada</p>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <p className="font-bold text-slate-700 text-sm">{new Date(selectedShipment.shipping_date).toLocaleDateString('es-PE')}</p>
+                      </div>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-gray-400 text-[10px] uppercase tracking-wide font-bold mb-1">Costo Envío</p>
+                      <div className="flex items-center gap-2">
+                        <BadgeDollarSign className="w-3.5 h-3.5 text-emerald-500" />
+                        <p className="font-bold text-emerald-700 text-sm">S/ {Number(selectedShipment.delivery_amount).toFixed(2)}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Segunda Fila: Pago, Entrega & Motorizado */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Payment & Delivery Info Card */}
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Pago y Entrega
-                </h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Método Pago</p>
-                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.metodoPago}>{selectedShipment.metodoPago}</p>
+            {/* Segunda Fila: Monto Total & Observación */}
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg shadow-emerald-500/20">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                    <BadgeDollarSign className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Modo Entrega</p>
-                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.modoEntrega}>{selectedShipment.modoEntrega}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Costo Delivery</p>
-                    <p className="font-semibold text-gray-900">{selectedShipment.delivery}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Distrito</p>
-                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.distrito}>{selectedShipment.distrito}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Estado</p>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
-                      {selectedShipment.estado}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Motivo</p>
-                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.motivo}>{selectedShipment.motivo}</p>
+                    <p className="text-white/70 text-[11px] uppercase tracking-widest font-bold">Total a Cobrar</p>
+                    <p className="text-3xl font-black tabular-nums">S/ {Number(selectedShipment.total_amount).toFixed(2)}</p>
                   </div>
                 </div>
-              </div>
 
-              {/* Motorizado Info Card */}
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  Datos del Motorizado
-                </h4>
-                <div className="grid grid-cols-2 gap-3 text-sm flex-1 content-start">
-                  <div className="col-span-2">
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Nombre</p>
-                    <p className="font-semibold text-gray-900 truncate" title={selectedShipment.motorizado}>{selectedShipment.motorizado}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">DNI</p>
-                    <p className="font-semibold text-gray-900">{selectedShipment.dniMoto}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[11px] uppercase tracking-wide mb-0.5">Placa</p>
-                    <p className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 w-fit">{selectedShipment.placa}</p>
+                <div className="h-px w-full md:h-12 md:w-px bg-white/20"></div>
+
+                <div className="flex-1 w-full">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shrink-0">
+                      <Info className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="w-full">
+                      <p className="text-white/70 text-[11px] uppercase tracking-widest font-bold mb-1">Observaciones</p>
+                      <p className="text-sm font-medium leading-normal line-clamp-2">
+                        {selectedShipment.observation || 'Sin observaciones adicionales para este envío.'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -366,3 +280,4 @@ export default function ShipmentsPage() {
     </div>
   );
 }
+

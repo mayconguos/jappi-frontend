@@ -72,9 +72,10 @@ export default function ShipmentsFilter({
               value={filterField}
               onChange={setFilterField}
               options={[
-                { label: 'Vendedor', value: 'vendor' },
-                { label: 'Producto', value: 'product' },
-                { label: 'Comprador', value: 'buyer' },
+                { label: 'Vendedor', value: 'company_name' },
+                { label: 'Producto', value: 'product_name' },
+                { label: 'Comprador', value: 'customer_name' },
+                { label: 'ID Envío', value: 'id' },
               ]}
               placeholder="Campo"
               icon={Filter}
