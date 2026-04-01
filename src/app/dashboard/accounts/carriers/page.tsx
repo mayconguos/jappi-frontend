@@ -60,17 +60,18 @@ export default function CarriersPage() {
     data: Carrier | null;
   }>({ isOpen: false, data: null });
   const [deleting, setDeleting] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
 
   // --- Hooks ---
-  const { get, del, error: apiError } = useApi<Carrier[]>();
+  const { get, del, put, error: apiError } = useApi<any>();
   const carrierModal = useModal<Carrier>();
   const carrierViewModal = useModal<Carrier>();
 
   // --- Effects ---
-  // Resetear paginación al cambiar filtro o valor
+  // Resetear paginación al cambiar filtro, valor o toggle de inactivos
   useEffect(() => {
     setCurrentPage(1);
-  }, [field, value]);
+  }, [field, value, showInactive]);
 
   // --- Data Fetching ---
   const fetchCarriers = useCallback(async () => {
@@ -95,13 +96,16 @@ export default function CarriersPage() {
 
   // --- Derived Data ---
   const filtered = useMemo(() => {
-    if (!field) return carriers;
+    // 1. Filtrar por estado (Inactivo=2 / Activo!=2)
+    const statusFiltered = carriers.filter(c => showInactive ? c.status === 2 : c.status !== 2);
+
+    if (!field || !value) return statusFiltered;
     const val = value.toLowerCase();
-    return carriers.filter((carrier) => {
+    return statusFiltered.filter((carrier) => {
       const fieldValue = carrier[field as keyof Carrier];
       return fieldValue ? fieldValue.toString().toLowerCase().includes(val) : false;
     });
-  }, [carriers, field, value]);
+  }, [carriers, field, value, showInactive]);
 
   const totalItems = filtered.length;
   const currentItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -119,6 +123,16 @@ export default function CarriersPage() {
 
   const handleAddCarrier: () => void = () => {
     carrierModal.openModal();
+  };
+
+  const handleReactivateCarrier = async (carrier: Carrier) => {
+    const response = await put(`/user/update/${carrier.id}`, { status: 1 });
+    if (response) {
+      setCarriers(prev => prev.map(c => c.id === carrier.id ? { ...c, status: 1 } : c));
+      setSuccessModal('El transportista ha sido reactivado correctamente.');
+    } else {
+      setErrorModal('No se pudo reactivar el transportista.');
+    }
   };
 
   const handleCarrierSubmit: (carrier: Omit<Carrier, 'id'>, editingCarrier?: Carrier | null) => void = (carrier, editingCarrier) => {
@@ -181,6 +195,8 @@ export default function CarriersPage() {
             filterFields,
             onAdd: handleAddCarrier,
             totalItems,
+            showInactive,
+            setShowInactive
           }}
         />
 
@@ -203,6 +219,7 @@ export default function CarriersPage() {
                 onView: handleViewCarrier,
                 onEdit: handleEditCarrier,
                 onDelete: handleDeleteCarrier,
+                onReactivate: handleReactivateCarrier
               }}
             />
 

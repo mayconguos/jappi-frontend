@@ -11,7 +11,8 @@ import {
   FileText,
   Bike,
   IdCard,
-  UserCheck
+  UserCheck,
+  Map
 } from 'lucide-react';
 
 export type Role =
@@ -37,6 +38,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
     { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Bike },
+    { path: '/dashboard/accounts/courier-zones', label: 'Zonas de Operación', icon: Map },
     { path: '/dashboard/accounts/workers', label: 'Usuarios internos', icon: IdCard },
     { path: '/dashboard/accounts/pending', label: 'Activación de cuentas', icon: UserCheck },
     { path: '/dashboard/pickups/supply', label: 'Recojos abastecimiento', icon: Truck },
@@ -51,6 +53,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/shipments/all', label: 'Todos los envíos', icon: Calendar },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Truck },
+    { path: '/dashboard/accounts/courier-zones', label: 'Zonas de Operación', icon: Map },
     { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
     { path: '/dashboard/pickups/supply', label: 'Recojos abastecimiento', icon: Truck },
     { path: '/dashboard/inventory/requests', label: 'Solicitudes de almacén', icon: FileText },

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShieldCheck, Package, RefreshCw, Search, Building2 } from 'lucide-react';
+import { ShieldCheck, Package, RefreshCw, Search, Building2, ArrowLeft } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
@@ -244,10 +244,10 @@ export default function KardexPage() {
           </div>
           <button
             onClick={() => { setSelectedCompanyId(null); setCompanySearchText(''); }}
-            className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2.5 px-4 py-2.5 bg-indigo-50 text-indigo-700 font-bold rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-all text-[11px] uppercase tracking-wider group shadow-sm"
           >
-            <RefreshCw size={14} />
-            Cambiar Empresa
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            Seleccionar otra empresa
           </button>
         </div>
       )}
