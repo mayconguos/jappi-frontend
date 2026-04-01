@@ -12,6 +12,19 @@ import { Select } from '@/components/ui/select';
 import { PasswordInput } from '@/components/ui/password-input';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import DeliveryLoader from '@/components/ui/delivery-loader';
+import { 
+  User, 
+  Mail, 
+  FileText, 
+  Lock, 
+  Truck, 
+  Fingerprint, 
+  IdCard,
+  Gauge, 
+  Car, 
+  Shield,
+  CreditCard
+} from 'lucide-react';
 
 import { PERSONAL_DOCUMENT_TYPES, DEFAULT_DOCUMENT_TYPE } from '@/constants/documentTypes';
 import { DEFAULT_CARRIER_ROLE } from '@/constants/userRoles';
@@ -221,7 +234,7 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
         });
       } else {
         // Crear nuevo usuario
-        response = await api.post('/user', requestBody, {
+        response = await api.post('/user/courier', requestBody, {
           headers: {
             authorization: `${token}`,
           },
@@ -274,58 +287,66 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
         isOpen={isOpen}
         onClose={handleClose}
         title={editingCarrier ? 'Editar transportista' : 'Añadir transportista'}
+        description={editingCarrier ? 'Actualiza la información personal y del vehículo del transportista.' : 'Completa los datos para registrar un nuevo transportista en la plataforma.'}
         size="xl"
         showCloseButton
       >
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 relative">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 relative">
           {apiError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4">
               {apiError}
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
 
             {/* SECCIÓN 1: INFORMACIÓN PERSONAL */}
             <div className="md:col-span-2">
-              <h4 className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+              <h4 className="text-xs font-bold text-[#02997d] mb-2 flex items-center gap-2 uppercase tracking-wider">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                  <User size={14} />
+                </div>
                 Información Personal
               </h4>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Input
                 label="Nombre *"
                 size="compact"
+                icon={User}
+                placeholder="Nombres"
                 value={watch('first_name') || ''}
                 onChange={(e) => {
                   setValue('first_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.first_name?.message}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
                 autoFocus={!editingCarrier}
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Input
                 label="Apellido *"
                 size="compact"
+                icon={User}
+                placeholder="Apellidos"
                 value={watch('last_name') || ''}
                 onChange={(e) => {
                   setValue('last_name', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.last_name?.message}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Select
                 label="Tipo de documento *"
                 size="compact"
+                icon={IdCard}
                 value={watch('document_type')}
                 options={PERSONAL_DOCUMENT_TYPES}
                 onChange={(value: string) => {
@@ -335,28 +356,32 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   clearErrors('document_number');
                 }}
                 error={errors.document_type?.message}
-                className="bg-slate-50 border-slate-200"
+                className="bg-white border-slate-200"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Input
                 label="Número de documento *"
                 size="compact"
+                icon={Fingerprint}
+                placeholder="Ej: 77665544"
                 value={watch('document_number') || ''}
                 onChange={(e) => {
                   setValue('document_number', e.target.value, { shouldDirty: true });
                 }}
                 error={errors.document_number?.message}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Input
                 type="email"
                 label="Correo electrónico *"
                 size="compact"
+                icon={Mail}
+                placeholder="ejemplo@jappi.com"
                 value={watch('email') || ''}
                 onChange={(e) => {
                   setValue('email', e.target.value.toLowerCase(), { shouldDirty: true });
@@ -364,42 +389,46 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                 error={errors.email?.message}
                 autoComplete="username"
                 disabled={!!editingCarrier}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
               />
               {editingCarrier && (
-                <p className="text-slate-400 text-xs mt-1 flex items-center gap-1">
-                  <span>🔒</span> El correo no puede ser modificado
+                <p className="text-slate-400 text-[10px] uppercase font-bold mt-1.5 flex items-center gap-1.5 px-1">
+                  <Lock size={10} /> Registro verificado - No modificable
                 </p>
               )}
             </div>
 
             {!editingCarrier && (
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 font-sans">
                 <PasswordInput
                   label="Contraseña *"
                   size="compact"
+                  placeholder="********"
                   value={watch('password') || ''}
                   onChange={(e) => setValue('password', e.target.value)}
                   disabled={isLoading}
                   error={'password' in errors ? errors.password?.message : undefined}
                   autoComplete="new-password"
-                  className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                  className="bg-white border-slate-200 focus:bg-white transition-colors"
                 />
               </div>
             )}
 
-            <div className="md:col-span-2 border-t border-slate-100 my-1 pt-3">
-              <h4 className="text-sm font-medium text-slate-900 mb-1 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[var(--surface-dark)] rounded-full"></span>
+            <div className="md:col-span-2 border-t border-slate-100 mt-1 pt-3">
+              <h4 className="text-xs font-bold text-[#02997d] mb-2 flex items-center gap-2 uppercase tracking-wider">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                  <Truck size={14} />
+                </div>
                 Datos del Vehículo
               </h4>
             </div>
 
             {/* SECCIÓN 2: DATOS DEL VEHÍCULO */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Select
                 label="Tipo de vehículo *"
                 size="compact"
+                icon={Car}
                 value={watch('vehicle_type')}
                 options={VEHICLE_TYPES.map(type => ({ label: type.label, value: type.value }))}
                 onChange={(value: string) => {
@@ -407,60 +436,67 @@ export default function CarrierModal({ isOpen, onClose, onSubmit, editingCarrier
                   clearErrors('vehicle_type');
                 }}
                 error={errors.vehicle_type?.message}
-                className="bg-slate-50 border-slate-200"
+                className="bg-white border-slate-200"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Input
                 label="Marca *"
                 size="compact"
+                icon={Shield}
+                placeholder="Ej: Toyota"
                 value={watch('brand') || ''}
                 onChange={(e) => {
                   setValue('brand', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.brand?.message}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Input
                 label="Modelo *"
                 size="compact"
+                icon={Truck}
+                placeholder="Ej: Hilux"
                 value={watch('model') || ''}
                 onChange={(e) => {
                   setValue('model', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.model?.message}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <Input
                 label="Placa *"
                 size="compact"
+                icon={CreditCard}
+                placeholder="Ej: ABC-123"
                 value={watch('plate_number') || ''}
                 onChange={(e) => {
                   setValue('plate_number', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.plate_number?.message}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                placeholder="Ej: ABC-123"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
-            <div className="md:col-span-2 space-y-1.5">
+            <div className="md:col-span-2 space-y-1.5 font-sans">
               <Input
                 label="Licencia *"
                 size="compact"
+                icon={Gauge}
+                placeholder="Número de Licencia de Conducir"
                 value={watch('license') || ''}
                 onChange={(e) => {
                   setValue('license', e.target.value.toUpperCase(), { shouldDirty: true });
                 }}
                 error={errors.license?.message}
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-white border-slate-200 focus:bg-white transition-colors"
               />
             </div>
 
