@@ -170,7 +170,8 @@ export default function CarrierPickupsTable() {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
-              <TableHead className="w-[140px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
+              <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
+              <TableHead className="w-[140px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Remitente</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contacto</TableHead>
               <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Paquetes</TableHead>
@@ -180,13 +181,16 @@ export default function CarrierPickupsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentItems.map((pickup) => (
+            {currentItems.map((pickup, index) => (
               <TableRow
                 key={pickup.id}
                 className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                 onClick={() => handleOpenDetail(pickup)}
               >
-                <TableCell className="pl-6 py-4 font-mono text-xs text-emerald-700 font-medium h-16">
+                <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+                </TableCell>
+                <TableCell className="py-4 font-mono text-xs text-emerald-700 font-medium h-16">
                   {pickup.id}
                 </TableCell>
                 <TableCell className="py-4">

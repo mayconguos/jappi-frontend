@@ -146,6 +146,8 @@ export default function CompanyWarehousePage() {
           <div className="flex flex-col gap-6">
             <CompanyProductsTable
               products={currentItems}
+              currentPage={currentPage}
+              itemsPerPage={ITEMS_PER_PAGE}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />

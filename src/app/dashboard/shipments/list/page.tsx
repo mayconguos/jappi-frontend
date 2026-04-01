@@ -126,6 +126,8 @@ export default function ShipmentsPage() {
             <>
               <ShipmentsTable
                 shipments={currentItems}
+                currentPage={currentPage}
+                itemsPerPage={ITEMS_PER_PAGE}
                 onView={handleOpenModal}
               />
               {totalItems > 0 && (

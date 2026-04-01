@@ -18,6 +18,8 @@ export interface CatalogProduct {
 
 interface CompanyProductsTableProps {
   products: CatalogProduct[];
+  currentPage: number;
+  itemsPerPage: number;
   onEdit: (product: CatalogProduct) => void;
   onDelete: (product: CatalogProduct) => void;
 }
@@ -43,6 +45,8 @@ const getStatusLabel = (status: string) => {
 
 export default function CompanyProductsTable({
   products,
+  currentPage,
+  itemsPerPage,
   onEdit,
   onDelete,
 }: CompanyProductsTableProps) {
@@ -57,7 +61,8 @@ export default function CompanyProductsTable({
       <Table>
         <TableHeader className="bg-slate-50">
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="w-[120px] pl-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">SKU</TableHead>
+            <TableHead className="w-[50px] pl-6 text-xs font-semibold text-slate-700 uppercase tracking-wider">#</TableHead>
+            <TableHead className="w-[120px] text-xs font-semibold text-slate-700 uppercase tracking-wider">SKU</TableHead>
             {/* Mostrar nombre de la empresa si al menos un producto lo tiene (indicando vista de Admin) */}
             {showCompanyNameColumn && (
               <TableHead className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Empresa</TableHead>
@@ -70,12 +75,15 @@ export default function CompanyProductsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {products.map((item) => (
+          {products.map((item, index) => (
             <TableRow
               key={item.id}
               className="border-b border-gray-50 hover:bg-slate-50/50 transition-colors group"
             >
-              <TableCell className="pl-6 py-4 font-mono text-xs font-medium text-slate-900">
+              <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                {(currentPage - 1) * itemsPerPage + index + 1}
+              </TableCell>
+              <TableCell className="py-4 font-mono text-xs font-medium text-slate-900">
                 {item.sku}
               </TableCell>
               {/* Renderizar celda de nombre de empresa si corresponde */}

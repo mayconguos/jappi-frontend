@@ -7,12 +7,14 @@ import { Badge } from '@/components/ui/badge';
 interface SupplyPickupsTableProps {
   pickups: Pickup[];
   currentPage: number;
+  itemsPerPage: number;
   onValidate: (pickup: Pickup) => void;
 }
 
 export default function SupplyPickupsTable({
   pickups,
   currentPage,
+  itemsPerPage,
   onValidate,
 }: SupplyPickupsTableProps) {
   
@@ -21,7 +23,8 @@ export default function SupplyPickupsTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b border-gray-100 bg-gray-50/50 hover:bg-gray-50/50">
-            <TableHead className="w-[80px] pl-6 text-xs font-bold text-gray-500 uppercase tracking-wider">ID</TableHead>
+            <TableHead className="w-[50px] pl-6 text-xs font-bold text-gray-500 uppercase tracking-wider">#</TableHead>
+            <TableHead className="w-[80px] text-xs font-bold text-gray-500 uppercase tracking-wider">ID</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Remitente / Solicitud</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Dirección de Recojo</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</TableHead>
@@ -29,14 +32,17 @@ export default function SupplyPickupsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {pickups.map((pickup) => {
+          {pickups.map((pickup, index) => {
             
             return (
               <TableRow
                 key={pickup.id}
                 className="border-b border-gray-50 hover:bg-blue-50/20 transition-colors group"
               >
-                <TableCell className="pl-6 py-4 font-mono text-sm font-semibold text-gray-700">
+                <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                  {(currentPage - 1) * itemsPerPage + index + 1}
+                </TableCell>
+                <TableCell className="py-4 font-mono text-sm font-semibold text-gray-700">
                   #{pickup.id}
                 </TableCell>
 

@@ -152,6 +152,8 @@ export default function WarehouseRequestsPage() {
           <>
             <RequestsTable
               requests={currentItems}
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
               onView={handleViewRequest}
               onDownloadGuide={handleDownloadGuide}
               isWarehouse={isWarehouse}

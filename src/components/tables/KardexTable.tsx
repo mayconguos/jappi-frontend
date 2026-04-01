@@ -57,7 +57,8 @@ export default function KardexTable({ movements, currentPage }: KardexTableProps
       <Table>
         <TableHeader>
           <TableRow className="border-b border-gray-100 bg-gray-50/50">
-            <TableHead className="w-[140px] pl-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha / Hora</TableHead>
+            <TableHead className="w-[50px] pl-6 text-xs font-bold text-gray-500 uppercase tracking-wider">#</TableHead>
+            <TableHead className="w-[140px] text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha / Hora</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">SKU</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Producto</TableHead>
             <TableHead className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo Mov. / Origen</TableHead>
@@ -67,7 +68,7 @@ export default function KardexTable({ movements, currentPage }: KardexTableProps
           </TableRow>
         </TableHeader>
         <TableBody>
-          {movements.map((mov) => {
+          {movements.map((mov, index) => {
             const config = MOVEMENT_MAPPING[mov.movement_type] || { label: mov.movement_type, baseType: 'ADJUSTMENT' };
             const isInput = config.baseType === 'IN';
 
@@ -87,7 +88,10 @@ export default function KardexTable({ movements, currentPage }: KardexTableProps
                 key={mov.id}
                 className="border-b border-gray-50 hover:bg-slate-50/70 transition-colors group"
               >
-                <TableCell className="pl-6 py-4">
+                <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                  {(currentPage - 1) * 10 + index + 1}
+                </TableCell>
+                <TableCell className="py-4 whitespace-nowrap">
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-gray-700">{formattedDate}</span>
                     <span className="text-xs text-gray-400">{formattedTime}</span>

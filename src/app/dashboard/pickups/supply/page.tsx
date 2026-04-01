@@ -209,6 +209,7 @@ export default function SupplyPickupsPage() {
           <SupplyPickupsTable
             pickups={currentItems}
             currentPage={currentPage}
+            itemsPerPage={ITEMS_PER_PAGE}
             onValidate={handleValidateClick}
           />
 

@@ -30,7 +30,7 @@ export interface RouteItem {
 
 export const roleRoutes: Record<Role, RouteItem[]> = {
   admin: [
-    { path: '/dashboard/shipments/calendar', label: 'Envíos por fecha', icon: Calendar },
+    { path: '/dashboard/shipments/calendar', label: 'Envíos diarios', icon: Calendar },
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
     { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
     { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
@@ -48,7 +48,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
     { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
     { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
-    { path: '/dashboard/shipments/calendar', label: 'Envíos por fecha', icon: Calendar },
+    { path: '/dashboard/shipments/calendar', label: 'Envíos diarios', icon: Calendar },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Truck },
     { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
@@ -61,7 +61,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/inventory/requests', label: 'Solicitudes', icon: FileText },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
-    { path: '/dashboard/shipments/calendar', label: 'Envíos por fecha', icon: Calendar },
+    { path: '/dashboard/shipments/calendar', label: 'Envíos diarios', icon: Calendar },
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
     { path: '/dashboard/pickups/supply', label: 'Recojos de abastecimiento', icon: Truck },
   ],

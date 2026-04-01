@@ -116,6 +116,8 @@ export default function ActivationsPage() {
           <div className="space-y-4">
             <PendingTable
               companies={currentItems}
+              currentPage={currentPage}
+              itemsPerPage={ITEMS_PER_PAGE}
               onActivate={(company) => {
                 setIsCorporateVal(company.is_corporate ?? false);
                 setConfirmModal({ isOpen: true, user: company, action: 'activate' });

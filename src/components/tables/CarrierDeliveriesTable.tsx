@@ -234,7 +234,8 @@ export default function CarrierDeliveriesTable() {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
-              <TableHead className="w-[140px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
+              <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
+              <TableHead className="w-[140px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Destinatario</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Teléfono</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
@@ -250,13 +251,16 @@ export default function CarrierDeliveriesTable() {
                 </TableCell>
               </TableRow>
             ) : (
-              currentItems.map((delivery) => (
+              currentItems.map((delivery, index) => (
                 <TableRow
                   key={delivery.id}
                   className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                   onClick={() => handleOpenDetail(delivery)}
                 >
-                  <TableCell className="pl-6 py-4 font-mono text-xs text-blue-700 font-medium h-16">
+                  <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                    {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+                  </TableCell>
+                  <TableCell className="py-4 font-mono text-xs text-blue-700 font-medium h-16">
                     {delivery.id}
                   </TableCell>
                   <TableCell className="py-4">

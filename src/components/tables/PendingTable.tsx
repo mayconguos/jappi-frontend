@@ -14,12 +14,16 @@ export interface UnverifiedCompany {
 
 interface PendingTableProps {
   companies: UnverifiedCompany[];
+  currentPage: number;
+  itemsPerPage: number;
   onActivate: (company: UnverifiedCompany) => void;
   onReject: (company: UnverifiedCompany) => void;
 }
 
 export default function PendingTable({
   companies,
+  currentPage,
+  itemsPerPage,
   onActivate,
   onReject,
 }: PendingTableProps) {
@@ -28,18 +32,22 @@ export default function PendingTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</TableHead>
+            <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
+            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Representante</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contacto</TableHead>
             <TableHead className="w-[120px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {companies.map((item) => (
+          {companies.map((item, index) => (
             <TableRow
               key={item.id}
               className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
             >
+              <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                {(currentPage - 1) * itemsPerPage + index + 1}
+              </TableCell>
               <TableCell className="pl-6 py-4">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 min-w-[2.5rem] rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold uppercase ring-1 ring-indigo-100/50">

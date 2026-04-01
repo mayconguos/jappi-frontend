@@ -19,6 +19,8 @@ export interface Shipment {
 
 interface ShipmentsTableProps {
   shipments: Shipment[];
+  currentPage: number;
+  itemsPerPage: number;
   onView: (shipment: Shipment) => void;
 }
 
@@ -51,6 +53,8 @@ const SHIPPING_MODE_LABELS: Record<string, string> = {
 
 export default function ShipmentsTable({
   shipments,
+  currentPage,
+  itemsPerPage,
   onView,
 }: ShipmentsTableProps) {
   return (
@@ -58,7 +62,8 @@ export default function ShipmentsTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente / Destino</TableHead>
+            <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
+            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente / Destino</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Modo</TableHead>
@@ -68,11 +73,14 @@ export default function ShipmentsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {shipments.map((item) => (
+          {shipments.map((item, index) => (
             <TableRow
               key={item.id}
               className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
             >
+              <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                {(currentPage - 1) * itemsPerPage + index + 1}
+              </TableCell>
               <TableCell className="pl-6 py-4">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium text-gray-900">{item.customer_name}</span>

@@ -16,6 +16,8 @@ export interface InboundRequest {
 
 interface RequestsTableProps {
   requests: InboundRequest[];
+  currentPage: number;
+  itemsPerPage: number;
   onView: (request: InboundRequest) => void;
   onDownloadGuide: (request: InboundRequest) => void;
   isWarehouse?: boolean;
@@ -42,6 +44,8 @@ const getStatusLabel = (status: string) => {
 
 export default function RequestsTable({
   requests,
+  currentPage,
+  itemsPerPage,
   onView,
   onDownloadGuide,
   isWarehouse = false,
@@ -51,7 +55,8 @@ export default function RequestsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Orden</TableHead>
+            <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
+            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Orden</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha Creación</TableHead>
             {isWarehouse && (
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</TableHead>
@@ -62,12 +67,15 @@ export default function RequestsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {requests.map((item) => (
+          {requests.map((item, index) => (
             <TableRow
               key={item.id}
               className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
             >
-              <TableCell className="pl-6 py-4 font-mono text-xs text-gray-500 font-medium">
+              <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                {(currentPage - 1) * itemsPerPage + index + 1}
+              </TableCell>
+              <TableCell className="py-4 font-mono text-xs text-gray-500 font-medium">
                 #{item.id.toString().padStart(6, '0')}
               </TableCell>
 
