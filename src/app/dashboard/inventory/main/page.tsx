@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
 import DeliveryLoader from '@/components/ui/delivery-loader';
-import ProductsFilter from '@/components/filters/ProductsFilter';
+import ProductsFilter, { RotationType } from '@/components/filters/ProductsFilter';
 import CompanyProductsTable, { CatalogProduct } from '@/components/tables/CompanyProductsTable';
 import ProductModal from '@/components/forms/modals/ProductModal';
 import { useProducts } from '@/hooks/useProducts';
@@ -17,12 +17,13 @@ export default function GeneralWarehousePage() {
   const { products, addProduct, updateProduct, deleteProduct, loading } = useProducts();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [rotationFilter, setRotationFilter] = useState<RotationType>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, rotationFilter]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
@@ -48,10 +49,23 @@ export default function GeneralWarehousePage() {
     message: ''
   });
 
-  const filteredProducts = products.filter(p =>
-    p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.sku.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         p.sku.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+
+    if (rotationFilter !== 'all') {
+      const lastUpdate = new Date(p.last_updated);
+      const now = new Date();
+      const diffDays = (now.getTime() - lastUpdate.getTime()) / (1000 * 3600 * 24);
+      
+      if (rotationFilter === 'stale_1m' && diffDays <= 30) return false;
+      if (rotationFilter === 'stale_6m' && diffDays <= 180) return false;
+      if (rotationFilter === 'stale_1y' && diffDays <= 365) return false;
+    }
+
+    return true;
+  });
 
   const totalItems = filteredProducts.length;
   const currentItems = filteredProducts.slice(
@@ -109,6 +123,14 @@ export default function GeneralWarehousePage() {
     }
   };
 
+  const handleSendEmails = async () => {
+    setIsLoading(true);
+    // Simulation
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsLoading(false);
+    setSuccessModal(`Se han enviado alertas de rotación a las empresas correspondientes por los ${filteredProducts.length} productos seleccionados.`);
+  };
+
   const closeStatusModals = () => {
     setSuccessModal(false);
     setErrorModal(null);
@@ -121,7 +143,11 @@ export default function GeneralWarehousePage() {
         <ProductsFilter
           searchValue={searchTerm}
           setSearchValue={setSearchTerm}
-          totalItems={products.length}
+          rotationFilter={rotationFilter}
+          setRotationFilter={setRotationFilter}
+          onSendEmails={handleSendEmails}
+          isSendingEmails={isLoading}
+          totalItems={filteredProducts.length}
           hideActions={true}
         />
 
