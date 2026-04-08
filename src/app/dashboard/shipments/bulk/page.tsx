@@ -65,7 +65,11 @@ export default function BulkShipmentPage() {
 
         {/* PASO 1 */}
         {currentStep === 1 && (
-          <TemplateDownloadStep onNext={() => setCurrentStep(2)} />
+          <TemplateDownloadStep
+            onNext={() => setCurrentStep(2)}
+            catalog={catalog}
+            catalogLoading={catalogLoading}
+          />
         )}
 
         {/* PASO 2 */}

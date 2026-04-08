@@ -2,6 +2,7 @@
 
 import ExcelJS from 'exceljs';
 import type { LocationCatalog } from '@/hooks/useLocationCatalog';
+import { MIN_COMPATIBLE_VERSION, TEMPLATE_VERSION_LABEL } from './template-version';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -48,8 +49,29 @@ export async function parseShipmentExcel(
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer);
 
-  const sheet = workbook.worksheets[0];
-  if (!sheet) throw new Error('El archivo no contiene hojas de cálculo.');
+  // ── Version validation ────────────────────────────────────────────────────
+  const metaSheet = workbook.getWorksheet('_meta');
+  if (!metaSheet) {
+    throw new Error(
+      'Este archivo no es la plantilla oficial de Japi Express. ' +
+      `Descarga la plantilla ${TEMPLATE_VERSION_LABEL} desde el Paso 1.`
+    );
+  }
+  const fileVersion = Number(metaSheet.getCell('A1').value);
+  if (isNaN(fileVersion) || fileVersion < MIN_COMPATIBLE_VERSION) {
+    throw new Error(
+      `Plantilla desactualizada (versión detectada: v${fileVersion || '?'}). ` +
+      `Se requiere la ${TEMPLATE_VERSION_LABEL} o superior. ` +
+      'Descarga la versión más reciente desde el Paso 1.'
+    );
+  }
+
+  // ── Find the data sheet by name (fallback to first sheet) ─────────────────
+  const sheet =
+    workbook.getWorksheet('Envíos') ??
+    workbook.worksheets.find((ws) => ws.name !== '_meta' && ws.name !== 'Catálogo') ??
+    null;
+  if (!sheet) throw new Error('El archivo no contiene la hoja "Envíos" esperada.');
 
   const rows: BulkShipmentRow[] = [];
 
@@ -132,21 +154,40 @@ export async function parseShipmentExcel(
 
     // ── Validación de ubicaciones con catálogo ────────────────────────────
     if (catalog) {
-      const regionExists = catalog.some(r => r.id_region === id_region);
-      if (id_region && !regionExists) {
+      const region = catalog.find(r => r.id_region === id_region);
+
+      if (id_region && !region) {
         errors.push(`Región ID ${id_region} no encontrada en el catálogo`);
       }
 
-      if (regionExists && id_district) {
-        const region = catalog.find(r => r.id_region === id_region);
-        const districtExists = region?.districts.some(d => d.id_district === id_district);
-        if (!districtExists) {
-          errors.push(`Distrito ID ${id_district} no pertenece a la Región ${id_region}`);
+      if (region && id_district) {
+        const district = region.districts.find(d => d.id_district === id_district);
+
+        if (!district) {
+          errors.push(
+            `Distrito ID ${id_district} no pertenece a la región "${region.region_name}"`
+          );
         } else if (id_sector) {
-          const district = region?.districts.find(d => d.id_district === id_district);
-          const sectorExists = district?.sectors.some(s => s.id_sector === id_sector);
-          if (!sectorExists) {
-            warnings.push(`Sector ID ${id_sector} no encontrado en el Distrito ${id_district}`);
+          const sectorInDistrict = district.sectors.find(s => s.id_sector === id_sector);
+          if (!sectorInDistrict) {
+            // Try to find the sector name anywhere in the catalog
+            let foundSectorName: string | null = null;
+            outer: for (const r of catalog) {
+              for (const d of r.districts) {
+                const match = d.sectors.find(s => s.id_sector === id_sector);
+                if (match) { foundSectorName = match.sector_name; break outer; }
+              }
+            }
+
+            if (foundSectorName) {
+              errors.push(
+                `El sector "${foundSectorName}" (ID ${id_sector}) no pertenece al distrito "${district.district_name}" (${region.region_name})`
+              );
+            } else {
+              errors.push(
+                `Sector ID ${id_sector} no existe en el catálogo`
+              );
+            }
           }
         }
       }
