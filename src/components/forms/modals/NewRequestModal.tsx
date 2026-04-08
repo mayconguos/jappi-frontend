@@ -29,7 +29,7 @@ interface PickupData {
 interface NewRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (items: SelectedProduct[]) => void;
+  onSubmit: (items: SelectedProduct[], isPickup: boolean) => void;
 }
 
 const TIME_SLOTS = [
@@ -164,7 +164,7 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
           },
         };
         await api.post('/inventory/supply-request', payload);
-        setSuccessModal('¡Solicitud creada! Hemos programado el recojo de tus productos. Te notificaremos cuando el motorizado sea asignado.');
+        setSuccessModal('pickup');
       } else {
         // Solicitud sin recojo
         const payload = {
@@ -175,7 +175,8 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
         setSuccessModal('La solicitud de abastecimiento ha sido creada exitosamente.');
       }
 
-      onSubmit(selectedItems);
+      // Don't call onSubmit here — wait for user to click "Aceptar"
+      // so the success modal stays visible until acknowledged.
 
     } catch (error) {
       console.error('Error creating supply request:', error);
@@ -187,6 +188,10 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
 
   const closeStatusModals = () => {
     if (successModal) {
+      // Capture state before clearing
+      const submittedItems = [...selectedItems];
+      const wasPickup = wantsPickup === true;
+
       setSuccessModal(false);
       setStep(1);
       setSelectedItems([]);
@@ -194,6 +199,8 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
       setWantsPickup(null);
       setPickupData({ address: '', id_address: null, phone: '', date: '' });
       onClose();
+      // Now notify the parent — after the modal is closed and state is reset
+      onSubmit(submittedItems, wasPickup);
     } else {
       setErrorModal(null);
     }
@@ -538,13 +545,32 @@ export default function NewRequestModal({ isOpen, onClose, onSubmit }: NewReques
             </ModalFooter>
           }
         >
-          <div className="flex flex-col items-center text-center py-4">
-            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center text-center py-4 gap-3">
+            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
-            <p className="text-slate-600 font-medium">
-              {typeof successModal === 'string' ? successModal : 'Operación completada correctamente.'}
-            </p>
+
+            {successModal === 'pickup' ? (
+              <>
+                <p className="text-slate-700 font-semibold text-base leading-snug">
+                  Tu solicitud de recojo de stock ha sido recibida y se encuentra pendiente de aprobación.
+                </p>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Para continuar, debes coordinar previamente con el área administrativa.
+                </p>
+                <a
+                  href="tel:902781212"
+                  className="inline-flex items-center gap-2 mt-1 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors shadow-md shadow-blue-500/20"
+                >
+                  <Phone className="w-4 h-4" />
+                  902 781 212
+                </a>
+              </>
+            ) : (
+              <p className="text-slate-600 font-medium">
+                {typeof successModal === 'string' ? successModal : 'Operación completada correctamente.'}
+              </p>
+            )}
           </div>
         </Modal>
       )}

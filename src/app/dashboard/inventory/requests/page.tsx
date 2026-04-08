@@ -96,18 +96,23 @@ export default function WarehouseRequestsPage() {
   const totalItems = filteredRequests.length;
   const currentItems = filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const handleCreateRequest = async () => {
+  const handleCreateRequest = async (_items: unknown, isPickup: boolean) => {
     setIsModalOpen(false);
     await fetchRequests();
-    setTimeout(() => {
-      setStatusConfig({
-        type: 'success',
-        title: '¡Solicitud creada!',
-        message: 'Se ha generado la Guía de Remisión. Por favor imprímela y pégala en tu caja.',
-        actionLabel: 'Entendido'
-      });
-      openStatus();
-    }, 500);
+
+    // Pickup orders already show their own success modal inside NewRequestModal.
+    // Only show the parent status modal for non-pickup (drop-off) requests.
+    if (!isPickup) {
+      setTimeout(() => {
+        setStatusConfig({
+          type: 'success',
+          title: '¡Solicitud creada!',
+          message: 'Se ha generado la Guía de Remisión. Por favor imprímela y pégala en tu caja.',
+          actionLabel: 'Entendido'
+        });
+        openStatus();
+      }, 500);
+    }
   };
 
   const handleViewRequest = (request: InboundRequest) => {
