@@ -162,6 +162,7 @@ export default function CompanyProfilePage() {
 
       const token = localStorage.getItem('token');
       const user = secureLocalStorage.getItem('user') as { id_company?: number | string } | null;
+
       const idCompany = user?.id_company;
 
       if (!idCompany) {
@@ -169,7 +170,7 @@ export default function CompanyProfilePage() {
         return false;
       }
 
-      await api.put(`/company/${idCompany}`, updatedProfile, {
+      await api.put(`/company/${idCompany}`, updatedProfile.company, {
         headers: {
           authorization: `${token}`,
         },

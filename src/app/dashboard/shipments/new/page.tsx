@@ -317,7 +317,15 @@ export default function CreateShipmentPage() {
         ...(p.id && data.service.origin_type === 'stock' ? { id: p.id } : {})
       }));
 
+      const deliveryAmount = shippingPrice || 0;
       const isCod = data.service.delivery_mode === 'pay_on_delivery';
+      
+      let totalToCollect = 0;
+      if (isCod) {
+        const baseAmount = data.service.cod_amount || 0;
+        const includesDelivery = data.service.cod_includes_delivery || false;
+        totalToCollect = includesDelivery ? baseAmount : baseAmount + deliveryAmount;
+      }
 
       const requestBody = {
         id_company: idCompany,
@@ -326,9 +334,11 @@ export default function CreateShipmentPage() {
         shipping_mode: data.service.delivery_mode, // delivery_only / pay_on_delivery
         date: data.service.delivery_date,
 
+        delivery_amount: deliveryAmount,
+        total_amount: totalToCollect,
+
         ...(isCod ? {
           delivery_include: data.service.cod_includes_delivery,
-          total_amount: data.service.cod_amount,
           payment_method: data.service.payment_method,
           payment_destination: data.service.payment_form,
         } : {}),

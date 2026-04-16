@@ -185,7 +185,6 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                   }}
                   error={errors.recipient?.phone?.message}
                   maxLength={9}
-                  prefix="+51"
                   className="h-10 border-gray-200 focus:border-[#02997d]"
                   placeholder="999 999 999"
                 />
