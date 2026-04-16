@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -23,6 +23,8 @@ export default function CreateShipmentPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shippingPrice, setShippingPrice] = useState<number | null>(null);
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [productsData, setProductsData] = useState<{
     pickup: Array<{ description: string; quantity: number; id: string }>;
     warehouse: Array<{ id: string; description: string; quantity: number; code: string; maxQuantity: number }>;
@@ -178,6 +180,72 @@ export default function CreateShipmentPage() {
 
     return await trigger(fieldsToValidate as (keyof ShipmentFormData)[]);
   };
+
+  // --- LÓGICA DE CÁLCULO DE PRECIOS ---
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const originType = watchedValues.service?.origin_type;
+      
+      // Determinar Distrito y Sector de ORIGEN
+      let idDistOrig: number | undefined;
+      let idSectOrig: number | undefined;
+
+      if (originType === 'pickup') {
+        idDistOrig = watchedValues.sender?.address?.id_district;
+        idSectOrig = watchedValues.sender?.address?.id_sector;
+      } else if (originType === 'stock') {
+        idDistOrig = 8; // Independencia
+        idSectOrig = 0; // Sin sector
+      }
+
+      // Determinar Distrito y Sector de DESTINO
+      const idDistDest = watchedValues.recipient?.address?.id_district;
+      const idSectDest = watchedValues.recipient?.address?.id_sector;
+
+      // Solo calcular si tenemos los distritos base
+      if (idDistOrig && idDistDest && originType) {
+        setIsPriceLoading(true);
+        try {
+          const token = localStorage.getItem('token');
+          const headers = { authorization: `${token}` };
+
+          // Construir URL con Path Params
+          let url = `/catalog/locations/price/${idDistOrig}/${idDistDest}`;
+          
+          // Añadir Query Params de existir
+          const params = new URLSearchParams();
+          if (idSectOrig && idSectOrig > 0) params.append('id_sector_origin', idSectOrig.toString());
+          if (idSectDest && idSectDest > 0) params.append('id_sector_destination', idSectDest.toString());
+          
+          const queryString = params.toString();
+          if (queryString) url += `?${queryString}`;
+
+          const response = await api.get(url, { headers });
+          
+          if (response.data && typeof response.data.price === 'number') {
+            setShippingPrice(response.data.price);
+          } else {
+            setShippingPrice(0);
+          }
+        } catch (error) {
+          console.error('Error calculando precio:', error);
+          setShippingPrice(null);
+        } finally {
+          setIsPriceLoading(false);
+        }
+      } else {
+        setShippingPrice(null);
+      }
+    };
+
+    fetchPrice();
+  }, [
+    watchedValues.service?.origin_type,
+    watchedValues.sender?.address?.id_district,
+    watchedValues.sender?.address?.id_sector,
+    watchedValues.recipient?.address?.id_district,
+    watchedValues.recipient?.address?.id_sector
+  ]);
 
   // Calcular si el formulario está listo para envio
   // 1. Shipment y Recipient completos
@@ -348,6 +416,8 @@ export default function CreateShipmentPage() {
                 isCompleted={isRecipientComplete}
                 onContinue={handleContinueRecipient}
                 onEdit={handleEditRecipient}
+                price={shippingPrice}
+                isPriceLoading={isPriceLoading}
               />
 
               {/* Botón de Registro SI NO hay paso de pago */}
@@ -391,7 +461,13 @@ export default function CreateShipmentPage() {
 
         {/* COLUMNA DERECHA: Resumen (Span 4) */}
         <div className="hidden lg:block lg:col-span-4 space-y-6 sticky top-6">
-          <ShipmentSummary watchedValues={watchedValues} isSubmitting={isSubmitting} disabled={!isFormReady} />
+          <ShipmentSummary 
+            watchedValues={watchedValues} 
+            isSubmitting={isSubmitting} 
+            disabled={!isFormReady} 
+            price={shippingPrice}
+            isPriceLoading={isPriceLoading}
+          />
         </div>
 
       </form>

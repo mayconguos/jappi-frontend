@@ -8,9 +8,11 @@ interface ShipmentSummaryProps {
   watchedValues?: Partial<ShipmentFormData>;
   isSubmitting?: boolean;
   disabled?: boolean;
+  price?: number | null;
+  isPriceLoading?: boolean;
 }
 
-export default function ShipmentSummary({ watchedValues, isSubmitting, disabled }: ShipmentSummaryProps) {
+export default function ShipmentSummary({ watchedValues, isSubmitting, disabled, price, isPriceLoading }: ShipmentSummaryProps) {
   const serviceType = watchedValues?.service?.type === 'express' ? 'Express' : 'Regular';
   const paymentMethod = watchedValues?.service?.payment_method === 'now' ? 'Pago Ahora' : (watchedValues?.service?.payment_method === 'cod' ? 'Contra Entrega' : '-');
 
@@ -84,11 +86,23 @@ export default function ShipmentSummary({ watchedValues, isSubmitting, disabled 
 
           <div className="flex items-baseline justify-between mb-1">
             <span className="text-sm font-medium text-gray-600">Subtotal</span>
-            <span className="text-sm font-medium text-gray-900">S/ 0.00</span>
+            <span className="text-sm font-medium text-gray-900">
+              {isPriceLoading ? (
+                <span className="text-[10px] text-gray-400 animate-pulse">Calculando...</span>
+              ) : (
+                `S/ ${(price || 0).toFixed(2)}`
+              )}
+            </span>
           </div>
           <div className="flex items-baseline justify-between">
             <span className="text-base font-bold text-gray-800">Total Estimado</span>
-            <span className="text-2xl font-bold text-[#02997d]">S/ 0.00</span>
+            <span className="text-2xl font-bold text-[#02997d]">
+              {isPriceLoading ? (
+                <span className="text-sm text-gray-300 animate-pulse">Cargando...</span>
+              ) : (
+                `S/ ${(price || 0).toFixed(2)}`
+              )}
+            </span>
           </div>
           <p className="text-xs text-gray-400 mt-2 text-right">
             *Precio sujeto a validación final en almacén

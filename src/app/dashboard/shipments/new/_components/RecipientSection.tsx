@@ -20,9 +20,11 @@ interface RecipientSectionProps {
   onContinue: () => void; // Prop crítica para avanzar
   onEdit?: () => void;
   onBack?: () => void;
+  price?: number | null;
+  isPriceLoading?: boolean;
 }
 
-export default function RecipientSection({ form, isActive, isCompleted, onContinue, onEdit, onBack }: RecipientSectionProps) {
+export default function RecipientSection({ form, isActive, isCompleted, onContinue, onEdit, onBack, price, isPriceLoading }: RecipientSectionProps) {
   const { getRegionOptions, getDistrictOptions, getSectorOptions } = useLocationCatalog();
   const { formState: { errors }, watch, setValue, trigger, register } = form;
   const watchedValues = watch();
@@ -71,55 +73,7 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
     prevAddressComplete.current = isAddressComplete;
   }, [isAddressComplete, isActive]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    if (!selectedDistrict) {
-      setReferencePrice(null);
-      return;
-    }
-
-    if (districtHasSectors && !selectedSector) {
-      setReferencePrice(null);
-      return;
-    }
-
-    const fetchPrice = async () => {
-      setIsLoadingPrice(true);
-      try {
-        const endpointUrl = (districtHasSectors && selectedSector)
-          ? `/catalog/locations/price/${selectedDistrict}?id_sector=${selectedSector}`
-          : `/catalog/locations/price/${selectedDistrict}`;
-
-        const res = await api.get(endpointUrl);
-        const data = res.data;
-
-        let price = null;
-        if (typeof data === 'number' || typeof data === 'string') {
-          price = Number(data);
-        } else if (data && typeof data === 'object') {
-          price = data.price ?? data.cost ?? data.amount ?? (Array.isArray(data) && data[0]?.price) ?? null;
-        }
-
-        if (isMounted && price !== null && !isNaN(price)) {
-          setReferencePrice(Number(price));
-        } else {
-          if (isMounted) setReferencePrice(null);
-        }
-      } catch (err) {
-        console.error('Error fetching reference price:', err);
-        if (isMounted) setReferencePrice(null);
-      } finally {
-        if (isMounted) setIsLoadingPrice(false);
-      }
-    };
-
-    fetchPrice();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedDistrict, selectedSector, districtHasSectors]);
+  // Obsolete internal price fetch removed to use centralized logic from parent
 
   const regionOptions = getRegionOptions();
   const recipientDistrictOptions = getDistrictOptions(selectedRegion || 0);
@@ -298,12 +252,12 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                 )}
               </div>
 
-              {/* Costo de delivery Referencial (Real via Endpoint) */}
-              {!!selectedDistrict && (referencePrice !== null || isLoadingPrice) && (
+              {/* Costo de delivery Referencial (Centralized Logic) */}
+              {!!selectedDistrict && (price !== null || isPriceLoading) && (
                 <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
                   <span className="font-bold text-xs">Costo referencial de envío:</span>
                   <span className="font-bold text-xs">
-                    {isLoadingPrice ? 'Calculando...' : `S/ ${referencePrice?.toFixed(2)}`}
+                    {isPriceLoading ? 'Calculando...' : `S/ ${price?.toFixed(2)}`}
                   </span>
                 </div>
               )}

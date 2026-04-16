@@ -161,8 +161,15 @@ export default function CompanyProfilePage() {
       }
 
       const token = localStorage.getItem('token');
+      const user = secureLocalStorage.getItem('user') as { id_company?: number | string } | null;
+      const idCompany = user?.id_company;
 
-      await api.put('/company/profile', updatedProfile, {
+      if (!idCompany) {
+        setError('No se pudo identificar a la empresa asociada.');
+        return false;
+      }
+
+      await api.put(`/company/${idCompany}`, updatedProfile, {
         headers: {
           authorization: `${token}`,
         },
