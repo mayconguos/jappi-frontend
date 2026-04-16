@@ -79,7 +79,7 @@ export async function parseShipmentExcel(
     // Saltar header (fila 1) y filas completamente vacías
     if (rowNumber === 1) return;
 
-    const values = row.values as (string | number | null | undefined)[];
+    const values = row.values as any[];
     // ExcelJS usa índice base 1 para row.values (índice 0 = undefined)
     const get = (col: number): string =>
       (values[col] != null ? String(values[col]).trim() : '');
@@ -93,19 +93,36 @@ export async function parseShipmentExcel(
     const customer_name = get(1);
     const phone = get(2);
     const address = get(3);
-    const id_region = getNum(4) ?? 0;
-    const id_district = getNum(5) ?? 0;
-    const id_sector = getNum(6) ?? 0;
-    const reference = get(7);
-    const service_type = get(8);
-    const shipping_mode = get(9);
-    const date = get(10);
-    const total_amount = getNum(11);
-    const payment_method = get(12);
-    const payment_destination = get(13);
-    const product_name = get(14);
-    const quantity = getNum(15) ?? 0;
-    const notes = get(16);
+    const location_name = get(4);
+    
+    let id_region = 0;
+    let id_district = 0;
+    let id_sector = 0;
+
+    const reference = get(8);
+    const service_type = get(9);
+    const shipping_mode = get(10) || 'solo entregar';
+    
+    // ── Date parsing (Col 10) ──
+    const rawDate = values[10];
+    let date = '';
+    if (rawDate instanceof Date) {
+      date = rawDate.toISOString().split('T')[0];
+    } else if (typeof rawDate === 'number') {
+      // Excel serial date (basic conversion)
+      const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+      const d = new Date(excelEpoch.getTime() + rawDate * 86400000);
+      date = d.toISOString().split('T')[0];
+    } else {
+      date = get(11);
+    }
+
+    const total_amount = getNum(12);
+    const payment_method = get(13);
+    const payment_destination = get(14);
+    const product_name = get(15);
+    const quantity = getNum(16) ?? 0;
+    const notes = get(17);
 
     // Omitir filas completamente vacías
     if (!customer_name && !phone && !address && !product_name) return;
@@ -117,23 +134,27 @@ export async function parseShipmentExcel(
     if (!customer_name) errors.push('Nombre destinatario requerido');
     if (!phone) {
       errors.push('Teléfono requerido');
-    } else if (!/^\d{7,15}$/.test(phone.replace(/\s/g, ''))) {
-      errors.push('Teléfono inválido (solo dígitos, 7-15 caracteres)');
+    } else if (!/^9\d{8}$/.test(phone.replace(/\s/g, ''))) {
+      errors.push('Teléfono inválido (debe tener 9 dígitos y empezar con 9)');
     }
-    if (!address) errors.push('Dirección requerida');
-    if (!id_region) errors.push('ID Región requerido');
-    if (!id_district) errors.push('ID Distrito requerido');
+    if (!address) {
+      errors.push('Dirección requerida');
+    } else if (address.length > 225) {
+      errors.push('La dirección no debe exceder los 225 caracteres');
+    }
+
+    if (reference && reference.length > 225) {
+      errors.push('La referencia no debe exceder los 225 caracteres');
+    }
 
     if (!service_type) {
       errors.push('Tipo de servicio requerido');
-    } else if (!['regular', 'express'].includes(service_type)) {
-      errors.push(`Tipo de servicio inválido: "${service_type}" (use: regular / express)`);
+    } else if (!['regular', 'cambio'].includes(service_type)) {
+      errors.push(`Tipo de servicio inválido: "${service_type}" (use: regular / cambio)`);
     }
 
-    if (!shipping_mode) {
-      errors.push('Modo de entrega requerido');
-    } else if (!['delivery_only', 'pay_on_delivery'].includes(shipping_mode)) {
-      errors.push(`Modo de entrega inválido: "${shipping_mode}" (use: delivery_only / pay_on_delivery)`);
+    if (!['solo entregar', 'contraentrega'].includes(shipping_mode)) {
+      errors.push(`Modo de entrega inválido: "${shipping_mode}" (use: solo entregar / contraentrega)`);
     }
 
     if (!date) {
@@ -146,53 +167,71 @@ export async function parseShipmentExcel(
     if (!quantity || quantity <= 0) errors.push('Cantidad de producto debe ser mayor a 0');
 
     // ── Validaciones COD ──────────────────────────────────────────────────
-    if (shipping_mode === 'pay_on_delivery') {
-      if (!total_amount || total_amount <= 0) errors.push('Monto COD requerido para "pay_on_delivery"');
-      if (!payment_method) errors.push('Método de pago requerido para "pay_on_delivery"');
-      if (!payment_destination) errors.push('Forma de pago requerida para "pay_on_delivery"');
-    }
-
-    // ── Validación de ubicaciones con catálogo ────────────────────────────
-    if (catalog) {
-      const region = catalog.find(r => r.id_region === id_region);
-
-      if (id_region && !region) {
-        errors.push(`Región ID ${id_region} no encontrada en el catálogo`);
+    if (shipping_mode === 'contraentrega') {
+      if (!total_amount || total_amount <= 0) {
+        errors.push('Monto COD requerido para "contraentrega"');
       }
 
-      if (region && id_district) {
-        const district = region.districts.find(d => d.id_district === id_district);
+      const validMethods = ['Efectivo', 'Tarjeta', 'Transferencia', 'Yape', 'Plin'];
+      if (!payment_method) {
+        errors.push('Método de pago requerido para "contraentrega"');
+      } else if (!validMethods.includes(payment_method)) {
+        errors.push(`Método de pago inválido: "${payment_method}" (use: ${validMethods.join(' / ')})`);
+      }
 
-        if (!district) {
-          errors.push(
-            `Distrito ID ${id_district} no pertenece a la región "${region.region_name}"`
-          );
-        } else if (id_sector) {
-          const sectorInDistrict = district.sectors.find(s => s.id_sector === id_sector);
-          if (!sectorInDistrict) {
-            // Try to find the sector name anywhere in the catalog
-            let foundSectorName: string | null = null;
-            outer: for (const r of catalog) {
-              for (const d of r.districts) {
-                const match = d.sectors.find(s => s.id_sector === id_sector);
-                if (match) { foundSectorName = match.sector_name; break outer; }
-              }
-            }
+      const validForms = ['Abono a Japi', 'Abono a vendedor'];
+      if (!payment_destination) {
+        errors.push('Forma de pago requerida para "contraentrega"');
+      } else if (!validForms.includes(payment_destination)) {
+        errors.push(`Forma de pago inválida: "${payment_destination}" (use: ${validForms.join(' / ')})`);
+      }
+    }
 
-            if (foundSectorName) {
-              errors.push(
-                `El sector "${foundSectorName}" (ID ${id_sector}) no pertenece al distrito "${district.district_name}" (${region.region_name})`
-              );
-            } else {
-              errors.push(
-                `Sector ID ${id_sector} no existe en el catálogo`
-              );
-            }
+    // ── Resolución de jerarquía con catálogo ────────────────────────────
+    if (catalog && location_name) {
+      let found = false;
+      const searchName = location_name.toLowerCase().trim();
+
+      // 1. Buscar en sectores (más específico)
+      outerSector: for (const r of catalog) {
+        for (const d of r.districts) {
+          const match = d.sectors.find(s => s.sector_name.toLowerCase().trim() === searchName);
+          if (match) {
+            id_region = r.id_region;
+            id_district = d.id_district;
+            id_sector = match.id_sector;
+            found = true;
+            break outerSector;
           }
         }
       }
+
+      // 2. Si no es sector, buscar en distritos
+      if (!found) {
+        outerDist: for (const r of catalog) {
+          const match = r.districts.find(d => d.district_name.toLowerCase().trim() === searchName);
+          if (match) {
+            id_region = r.id_region;
+            id_district = match.id_district;
+            id_sector = 0;
+            found = true;
+            break outerDist;
+          }
+        }
+      }
+
+      if (!found) {
+        errors.push(`Ubicación "${location_name}" no encontrada en el catálogo (buscado como Sector y Distrito)`);
+      }
+    } else if (!location_name) {
+      errors.push('Ubicación (Nombre) requerido');
     } else {
-      warnings.push('Catálogo de ubicaciones no disponible: no se validaron región/distrito/sector');
+      warnings.push('Catálogo no disponible: no se pudo validar la jerarquía de la ubicación');
+    }
+
+    // Validar que finalmente tengamos una ubicación resuelta
+    if (!id_region && !id_district) {
+      errors.push('ID Ubicación no válido o campo vacío');
     }
 
     rows.push({
@@ -231,13 +270,13 @@ export async function parseShipmentExcel(
 // ─── Transformación a payload de API ─────────────────────────────────────────
 
 export function rowToApiPayload(row: BulkShipmentRow, idCompany: number | string) {
-  const isCod = row.shipping_mode === 'pay_on_delivery';
+  const isCod = row.shipping_mode === 'contraentrega';
 
   return {
     id_company: idCompany,
     origin_type: 'bulk',
     service_type: row.service_type,
-    shipping_mode: row.shipping_mode,
+    shipping_mode: row.shipping_mode === 'contraentrega' ? 'pay_on_delivery' : 'delivery_only',
     date: row.date,
     customer_name: row.customer_name,
     phone: row.phone,
@@ -258,8 +297,19 @@ export function rowToApiPayload(row: BulkShipmentRow, idCompany: number | string
     ...(isCod
       ? {
           total_amount: row.total_amount,
-          payment_method: row.payment_method,
-          payment_destination: row.payment_destination,
+          payment_method:
+            {
+              Efectivo: 'cash',
+              Tarjeta: 'card',
+              Transferencia: 'transfer',
+              Yape: 'yape',
+              Plin: 'plin',
+            }[row.payment_method] || 'cash',
+          payment_destination:
+            {
+              'Abono a Japi': 'japi_payment',
+              'Abono a vendedor': 'seller_payment',
+            }[row.payment_destination] || 'seller_payment',
         }
       : {}),
   };

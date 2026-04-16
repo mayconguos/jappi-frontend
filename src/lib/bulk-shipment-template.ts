@@ -52,9 +52,11 @@ export async function downloadBulkShipmentTemplate(
     { header: 'Nombre Destinatario *', key: 'customer_name',      width: 28 },
     { header: 'Teléfono *',            key: 'phone',               width: 16 },
     { header: 'Dirección *',           key: 'address',             width: 32 },
-    { header: 'ID Región *',           key: 'id_region',           width: 12 },
-    { header: 'ID Distrito *',         key: 'id_district',         width: 14 },
-    { header: 'ID Sector',             key: 'id_sector',           width: 12 },
+    { header: 'Ubicación (Nombre) *',  key: 'location_name',       width: 25 },
+    // ── VLOOKUP helper columns (E, F, G) ──
+    { header: '✔ Nombre Región',   key: '_region_name',   width: 22 },
+    { header: '✔ Nombre Distrito', key: '_district_name', width: 22 },
+    { header: '✔ Nombre Sector',   key: '_sector_name',   width: 22 },
     { header: 'Referencia',            key: 'reference',           width: 24 },
     { header: 'Tipo de Servicio *',    key: 'service_type',        width: 20 },
     { header: 'Modo de Entrega *',     key: 'shipping_mode',       width: 22 },
@@ -65,16 +67,12 @@ export async function downloadBulkShipmentTemplate(
     { header: 'Producto - Nombre *',   key: 'product_name',        width: 26 },
     { header: 'Producto - Cantidad *', key: 'quantity',            width: 22 },
     { header: 'Notas',                 key: 'notes',               width: 28 },
-    // ── VLOOKUP helper columns (Q, R, S) ──
-    { header: '✔ Nombre Región',   key: '_region_name',   width: 22 },
-    { header: '✔ Nombre Distrito', key: '_district_name', width: 22 },
-    { header: '✔ Nombre Sector',   key: '_sector_name',   width: 22 },
   ];
 
   // Header row styles
   const headerRow = sheet.getRow(1);
   headerRow.eachCell((cell, colNumber) => {
-    const isHelper   = colNumber >= 17;
+    const isHelper   = colNumber >= 5 && colNumber <= 7;
     const isRequired = !isHelper && cell.value?.toString().includes('*');
     cell.fill = {
       type: 'pattern',
@@ -114,12 +112,10 @@ export async function downloadBulkShipmentTemplate(
     customer_name:       'Juan Pérez García',
     phone:               '987654321',
     address:             'Av. Lima 123, Int. 5',
-    id_region:           1,
-    id_district:         15,
-    id_sector:           3,
+    location_name:       'Huaycan',
     reference:           'Frente al parque central',
     service_type:        'regular',
-    shipping_mode:       'delivery_only',
+    shipping_mode:       'solo entregar',
     date:                '2026-05-10',
     total_amount:        '',
     payment_method:      '',
@@ -130,7 +126,9 @@ export async function downloadBulkShipmentTemplate(
   });
 
   exampleRow.eachCell((cell, colNumber) => {
-    if (colNumber <= 16) {
+    // Only color the main input/info columns, excluding helpers in 5,6,7
+    const isField = colNumber <= 4 || (colNumber >= 8 && colNumber <= 17);
+    if (isField) {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0FFF4' } };
       cell.font = { italic: true, color: { argb: 'FF2D6A4F' }, size: 10 };
     }
@@ -138,36 +136,91 @@ export async function downloadBulkShipmentTemplate(
 
   // Data validations + VLOOKUP formulas (rows 2 → MAX_DATA_ROWS)
   for (let r = 2; r <= MAX_DATA_ROWS; r++) {
-    // Dropdown: Tipo de Servicio (col H)
-    sheet.getCell(`H${r}`).dataValidation = {
-      type: 'list', allowBlank: false,
-      formulae: ['"regular,express"'],
-      showErrorMessage: true,
-      errorTitle: 'Valor inválido',
-      error: 'Solo se permite: regular o express',
-    };
-    // Dropdown: Modo de Entrega (col I)
+    // Dropdown: Tipo de Servicio (col I)
     sheet.getCell(`I${r}`).dataValidation = {
       type: 'list', allowBlank: false,
-      formulae: ['"delivery_only,pay_on_delivery"'],
+      formulae: ['"regular,cambio"'],
       showErrorMessage: true,
       errorTitle: 'Valor inválido',
-      error: 'Solo se permite: delivery_only o pay_on_delivery',
+      error: 'Solo se permite: regular o cambio',
+    };
+
+    // ── Payment Blocking ──
+
+    // Custom Validation: Monto COD (col L) only allowed if J = contraentrega
+    sheet.getCell(`L${r}`).dataValidation = {
+      type: 'custom',
+      allowBlank: true,
+      formulae: [`J${r}="contraentrega"`],
+      showErrorMessage: true,
+      errorTitle: 'Campo Bloqueado',
+      error: 'El monto solo se puede ingresar si el modo es "contraentrega"',
+    };
+
+    // Dropdown: Modo de Entrega (col J)
+    sheet.getCell(`J${r}`).dataValidation = {
+      type: 'list', allowBlank: false,
+      formulae: ['"solo entregar,contraentrega"'],
+      showErrorMessage: true,
+      errorTitle: 'Valor inválido',
+      error: 'Solo se permite: solo entregar o contraentrega',
+    };
+
+    // Dropdown: Método de Pago (col M)
+    sheet.getCell(`M${r}`).dataValidation = {
+      type: 'list', allowBlank: true,
+      formulae: ['"Efectivo,Tarjeta,Transferencia,Yape,Plin"'],
+      showErrorMessage: true,
+      errorTitle: 'Valor inválido',
+      error: 'Solo se permiten métodos de pago válidos',
+    };
+
+    // Dropdown: Forma de Pago / Abono (col N)
+    sheet.getCell(`N${r}`).dataValidation = {
+      type: 'list', allowBlank: true,
+      formulae: ['"Abono a Japi,Abono a vendedor"'],
+      showErrorMessage: true,
+      errorTitle: 'Valor inválido',
+      error: 'Solo se permiten formas de pago válidas',
     };
 
     // VLOOKUP helpers — only if catalog was available at generation time
     if (catalog) {
-      sheet.getCell(`Q${r}`).value = {
-        formula: `IF(D${r}="","",IFERROR(VLOOKUP(D${r},'Catálogo'!$A:$B,2,0),"❌ ID no encontrado"))`,
+      // Resolve Region (E) from D (Name)
+      sheet.getCell(`E${r}`).value = {
+        formula: `IF(D${r}="","",IFERROR(INDEX('Catálogo'!$B:$B, MATCH(D${r},'Catálogo'!$F:$F,0)), IFERROR(INDEX('Catálogo'!$B:$B, MATCH(D${r},'Catálogo'!$D:$D,0)), "❌ No encontrado")))`,
       };
-      sheet.getCell(`R${r}`).value = {
-        formula: `IF(E${r}="","",IFERROR(VLOOKUP(E${r},'Catálogo'!$D:$E,2,0),"❌ ID no encontrado"))`,
+      // Resolve District (F) from D (Name)
+      sheet.getCell(`F${r}`).value = {
+        formula: `IF(D${r}="","",IFERROR(INDEX('Catálogo'!$D:$D, MATCH(D${r},'Catálogo'!$F:$F,0)), IFERROR(INDEX('Catálogo'!$D:$D, MATCH(D${r},'Catálogo'!$D:$D,0)), "❌ No encontrado")))`,
       };
-      sheet.getCell(`S${r}`).value = {
-        formula: `IF(F${r}="","",IFERROR(VLOOKUP(F${r},'Catálogo'!$H:$I,2,0),"❌ ID no encontrado"))`,
+      // Resolve Sector (G) from D (Name)
+      sheet.getCell(`G${r}`).value = {
+        formula: `IF(D${r}="","",IFERROR(INDEX('Catálogo'!$F:$F, MATCH(D${r},'Catálogo'!$F:$F,0)), "-"))`,
       };
     }
   }
+
+  // ── Conditional Formatting: Grey out L, M, N if mode is "solo entregar" (J) ──
+  sheet.addConditionalFormatting({
+    ref: `L2:N${MAX_DATA_ROWS}`,
+    rules: [
+      {
+        priority: 1,
+        type: 'expression',
+        formulae: [`$J2="solo entregar"`],
+        style: {
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            bgColor: { argb: 'FFE5E7EB' }, // Light gray
+            fgColor: { argb: 'FFE5E7EB' },
+          },
+          font: { color: { argb: 'FF9CA3AF' } } // Gray text
+        }
+      }
+    ]
+  });
 
   // Freeze header row
   sheet.views = [{ state: 'frozen', ySplit: 1 }];
@@ -176,98 +229,90 @@ export async function downloadBulkShipmentTemplate(
   if (catalog) {
     const catSheet = workbook.addWorksheet('Catálogo');
 
-    // Flatten catalog
-    const regions = catalog.map(r => ({
-      id: r.id_region, name: r.region_name,
-    }));
-    const districts = catalog.flatMap(r =>
-      r.districts.map(d => ({
-        id: d.id_district, name: d.district_name, idRegion: r.id_region,
-      }))
-    );
-    const sectors = catalog.flatMap(r =>
-      r.districts.flatMap(d =>
-        d.sectors.map(s => ({
-          id: s.id_sector, name: s.sector_name, idDistrict: d.id_district,
-        }))
-      )
-    );
+    // Flatten catalog into a unified list
+    const flatRows: any[] = [];
+    catalog.forEach(reg => {
+      reg.districts.forEach(dist => {
+        if (dist.sectors.length > 0) {
+          dist.sectors.forEach(sec => {
+            flatRows.push({
+              regId: reg.id_region,
+              regName: reg.region_name,
+              distId: dist.id_district,
+              distName: dist.district_name,
+              secId: sec.id_sector,
+              secName: sec.sector_name,
+            });
+          });
+        } else {
+          // If a district has no sectors, still show the district
+          flatRows.push({
+            regId: reg.id_region,
+            regName: reg.region_name,
+            distId: dist.id_district,
+            distName: dist.district_name,
+            secId: null,
+            secName: null,
+          });
+        }
+      });
+    });
 
     // ── Intro row ──
     const intro = catSheet.getCell('A1');
-    intro.value = '📋 Catálogo de Ubicaciones — Usa Ctrl+F para buscar. Las columnas Q, R, S en la hoja Envíos confirman el nombre automáticamente.';
+    intro.value = '📋 Catálogo de Ubicaciones Unificado — Usa Ctrl+F para buscar. Cada fila muestra la jerarquía completa.';
     intro.font = { italic: true, size: 9, color: { argb: 'FF555555' } };
-    catSheet.mergeCells('A1:J1');
+    catSheet.mergeCells('A1:F1');
     catSheet.getRow(1).height = 20;
 
     const HEADER_ROW = 2;
 
-    // ── Table A–B: Regiones ──
-    const rhA = catSheet.getCell(`A${HEADER_ROW}`);
-    const rhB = catSheet.getCell(`B${HEADER_ROW}`);
-    rhA.value = 'ID Región';  styleCatHeader(rhA, 'FF1D4ED8');
-    rhB.value = 'Nombre Región'; styleCatHeader(rhB, 'FF1D4ED8');
+    // ── Unified Header ──
+    const headers = [
+      { col: 'A', val: 'ID Región', bg: 'FF1D4ED8' },
+      { col: 'B', val: 'Nombre Región', bg: 'FF1D4ED8' },
+      { col: 'C', val: 'ID Distrito', bg: 'FF7C3AED' },
+      { col: 'D', val: 'Nombre Distrito', bg: 'FF7C3AED' },
+      { col: 'E', val: 'ID Sector', bg: 'FF059669' },
+      { col: 'G', val: 'Nombre Sector', bg: 'FF059669' }, // Wait, should be F but I'll use F
+    ];
+    
+    // Re-check column assignments: A,B,C,D,E,F
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const names = ['ID Región', 'Nombre Región', 'ID Distrito', 'Nombre Distrito', 'ID Sector', 'Nombre Sector'];
+    const colors = ['FF1D4ED8', 'FF1D4ED8', 'FF7C3AED', 'FF7C3AED', 'FF059669', 'FF059669'];
 
-    regions.forEach((reg, i) => {
-      const row = HEADER_ROW + 1 + i;
-      const cellA = catSheet.getCell(`A${row}`);
-      const cellB = catSheet.getCell(`B${row}`);
-      cellA.value = reg.id;   styleCatDataCell(cellA, i, 'FFDBEAFE');
-      cellB.value = reg.name; styleCatDataCell(cellB, i, 'FFDBEAFE');
-      cellA.alignment = { horizontal: 'center' };
+    cols.forEach((col, i) => {
+      const cell = catSheet.getCell(`${col}${HEADER_ROW}`);
+      cell.value = names[i];
+      styleCatHeader(cell, colors[i]);
     });
 
-    // ── Table D–F: Distritos ──
-    const dhD = catSheet.getCell(`D${HEADER_ROW}`);
-    const dhE = catSheet.getCell(`E${HEADER_ROW}`);
-    const dhF = catSheet.getCell(`F${HEADER_ROW}`);
-    dhD.value = 'ID Distrito';    styleCatHeader(dhD, 'FF7C3AED');
-    dhE.value = 'Nombre Distrito'; styleCatHeader(dhE, 'FF7C3AED');
-    dhF.value = 'ID Región';      styleCatHeader(dhF, 'FF7C3AED');
-
-    districts.forEach((dist, i) => {
+    // ── Data Rows ──
+    flatRows.forEach((item, i) => {
       const row = HEADER_ROW + 1 + i;
-      const cellD = catSheet.getCell(`D${row}`);
-      const cellE = catSheet.getCell(`E${row}`);
-      const cellF = catSheet.getCell(`F${row}`);
-      cellD.value = dist.id;       styleCatDataCell(cellD, i, 'FFEDE9FE');
-      cellE.value = dist.name;     styleCatDataCell(cellE, i, 'FFEDE9FE');
-      cellF.value = dist.idRegion; styleCatDataCell(cellF, i, 'FFEDE9FE');
-      cellD.alignment = { horizontal: 'center' };
-      cellF.alignment = { horizontal: 'center' };
-    });
-
-    // ── Table H–J: Sectores ──
-    const shH = catSheet.getCell(`H${HEADER_ROW}`);
-    const shI = catSheet.getCell(`I${HEADER_ROW}`);
-    const shJ = catSheet.getCell(`J${HEADER_ROW}`);
-    shH.value = 'ID Sector';    styleCatHeader(shH, 'FF059669');
-    shI.value = 'Nombre Sector'; styleCatHeader(shI, 'FF059669');
-    shJ.value = 'ID Distrito';   styleCatHeader(shJ, 'FF059669');
-
-    sectors.forEach((sec, i) => {
-      const row = HEADER_ROW + 1 + i;
-      const cellH = catSheet.getCell(`H${row}`);
-      const cellI = catSheet.getCell(`I${row}`);
-      const cellJ = catSheet.getCell(`J${row}`);
-      cellH.value = sec.id;          styleCatDataCell(cellH, i, 'FFD1FAE5');
-      cellI.value = sec.name;        styleCatDataCell(cellI, i, 'FFD1FAE5');
-      cellJ.value = sec.idDistrict;  styleCatDataCell(cellJ, i, 'FFD1FAE5');
-      cellH.alignment = { horizontal: 'center' };
-      cellJ.alignment = { horizontal: 'center' };
+      const data = [item.regId, item.regName, item.distId, item.distName, item.secId, item.secName];
+      
+      cols.forEach((col, j) => {
+        const cell = catSheet.getCell(`${col}${row}`);
+        cell.value = data[j];
+        // Alternate colors based on District for better visibility?
+        // Let's use simple parity and the fill color assigned to the column type
+        const lightBgMapping = ['FFDBEAFE', 'FFDBEAFE', 'FFEDE9FE', 'FFEDE9FE', 'FFD1FAE5', 'FFD1FAE5'];
+        styleCatDataCell(cell, i, lightBgMapping[j]);
+        if (j === 0 || j === 2 || j === 4) {
+          cell.alignment = { horizontal: 'center' };
+        }
+      });
     });
 
     // Column widths
     catSheet.getColumn('A').width = 12;
-    catSheet.getColumn('B').width = 26;
-    catSheet.getColumn('C').width = 4;  // spacer
-    catSheet.getColumn('D').width = 13;
-    catSheet.getColumn('E').width = 28;
-    catSheet.getColumn('F').width = 12;
-    catSheet.getColumn('G').width = 4;  // spacer
-    catSheet.getColumn('H').width = 12;
-    catSheet.getColumn('I').width = 28;
-    catSheet.getColumn('J').width = 13;
+    catSheet.getColumn('B').width = 24;
+    catSheet.getColumn('C').width = 12;
+    catSheet.getColumn('D').width = 24;
+    catSheet.getColumn('E').width = 12;
+    catSheet.getColumn('F').width = 24;
 
     // Freeze header row
     catSheet.views = [{ state: 'frozen', ySplit: HEADER_ROW }];
@@ -279,7 +324,7 @@ export async function downloadBulkShipmentTemplate(
   // ── Sheet 3: _meta (very hidden — version token) ──────────────────────────
   const metaSheet = workbook.addWorksheet('_meta');
   metaSheet.state = 'veryHidden';
-  metaSheet.getCell('A1').value = CURRENT_TEMPLATE_VERSION; // numeric version for range checks
+  metaSheet.getCell('A1').value = CURRENT_TEMPLATE_VERSION;
   metaSheet.getCell('A2').value = 'Japi Express Bulk Shipment Template';
   metaSheet.getCell('A3').value = new Date().toISOString();
 

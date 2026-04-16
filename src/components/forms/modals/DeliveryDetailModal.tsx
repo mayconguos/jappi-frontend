@@ -10,7 +10,7 @@ import CameraCapture from '@/components/ui/camera-capture';
 interface DeliveryDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  delivery: any; // Using any for mock simplicity, ideally defined type
+  delivery: any;
   onStatusChange: (id: string, newStatus: string) => void;
 }
 
