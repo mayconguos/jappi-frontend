@@ -37,7 +37,7 @@ export default function PickupDetailsForm({
     <div className="pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-t border-gray-100 pt-4">Datos de Recojo</h4>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
         <div className="md:col-span-2">
           <Select
             label="Dirección de recojo *"
@@ -48,7 +48,7 @@ export default function PickupDetailsForm({
           />
         </div>
 
-        <div>
+        <div className="md:col-span-1">
           <Select
             label="Teléfono de contacto *"
             value={phoneValue || ''}

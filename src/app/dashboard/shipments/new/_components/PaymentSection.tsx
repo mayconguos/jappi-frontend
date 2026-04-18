@@ -43,7 +43,13 @@ export default function PaymentSection({ form, isActive, isCompleted, onSubmit, 
               <h3 className="text-base font-semibold text-gray-900">
                 Método de Pago
               </h3>
-              {!isCompleted && <p className="text-xs text-gray-500">Cómo se procesará el cobro</p>}
+              {isCompleted && !isActive ? (
+                <p className="text-xs text-emerald-600 font-medium animate-in fade-in slide-in-from-left-2 transition-all">
+                  {PAYMENT_METHODS.find(m => m.value === watchedValues.service?.payment_method)?.label || 'Método seleccionado'} • {PAYMENT_FORMS.find(f => f.value === watchedValues.service?.payment_form)?.label || 'Forma seleccionada'}
+                </p>
+              ) : (
+                !isCompleted && <p className="text-xs text-gray-500">Cómo se procesará el cobro</p>
+              )}
             </div>
           </div>
         </div>
@@ -51,7 +57,7 @@ export default function PaymentSection({ form, isActive, isCompleted, onSubmit, 
         {/* BODY */}
         <div className={clsx(
           "transition-all duration-500",
-          !isActive && !isCompleted ? "max-h-0 py-0 opacity-0 overflow-hidden" : "max-h-[1000px] opacity-100"
+          !isActive ? "max-h-0 py-0 opacity-0 overflow-hidden" : "max-h-[1000px] opacity-100"
         )}>
           <div className="p-6 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

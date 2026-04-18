@@ -218,6 +218,11 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
               <h3 className="text-base font-semibold text-gray-900">
                 Información del Envío
               </h3>
+              {isCompleted && !isActive && (
+                <p className="text-xs text-emerald-600 font-medium animate-in fade-in slide-in-from-left-2 transition-all">
+                  {selectedOriginType === 'pickup' ? 'Recojo en local' : 'Desde Almacén'} • {watchedValues.service?.type === 'express' ? 'Servicio Express' : 'Servicio Regular'}
+                </p>
+              )}
             </div>
           </div>
 
@@ -235,7 +240,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
 
         <div className={clsx(
           "transition-all duration-500",
-          !isActive && !isCompleted ? "max-h-0 py-0 opacity-0 overflow-hidden" : "max-h-[2000px] opacity-100"
+          !isActive ? "max-h-0 py-0 opacity-0 overflow-hidden" : "max-h-[2000px] opacity-100"
         )}>
           <div className="p-6 space-y-8">
 
