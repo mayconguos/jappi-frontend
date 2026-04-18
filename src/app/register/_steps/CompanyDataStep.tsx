@@ -121,7 +121,6 @@ export function CompanyDataStep({ form, watchedValues }: CompanyDataStepProps) {
             name="company.phones.0"
             type="text"
             label="Teléfono *"
-            prefix="+51"
             autoComplete="tel"
             placeholder="900 000 000"
             maxLength={15}

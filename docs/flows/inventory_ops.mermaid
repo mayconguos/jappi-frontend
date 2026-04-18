@@ -1,0 +1,43 @@
+graph TD
+    %% Roles
+    Empresa((Empresa))
+    Almacen((Almacén Japi))
+    Transp((Transportista))
+    Admin((Coord/Admin))
+
+    %% Registro de Solicitud
+    subgraph Registro ["1. Creación de Solicitud"]
+        Empresa -->|Nueva Solicitud| Modal[NewRequestModal]
+        Modal -->|Elección| Choice{Modo de Entrega}
+    end
+
+    %% Caminos de Abastecimiento
+    subgraph Logistica ["2. Logística de Abastecimiento"]
+        Choice -->|Opción: Lo llevo yo| DropOff[Empresa entrega en Almacén]
+        Choice -->|Opción: Japi recoge| PickupReq[Solicitud de Recojo Supply]
+        
+        PickupReq -->|Validación| Admin
+        Admin -->|Asignar| Transp
+        Transp -->|Pasa por local de cliente| Collect[Recojo de Mercadería]
+        Collect -->|Entrega en Japi Center| DropOff
+    end
+
+    %% Recepción y Stock
+    subgraph Recepcion ["3. Recepción y Verificación"]
+        DropOff -->|Verificación Física| Verify[Almacén: Conteo y Control]
+        Verify -->|Confirmar Recibo| StockIn[Ingreso a Almacén]
+        StockIn -->|Actualización DB| Kardex_Add[Kardex: Entrada +]
+    end
+
+    %% Despacho (Outbound)
+    subgraph Salida ["4. Despacho (Fulfillment)"]
+        Order[Envío tipo Warehouse] -->|Trigger| Dispatch[Preparación de Pedido]
+        Dispatch -->|Salida de Almacén| Delivery[En ruta a Cliente Final]
+        Delivery -->|Actualización DB| Kardex_Sub[Kardex: Salida -]
+    end
+
+    %% Estilos
+    style Choice fill:#fff9c4,stroke:#fbc02d
+    style Kardex_Add fill:#e8f5e9,stroke:#2e7d32
+    style Kardex_Sub fill:#ffebee,stroke:#c62828
+    style PickupReq fill:#e3f2fd,stroke:#1565c0

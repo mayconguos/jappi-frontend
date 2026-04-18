@@ -1,0 +1,42 @@
+graph TD
+    %% Roles
+    Empresa((Empresa))
+    Admin((Admin/Coord))
+    Transportista((Transportista))
+    Almacen((Almacén))
+
+    %% Registro
+    subgraph Registro ["1. Registro de Envío"]
+        Empresa -->|Individual| S_New[Registrar Envío Form]
+        Empresa -->|Masivo| S_Bulk[Subir Excel Masivo]
+        S_New --> S_Pending[Estado: Pendiente]
+        S_Bulk --> S_Pending
+    end
+
+    %% Procesamiento
+    subgraph Procesamiento ["2. Preparación"]
+        S_Pending -->|Tipo Almacén| Almacen[Preparación en Almacén Japi]
+        S_Pending -->|Tipo Recojo| Pick[Programar Recojo de Producto]
+        Almacen --> S_Ready[Estado: Listo para Entrega]
+        Pick --> S_Ready
+    end
+
+    %% Asignación
+    subgraph Asignacion ["3. Gestión Logística"]
+        S_Ready --> Admin
+        Admin -->|Asignar Zona/Courier| S_Assigned[Estado: Asignado]
+    end
+
+    %% Despacho y Entrega
+    subgraph Entrega ["4. Última Milla"]
+        S_Assigned --> Transportista
+        Transportista -->|En camino| S_Transit[Estado: En Ruta]
+        S_Transit -->|Entrega Exitosa| S_Done[Estado: Entregado]
+        S_Transit -->|Incidencia| S_Issue[Estado: Incidencia/Reintento]
+    end
+
+    %% Estilos
+    style Empresa fill:#f9f,stroke:#333,stroke-width:2px
+    style Admin fill:#bbf,stroke:#333,stroke-width:2px
+    style Transportista fill:#bfb,stroke:#333,stroke-width:2px
+    style S_Done underline

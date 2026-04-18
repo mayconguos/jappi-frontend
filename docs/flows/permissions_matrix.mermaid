@@ -1,0 +1,46 @@
+graph TD
+    %% Sistema Central
+    Japi((Japi Express Core))
+
+    %% Roles
+    subgraph Admin_Role ["Admin / Coordinación"]
+        Admin[Gestión Total]
+        Admin -->|Modulo| A1[Empresas y Motorizados]
+        Admin -->|Modulo| A2[Activación de Cuentas]
+        Admin -->|Modulo| A3[Zonas de Operación]
+        Admin -->|Modulo| A4[Asignación de Envíos]
+    end
+
+    subgraph Empresa_Role ["Empresa Cliente"]
+        Empresa[Autoconsumo]
+        Empresa -->|Modulo| E1[Registro Envíos / Masivo]
+        Empresa -->|Modulo| E2[Mi Almacén e Inventario]
+        Empresa -->|Modulo| E3[Solicitud Abastecimiento]
+    end
+
+    subgraph Transportista_Role ["Transportista (Motorizado)"]
+        Transp[Operativo]
+        Transp -->|Modulo| T1[Recojos Asignados]
+        Transp -->|Modulo| T2[Entregas Asignadas]
+        Transp -->|Modulo| T3[Historial y Pruebas]
+    end
+
+    subgraph Almacen_Role ["Almacén / Despacho"]
+        Alm[Logística Interna]
+        Alm -->|Modulo| L1[Kardex General]
+        Alm -->|Modulo| L2[Despachos de Stock]
+        Alm -->|Modulo| L3[Recepción de Solicitudes]
+    end
+
+    %% Conexiones
+    Admin --- Japi
+    Empresa --- Japi
+    Transp --- Japi
+    Alm --- Japi
+
+    %% Estilos
+    style Japi fill:#02997d,stroke:#333,color:#fff
+    style Admin fill:#e1f5fe,stroke:#039be5
+    style Empresa fill:#fce4ec,stroke:#f06292
+    style Transp fill:#e8f5e9,stroke:#4caf50
+    style Alm fill:#fff9c4,stroke:#fbc02d

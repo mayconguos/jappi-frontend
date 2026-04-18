@@ -1,0 +1,32 @@
+graph TD
+    %% Inicio
+    Start([Registro de Usuario]) --> Form[Completar Formulario Registro]
+    
+    %% Selección de Tipo
+    Form -->|Empresa| DataE[Datos RUC, Nombre, Contacto]
+    Form -->|Transportista| DataT[Datos DNI, Placa, Tipo Vehículo]
+    
+    %% Envío
+    DataE --> Submit[Enviar Solicitud]
+    DataT --> Submit
+    
+    %% Estado Pendiente
+    Submit --> Pending[Estado: Pendiente de Activación]
+    Pending --> LoginDeny[Login: Acceso Restringido]
+    
+    %% Acción Administrativa
+    subgraph AdminAction ["Revisión Administrativa (Admin/Master)"]
+        Pending --> Review[Validar Documentación / RUC]
+        Review -->|Aprobar| Activate[Activar Cuenta]
+        Review -->|Rechazar| Reject[Notificar Rechazo]
+    end
+    
+    %% Final
+    Activate --> LoginOK[Login: Acceso Completo Dashboard]
+    Reject --> End([Fin])
+    
+    %% Estilos
+    style Pending fill:#fffbd7,stroke:#e6db74
+    style Activate fill:#e1f5fe,stroke:#039be5
+    style Reject fill:#ffebee,stroke:#e53935
+    style AdminAction fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray: 5 5

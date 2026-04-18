@@ -1,0 +1,36 @@
+graph TD
+    %% Inicio
+    Start([Inicio de Jornada]) --> Dashboard[Dashboard Transportista]
+
+    %% Proceso de Recojo
+    subgraph Recojo ["1. Gestión de Recojos (Pickups)"]
+        Dashboard --> ListP[Asignados a Recoger]
+        ListP --> NavP[Abrir Mapa: Google Maps]
+        NavP --> ArriveP[Llegada a Punto de Origen]
+        ArriveP --> ProofP[Captura Foto / GPS OK]
+        ProofP --> DoneP[Estado: Recogido / Completado]
+    end
+
+    %% Proceso de Entrega
+    subgraph Entrega ["2. Gestión de Entregas (Deliveries)"]
+        DoneP --> ListD[Asignados a Entregar]
+        Dashboard --> ListD
+        ListD --> Contact[Llamar / WhatsApp Cliente]
+        Contact --> NavD[Abrir Mapa: Google Maps]
+        NavD --> ArriveD[Llegada a Punto de Destino]
+        ArriveD --> ProofD[Captura Foto Prueba de Entrega]
+        ProofD --> DoneD[Estado: Entregado / Completado]
+    end
+
+    %% Incidencias
+    subgraph Incidencias ["3. Excepciones"]
+        ArriveD -->|No disponible / Rechazado| Fail[Registrar Incidencia]
+        Fail --> Return[Retorno a Almacén / Reintento]
+    end
+
+    %% Estilos
+    style ProofP fill:#bfb,stroke:#090
+    style ProofD fill:#bfb,stroke:#090
+    style Fail fill:#fbb,stroke:#900
+    style NavP fill:#bbf,stroke:#009
+    style NavD fill:#bbf,stroke:#009
