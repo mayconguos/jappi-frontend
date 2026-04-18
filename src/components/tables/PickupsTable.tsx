@@ -63,7 +63,7 @@ export default function PickupsTable({
         <TableHeader className="bg-slate-50/50">
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
             {/* Multi-select Header */}
-            <TableHead className="w-[45px] pl-6">
+            <TableHead className="w-[45px] pl-6 pr-0">
               <input 
                 type="checkbox" 
                 checked={allSelected}
@@ -71,8 +71,8 @@ export default function PickupsTable({
                 className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
               />
             </TableHead>
-            <TableHead className="w-[50px] text-xs font-bold text-slate-400 uppercase tracking-widest pl-2">#</TableHead>
-            <TableHead className="w-[120px] text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Fecha</TableHead>
+            <TableHead className="w-[30px] px-1 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</TableHead>
+            <TableHead className="w-[90px] px-2 text-xs font-bold text-slate-400 uppercase tracking-widest text-left">Fecha</TableHead>
             <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Vendedor / Cliente</TableHead>
             <TableHead className="text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Ubicación de Recojo</TableHead>
             <TableHead className="w-[110px] text-xs font-bold text-slate-400 uppercase tracking-widest">Origen</TableHead>
@@ -92,7 +92,7 @@ export default function PickupsTable({
                   isSelected ? 'bg-emerald-50/40 border-emerald-100' : ''
                 }`}
               >
-                <TableCell className="pl-6 py-4">
+                <TableCell className="pl-6 pr-0 py-4">
                    <input 
                     type="checkbox" 
                     checked={isSelected}
@@ -100,11 +100,11 @@ export default function PickupsTable({
                     className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
                   />
                 </TableCell>
-                <TableCell className="py-4 pl-2 font-mono text-[11px] font-bold text-slate-300">
+                <TableCell className="py-4 px-1 text-center font-mono text-[11px] font-bold text-slate-300">
                   {(currentPage - 1) * 10 + index + 1}
                 </TableCell>
 
-                <TableCell className="py-4 text-center">
+                <TableCell className="py-4 px-2 text-left">
                   <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
                     {pickup.pickup_date}
                   </span>

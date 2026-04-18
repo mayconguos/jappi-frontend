@@ -95,7 +95,9 @@ export default function ShipmentsTable({
               </TableCell>
 
               <TableCell className="py-4 whitespace-nowrap">
-                <span className="text-sm text-gray-700 font-medium">{new Date(item.shipping_date).toLocaleDateString('es-PE')}</span>
+                <span className="text-sm text-gray-700 font-medium">
+                  {item.shipping_date ? item.shipping_date.split('T')[0].split('-').reverse().join('/') : ''}
+                </span>
               </TableCell>
 
               <TableCell className="py-4">

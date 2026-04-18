@@ -150,15 +150,15 @@ export default function PickupsPage() {
   // --- Cancel Pickup State ---
   const [pickupToCancel, setPickupToCancel] = useState<number | null>(null);
 
-  const { get } = useApi<any>();
+  const { get, put } = useApi<any>();
 
   // --- Initial Fetch ---
   useEffect(() => {
     const fetchPickups = async () => {
       setIsInitialLoading(true);
       try {
-        console.log('Fetching pickups from /shipping/pickup...');
-        const resp = await get('/shipping/pickup');
+        console.log('Fetching pickups from /pickup...');
+        const resp = await get('/pickup');
         console.log('Pickups API Response:', resp);
 
         // Intentar detectar si la data está envuelta en un objeto { data: [...] }
@@ -255,7 +255,7 @@ export default function PickupsPage() {
   const handleViewPickup = async (pickup: Pickup) => {
     setViewDetails({ isOpen: true, pickup, items: [], loading: true, error: null });
     try {
-      const resp = await get(`/shipping/pickup/detail/${pickup.id}`);
+      const resp = await get(`/pickup/detail/${pickup.id}`);
       const items = Array.isArray(resp) ? resp : (resp?.data || []);
       setViewDetails(prev => ({ ...prev, loading: false, items }));
     } catch (err: any) {
@@ -344,17 +344,47 @@ export default function PickupsPage() {
     if (!selectedChange) return;
     setIsUpdatingCarrier(true);
 
-    // Simular golpe a API
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const courier = couriers.find(c => `${c.first_name} ${c.last_name || ''}`.trim() === selectedChange.courierName);
+    const driverId = courier ? courier.id : 0;
 
-    setPickups(prev => prev.map(p =>
-      p.id === selectedChange.pickupId ? { ...p, carrier: selectedChange.courierName } : p
-    ));
+    try {
+      const payload = {
+        assignments: [
+          {
+            id_shipping: selectedChange.pickupId,
+            id_driver: driverId
+          }
+        ]
+      };
 
-    setIsUpdatingCarrier(false);
-    setIsConfirmModalOpen(false);
-    setSelectedChange(null);
-    setSuccessModal('El transportista ha sido asignado correctamente.');
+      const response = await put('/shipping/assign', payload);
+      if (!response) {
+        throw new Error('Hubo un error comunicándose con el servidor.');
+      }
+
+      const isUnassigning = driverId === 0;
+
+      setPickups(prev => prev.map(p =>
+        p.id === selectedChange.pickupId 
+          ? { 
+              ...p, 
+              carrier: selectedChange.courierName, 
+              status: !isUnassigning ? 'scheduled' : p.status 
+            } 
+          : p
+      ));
+
+      setSuccessModal('El transportista ha sido asignado correctamente.');
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error de Asignación',
+        message: err.message || 'Ocurrió un error al intentar asignar el transportista.'
+      });
+    } finally {
+      setIsUpdatingCarrier(false);
+      setIsConfirmModalOpen(false);
+      setSelectedChange(null);
+    }
   };
 
   const handleCancel = (id: number) => {
@@ -388,18 +418,46 @@ export default function PickupsPage() {
     if (!batchCarrier || selectedIds.length === 0) return;
     setIsUpdatingCarrier(true);
 
-    // Simular golpe a API para múltiples IDs
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const courier = couriers.find(c => `${c.first_name} ${c.last_name || ''}`.trim() === batchCarrier);
+    const driverId = courier ? courier.id : 0;
 
-    setPickups(prev => prev.map(p =>
-      selectedIds.includes(p.id) ? { ...p, carrier: batchCarrier, status: 'scheduled' as PickupStatus } : p
-    ));
+    try {
+      const payload = {
+        assignments: selectedIds.map(id => ({
+          id_shipping: id,
+          id_driver: driverId
+        }))
+      };
 
-    setIsUpdatingCarrier(false);
-    setIsBatchModalOpen(false);
-    setSelectedIds([]);
-    setBatchCarrier('');
-    setSuccessModal(`Se ha asignado correctamente a ${batchCarrier} para los ${selectedIds.length} recojos seleccionados.`);
+      const response = await put('/shipping/assign', payload);
+      if (!response) {
+        throw new Error('No se pudo completar la asignación masiva en el servidor.');
+      }
+
+      const isUnassigning = driverId === 0;
+
+      setPickups(prev => prev.map(p =>
+        selectedIds.includes(p.id) 
+          ? { 
+              ...p, 
+              carrier: batchCarrier, 
+              status: !isUnassigning ? 'scheduled' : p.status 
+            } 
+          : p
+      ));
+
+      setSuccessModal(`Se ha asignado correctamente a ${batchCarrier} para los ${selectedIds.length} recojos seleccionados.`);
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error de Asignación Masiva',
+        message: err.message || 'Ocurrió un error al intentar realizar la asignación masiva.'
+      });
+    } finally {
+      setIsUpdatingCarrier(false);
+      setIsBatchModalOpen(false);
+      setSelectedIds([]);
+      setBatchCarrier('');
+    }
   };
 
   const handleBatchStatusUpdate = async () => {

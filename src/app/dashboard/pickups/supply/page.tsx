@@ -122,7 +122,7 @@ export default function SupplyPickupsPage() {
     const fetchSupplyPickups = async () => {
       setIsInitialLoading(true);
       try {
-        const resp = await get('/shipping/pickup/supply-request');
+        const resp = await get('/pickup/supply-request');
         const data = Array.isArray(resp) ? resp : (resp as any)?.data;
 
         if (data && Array.isArray(data)) {
@@ -231,7 +231,6 @@ export default function SupplyPickupsPage() {
         setValue={setValue}
         filterFields={FILTER_FIELDS}
         onExportExcel={() => console.log('Exporting')}
-        onExportPdf={() => console.log('Exporting')}
         dateRange={dateRange}
         setDateRange={setDateRange}
         totalItems={totalItems}

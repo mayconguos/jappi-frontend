@@ -231,7 +231,9 @@ export default function AllShipmentsPage() {
                       <p className="text-gray-400 text-[10px] uppercase tracking-wide font-bold mb-1">Fecha Programada</p>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <p className="font-bold text-slate-700 text-sm">{new Date(selectedShipment.shipping_date).toLocaleDateString('es-PE')}</p>
+                        <p className="font-bold text-slate-700 text-sm">
+                          {selectedShipment.shipping_date ? selectedShipment.shipping_date.split('T')[0].split('-').reverse().join('/') : ''}
+                        </p>
                       </div>
                     </div>
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">

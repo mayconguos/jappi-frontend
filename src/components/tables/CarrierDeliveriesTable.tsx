@@ -181,6 +181,16 @@ export default function CarrierDeliveriesTable() {
   const totalItems = sorted.length;
   const currentItems = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
+  const getWhatsappMessage = (delivery: Delivery) => {
+    return [
+      `Buen día, le saludamos de Japi Express ${String.fromCodePoint(0x1F4E6)}`,
+      `Empresa Courier oficial de la tienda *${delivery.origin}* donde realizó su compra.`,
+      `Le escribo por este medio para que me haga llegar su ubicación de mapa ${String.fromCodePoint(0x1F4CD)} y poder realizar la entrega con más efectividad.`,
+      `${String.fromCodePoint(0x1F550)} Estaremos visitándolo(a) el día de hoy hasta las 07:00 pm aprox.`,
+      `${String.fromCodePoint(0x2B50)} ¡Qué tenga un excelente día! ${String.fromCodePoint(0x2B50)}`
+    ].join('\n');
+  };
+
   const handleOpenDetail = (delivery: Delivery) => {
     setSelectedDelivery(delivery);
     setIsModalOpen(true);
@@ -276,7 +286,7 @@ export default function CarrierDeliveriesTable() {
                   <TableCell className="py-4">
                     <div className="flex items-center gap-2">
                       <a
-                        href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${delivery.recipient}, te saluda el motorizado de Jappi Express. Estoy en camino para entregar tu pedido ${delivery.id} en ${delivery.destination}. ¿Te encuentras disponible?`)}`}
+                        href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
@@ -308,7 +318,7 @@ export default function CarrierDeliveriesTable() {
                   </TableCell>
                   <TableCell className="text-right pr-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                       <a
+                      <a
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${delivery.destination}, ${delivery.district}, Lima`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -374,7 +384,7 @@ export default function CarrierDeliveriesTable() {
                       <Phone size={14} />
                     </a>
                     <a
-                      href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${delivery.recipient}, te saluda el motorizado de Jappi Express. Estoy por ahí con tu pedido ${delivery.id}.`)}`}
+                      href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
