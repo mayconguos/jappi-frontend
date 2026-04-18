@@ -1,5 +1,5 @@
 import { UseFormReturn } from 'react-hook-form';
-import { CreditCard, CheckCircle2 } from 'lucide-react';
+import { CreditCard, CheckCircle2, Edit2 } from 'lucide-react';
 import { clsx } from 'clsx';
 
 import { Select } from '@/components/ui/select';
@@ -12,11 +12,12 @@ interface PaymentSectionProps {
   form: UseFormReturn<ShipmentFormData>;
   isActive: boolean;
   isCompleted?: boolean;
-  onSubmit?: () => void;
+  onContinue?: () => void;
+  onEdit?: () => void;
   isLoading?: boolean;
 }
 
-export default function PaymentSection({ form, isActive, isCompleted, onSubmit, isLoading }: PaymentSectionProps) {
+export default function PaymentSection({ form, isActive, isCompleted, onContinue, onEdit, isLoading }: PaymentSectionProps) {
   const { formState: { errors }, watch, setValue, trigger } = form;
   const watchedValues = watch();
 
@@ -52,6 +53,17 @@ export default function PaymentSection({ form, isActive, isCompleted, onSubmit, 
               )}
             </div>
           </div>
+
+          {isCompleted && onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="px-4 py-1.5 text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-[#02997d] hover:text-[#02997d] hover:bg-[#02997d]/5 transition-all flex items-center shadow-sm"
+            >
+              <Edit2 size={14} className="mr-1.5" />
+              Modificar
+            </button>
+          )}
         </div>
 
         {/* BODY */}
@@ -93,24 +105,16 @@ export default function PaymentSection({ form, isActive, isCompleted, onSubmit, 
               {/* Nota: La configuración de montos C.O.D. se maneja en la Sección 1 (ShipmentSection) */}
             </div>
 
-            {/* BOTÓN FINAL */}
-            {onSubmit && (
+            {/* BOTÓN CONTINUAR */}
+            {onContinue && (
               <div className="pt-8 flex justify-end border-t border-gray-50 mt-4 animate-in fade-in zoom-in duration-500">
                 <Button
-                  onClick={onSubmit}
+                  onClick={onContinue}
                   type="button"
                   disabled={isLoading}
                   className="bg-gray-900 text-white hover:bg-black px-8 h-11 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                 >
-                  {isLoading ? (
-                    <>
-                      <span className="animate-spin mr-2"></span> Procesando...
-                    </>
-                  ) : (
-                    <>
-                      <span className="mr-2"></span> Confirmar forma de pago
-                    </>
-                  )}
+                  <span className="mr-2"></span> Continuar
                 </Button>
               </div>
             )}
