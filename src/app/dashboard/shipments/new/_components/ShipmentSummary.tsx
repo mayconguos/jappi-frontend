@@ -94,13 +94,25 @@ export default function ShipmentSummary({ watchedValues, isSubmitting, disabled,
               )}
             </span>
           </div>
+          {watchedValues?.service?.require_invoice && (
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-sm font-medium text-gray-600">IGV (18%)</span>
+              <span className="text-sm font-medium text-gray-900">
+                {isPriceLoading ? (
+                  <span className="text-[10px] text-gray-400 animate-pulse">Calculando...</span>
+                ) : (
+                  `S/ ${((price || 0) * 0.18).toFixed(2)}`
+                )}
+              </span>
+            </div>
+          )}
           <div className="flex items-baseline justify-between">
             <span className="text-base font-bold text-gray-800">Total Estimado</span>
             <span className="text-2xl font-bold text-[#02997d]">
               {isPriceLoading ? (
                 <span className="text-sm text-gray-300 animate-pulse">Cargando...</span>
               ) : (
-                `S/ ${(price || 0).toFixed(2)}`
+                `S/ ${(watchedValues?.service?.require_invoice ? (price || 0) * 1.18 : (price || 0)).toFixed(2)}`
               )}
             </span>
           </div>

@@ -14,6 +14,8 @@ interface DeliveryConfigurationProps {
   dateError?: string;
   codIncludesDelivery?: boolean;
   onCodIncludesDeliveryChange?: (value: boolean) => void;
+  requireInvoice?: boolean;
+  onRequireInvoiceChange?: (value: boolean) => void;
 }
 
 export default function DeliveryConfiguration({
@@ -26,7 +28,9 @@ export default function DeliveryConfiguration({
   onDateChange,
   dateError,
   codIncludesDelivery,
-  onCodIncludesDeliveryChange
+  onCodIncludesDeliveryChange,
+  requireInvoice,
+  onRequireInvoiceChange
 }: DeliveryConfigurationProps) {
   return (
     <div className="md:col-span-2 mb-6">
@@ -142,6 +146,27 @@ export default function DeliveryConfiguration({
           </div>
         </div>
       </div>
+
+      {/* Invoice Option */}
+      <div className="mt-6 p-4 rounded-xl border border-blue-100 bg-blue-50/50">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={requireInvoice || false}
+            onChange={(e) => onRequireInvoiceChange?.(e.target.checked)}
+            className="mt-0.5 rounded border-blue-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
+          />
+          <div>
+            <span className="text-sm font-semibold text-blue-900 block leading-tight">
+              Solicitar Factura para el servicio de delivery
+            </span>
+            <span className="text-xs text-blue-700/80 mt-1 block">
+              Se agregará el 18% de IGV al precio del envío. La factura será emitida mediante SUNAT.
+            </span>
+          </div>
+        </label>
+      </div>
+
     </div>
   );
 }

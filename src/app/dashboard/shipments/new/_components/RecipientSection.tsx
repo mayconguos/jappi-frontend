@@ -329,6 +329,11 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                       await trigger('service.delivery_date');
                     }}
                     dateError={errors.service?.delivery_date?.message}
+                    requireInvoice={watchedValues.service?.require_invoice}
+                    onRequireInvoiceChange={async (val) => {
+                      setValue('service.require_invoice', val);
+                      await trigger('service.require_invoice');
+                    }}
                   />
                 </div>
               )}

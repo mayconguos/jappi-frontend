@@ -83,7 +83,8 @@ const serviceSchema = z.object({
   notes: z
     .string()
     .max(1000, 'Las notas no pueden exceder 1000 caracteres')
-    .optional()
+    .optional(),
+  require_invoice: z.boolean().optional()
 });
 
 // Schema principal del envío

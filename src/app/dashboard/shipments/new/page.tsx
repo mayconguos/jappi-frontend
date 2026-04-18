@@ -329,7 +329,8 @@ export default function CreateShipmentPage() {
         ...(p.id && data.service.origin_type === 'stock' ? { id: p.id } : {})
       }));
 
-      const deliveryAmount = shippingPrice || 0;
+      const baseDeliveryAmount = shippingPrice || 0;
+      const deliveryAmount = data.service.require_invoice ? parseFloat((baseDeliveryAmount * 1.18).toFixed(2)) : baseDeliveryAmount;
       const isCod = data.service.delivery_mode === 'pay_on_delivery';
       
       let totalToCollect = 0;
@@ -348,6 +349,7 @@ export default function CreateShipmentPage() {
 
         delivery_amount: deliveryAmount,
         total_amount: totalToCollect,
+        require_invoice: data.service.require_invoice || false,
 
         ...(isCod ? {
           delivery_include: data.service.cod_includes_delivery,
