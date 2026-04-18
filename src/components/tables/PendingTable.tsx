@@ -36,7 +36,7 @@ export default function PendingTable({
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Representante</TableHead>
             <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contacto</TableHead>
-            <TableHead className="w-[120px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
+            <TableHead className="w-[180px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -80,26 +80,21 @@ export default function PendingTable({
               </TableCell>
 
               <TableCell className="text-right pr-6 py-4">
-                <div className="flex items-center justify-end gap-2 transition-opacity">
+                <div className="flex items-center justify-end gap-2">
                   <Button
                     onClick={() => onReject(item)}
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                    title="Rechazar"
+                    variant="secondary"
+                    className="h-8 px-3 text-[11px] font-semibold text-gray-500 border-gray-200 hover:border-red-200 hover:bg-red-50 hover:text-red-700 transition-all rounded-full"
+                    title="Rechazar solicitud"
                   >
-                    <X size={16} />
-                    <span className="sr-only">Rechazar</span>
+                    Rechazar
                   </Button>
                   <Button
                     onClick={() => onActivate(item)}
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-400 hover:text-green-600 hover:bg-green-50 transition-all"
-                    title="Aprobar"
+                    className="h-8 px-4 text-[11px] font-bold bg-[#02997d] hover:bg-[#028870] text-white shadow-sm shadow-[#02997d]/20 transition-all rounded-full"
+                    title="Aprobar la cuenta"
                   >
-                    <Check size={16} />
-                    <span className="sr-only">Aprobar</span>
+                    Aprobar
                   </Button>
                 </div>
               </TableCell>

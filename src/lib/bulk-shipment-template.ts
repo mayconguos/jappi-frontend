@@ -178,7 +178,7 @@ export async function downloadBulkShipmentTemplate(
     // Dropdown: Forma de Pago / Abono (col N)
     sheet.getCell(`N${r}`).dataValidation = {
       type: 'list', allowBlank: true,
-      formulae: ['"Abono a Japi,Abono a vendedor"'],
+      formulae: ['"Pago a Japi,Pago a vendedor"'],
       showErrorMessage: true,
       errorTitle: 'Valor inválido',
       error: 'Solo se permiten formas de pago válidas',

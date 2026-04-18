@@ -46,7 +46,7 @@ export default function PaymentSection({ form, isActive, isCompleted, onContinue
               </h3>
               {isCompleted && !isActive ? (
                 <p className="text-xs text-emerald-600 font-medium animate-in fade-in slide-in-from-left-2 transition-all">
-                  {PAYMENT_METHODS.find(m => m.value === watchedValues.service?.payment_method)?.label || 'Método seleccionado'} • {PAYMENT_FORMS.find(f => f.value === watchedValues.service?.payment_form)?.label || 'Forma seleccionada'}
+                  {PAYMENT_FORMS.find(f => f.value === watchedValues.service?.payment_form)?.label || 'Destino seleccionado'} • {PAYMENT_METHODS.find(m => m.value === watchedValues.service?.payment_method)?.label || 'Método seleccionado'}
                 </p>
               ) : (
                 !isCompleted && <p className="text-xs text-gray-500">Cómo se procesará el cobro</p>
@@ -74,31 +74,38 @@ export default function PaymentSection({ form, isActive, isCompleted, onContinue
           <div className="p-6 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+              {/* Destino de Pago (Antes Forma de Pago) */}
+              <div>
+                <Select
+                  label="Destino de pago *"
+                  value={watchedValues.service?.payment_form || ''}
+                  options={PAYMENT_FORMS}
+                  onChange={async (value) => {
+                    setValue('service.payment_form', value);
+                    // Resetear método de pago al cambiar el destino para evitar inconsistencias
+                    setValue('service.payment_method', '');
+                    await trigger(['service.payment_form', 'service.payment_method']);
+                  }}
+                  error={errors.service?.payment_form?.message}
+                />
+              </div>
+
               {/* Método de Pago */}
               <div>
                 <Select
                   label="Método de pago *"
                   value={watchedValues.service?.payment_method || ''}
-                  options={PAYMENT_METHODS}
+                  options={
+                    watchedValues.service?.payment_form === 'seller_payment'
+                      ? PAYMENT_METHODS.filter(m => ['transfer', 'yape', 'plin'].includes(m.value))
+                      : PAYMENT_METHODS
+                  }
                   onChange={async (value) => {
                     setValue('service.payment_method', value);
                     await trigger('service.payment_method');
                   }}
                   error={errors.service?.payment_method?.message}
-                />
-              </div>
-
-              {/* Forma de Pago */}
-              <div>
-                <Select
-                  label="Forma de pago *"
-                  value={watchedValues.service?.payment_form || ''}
-                  options={PAYMENT_FORMS}
-                  onChange={async (value) => {
-                    setValue('service.payment_form', value);
-                    await trigger('service.payment_form');
-                  }}
-                  error={errors.service?.payment_form?.message}
+                  disabled={!watchedValues.service?.payment_form} // Opcional: Desactivar hasta que se seleccione el destino
                 />
               </div>
 

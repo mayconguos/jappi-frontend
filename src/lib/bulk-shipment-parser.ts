@@ -179,7 +179,7 @@ export async function parseShipmentExcel(
         errors.push(`Método de pago inválido: "${payment_method}" (use: ${validMethods.join(' / ')})`);
       }
 
-      const validForms = ['Abono a Japi', 'Abono a vendedor'];
+      const validForms = ['Pago a Japi', 'Pago a vendedor'];
       if (!payment_destination) {
         errors.push('Forma de pago requerida para "contraentrega"');
       } else if (!validForms.includes(payment_destination)) {
@@ -307,8 +307,8 @@ export function rowToApiPayload(row: BulkShipmentRow, idCompany: number | string
             }[row.payment_method] || 'cash',
           payment_destination:
             {
-              'Abono a Japi': 'japi_payment',
-              'Abono a vendedor': 'seller_payment',
+              'Pago a Japi': 'japi_payment',
+              'Pago a vendedor': 'seller_payment',
             }[row.payment_destination] || 'seller_payment',
         }
       : {}),
