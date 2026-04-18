@@ -32,10 +32,10 @@ export interface RouteItem {
 
 export const roleRoutes: Record<Role, RouteItem[]> = {
   admin: [
-    { path: '/dashboard/shipments/all', label: 'Todos los envíos', icon: Calendar },
+    { path: '/dashboard/shipments/all', label: 'Envíos', icon: Calendar },
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
-    { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
-    { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    // { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
+    // { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
     { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Bike },
@@ -49,9 +49,9 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
 
   coordinacion: [
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
-    { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
+    // { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
     { path: '/dashboard/delivery-warehouse', label: 'Despachos desde almacén', icon: ClipboardCheck },
-    { path: '/dashboard/shipments/all', label: 'Todos los envíos', icon: Calendar },
+    { path: '/dashboard/shipments/all', label: 'Envíos', icon: Calendar },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Truck },
     { path: '/dashboard/accounts/courier-zones', label: 'Zonas de Operación', icon: Map },
@@ -64,8 +64,8 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
   almacen: [
     { path: '/dashboard/inventory/requests', label: 'Solicitudes', icon: FileText },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
-    { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
-    { path: '/dashboard/shipments/all', label: 'Todos los envíos', icon: Calendar },
+    // { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
+    { path: '/dashboard/shipments/all', label: 'Envíos', icon: Calendar },
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
     { path: '/dashboard/pickups/supply', label: 'Recojos de abastecimiento', icon: Truck },
   ],
@@ -88,7 +88,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
   ],
 
   despacho: [
-    { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    // { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
     { path: '/dashboard/inventory/kardex', label: 'Kardex', icon: ClipboardCheck },
   ],
 };

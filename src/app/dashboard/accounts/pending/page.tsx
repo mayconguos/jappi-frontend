@@ -158,12 +158,12 @@ export default function ActivationsPage() {
             <Button
               variant="secondary"
               onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-              className="bg-white border-dashed border-gray-300 text-gray-600 hover:border-[#02997d] hover:text-[#02997d]"
               disabled={loadingActivate}
             >
               Cancelar
             </Button>
             <Button
+              variant={confirmModal.action === 'activate' ? 'primary' : 'destructive'}
               onClick={() => {
                 if (confirmModal.user) {
                   if (confirmModal.action === 'activate') {
@@ -175,9 +175,7 @@ export default function ActivationsPage() {
                 }
               }}
               disabled={loadingActivate}
-              className={confirmModal.action === 'activate'
-                ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-500/20 shadow-lg min-w-[100px]'
-                : 'bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg min-w-[100px]'}
+              className="min-w-[100px]"
             >
               {confirmModal.action === 'activate' ? 'Aprobar' : 'Rechazar'}
             </Button>
@@ -185,48 +183,83 @@ export default function ActivationsPage() {
         }
       >
         <div className="flex flex-col items-center text-center">
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${confirmModal.action === 'activate' ? 'bg-green-50' : 'bg-red-50'
-            }`}>
-            {confirmModal.action === 'activate' ? (
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            ) : (
-              <XCircle className="w-6 h-6 text-red-600" />
-            )}
-          </div>
-
-          <p className="text-gray-600 text-base leading-relaxed mb-6">
-            {confirmModal.action === 'activate'
-              ? `¿Deseas activar la cuenta de ${confirmModal.user?.company_name}?`
-              : `¿Rechazar solicitud de ${confirmModal.user?.company_name}? Esta acción no se puede deshacer.`}
-          </p>
 
           {confirmModal.user && (
-            <div className="w-full bg-gray-50 rounded-lg p-5 border border-gray-100 text-base text-left">
-              <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 items-center">
-                <span className="text-gray-500 font-medium">Nombre:</span>
-                <span className="font-semibold text-gray-900">{confirmModal.user.first_name} {confirmModal.user.last_name}</span>
-                <span className="text-gray-500 font-medium">Correo:</span>
-                <span className="font-medium text-gray-700 truncate" title={confirmModal.user.email}>{confirmModal.user.email}</span>
+            <div className="w-full bg-white rounded-xl p-4 border border-gray-100 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] text-left">
+              
+              {/* Profile Card Info */}
+              <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-50">
+                <div className="h-10 w-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold uppercase ring-1 ring-indigo-100/50 shrink-0">
+                  {confirmModal.user.company_name.substring(0, 2)}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-bold text-gray-900 truncate">{confirmModal.user.company_name}</p>
+                  <p className="text-xs text-gray-500 truncate">{confirmModal.user.email}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Representante</span>
+                  <span className="block text-xs font-medium text-gray-800">{confirmModal.user.first_name} {confirmModal.user.last_name || ''}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Teléfono</span>
+                  <span className="block text-xs font-mono text-gray-800">{confirmModal.user.phone_number}</span>
+                </div>
               </div>
               
               {confirmModal.action === 'activate' && (
-                <div className="mt-5 pt-4 border-t border-gray-200">
-                  <label className="flex items-center justify-between cursor-pointer group">
-                    <div>
-                      <span className="text-sm font-semibold text-gray-900 block mb-0.5 group-hover:text-indigo-600 transition-colors">¿Es cliente corporativo?</span>
-                      <span className="text-xs text-gray-500 block">Identifica si esta cuenta tendrá facturación corporativa especial.</span>
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Tarjeta Estándar */}
+                    <div 
+                      onClick={() => setIsCorporateVal(false)}
+                      className={`relative cursor-pointer rounded-xl border p-3 transition-all duration-200 ${
+                        !isCorporateVal 
+                          ? 'border-[#02997d] bg-[#02997d]/[0.03] ring-1 ring-[#02997d]' 
+                          : 'border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 shadow-sm ${
+                          !isCorporateVal ? 'border-[#02997d] bg-[#02997d]' : 'border-gray-300 bg-white'
+                        }`}>
+                          {!isCorporateVal && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                        <span className={`text-[12px] font-bold ${!isCorporateVal ? 'text-[#02997d]' : 'text-gray-700'}`}>
+                          Estándar
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-500 pl-6 leading-tight">
+                        Respeta las tarifas base.
+                      </p>
                     </div>
-                    <div className="relative">
-                      <input 
-                        type="checkbox" 
-                        className="sr-only" 
-                        checked={isCorporateVal}
-                        onChange={(e) => setIsCorporateVal(e.target.checked)}
-                      />
-                      <div className={`block w-14 h-8 rounded-full transition-colors ${isCorporateVal ? 'bg-indigo-500' : 'bg-gray-300'}`}></div>
-                      <div className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${isCorporateVal ? 'translate-x-6' : ''}`}></div>
+
+                    {/* Tarjeta Corporativo */}
+                    <div 
+                      onClick={() => setIsCorporateVal(true)}
+                      className={`relative cursor-pointer rounded-xl border p-3 transition-all duration-200 ${
+                        isCorporateVal 
+                          ? 'border-indigo-500 bg-indigo-50/50 ring-1 ring-indigo-500' 
+                          : 'border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 shadow-sm ${
+                          isCorporateVal ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 bg-white'
+                        }`}>
+                          {isCorporateVal && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                        <span className={`text-[12px] font-bold ${isCorporateVal ? 'text-indigo-700' : 'text-gray-700'}`}>
+                          Corporativo
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-500 pl-6 leading-tight">
+                        Acceso a ajustes y tarifas preferenciales.
+                      </p>
                     </div>
-                  </label>
+                  </div>
                 </div>
               )}
             </div>
