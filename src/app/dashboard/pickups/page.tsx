@@ -35,6 +35,7 @@ export interface Pickup {
   status: PickupStatus;
   observation?: string;
   origin: 'pickup' | 'warehouse';
+  id_driver: number | null;
 }
 
 export interface ApiPickup {
@@ -51,6 +52,7 @@ export interface ApiPickup {
   }[];
   package_count?: number;
   driver_name: string | null;
+  id_driver?: number | null;
   origin?: string;
 }
 
@@ -91,6 +93,7 @@ const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
     packages: apiPickup.package_count || 0,
     status: apiPickup.status,
     observation: undefined,
+    id_driver: apiPickup.id_driver || null,
   };
 };
 
@@ -126,7 +129,7 @@ export default function PickupsPage() {
   const [isConfirmStatusModalOpen, setIsConfirmStatusModalOpen] = useState(false);
   const [isUpdatingCarrier, setIsUpdatingCarrier] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [selectedChange, setSelectedChange] = useState<{ pickupId: number; courierName: string } | null>(null);
+  const [selectedChange, setSelectedChange] = useState<{ pickupId: number; courierId: number; courierName: string } | null>(null);
   const [pendingStatusChange, setPendingStatusChange] = useState<{ pickupId: number; status: PickupStatus } | null>(null);
   const [successModal, setSuccessModal] = useState<string | null>(null);
   const [warningModal, setWarningModal] = useState<{ title: string; message: string } | null>(null);
@@ -313,11 +316,10 @@ export default function PickupsPage() {
     setSuccessModal('El estado del recojo ha sido actualizado correctamente.');
   };
 
-  const handleCarrierSelect = (id: number, carrierName: string) => {
+  const handleCarrierSelect = (id: number, driverIdStr: string) => {
     const pickup = pickups.find(p => p.id === id);
     if (!pickup) return;
 
-    // Bloqueo estricto si el estado es Recibido
     if (pickup.status === 'received') {
       setWarningModal({
         title: 'Acción Bloqueada',
@@ -326,7 +328,7 @@ export default function PickupsPage() {
       return;
     }
 
-    if (carrierName === 'Sin asignar' && pickup.status === 'scheduled') {
+    if (driverIdStr === '0' && pickup.status === 'scheduled') {
       setWarningModal({
         title: 'Transportista Obligatorio',
         message: 'No se puede desasignar el transportista si el estado actual es Programado.'
@@ -334,9 +336,13 @@ export default function PickupsPage() {
       return;
     }
 
-    if (carrierName === pickup.carrier) return;
+    const currentDriverStr = pickup.id_driver?.toString() || '0';
+    if (driverIdStr === currentDriverStr) return;
 
-    setSelectedChange({ pickupId: id, courierName: carrierName });
+    const courier = couriers.find(c => c.id.toString() === driverIdStr);
+    const courierName = courier ? `${courier.first_name} ${courier.last_name || ''}`.trim() : 'Sin asignar';
+
+    setSelectedChange({ pickupId: id, courierId: parseInt(driverIdStr), courierName });
     setIsConfirmModalOpen(true);
   };
 
@@ -344,8 +350,7 @@ export default function PickupsPage() {
     if (!selectedChange) return;
     setIsUpdatingCarrier(true);
 
-    const courier = couriers.find(c => `${c.first_name} ${c.last_name || ''}`.trim() === selectedChange.courierName);
-    const driverId = courier ? courier.id : 0;
+    const driverId = selectedChange.courierId;
 
     try {
       const payload = {
@@ -369,6 +374,7 @@ export default function PickupsPage() {
           ? { 
               ...p, 
               carrier: selectedChange.courierName, 
+              id_driver: driverId === 0 ? null : driverId,
               status: !isUnassigning ? 'scheduled' : p.status 
             } 
           : p
@@ -418,8 +424,9 @@ export default function PickupsPage() {
     if (!batchCarrier || selectedIds.length === 0) return;
     setIsUpdatingCarrier(true);
 
-    const courier = couriers.find(c => `${c.first_name} ${c.last_name || ''}`.trim() === batchCarrier);
-    const driverId = courier ? courier.id : 0;
+    const driverId = parseInt(batchCarrier);
+    const courier = couriers.find(c => c.id === driverId);
+    const courierName = courier ? `${courier.first_name} ${courier.last_name || ''}`.trim() : 'Sin asignar';
 
     try {
       const payload = {
@@ -440,13 +447,14 @@ export default function PickupsPage() {
         selectedIds.includes(p.id) 
           ? { 
               ...p, 
-              carrier: batchCarrier, 
+              carrier: courierName, 
+              id_driver: driverId === 0 ? null : driverId,
               status: !isUnassigning ? 'scheduled' : p.status 
             } 
           : p
       ));
 
-      setSuccessModal(`Se ha asignado correctamente a ${batchCarrier} para los ${selectedIds.length} recojos seleccionados.`);
+      setSuccessModal(`Se ha asignado correctamente a ${courierName} para los ${selectedIds.length} recojos seleccionados.`);
     } catch (err: any) {
       setWarningModal({
         title: 'Error de Asignación Masiva',
@@ -790,7 +798,7 @@ export default function PickupsPage() {
               onChange={setBatchCarrier}
               options={couriers.map(c => ({
                 label: `${c.first_name} ${c.last_name || ''}`.trim(),
-                value: `${c.first_name} ${c.last_name || ''}`.trim(),
+                value: c.id.toString(),
               }))}
               placeholder="Elegir motorizado..."
               className="w-full"

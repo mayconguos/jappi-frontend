@@ -12,7 +12,7 @@ interface PickupsTableProps {
   onSelectOne: (id: number) => void;
   onView: (pickup: Pickup) => void;
   onStatusChange: (id: number, status: PickupStatus) => void;
-  onCarrierChange: (id: number, carrierName: string) => void;
+  onCarrierChange: (id: number, carrierIdStr: string) => void;
   onCancel: (id: number) => void;
   couriers: Courier[];
   isFetchingCouriers: boolean;
@@ -47,13 +47,27 @@ export default function PickupsTable({
       value,
     }));
 
+  // Get assigned couriers from the pickups array to show as options even if couriers aren't loaded yet
+  const assignedCouriers = pickups
+    .filter(p => p.id_driver !== null && p.carrier !== 'Sin asignar')
+    .map(p => ({
+      label: p.carrier,
+      value: p.id_driver!.toString()
+    }));
+
+  const fetchedCouriers = couriers.map(c => ({
+    label: `${c.first_name} ${c.last_name || ''}`.trim(),
+    value: c.id.toString(),
+  }));
+
+  const allCouriers = [...assignedCouriers, ...fetchedCouriers];
+  const uniqueCouriersMap = new Map();
+  allCouriers.forEach(c => uniqueCouriersMap.set(c.value, c));
+
   const carrierOptions = [
-    { label: 'Sin asignar', value: 'Sin asignar' },
-    ...couriers.map(c => ({
-      label: `${c.first_name} ${c.last_name || ''}`.trim(),
-      value: `${c.first_name} ${c.last_name || ''}`.trim(),
-    }))
-  ];
+    { label: 'Sin asignar', value: '0' },
+    ...Array.from(uniqueCouriersMap.values())
+  ].sort((a, b) => a.label === 'Sin asignar' ? -1 : a.label.localeCompare(b.label));
 
   const allSelected = pickups.length > 0 && selectedIds.length === pickups.length;
 
@@ -151,17 +165,17 @@ export default function PickupsTable({
                 <TableCell className="py-4">
                   <div
                     className="flex items-center gap-2 relative group-select"
-                    onClick={() => (couriers.length === 0 && pickup.status !== 'received') && onFetchCouriers()}
+                    onClick={() => (couriers.length === 0 && pickup.status !== 'received' && pickup.status !== 'scheduled') && onFetchCouriers()}
                   >
                     <Select
                       size="compact"
-                      value={pickup.carrier}
+                      value={pickup.id_driver?.toString() || '0'}
                       onChange={(val) => onCarrierChange(pickup.id, val)}
                       options={carrierOptions}
                       className="w-full min-w-[160px] border-slate-200 shadow-sm"
-                      disabled={isFetchingCouriers || pickup.status === 'received'}
+                      disabled={isFetchingCouriers || pickup.status === 'received' || pickup.status === 'scheduled' || pickup.status === 'picked_up'}
                     />
-                    {isFetchingCouriers && pickup.status !== 'received' && (
+                    {isFetchingCouriers && pickup.status === 'pending' && (
                       <div className="absolute right-10 top-1/2 -translate-y-1/2">
                         <Loader2 size={13} className="animate-spin text-slate-400" />
                       </div>
