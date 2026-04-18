@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { clsx } from 'clsx';
 import { Card } from '@/components/ui/card';
 import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { type ShipmentFormData } from '@/lib/validations/shipment';
 import api from '@/app/services/api';
 import { DELIVERY_MODES } from '@/constants/formOptions';
@@ -332,13 +333,14 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
             {/* Footer con Botón Continuar */}
             {!isCompleted && isActive && (
               <div className="border-t border-gray-100 mt-6 pt-6 flex justify-end">
-                <button
+                <Button
                   type="button"
                   onClick={onContinue}
-                  className="bg-[#02997d] text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-[#02886f] transition-colors shadow-lg shadow-[#02997d]/20"
+                  variant="primary"
+                  className="px-8 h-11 w-full sm:w-auto"
                 >
                   Continuar
-                </button>
+                </Button>
               </div>
             )}
           </div>

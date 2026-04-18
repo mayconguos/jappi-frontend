@@ -1,8 +1,8 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, Truck, Receipt, CreditCard } from 'lucide-react';
+import { Package, Truck, Receipt, CreditCard, Wallet } from 'lucide-react';
 import { ShipmentFormData } from '@/lib/validations/shipment';
-import { REGIONES_LIMA } from '@/constants/formOptions';
+import { REGIONES_LIMA, PAYMENT_FORMS, PAYMENT_METHODS } from '@/constants/formOptions';
 
 interface ShipmentSummaryProps {
   watchedValues?: Partial<ShipmentFormData>;
@@ -14,7 +14,8 @@ interface ShipmentSummaryProps {
 
 export default function ShipmentSummary({ watchedValues, isSubmitting, disabled, price, isPriceLoading }: ShipmentSummaryProps) {
   const serviceType = watchedValues?.service?.type === 'express' ? 'Express' : 'Regular';
-  const paymentMethod = watchedValues?.service?.payment_method === 'now' ? 'Pago Ahora' : (watchedValues?.service?.payment_method === 'cod' ? 'Contra Entrega' : '-');
+  const paymentFormLabel = PAYMENT_FORMS.find(f => f.value === watchedValues?.service?.payment_form)?.label || '-';
+  const paymentMethodLabel = PAYMENT_METHODS.find(m => m.value === watchedValues?.service?.payment_method)?.label || '-';
 
   // Datos de Ruta
   const originDistrict = watchedValues?.sender?.address?.id_district
@@ -67,9 +68,15 @@ export default function ShipmentSummary({ watchedValues, isSubmitting, disabled,
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500 flex items-center gap-2">
-              <CreditCard size={16} /> Método de Pago
+              <CreditCard size={16} /> Destino de Pago
             </span>
-            <span className="font-medium text-gray-900">{paymentMethod}</span>
+            <span className="font-medium text-gray-900">{paymentFormLabel}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500 flex items-center gap-2">
+              <Wallet size={16} /> Método de Pago
+            </span>
+            <span className="font-medium text-gray-900">{paymentMethodLabel}</span>
           </div>
         </div>
 

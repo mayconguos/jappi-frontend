@@ -119,7 +119,8 @@ export default function PaymentSection({ form, isActive, isCompleted, onContinue
                   onClick={onContinue}
                   type="button"
                   disabled={isLoading}
-                  className="bg-gray-900 text-white hover:bg-black px-8 h-11 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                  variant="primary"
+                  className="px-8 h-11 w-full sm:w-auto"
                 >
                   <span className="mr-2"></span> Continuar
                 </Button>

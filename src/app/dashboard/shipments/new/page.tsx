@@ -251,7 +251,9 @@ export default function CreateShipmentPage() {
   // Calcular si el formulario está listo para envio
   // 1. Shipment y Recipient completos
   // 2. Si es Contra Entrega (shouldShowPaymentStep), validar que el paso esté completado
-  const isFormReady = isShipmentComplete && isRecipientComplete && (!shouldShowPaymentStep || isPaymentComplete);
+  // 3. El costo referencial (shippingPrice) debe ser mayor a 0
+  const hasValidPrice = shippingPrice !== null && shippingPrice > 0;
+  const isFormReady = isShipmentComplete && isRecipientComplete && (!shouldShowPaymentStep || isPaymentComplete) && hasValidPrice;
 
   // Handlers
   const handleContinueShipment = async () => {
@@ -304,6 +306,16 @@ export default function CreateShipmentPage() {
           type: 'error',
           title: 'Secciones incompletas',
           message: 'Por favor, completa todas las secciones antes de intentar registrar el envío.'
+        });
+        return;
+      }
+
+      // Validación de precio/cobertura
+      if (!shippingPrice || shippingPrice <= 0) {
+        showStatus({
+          type: 'error',
+          title: 'Ubicación sin cobertura',
+          message: 'El costo referencial de envío es S/ 0.00, lo que indica que actualmente no hay cobertura o ruta configurada para esta zona. Verifica la dirección o contacta a soporte.'
         });
         return;
       }

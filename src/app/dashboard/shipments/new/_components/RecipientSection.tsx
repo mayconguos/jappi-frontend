@@ -259,12 +259,20 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
 
                 {/* Costo de delivery Referencial (Centralized Logic) */}
                 {!!selectedDistrict && (price !== null || isPriceLoading) && (
-                  <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
-                    <span className="font-bold text-xs">Costo referencial de envío:</span>
-                    <span className="font-bold text-xs">
-                      {isPriceLoading ? 'Calculando...' : `S/ ${price?.toFixed(2)}`}
-                    </span>
-                  </div>
+                  <>
+                    {!isPriceLoading && price === 0 ? (
+                      <div className="mb-4 p-3 bg-red-50/50 border border-red-100 text-red-700 rounded-lg flex items-center justify-between gap-2 mt-2 animate-in fade-in">
+                        <span className="font-medium text-[11px] leading-tight">Actualmente no tenemos cobertura de envío para esta ruta. Contacta a soporte para evaluar tu caso.</span>
+                      </div>
+                    ) : (
+                      <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
+                        <span className="font-bold text-xs">Costo referencial de envío:</span>
+                        <span className="font-bold text-xs">
+                          {isPriceLoading ? 'Calculando...' : `S/ ${price?.toFixed(2)}`}
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Fila 2: Dirección Exacta - Separada */}
@@ -346,7 +354,8 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
                   type="button"
                   onClick={handleContinue}
                   disabled={isValidating}
-                  className="bg-gray-900 text-white hover:bg-black px-8 h-11 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                  variant="primary"
+                  className="px-8 h-11 w-full sm:w-auto"
                 >
                   {isValidating ? 'Validando...' : (watchedValues.service?.delivery_mode === 'pay_on_delivery' ? 'Continuar al Pago' : 'Confirmar Dirección')}
                 </Button>
