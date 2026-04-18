@@ -41,12 +41,12 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
 
   const districtHasSectors = selectedDistrict ? getSectorOptions(selectedDistrict).length > 0 : false;
 
-  const isPersonalComplete = 
-    (watchedValues.recipient?.full_name?.length || 0) > 2 && 
+  const isPersonalComplete =
+    (watchedValues.recipient?.full_name?.length || 0) > 2 &&
     (watchedValues.recipient?.phone?.length || 0) >= 9;
 
-  const isAddressComplete = 
-    isPersonalComplete && 
+  const isAddressComplete =
+    isPersonalComplete &&
     (watchedValues.recipient?.address?.id_region || 0) > 0 &&
     (watchedValues.recipient?.address?.id_district || 0) > 0 &&
     (watchedValues.recipient?.address?.address?.length || 0) > 4 &&
@@ -201,136 +201,136 @@ export default function RecipientSection({ form, isActive, isCompleted, onContin
             {/* Dirección de Entrega (Bloque Contenido) */}
             {isPersonalComplete && (
               <div ref={addressRef} className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
-              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <MapPin size={14} /> Dirección de Entrega
-              </h4>
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <MapPin size={14} /> Dirección de Entrega
+                </h4>
 
-              {/* Fila 1: Selectores (Fondo Blanco) */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                {/* Región */}
-                <div className="relative">
-                  <Select
-                    label="Región *"
-                    value={watchedValues.recipient?.address?.id_region?.toString() || ''}
-                    options={regionOptions}
-                    onChange={async (value) => {
-                      setValue('recipient.address.id_region', parseInt(value));
-                      setValue('recipient.address.id_district', 0);
-                      setValue('recipient.address.id_sector', 0);
-                      await trigger(['recipient.address.id_region', 'recipient.address.id_district']);
-                    }}
-                    error={errors.recipient?.address?.id_region?.message}
-                  />
-                </div>
-
-                {/* Distrito */}
-                <div className={clsx("transition-all duration-300 ease-in-out relative", selectedRegion ? 'opacity-100' : 'opacity-50 pointer-events-none')}>
-                  <Select
-                    label="Distrito *"
-                    value={watchedValues.recipient?.address?.id_district?.toString() || ''}
-                    options={recipientDistrictOptions}
-                    onChange={async (value) => {
-                      setValue('recipient.address.id_district', parseInt(value));
-                      setValue('recipient.address.id_sector', 0);
-                      await trigger(['recipient.address.id_district', 'recipient.address.id_sector']);
-                    }}
-                    error={errors.recipient?.address?.id_district?.message}
-                  />
-                </div>
-
-                {/* Sector */}
-                {districtHasSectors ? (
-                  <div className="animate-in fade-in slide-in-from-top-2 relative">
+                {/* Fila 1: Selectores (Fondo Blanco) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {/* Región */}
+                  <div className="relative">
                     <Select
-                      label="Sector *"
-                      value={watchedValues.recipient?.address?.id_sector?.toString() || ''}
-                      options={recipientSectorOptions}
+                      label="Región *"
+                      value={watchedValues.recipient?.address?.id_region?.toString() || ''}
+                      options={regionOptions}
                       onChange={async (value) => {
-                        setValue('recipient.address.id_sector', parseInt(value));
-                        await trigger('recipient.address.id_sector');
+                        setValue('recipient.address.id_region', parseInt(value));
+                        setValue('recipient.address.id_district', 0);
+                        setValue('recipient.address.id_sector', 0);
+                        await trigger(['recipient.address.id_region', 'recipient.address.id_district']);
                       }}
-                      error={errors.recipient?.address?.id_sector?.message}
+                      error={errors.recipient?.address?.id_region?.message}
                     />
                   </div>
-                ) : (
-                  <div className="hidden md:block"></div>
-                )}
-              </div>
 
-              {/* Costo de delivery Referencial (Centralized Logic) */}
-              {!!selectedDistrict && (price !== null || isPriceLoading) && (
-                <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
-                  <span className="font-bold text-xs">Costo referencial de envío:</span>
-                  <span className="font-bold text-xs">
-                    {isPriceLoading ? 'Calculando...' : `S/ ${price?.toFixed(2)}`}
-                  </span>
+                  {/* Distrito */}
+                  <div className={clsx("transition-all duration-300 ease-in-out relative", selectedRegion ? 'opacity-100' : 'opacity-50 pointer-events-none')}>
+                    <Select
+                      label="Distrito *"
+                      value={watchedValues.recipient?.address?.id_district?.toString() || ''}
+                      options={recipientDistrictOptions}
+                      onChange={async (value) => {
+                        setValue('recipient.address.id_district', parseInt(value));
+                        setValue('recipient.address.id_sector', 0);
+                        await trigger(['recipient.address.id_district', 'recipient.address.id_sector']);
+                      }}
+                      error={errors.recipient?.address?.id_district?.message}
+                    />
+                  </div>
+
+                  {/* Sector */}
+                  {districtHasSectors ? (
+                    <div className="animate-in fade-in slide-in-from-top-2 relative">
+                      <Select
+                        label="Sector *"
+                        value={watchedValues.recipient?.address?.id_sector?.toString() || ''}
+                        options={recipientSectorOptions}
+                        onChange={async (value) => {
+                          setValue('recipient.address.id_sector', parseInt(value));
+                          await trigger('recipient.address.id_sector');
+                        }}
+                        error={errors.recipient?.address?.id_sector?.message}
+                      />
+                    </div>
+                  ) : (
+                    <div className="hidden md:block"></div>
+                  )}
                 </div>
-              )}
 
-              {/* Fila 2: Dirección Exacta - Separada */}
-              <div className="mb-4">
-                <Input
-                  label="Dirección Exacta"
-                  value={watchedValues.recipient?.address?.address || ''}
-                  onChange={async (e) => {
-                    const value = e.target.value;
-                    setValue('recipient.address.address', value.toUpperCase());
-                    await trigger('recipient.address.address');
-                  }}
-                  error={errors.recipient?.address?.address?.message}
-                  className="border-gray-200 focus:border-[#02997d]"
-                  placeholder="Av. Principal 123, Urb. Las Flores"
-                />
-              </div>
+                {/* Costo de delivery Referencial (Centralized Logic) */}
+                {!!selectedDistrict && (price !== null || isPriceLoading) && (
+                  <div className="mb-4 p-3 bg-blue-50/50 border border-blue-100 text-blue-800 rounded-lg flex items-center justify-between gap-2 max-w-sm mt-2 animate-in fade-in">
+                    <span className="font-bold text-xs">Costo referencial de envío:</span>
+                    <span className="font-bold text-xs">
+                      {isPriceLoading ? 'Calculando...' : `S/ ${price?.toFixed(2)}`}
+                    </span>
+                  </div>
+                )}
 
-              <div>
-                <Input
-                  label="Referencia"
-                  value={watchedValues.recipient?.address?.reference || ''}
-                  onChange={async (e) => {
-                    const value = e.target.value;
-                    setValue('recipient.address.reference', value.toUpperCase());
-                  }}
-                  error={errors.recipient?.address?.reference?.message}
-                  className="border-gray-200 focus:border-[#02997d]"
-                  placeholder="Ej. Portón negro, frente al parque..."
-                />
+                {/* Fila 2: Dirección Exacta - Separada */}
+                <div className="mb-4">
+                  <Input
+                    label="Dirección Exacta"
+                    value={watchedValues.recipient?.address?.address || ''}
+                    onChange={async (e) => {
+                      const value = e.target.value;
+                      setValue('recipient.address.address', value.toUpperCase());
+                      await trigger('recipient.address.address');
+                    }}
+                    error={errors.recipient?.address?.address?.message}
+                    className="border-gray-200 focus:border-[#02997d]"
+                    placeholder="Av. Principal 123, Urb. Las Flores"
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    label="Referencia"
+                    value={watchedValues.recipient?.address?.reference || ''}
+                    onChange={async (e) => {
+                      const value = e.target.value;
+                      setValue('recipient.address.reference', value.toUpperCase());
+                    }}
+                    error={errors.recipient?.address?.reference?.message}
+                    className="border-gray-200 focus:border-[#02997d]"
+                    placeholder="Ej. Portón negro, frente al parque..."
+                  />
+                </div>
               </div>
-            </div>
             )}
 
             {/* Configuración de Entrega (Modo de Entrega / COD / Fecha) */}
             <div ref={configRef}>
               {isAddressComplete && (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm mt-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
-                  Configuración de Entrega
-                </h4>
-              <DeliveryConfiguration
-                deliveryMode={watchedValues.service?.delivery_mode}
-                onModeChange={async (val) => {
-                  setValue('service.delivery_mode', val);
-                  await trigger('service.delivery_mode');
-                }}
-                error={errors.service?.delivery_mode?.message}
-                registerCodAmount={register('service.cod_amount', {
-                  required: watchedValues.service?.delivery_mode === 'pay_on_delivery' ? "Ingresa el monto a cobrar" : false,
-                  valueAsNumber: true
-                })}
-                codAmountError={errors.service?.cod_amount?.message}
-                codIncludesDelivery={watchedValues.service?.cod_includes_delivery}
-                onCodIncludesDeliveryChange={async (val) => {
-                  setValue('service.cod_includes_delivery', val);
-                  await trigger('service.cod_includes_delivery');
-                }}
-                deliveryDate={watchedValues.service?.delivery_date}
-                onDateChange={async (val) => {
-                  setValue('service.delivery_date', val);
-                  await trigger('service.delivery_date');
-                }}
-                  dateError={errors.service?.delivery_date?.message}
-                />
-              </div>
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+                    Configuración de Entrega
+                  </h4>
+                  <DeliveryConfiguration
+                    deliveryMode={watchedValues.service?.delivery_mode}
+                    onModeChange={async (val) => {
+                      setValue('service.delivery_mode', val);
+                      await trigger('service.delivery_mode');
+                    }}
+                    error={errors.service?.delivery_mode?.message}
+                    registerCodAmount={register('service.cod_amount', {
+                      required: watchedValues.service?.delivery_mode === 'pay_on_delivery' ? "Ingresa el monto a cobrar" : false,
+                      valueAsNumber: true
+                    })}
+                    codAmountError={errors.service?.cod_amount?.message}
+                    codIncludesDelivery={watchedValues.service?.cod_includes_delivery}
+                    onCodIncludesDeliveryChange={async (val) => {
+                      setValue('service.cod_includes_delivery', val);
+                      await trigger('service.cod_includes_delivery');
+                    }}
+                    deliveryDate={watchedValues.service?.delivery_date}
+                    onDateChange={async (val) => {
+                      setValue('service.delivery_date', val);
+                      await trigger('service.delivery_date');
+                    }}
+                    dateError={errors.service?.delivery_date?.message}
+                  />
+                </div>
               )}
             </div>
 

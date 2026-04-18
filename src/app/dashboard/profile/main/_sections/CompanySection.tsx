@@ -175,7 +175,7 @@ export default function CompanySection({
           </div>
 
           <div className="group">
-             <div className="flex items-center gap-1.5 mb-1.5 px-1">
+            <div className="flex items-center gap-1.5 mb-1.5 px-1">
               <FileText size={14} className="text-gray-400 group-hover:text-emerald-600 transition-colors" />
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">RUC</span>
             </div>
