@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Pagination } from '@/components/ui/pagination';
 import { Loader2, Package, MapPin, Phone, Calendar, BadgeDollarSign, Info } from 'lucide-react';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 
 // Hooks & Context
 import { useAuth } from '@/context/AuthContext';
@@ -108,49 +109,42 @@ export default function AllShipmentsPage() {
   const currentItems = filteredShipments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
-      <div className="space-y-6">
-        {/* Filters */}
-        <ShipmentsFilter
-          filterField={filterField}
-          setFilterField={setFilterField}
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          onExport={() => { }}
-          totalItems={filteredShipments.length}
-        />
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
+      <ShipmentsFilter
+        filterField={filterField}
+        setFilterField={setFilterField}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        onExportExcel={() => { }}
+        totalItems={filteredShipments.length}
+      />
 
-        {/* Table Area */}
-        <div className="space-y-4">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-64 bg-white rounded-xl border border-gray-100 shadow-sm">
-              <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mb-4" />
-              <p className="text-gray-500 font-medium">Cargando envíos...</p>
-            </div>
-          ) : (
-            <>
-              <ShipmentsTable
-                shipments={currentItems}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <DeliveryLoader message="Cargando información de envíos..." />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <ShipmentsTable
+            shipments={currentItems}
+            currentPage={currentPage}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onView={handleOpenModal}
+          />
+          {totalItems > 0 && (
+            <div className="flex justify-center sm:justify-end mt-4">
+              <Pagination
                 currentPage={currentPage}
+                totalItems={totalItems}
                 itemsPerPage={ITEMS_PER_PAGE}
-                onView={handleOpenModal}
+                onPageChange={setCurrentPage}
               />
-              {totalItems > 0 && (
-                <div className="flex justify-center sm:justify-end mt-4">
-                  <Pagination
-                    currentPage={currentPage}
-                    totalItems={totalItems}
-                    itemsPerPage={ITEMS_PER_PAGE}
-                    onPageChange={setCurrentPage}
-                  />
-                </div>
-              )}
-            </>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Detail Modal */}
       <Modal

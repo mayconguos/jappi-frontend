@@ -429,7 +429,6 @@ export default function PickupsPage() {
         setValue={setValue}
         filterFields={FILTER_FIELDS}
         onExportExcel={handleExportExcel}
-        onExportPdf={handleExportPdf}
         dateRange={dateRange}
         setDateRange={setDateRange}
         totalItems={totalItems}

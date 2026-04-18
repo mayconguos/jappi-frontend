@@ -111,7 +111,7 @@ export default function ShipmentsPage() {
           setSearchValue={setSearchValue}
           dateRange={dateRange}
           setDateRange={setDateRange}
-          onExport={() => { }}
+          onExportExcel={() => { }}
           totalItems={filteredShipments.length}
         />
 

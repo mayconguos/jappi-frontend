@@ -1,4 +1,4 @@
-import { FileSpreadsheet, FileText, Search, Filter } from 'lucide-react';
+import { Download, Search, Filter } from 'lucide-react';
 
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,6 @@ interface PickupsFilterProps {
   setValue: (value: string) => void;
   filterFields: FilterField[];
   onExportExcel: () => void;
-  onExportPdf: () => void;
   dateRange: { from: string | undefined; to: string | undefined };
   setDateRange: (range: { from: string | undefined; to: string | undefined }) => void;
   totalItems: number;
@@ -29,7 +28,6 @@ export default function PickupsFilter({
   setValue,
   filterFields,
   onExportExcel,
-  onExportPdf,
   dateRange,
   setDateRange,
   totalItems
@@ -116,18 +114,9 @@ export default function PickupsFilter({
             className="flex items-center gap-2 border-slate-200 hover:border-emerald-200 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-all"
             size="sm"
           >
-            <FileSpreadsheet size={16} />
+            <Download size={16} />
             <span className="hidden sm:inline">Excel</span>
           </Button>
-          {/* <Button
-            variant="secondary"
-            onClick={onExportPdf}
-            className="flex items-center gap-2 border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all"
-            size="sm"
-          >
-            <FileText size={16} />
-            <span className="hidden sm:inline">PDF</span>
-          </Button> */}
         </div>
       </div>
     </div>
