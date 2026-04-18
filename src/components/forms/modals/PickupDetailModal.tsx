@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle, MessageCircle, Phone } from 'lucide-react';
+import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle, MessageCircle, Phone, Copy, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import CameraCapture from '@/components/ui/camera-capture';
 
@@ -20,8 +20,25 @@ export default function PickupDetailModal({ isOpen, onClose, pickup, onStatusCha
   const [photos, setPhotos] = useState<string[]>([]);
   const [photoSlots, setPhotoSlots] = useState(1);
   const [activeCameraSlot, setActiveCameraSlot] = useState<number | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   if (!pickup) return null;
+
+  const handleCopy = (text: string, fieldId: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldId);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const CopyButton = ({ text, fieldId }: { text: string; fieldId: string }) => (
+    <button
+      onClick={() => handleCopy(text, fieldId)}
+      className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-emerald-600 transition-colors ml-1"
+      title="Copiar"
+    >
+      {copiedField === fieldId ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+    </button>
+  );
 
   const handleFinishClick = () => {
     setPhotoSlots(1);
@@ -86,9 +103,12 @@ export default function PickupDetailModal({ isOpen, onClose, pickup, onStatusCha
                 <div className="flex items-start gap-2">
                   <User size={20} className="text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h3 className="text-md font-semibold text-gray-900">
-                      {pickup.sender}
-                    </h3>
+                    <div className="flex items-center">
+                      <h3 className="text-md font-semibold text-gray-900">
+                        {pickup.sender}
+                      </h3>
+                      <CopyButton text={pickup.sender} fieldId="sender" />
+                    </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <p className="text-sm text-gray-500">{pickup.sender_phone}</p>
                       <div className="flex gap-1.5">
@@ -127,9 +147,12 @@ export default function PickupDetailModal({ isOpen, onClose, pickup, onStatusCha
                 <div className="flex items-start gap-2">
                   <MapPin size={20} className="text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h3 className="text-md font-semibold text-gray-900">
-                      {pickup.origin}
-                    </h3>
+                    <div className="flex items-center">
+                      <h3 className="text-md font-semibold text-gray-900 leading-tight">
+                        {pickup.origin}
+                      </h3>
+                      <CopyButton text={pickup.origin} fieldId="origin" />
+                    </div>
                     <p className="text-sm text-gray-500">
                       Recojo programado para hoy.
                     </p>
@@ -173,6 +196,10 @@ export default function PickupDetailModal({ isOpen, onClose, pickup, onStatusCha
                           >
                             <span className="text-xs">×</span>
                           </Button>
+                        </div>
+                        <div className="flex items-center gap-1 bg-black/60 text-white px-2 py-0.5 rounded-full absolute bottom-2 z-10 backdrop-blur-sm">
+                          <MapPin size={10} className="text-emerald-400" />
+                          <span className="text-[10px] font-mono">GPS OK</span>
                         </div>
                       </>
                     ) : (

@@ -3,7 +3,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Package, ArrowRight, Eye, MessageCircle, Phone } from 'lucide-react';
+import { MapPin, Package, ArrowRight, Eye, MessageCircle, Phone, Map, Navigation } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import PickupDetailModal from '@/components/forms/modals/PickupDetailModal';
 import { Pagination } from '@/components/ui/pagination';
@@ -14,6 +14,7 @@ interface Pickup {
   sender_phone: string;
   origin: string;
   destination: string;
+  district: string;
   status: 'pending' | 'completed';
   date: string;
   items_count: number;
@@ -26,6 +27,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Av. Javier Prado 123, San Isidro',
     destination: 'Jr. Unión 456, Lima',
+    district: 'San Isidro',
     status: 'pending',
     date: '2024-02-06',
     items_count: 5
@@ -36,6 +38,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Ca. Los Pinos 789, Miraflores',
     destination: 'Av. Arequipa 1020, Lince',
+    district: 'Miraflores',
     status: 'pending',
     date: '2024-02-06',
     items_count: 3
@@ -46,6 +49,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Av. Túpac Amaru 340, Independencia',
     destination: 'Ca. Colón 88, Jesús María',
+    district: 'Independencia',
     status: 'pending',
     date: '2024-02-06',
     items_count: 2
@@ -56,6 +60,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Jr. Lampa 570, Cercado de Lima',
     destination: 'Av. Universitaria 1800, San Miguel',
+    district: 'Lima',
     status: 'pending',
     date: '2024-02-06',
     items_count: 7
@@ -66,6 +71,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Jr. Gamarra 240, La Victoria',
     destination: 'Av. Primavera 1100, Surco',
+    district: 'La Victoria',
     status: 'completed',
     date: '2024-02-04',
     items_count: 12
@@ -76,6 +82,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Av. Colonial 2400, Pueblo Libre',
     destination: 'Ca. Loreto 55, Barranco',
+    district: 'Pueblo Libre',
     status: 'completed',
     date: '2024-02-04',
     items_count: 3
@@ -86,6 +93,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Av. Separadora Industrial 1200, Ate',
     destination: 'Ca. Los Álamos 45, La Molina',
+    district: 'Ate',
     status: 'pending',
     date: '2024-02-06',
     items_count: 1
@@ -96,6 +104,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Av. Argentina 500, Callao',
     destination: 'Av. Brasil 300, Magdalena',
+    district: 'Callao',
     status: 'completed',
     date: '2024-02-05',
     items_count: 4
@@ -106,6 +115,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Av. Benavides 3200, Surco',
     destination: 'Av. Angamos 900, Miraflores',
+    district: 'Surco',
     status: 'completed',
     date: '2024-02-05',
     items_count: 6
@@ -116,6 +126,7 @@ const MOCK_PICKUPS: Pickup[] = [
     sender_phone: '+51 976 548 966',
     origin: 'Av. La Marina 2000, San Miguel',
     destination: 'Jr. Ica 320, Cercado de Lima',
+    district: 'San Miguel',
     status: 'completed',
     date: '2024-02-03',
     items_count: 8
@@ -139,6 +150,15 @@ export default function CarrierPickupsTable() {
   const [pickups, setPickups] = useState<Pickup[]>(MOCK_PICKUPS);
   const [selectedPickup, setSelectedPickup] = useState<Pickup | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
+
+  // Derivar distritos únicos
+  const districtsWithPending = Array.from(
+    new Set(pickups.filter(p => p.status === 'pending').map(p => p.district))
+  ).sort();
+  const districts = ['all', ...districtsWithPending];
+
+  const filtered = pickups.filter(p => selectedDistrict === 'all' || p.district === selectedDistrict);
 
   const handleOpenDetail = (pickup: Pickup) => {
     setSelectedPickup(pickup);
@@ -153,18 +173,54 @@ export default function CarrierPickupsTable() {
     }
   };
 
-  const sortedPickups = [...pickups].sort(
+  const sortedPickups = [...filtered].sort(
     (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
   );
 
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedDistrict]);
+
   const totalItems = sortedPickups.length;
   const currentItems = sortedPickups.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <>
+      {/* Filtro por Distrito (Chips) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none mb-4">
+        {districts.map((district) => {
+          const isActive = selectedDistrict === district;
+          const count = district === 'all'
+            ? pickups.length
+            : pickups.filter(p => p.district === district).length;
+          return (
+            <button
+              key={district}
+              onClick={() => setSelectedDistrict(district)}
+              className={`
+                flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+                whitespace-nowrap border transition-all duration-200 shrink-0
+                ${isActive
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-200'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50'
+                }
+              `}
+            >
+              {district === 'all' ? 'Todos' : district}
+              <span className={`
+                inline-flex items-center justify-center rounded-full text-[10px] font-semibold
+                min-w-[16px] h-4 px-1
+                ${isActive ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'}
+              `}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
       {/* Desktop View */}
       <div className="hidden md:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <Table>
@@ -250,7 +306,17 @@ export default function CarrierPickupsTable() {
                   {getStatusBadge(pickup.status)}
                 </TableCell>
                 <TableCell className="text-right pr-6 py-4">
-                  <div className="flex items-center justify-end transition-opacity">
+                  <div className="flex items-center justify-end gap-2">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pickup.origin}, ${pickup.district}, Lima`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all border border-transparent hover:border-emerald-100"
+                      title="Cómo llegar"
+                    >
+                      <Map size={16} />
+                    </a>
                     <Button
                       variant="ghost" size="sm"
                       className="h-8 gap-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all font-normal"
@@ -282,7 +348,17 @@ export default function CarrierPickupsTable() {
               {/* Remitente */}
               <div className="flex justify-between items-start gap-2 mb-1">
                 <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{pickup.sender}</p>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pickup.origin}, ${pickup.district}, Lima`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex h-7 px-2 items-center justify-center gap-1 rounded-full bg-emerald-100 text-emerald-700 shadow-sm active:scale-90 transition-transform text-[10px] font-bold border border-emerald-200"
+                  >
+                    <Navigation size={12} className="fill-emerald-700/10" />
+                    MAPS
+                  </a>
                   <a
                     href={`tel:${pickup.sender_phone.replace(/\D/g, '')}`}
                     onClick={(e) => e.stopPropagation()}
@@ -302,12 +378,16 @@ export default function CarrierPickupsTable() {
                 </div>
               </div>
 
-              {/* Ruta inline: Origen → Destino */}
-              <div className="flex items-start gap-1.5 text-[11px] text-gray-500">
-                <MapPin size={11} className="text-gray-400 shrink-0 mt-0.5" />
-                <span className="truncate">{pickup.origin}</span>
-                <ArrowRight size={11} className="text-gray-300 shrink-0 mt-0.5" />
-                <span className="truncate">{pickup.destination}</span>
+              {/* Dirección de Origen */}
+              <div className="flex items-start gap-1.5 text-[11px] text-gray-600 mb-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1" />
+                <span className="line-clamp-1 italic">{pickup.origin}</span>
+              </div>
+
+              {/* Distrito */}
+              <div className="flex items-start gap-1.5 text-[10px] text-gray-400 font-medium">
+                <MapPin size={10} className="text-gray-400 shrink-0 mt-0.5" />
+                <span className="truncate uppercase tracking-tight">{pickup.district}</span>
               </div>
             </div>
           </div>

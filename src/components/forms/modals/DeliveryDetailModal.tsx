@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle, MessageCircle, Phone } from 'lucide-react';
+import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle, MessageCircle, Phone, Copy, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import CameraCapture from '@/components/ui/camera-capture';
 
@@ -20,8 +20,25 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
   const [photos, setPhotos] = useState<string[]>([]);
   const [photoSlots, setPhotoSlots] = useState(1);
   const [activeCameraSlot, setActiveCameraSlot] = useState<number | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   if (!delivery) return null;
+
+  const handleCopy = (text: string, fieldId: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldId);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const CopyButton = ({ text, fieldId }: { text: string; fieldId: string }) => (
+    <button
+      onClick={() => handleCopy(text, fieldId)}
+      className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors ml-1"
+      title="Copiar"
+    >
+      {copiedField === fieldId ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+    </button>
+  );
 
 
   const handleFinishClick = () => {
@@ -97,9 +114,12 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                 <div className="flex items-start gap-2">
                   <User size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h3 className="text-md font-semibold text-gray-900">
-                      {delivery.recipient}
-                    </h3>
+                    <div className="flex items-center">
+                      <h3 className="text-md font-semibold text-gray-900">
+                        {delivery.recipient}
+                      </h3>
+                      <CopyButton text={delivery.recipient} fieldId="recipient" />
+                    </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <p className="text-sm text-gray-500">{delivery.recipient_phone}</p>
                       <div className="flex gap-1.5">
@@ -138,9 +158,12 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                 <div className="flex items-start gap-2">
                   <MapPin size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h3 className="text-md font-semibold text-gray-900">
-                      {delivery.recipient_address}
-                    </h3>
+                    <div className="flex items-center">
+                      <h3 className="text-md font-semibold text-gray-900 leading-tight">
+                        {delivery.recipient_address}
+                      </h3>
+                      <CopyButton text={delivery.recipient_address} fieldId="address" />
+                    </div>
                     <p className="text-sm text-gray-500">
                       Referencia: Frente al parque central, puerta de rejas negras.
                     </p>

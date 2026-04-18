@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, MapPin, User, MessageCircle, Phone } from 'lucide-react';
+import { Eye, MapPin, User, MessageCircle, Phone, Map, Navigation } from 'lucide-react';
 import DeliveryDetailModal from '@/components/forms/modals/DeliveryDetailModal';
 
 interface Delivery {
@@ -307,7 +307,17 @@ export default function CarrierDeliveriesTable() {
                     {getStatusBadge(delivery.status)}
                   </TableCell>
                   <TableCell className="text-right pr-6 py-4">
-                    <div className="flex items-center justify-end transition-opacity">
+                    <div className="flex items-center justify-end gap-2">
+                       <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${delivery.destination}, ${delivery.district}, Lima`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
+                        title="Cómo llegar"
+                      >
+                        <Map size={16} />
+                      </a>
                       <Button
                         variant="ghost" size="sm"
                         className="h-8 gap-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all font-normal"
@@ -345,7 +355,17 @@ export default function CarrierDeliveriesTable() {
                 {/* Destinatario */}
                 <div className="flex justify-between items-start gap-2 mb-1">
                   <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{delivery.recipient}</p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${delivery.destination}, ${delivery.district}, Lima`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex h-7 px-2 items-center justify-center gap-1 rounded-full bg-blue-100 text-blue-700 shadow-sm active:scale-90 transition-transform text-[10px] font-bold border border-blue-200"
+                    >
+                      <Navigation size={12} className="fill-blue-700/10" />
+                      MAPS
+                    </a>
                     <a
                       href={`tel:${delivery.recipient_phone.replace(/\D/g, '')}`}
                       onClick={(e) => e.stopPropagation()}
@@ -365,10 +385,16 @@ export default function CarrierDeliveriesTable() {
                   </div>
                 </div>
 
+                {/* Dirección - Agregada entre nombre y distrito */}
+                <div className="flex items-start gap-1.5 text-[11px] text-gray-600 mb-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mt-1" />
+                  <span className="line-clamp-1 italic">{delivery.destination}</span>
+                </div>
+
                 {/* Distrito */}
-                <div className="flex items-start gap-1.5 text-[11px] text-gray-500">
-                  <MapPin size={11} className="text-gray-400 shrink-0 mt-0.5" />
-                  <span className="truncate">{delivery.district}</span>
+                <div className="flex items-start gap-1.5 text-[10px] text-gray-400 font-medium">
+                  <MapPin size={10} className="text-gray-400 shrink-0 mt-0.5" />
+                  <span className="truncate uppercase tracking-tight">{delivery.district}</span>
                 </div>
               </div>
             </div>
