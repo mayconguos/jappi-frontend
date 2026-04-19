@@ -165,7 +165,7 @@ export default function PickupsTable({
                 <TableCell className="py-4">
                   <div
                     className="flex items-center gap-2 relative group-select"
-                    onClick={() => (couriers.length === 0 && pickup.status !== 'received' && pickup.status !== 'scheduled') && onFetchCouriers()}
+                    onClick={() => (couriers.length === 0 && pickup.status !== 'received' && pickup.status !== 'picked_up') && onFetchCouriers()}
                   >
                     <Select
                       size="compact"
@@ -173,9 +173,9 @@ export default function PickupsTable({
                       onChange={(val) => onCarrierChange(pickup.id, val)}
                       options={carrierOptions}
                       className="w-full min-w-[160px] border-slate-200 shadow-sm"
-                      disabled={isFetchingCouriers || pickup.status === 'received' || pickup.status === 'scheduled' || pickup.status === 'picked_up'}
+                      disabled={isFetchingCouriers || pickup.status === 'received' || pickup.status === 'picked_up'}
                     />
-                    {isFetchingCouriers && pickup.status === 'pending' && (
+                    {isFetchingCouriers && (pickup.status === 'pending' || pickup.status === 'scheduled') && (
                       <div className="absolute right-10 top-1/2 -translate-y-1/2">
                         <Loader2 size={13} className="animate-spin text-slate-400" />
                       </div>

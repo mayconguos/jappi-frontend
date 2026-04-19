@@ -356,13 +356,13 @@ export default function PickupsPage() {
       const payload = {
         assignments: [
           {
-            id_shipping: selectedChange.pickupId,
+            id_pickup: selectedChange.pickupId,
             id_driver: driverId
           }
         ]
       };
 
-      const response = await put('/shipping/assign', payload);
+      const response = await put('/pickup/assign', payload);
       if (!response) {
         throw new Error('Hubo un error comunicándose con el servidor.');
       }
@@ -431,12 +431,12 @@ export default function PickupsPage() {
     try {
       const payload = {
         assignments: selectedIds.map(id => ({
-          id_shipping: id,
+          id_pickup: id,
           id_driver: driverId
         }))
       };
 
-      const response = await put('/shipping/assign', payload);
+      const response = await put('/pickup/assign', payload);
       if (!response) {
         throw new Error('No se pudo completar la asignación masiva en el servidor.');
       }
