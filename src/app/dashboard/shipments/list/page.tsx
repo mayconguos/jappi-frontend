@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Pagination } from '@/components/ui/pagination';
@@ -12,14 +12,16 @@ import { useApi } from '@/hooks/useApi';
 
 // Components
 import ShipmentsFilter from '@/components/filters/ShipmentsFilter';
-import ShipmentsTable, { Shipment } from '@/components/tables/ShipmentsTable';
+import ShipmentsTable from '@/components/tables/ShipmentsTable';
+import { Shipment } from '@/types/shipment';
 
 export default function ShipmentsPage() {
   const { user } = useAuth();
   const { get, loading } = useApi<Shipment[]>();
-  const [allShipments, setAllShipments] = useState<Shipment[]>([]);
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [field, setField] = useState('all');
+  const [value, setValue] = useState('');
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
-  const [filterField, setFilterField] = useState('');
   const [searchValue, setSearchValue] = useState('');
   const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({ from: undefined, to: undefined });
 
@@ -30,7 +32,7 @@ export default function ShipmentsPage() {
       if (idCompany) {
         const data = await get(`/shipping/${idCompany}`);
         if (data) {
-          setAllShipments(data);
+          setShipments(data);
         }
       }
     };
@@ -49,52 +51,63 @@ export default function ShipmentsPage() {
   };
 
   // Filter Logic
-  const filteredShipments = allShipments.filter(item => {
-    // Basic search filter
-    if (searchValue) {
-      const searchLower = searchValue.toLowerCase();
-
-      if (filterField && filterField in item) {
-        const value = item[filterField as keyof Shipment];
-        if (!value?.toString().toLowerCase().includes(searchLower)) return false;
-      } else {
-        // General search if no specific field is selected
-        const matchesSearch =
-          item.company_name.toLowerCase().includes(searchLower) ||
-          item.customer_name.toLowerCase().includes(searchLower) ||
-          item.product_name.toLowerCase().includes(searchLower) ||
-          item.id.toString().includes(searchLower);
-
-        if (!matchesSearch) return false;
-      }
-    }
+  const filteredShipments = useMemo(() => {
+    let filtered = shipments;
 
     // Filter by Date Range
-    if (dateRange.from && item.shipping_date) {
-      const shipDate = new Date(item.shipping_date);
-      shipDate.setHours(0, 0, 0, 0);
+    if (dateRange.from) {
       const fDate = new Date(dateRange.from);
       fDate.setHours(0, 0, 0, 0);
-      if (shipDate < fDate) return false;
+      filtered = filtered.filter(s => {
+        const sDate = new Date(s.shipment_date.split('/').reverse().join('-')); // DD/MM/YYYY to YYYY-MM-DD
+        sDate.setHours(0, 0, 0, 0);
+        return sDate >= fDate;
+      });
     }
 
-    if (dateRange.to && item.shipping_date) {
-      const shipDate = new Date(item.shipping_date);
-      shipDate.setHours(23, 59, 59, 999);
+    if (dateRange.to) {
       const tDate = new Date(dateRange.to);
       tDate.setHours(23, 59, 59, 999);
-      if (shipDate > tDate) return false;
+      filtered = filtered.filter(s => {
+        const sDate = new Date(s.shipment_date.split('/').reverse().join('-'));
+        sDate.setHours(23, 59, 59, 999);
+        return sDate <= tDate;
+      });
     }
 
-    return true;
-  });
+    if (!value) return filtered;
 
+    const searchTerm = value.toLowerCase();
+    return filtered.filter((s) => {
+      if (field === 'all') {
+        return (
+          s.seller.toLowerCase().includes(searchTerm) ||
+          s.carrier.toLowerCase().includes(searchTerm) ||
+          s.district.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      const fieldValue = s[field as keyof Shipment];
+      return fieldValue
+        ? String(fieldValue).toLowerCase().includes(searchTerm)
+        : false;
+    });
+  }, [field, value, shipments, dateRange]);
+
+  // ─── Data estática ─────────────────────────────────────────────
   const ITEMS_PER_PAGE = 10;
+  const FILTER_FIELDS = [
+    { value: 'all', label: 'Todos los campos' },
+    { value: 'seller', label: 'Vendedor' },
+    { value: 'carrier', label: 'Transportista' },
+    { value: 'district', label: 'Distrito' },
+  ];
+
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchValue, filterField, dateRange]);
+  }, [searchValue, value, dateRange]);
 
   const totalItems = filteredShipments.length;
   const currentItems = filteredShipments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -105,14 +118,15 @@ export default function ShipmentsPage() {
       <div className="space-y-6">
         {/* Filters */}
         <ShipmentsFilter
-          filterField={filterField}
-          setFilterField={setFilterField}
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
+          filterFields={FILTER_FIELDS}
+          totalItems={totalItems}
+          field={field}
+          value={value}
           dateRange={dateRange}
+          setField={setField}
+          setValue={setValue}
           setDateRange={setDateRange}
           onExportExcel={() => { }}
-          totalItems={filteredShipments.length}
         />
 
         {/* Table Area */}
@@ -125,9 +139,9 @@ export default function ShipmentsPage() {
           ) : (
             <>
               <ShipmentsTable
+                mode="company"
                 shipments={currentItems}
                 currentPage={currentPage}
-                itemsPerPage={ITEMS_PER_PAGE}
                 onView={handleOpenModal}
               />
               {totalItems > 0 && (
@@ -220,7 +234,7 @@ export default function ShipmentsPage() {
                     <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold mb-2">Producto(s)</p>
                     <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <p className="text-sm font-medium text-gray-800 leading-relaxed italic">
-                        "{selectedShipment.product_name}"
+                        {/* "{selectedShipment.product_name}" */}
                       </p>
                     </div>
                   </div>
@@ -230,14 +244,14 @@ export default function ShipmentsPage() {
                       <p className="text-gray-400 text-[10px] uppercase tracking-wide font-bold mb-1">Fecha Programada</p>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <p className="font-bold text-slate-700 text-sm">{new Date(selectedShipment.shipping_date).toLocaleDateString('es-PE')}</p>
+                        {/* <p className="font-bold text-slate-700 text-sm">{new Date(selectedShipment.shipping_date).toLocaleDateString('es-PE')}</p> */}
                       </div>
                     </div>
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                       <p className="text-gray-400 text-[10px] uppercase tracking-wide font-bold mb-1">Costo Envío</p>
                       <div className="flex items-center gap-2">
                         <BadgeDollarSign className="w-3.5 h-3.5 text-emerald-500" />
-                        <p className="font-bold text-emerald-700 text-sm">S/ {Number(selectedShipment.delivery_amount).toFixed(2)}</p>
+                        {/* <p className="font-bold text-emerald-700 text-sm">S/ {Number(selectedShipment.delivery_amount).toFixed(2)}</p> */}
                       </div>
                     </div>
                   </div>
@@ -254,7 +268,7 @@ export default function ShipmentsPage() {
                   </div>
                   <div>
                     <p className="text-white/70 text-[11px] uppercase tracking-widest font-bold">Total a Cobrar</p>
-                    <p className="text-3xl font-black tabular-nums">S/ {Number(selectedShipment.total_amount).toFixed(2)}</p>
+                    {/* <p className="text-3xl font-black tabular-nums">S/ {Number(selectedShipment.total_amount).toFixed(2)}</p> */}
                   </div>
                 </div>
 

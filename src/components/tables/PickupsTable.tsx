@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select } from '@/components/ui/select';
 
-import { Pickup, PickupStatus, Courier } from '@/app/dashboard/pickups/page';
+import { Pickup, PickupStatus } from '@/types/pickup';
+import { Courier } from '@/types/courier';
 
 interface PickupsTableProps {
   pickups: Pickup[];

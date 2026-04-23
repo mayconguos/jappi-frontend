@@ -24,55 +24,8 @@ const STATUS_LABELS: Record<PickupStatus, string> = {
 };
 
 // ─── Tipos ────────────────────────────────────────────────────
-export type PickupStatus = 'pending' | 'scheduled' | 'picked_up' | 'received';
-
-export interface Pickup {
-  id: number;
-  id_driver: number | null;
-  address: string;
-  carrier: string;
-  created_at: string;
-  district: string;
-  observation?: string;
-  origin: 'pickup' | 'warehouse';
-  packages: number;
-  phone: string;
-  pickup_date: string;
-  seller: string;
-  status: PickupStatus;
-}
-
-export interface ApiPickup {
-  id: number;
-  id_driver?: number | null;
-  address: string;
-  company_name: string; // seller
-  district_name: string;
-  driver_name: string | null; // carrier
-  items: {
-    product_name: string;
-    quantity: number;
-  }[];
-  origin?: string;
-  package_count?: number; //packages
-  phone: string;
-  pickup_date: string;
-  status: PickupStatus;
-}
-
-export interface Courier {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string | null;
-  document_type: string;
-  document_number: string;
-  status: number;
-  vehicle_type: string;
-  license: string;
-  plate_number: string;
-  brand: string;
-}
+import { Pickup, ApiPickup, PickupStatus } from '@/types/pickup';
+import { Courier } from '@/types/courier';
 
 // ─── Helper de Mapeo ───────────────────────────────────────────
 const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {

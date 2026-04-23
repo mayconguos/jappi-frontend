@@ -28,55 +28,8 @@ const STATUS_LABELS: Record<ShipmentStatus, string> = {
   returned: 'Devuelto',
 };
 
-export type ShipmentStatus = 'pending' | 'scheduled' | 'picked_up' | 'received' | 'in_transit' | 'delivered' | 'cancelled' | 'returned';
-
-export interface Shipment {
-  id: number;
-  id_driver: number | null;
-  address: string;
-  carrier: string;
-  district: string;
-  observation?: string;
-  origin: 'pickup' | 'warehouse';
-  shipment_mode: string;
-  packages: number;
-  shipment_date: string;
-  seller: string;
-  status: string;
-  customer_name: string;
-  phone: string;
-}
-
-export interface ApiShipment {
-  id: number,
-  id_driver: number | null,
-  address: string
-  company_name: string; // seller
-  district_name: string,
-  driver_name: string | null;
-  customer_name: string,
-  total_amount: number,
-  delivery_amount: number,
-  package_count?: number,
-  shipping_mode: string,
-  phone: string,
-  shipping_date: string,
-  status: string,
-}
-
-export interface Courier {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string | null;
-  document_type: string;
-  document_number: string;
-  status: number;
-  vehicle_type: string;
-  license: string;
-  plate_number: string;
-  brand: string;
-}
+import { Shipment, ApiShipment, ShipmentStatus } from '@/types/shipment';
+import { Courier } from '@/types/courier';
 
 const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
   const date = apiShipment.shipping_date ? new Date(apiShipment.shipping_date) : new Date();
@@ -362,6 +315,7 @@ export default function AllShipmentsPage() {
       ) : (
         <div className="flex flex-col gap-6">
           <ShipmentsTable
+            mode="admin"
             shipments={currentItems}
             currentPage={currentPage}
             selectedIds={selectedIds}
