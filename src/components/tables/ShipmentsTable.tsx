@@ -1,27 +1,24 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Eye, MapPin, Package, MessageSquareWarning, XCircle, Loader2, Phone } from 'lucide-react';
 
-export interface Shipment {
-  id: number;
-  company_name: string;
-  shipping_date: string;
-  customer_name: string;
-  product_name: string;
-  shipping_mode: 'delivery_only' | 'pay_on_delivery';
-  observation: string;
-  status: string;
-  total_amount: number;
-  delivery_amount: number;
-  phone: string;
-  address: string;
-}
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select } from '@/components/ui/select';
+
+import { Shipment, ShipmentStatus, Courier } from '@/app/dashboard/shipments/all/page'
 
 interface ShipmentsTableProps {
   shipments: Shipment[];
   currentPage: number;
-  itemsPerPage: number;
+  selectedIds: number[];
+  onSelectAll: (ids: number[]) => void;
+  onSelectOne: (id: number) => void;
   onView: (shipment: Shipment) => void;
+  onStatusChange: (id: number, status: ShipmentStatus) => void;
+  onCarrierChange: (id: number, carrierIdStr: string) => void;
+  onCancel: (id: number) => void;
+  couriers: Courier[];
+  isFetchingCouriers: boolean;
+  onFetchCouriers: () => void;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -51,89 +48,221 @@ const SHIPPING_MODE_LABELS: Record<string, string> = {
   'pay_on_delivery': 'Contra Entrega',
 };
 
+const STATUS_META: Record<ShipmentStatus, { label: string; badge: string; dot: string }> = {
+  pending: { label: 'Pendiente', badge: 'bg-amber-50  text-amber-700  border-amber-100', dot: 'bg-amber-400' },
+  scheduled: { label: 'Programado', badge: 'bg-blue-50   text-blue-700   border-blue-100', dot: 'bg-blue-400' },
+  picked_up: { label: 'Recogido', badge: 'bg-indigo-50 text-indigo-700 border-indigo-100', dot: 'bg-indigo-400' },
+  received: { label: 'Recibido', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
+  in_transit: { label: 'En tránsito', badge: 'bg-cyan-50 text-cyan-700 border-cyan-100', dot: 'bg-cyan-400' },
+  delivered: { label: 'Entregado', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
+  cancelled: { label: 'Cancelado', badge: 'bg-red-50 text-red-700 border-red-100', dot: 'bg-red-400' },
+  returned: { label: 'Devuelto', badge: 'bg-orange-50 text-orange-700 border-orange-100', dot: 'bg-orange-400' },
+};
+
 export default function ShipmentsTable({
   shipments,
   currentPage,
-  itemsPerPage,
+  selectedIds,
+  onSelectAll,
+  onSelectOne,
   onView,
+  onStatusChange,
+  onCarrierChange,
+  onCancel,
+  couriers,
+  isFetchingCouriers,
+  onFetchCouriers,
 }: ShipmentsTableProps) {
+  const statusOptions = Object.entries(STATUS_META)
+    .filter(([value]) => value !== 'picked_up')
+    .map(([value, { label }]) => ({
+      label,
+      value,
+    }));
+
+  // Get assigned couriers from the pickups array to show as options even if couriers aren't loaded yet
+  const assignedCouriers = shipments
+    .filter(s => s.id_driver !== null && s.carrier !== 'Sin asignar')
+    .map(s => ({
+      label: s.carrier,
+      value: s.id_driver!.toString()
+    }));
+
+  const fetchedCouriers = couriers.map(c => ({
+    label: `${c.first_name} ${c.last_name || ''}`.trim(),
+    value: c.id.toString(),
+  }));
+
+  const allCouriers = [...assignedCouriers, ...fetchedCouriers];
+  const uniqueCouriersMap = new Map();
+  allCouriers.forEach(c => uniqueCouriersMap.set(c.value, c));
+
+  const carrierOptions = [
+    { label: 'Sin asignar', value: '0' },
+    ...Array.from(uniqueCouriersMap.values())
+  ].sort((a, b) => a.label === 'Sin asignar' ? -1 : a.label.localeCompare(b.label));
+
+  const allSelected = shipments.length > 0 && selectedIds.length === shipments.length;
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden relative transition-all">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-slate-50/50">
           <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente / Destino</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Modo</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Monto</TableHead>
-            <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Detalles</TableHead>
+            {/* Multi-select Header */}
+            <TableHead className="w-[45px] pl-6 pr-0">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={() => onSelectAll(shipments.map(s => s.id))}
+                className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
+              />
+            </TableHead>
+            <TableHead className="w-[30px] px-1 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</TableHead>
+            <TableHead className="w-[90px] px-2 text-xs font-bold text-slate-400 uppercase tracking-widest text-left">Fecha</TableHead>
+            <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Cliente</TableHead>
+            <TableHead className="text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Ubicación</TableHead>
+            <TableHead className="w-[110px] text-xs font-bold text-slate-400 uppercase tracking-widest">Modo</TableHead>
+            <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Transportista</TableHead>
+            <TableHead className="w-[80px] text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Pedidos</TableHead>
+            <TableHead className="w-[160px] text-xs font-bold text-slate-400 uppercase tracking-widest">Estado</TableHead>
+            <TableHead className="w-[100px] text-right pr-6 text-xs font-bold text-slate-400 uppercase tracking-widest">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {shipments.map((item, index) => (
-            <TableRow
-              key={item.id}
-              className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
-            >
-              <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
-                {(currentPage - 1) * itemsPerPage + index + 1}
-              </TableCell>
-              <TableCell className="pl-6 py-4">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-gray-900">{item.customer_name}</span>
-                  <span className="text-xs text-gray-500 truncate max-w-[200px]" title={item.address}>{item.address}</span>
-                </div>
-              </TableCell>
+          {shipments.map((shipment, index) => {
+            const isSelected = selectedIds.includes(shipment.id);
+            return (
+              <TableRow
+                key={shipment.id}
+                className={`border-b border-gray-50 hover:bg-slate-50/50 transition-all group ${isSelected ? 'bg-emerald-50/40 border-emerald-100' : ''
+                  }`}
+              >
+                <TableCell className="pl-6 pr-0 py-4">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onSelectOne(shipment.id)}
+                    className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
+                  />
+                </TableCell>
+                <TableCell className="py-4 px-1 text-center font-mono text-[11px] font-bold text-slate-300">
+                  {(currentPage - 1) * 10 + index + 1}
+                </TableCell>
 
-              <TableCell className="py-4 max-w-[200px]">
-                <p className="text-sm text-gray-600 truncate" title={item.product_name}>
-                  {item.product_name}
-                </p>
-              </TableCell>
+                <TableCell className="py-4 px-2 text-left">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                    {shipment.shipment_date}
+                  </span>
+                </TableCell>
 
-              <TableCell className="py-4 whitespace-nowrap">
-                <span className="text-sm text-gray-700 font-medium">
-                  {item.shipping_date ? item.shipping_date.split('T')[0].split('-').reverse().join('/') : ''}
-                </span>
-              </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-semibold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">
+                      {shipment.customer_name}
+                    </span>
+                    <div className="flex items-center gap-1.5 text-slate-500 mt-0.5">
+                      <Phone size={12} className="shrink-0 text-slate-400" />
+                      <span className="text-xs font-mono font-bold tracking-tight">
+                        {shipment.phone}
+                      </span>
+                    </div>
+                  </div>
+                </TableCell>
 
-              <TableCell className="py-4">
-                <span className={`text-[11px] font-bold uppercase px-2 py-1 rounded bg-slate-100 ${item.shipping_mode === 'pay_on_delivery' ? 'text-blue-600 border border-blue-100 bg-blue-50/50' : 'text-slate-500'}`}>
-                  {SHIPPING_MODE_LABELS[item.shipping_mode] || item.shipping_mode}
-                </span>
-              </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex flex-col gap-1.5 max-w-[340px]">
+                    <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-widest bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm">
+                      {/* {pickup.district} */}
+                    </span>
+                    <div className="flex items-start gap-1.5 group/addr opacity-70 hover:opacity-100 transition-opacity">
+                      <MapPin size={11} className="text-slate-300 shrink-0 mt-1" />
+                      <p className="text-xs font-medium text-slate-500 leading-snug break-words italic pl-0.5" title={shipment.address}>
+                        {shipment.address}
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
 
-              <TableCell className="py-4">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${STATUS_COLORS[item.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
-                  {STATUS_LABELS[item.status] || item.status}
-                </span>
-              </TableCell>
+                <TableCell className="py-4">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-sm ${shipment.shipment_mode === 'delivery_only'
+                    ? 'bg-slate-50 text-slate-600 border-slate-100'
+                    : 'bg-white text-emerald-600 border-emerald-100'
+                    }`}>
+                    {shipment.shipment_mode === 'delivery_only' ? 'Solo Entrega' : 'Contraentrega'}
+                  </span>
+                </TableCell>
 
-              <TableCell className="py-4">
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-emerald-600">S/ {Number(item.total_amount).toFixed(2)}</span>
-                  <span className="text-[10px] text-gray-400">Delivery: S/ {Number(item.delivery_amount).toFixed(2)}</span>
-                </div>
-              </TableCell>
-
-              <TableCell className="text-right pr-6 py-4">
-                <div className="flex items-center justify-end transition-opacity">
-                  <Button
-                    onClick={() => onView(item)}
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 gap-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all font-normal"
+                <TableCell className="py-4">
+                  <div
+                    className="flex items-center gap-2 relative group-select"
+                    onClick={() => (couriers.length === 0 && shipment.status !== 'received' && shipment.status !== 'picked_up') && onFetchCouriers()}
                   >
-                    <Eye size={16} />
-                    <span className="text-xs">Ver</span>
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+                    <Select
+                      size="compact"
+                      value={shipment.id_driver?.toString() || '0'}
+                      onChange={(val) => onCarrierChange(shipment.id, val)}
+                      options={carrierOptions}
+                      className="w-full min-w-[160px] border-slate-200 shadow-sm"
+                      disabled={isFetchingCouriers || shipment.status === 'received' || shipment.status === 'picked_up'}
+                    />
+                    {isFetchingCouriers && (shipment.status === 'pending' || shipment.status === 'scheduled') && (
+                      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                        <Loader2 size={13} className="animate-spin text-slate-400" />
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-4 text-center">
+                  <div className="inline-flex flex-col items-center justify-center min-w-[32px] h-8 rounded-xl bg-slate-50 text-xs font-black text-slate-800 border border-slate-200/60 shadow-inner">
+                    {shipment.packages}
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-4">
+                  <div className="flex items-center gap-2">
+                    <Select
+                      size="compact"
+                      value={shipment.status}
+                      onChange={(val) => onStatusChange(shipment.id, val as ShipmentStatus)}
+                      options={statusOptions}
+                      className="w-full min-w-[130px] border-slate-200 shadow-sm"
+                      disabled={shipment.status === 'received'}
+                    />
+                    {shipment.observation && (
+                      <span title={shipment.observation} className="text-amber-500 cursor-help active:scale-90 transition-transform">
+                        <MessageSquareWarning size={14} />
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+
+                <TableCell className="text-right pr-6 py-4">
+                  <div className="flex items-center justify-end gap-1.5 opacity-40 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => onView(shipment)}
+                      className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg hover:shadow-md hover:shadow-indigo-100 transition-all"
+                      title="Ver Detalle"
+                    >
+                      <Eye size={16} />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => onCancel(shipment.id)}
+                      className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg hover:shadow-md hover:shadow-red-100 transition-all"
+                      title="Cancelar Recojo"
+                    >
+                      <XCircle size={16} />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
           {shipments.length === 0 && (
             <TableRow>
               <TableCell colSpan={7} className="h-48 text-center text-gray-500">

@@ -1,15 +1,19 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+
+import { CheckCircle, AlertTriangle, Truck, RefreshCw } from 'lucide-react';
+
+import { useApi } from '@/hooks';
+
+import { Button } from '@/components/ui/button';
+import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Pagination } from '@/components/ui/pagination';
+import { Select } from '@/components/ui/select';
+import DeliveryLoader from '@/components/ui/delivery-loader';
+
 import PickupsFilter from '@/components/filters/PickupsFilter';
 import PickupsTable from '@/components/tables/PickupsTable';
-import { Select } from '@/components/ui/select';
-import { Pagination } from '@/components/ui/pagination';
-import { useApi } from '@/hooks';
-import { Modal, ModalFooter } from '@/components/ui/modal';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, AlertTriangle, Truck, RefreshCw } from 'lucide-react';
-import DeliveryLoader from '@/components/ui/delivery-loader';
 
 // ─── Constantes ───────────────────────────────────────────────
 const STATUS_LABELS: Record<PickupStatus, string> = {
@@ -24,36 +28,36 @@ export type PickupStatus = 'pending' | 'scheduled' | 'picked_up' | 'received';
 
 export interface Pickup {
   id: number;
-  created_at: string;
-  pickup_date: string;
-  seller: string;
-  phone: string;
-  carrier: string;
-  district: string;
+  id_driver: number | null;
   address: string;
-  packages: number;
-  status: PickupStatus;
+  carrier: string;
+  created_at: string;
+  district: string;
   observation?: string;
   origin: 'pickup' | 'warehouse';
-  id_driver: number | null;
+  packages: number;
+  phone: string;
+  pickup_date: string;
+  seller: string;
+  status: PickupStatus;
 }
 
 export interface ApiPickup {
   id: number;
-  status: PickupStatus;
-  pickup_date: string;
-  company_name: string;
-  phone: string;
+  id_driver?: number | null;
   address: string;
+  company_name: string; // seller
   district_name: string;
+  driver_name: string | null; // carrier
   items: {
     product_name: string;
     quantity: number;
   }[];
-  package_count?: number;
-  driver_name: string | null;
-  id_driver?: number | null;
   origin?: string;
+  package_count?: number; //packages
+  phone: string;
+  pickup_date: string;
+  status: PickupStatus;
 }
 
 export interface Courier {
@@ -74,7 +78,7 @@ export interface Courier {
 const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
   const date = apiPickup.pickup_date ? new Date(apiPickup.pickup_date) : new Date();
   const dateStr = !isNaN(date.getTime())
-    ? date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    ? date.toISOString().split('T')[0].split('-').reverse().join('/')
     : 'Fecha inválida';
 
   // Intentar encontrar la lista de items en varias propiedades comunes si no está en .items
@@ -82,24 +86,22 @@ const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
 
   return {
     id: apiPickup.id,
-    origin: apiPickup.origin === 'supply' ? 'warehouse' : 'pickup',
+    id_driver: apiPickup.id_driver || null,
+    address: apiPickup.address,
+    carrier: apiPickup.driver_name || 'Sin asignar',
     created_at: dateStr,
+    district: apiPickup.district_name,
+    observation: undefined,
+    origin: apiPickup.origin === 'supply' ? 'warehouse' : 'pickup',
+    packages: apiPickup.package_count || 0,
+    phone: apiPickup.phone || 'Sin teléfono',
     pickup_date: dateStr,
     seller: apiPickup.company_name,
-    phone: apiPickup.phone || 'Sin teléfono',
-    carrier: apiPickup.driver_name || 'Sin asignar',
-    district: apiPickup.district_name,
-    address: apiPickup.address,
-    packages: apiPickup.package_count || 0,
     status: apiPickup.status,
-    observation: undefined,
-    id_driver: apiPickup.id_driver || null,
   };
 };
 
 // ─── Data estática ─────────────────────────────────────────────
-const today = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
 const ITEMS_PER_PAGE = 10;
 const FILTER_FIELDS = [
   { value: 'all', label: 'Todos los campos' },
@@ -253,7 +255,6 @@ export default function PickupsPage() {
   );
 
   const handleExportExcel = () => console.log('Exporting Excel...');
-  const handleExportPdf = () => console.log('Exporting PDF...');
 
   const handleViewPickup = async (pickup: Pickup) => {
     setViewDetails({ isOpen: true, pickup, items: [], loading: true, error: null });
@@ -370,13 +371,13 @@ export default function PickupsPage() {
       const isUnassigning = driverId === 0;
 
       setPickups(prev => prev.map(p =>
-        p.id === selectedChange.pickupId 
-          ? { 
-              ...p, 
-              carrier: selectedChange.courierName, 
-              id_driver: driverId === 0 ? null : driverId,
-              status: !isUnassigning ? 'scheduled' : p.status 
-            } 
+        p.id === selectedChange.pickupId
+          ? {
+            ...p,
+            carrier: selectedChange.courierName,
+            id_driver: driverId === 0 ? null : driverId,
+            status: !isUnassigning ? 'scheduled' : p.status
+          }
           : p
       ));
 
@@ -444,13 +445,13 @@ export default function PickupsPage() {
       const isUnassigning = driverId === 0;
 
       setPickups(prev => prev.map(p =>
-        selectedIds.includes(p.id) 
-          ? { 
-              ...p, 
-              carrier: courierName, 
-              id_driver: driverId === 0 ? null : driverId,
-              status: !isUnassigning ? 'scheduled' : p.status 
-            } 
+        selectedIds.includes(p.id)
+          ? {
+            ...p,
+            carrier: courierName,
+            id_driver: driverId === 0 ? null : driverId,
+            status: !isUnassigning ? 'scheduled' : p.status
+          }
           : p
       ));
 
@@ -489,15 +490,15 @@ export default function PickupsPage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
       <PickupsFilter
-        field={field}
-        setField={setField}
-        value={value}
-        setValue={setValue}
         filterFields={FILTER_FIELDS}
-        onExportExcel={handleExportExcel}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
         totalItems={totalItems}
+        field={field}
+        value={value}
+        dateRange={dateRange}
+        setField={setField}
+        setValue={setValue}
+        setDateRange={setDateRange}
+        onExportExcel={handleExportExcel}
       />
 
       {isInitialLoading ? (
@@ -529,14 +530,6 @@ export default function PickupsPage() {
                 itemsPerPage={ITEMS_PER_PAGE}
                 onPageChange={setCurrentPage}
               />
-            </div>
-          )}
-
-          {totalItems === 0 && (
-            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
-              <p className="text-slate-400">
-                {value ? `No se encontraron resultados para "${value}"` : 'No hay recojos registrados'}
-              </p>
             </div>
           )}
         </div>

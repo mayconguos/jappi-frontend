@@ -1,28 +1,36 @@
-import { Search, Filter, Download } from 'lucide-react';
+import { Download, Filter, Search } from 'lucide-react';
+
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
+interface FilterField {
+  value: string;
+  label: string;
+}
+
 interface ShipmentsFilterProps {
-  filterField: string;
-  setFilterField: (value: string) => void;
-  searchValue: string;
-  setSearchValue: (value: string) => void;
+  filterFields: FilterField[];
+  totalItems: number;
+  field: string;
+  value: string;
   dateRange: { from: string | undefined; to: string | undefined };
+  setField: (value: string) => void;
+  setValue: (value: string) => void;
   setDateRange: (range: { from: string | undefined; to: string | undefined }) => void;
   onExportExcel: () => void;
-  totalItems: number;
 }
 
 export default function ShipmentsFilter({
-  filterField,
-  setFilterField,
-  searchValue,
-  setSearchValue,
-  dateRange,
-  setDateRange,
-  onExportExcel,
+  filterFields,
   totalItems,
+  field,
+  value,
+  dateRange,
+  setField,
+  setValue,
+  setDateRange,
+  onExportExcel
 }: ShipmentsFilterProps) {
   return (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
@@ -68,14 +76,9 @@ export default function ShipmentsFilter({
           <div className="w-full sm:w-48">
             <Select
               label="Filtrar por"
-              value={filterField}
-              onChange={setFilterField}
-              options={[
-                { label: 'Vendedor', value: 'company_name' },
-                { label: 'Producto', value: 'product_name' },
-                { label: 'Comprador', value: 'customer_name' },
-                { label: 'ID Envío', value: 'id' },
-              ]}
+              value={field}
+              onChange={setField}
+              options={filterFields}
               placeholder="Campo"
               icon={Filter}
               className="bg-white border-slate-200"
@@ -85,8 +88,8 @@ export default function ShipmentsFilter({
             <Input
               label="Búsqueda"
               placeholder="Buscar..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
               icon={Search}
               className="bg-white border-slate-200"
             />

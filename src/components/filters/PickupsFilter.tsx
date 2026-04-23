@@ -10,27 +10,27 @@ interface FilterField {
 }
 
 interface PickupsFilterProps {
-  field: string;
-  setField: (value: string) => void;
-  value: string;
-  setValue: (value: string) => void;
   filterFields: FilterField[];
-  onExportExcel: () => void;
-  dateRange: { from: string | undefined; to: string | undefined };
-  setDateRange: (range: { from: string | undefined; to: string | undefined }) => void;
   totalItems: number;
+  field: string;
+  value: string;
+  dateRange: { from: string | undefined; to: string | undefined };
+  setField: (value: string) => void;
+  setValue: (value: string) => void;
+  setDateRange: (range: { from: string | undefined; to: string | undefined }) => void;
+  onExportExcel: () => void;
 }
 
 export default function PickupsFilter({
-  field,
-  setField,
-  value,
-  setValue,
   filterFields,
-  onExportExcel,
+  totalItems,
+  field,
+  value,
   dateRange,
+  setField,
+  setValue,
   setDateRange,
-  totalItems
+  onExportExcel,
 }: PickupsFilterProps) {
   return (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
