@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useApi } from '@/hooks/useApi';
 
 // Components
-import ShipmentsFilter from '@/components/filters/ShipmentsFilter';
+import DataTableFilter from '@/components/filters/DataTableFilter';
 import ShipmentsTable from '@/components/tables/ShipmentsTable';
 import { Shipment } from '@/types/shipment';
 
@@ -117,7 +117,7 @@ export default function ShipmentsPage() {
 
       <div className="space-y-6">
         {/* Filters */}
-        <ShipmentsFilter
+        <DataTableFilter
           filterFields={FILTER_FIELDS}
           totalItems={totalItems}
           field={field}

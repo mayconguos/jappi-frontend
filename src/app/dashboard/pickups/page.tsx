@@ -12,7 +12,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { Select } from '@/components/ui/select';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
-import PickupsFilter from '@/components/filters/PickupsFilter';
+import DataTableFilter from '@/components/filters/DataTableFilter';
 import PickupsTable from '@/components/tables/PickupsTable';
 
 // ─── Constantes ───────────────────────────────────────────────
@@ -442,7 +442,7 @@ export default function PickupsPage() {
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
-      <PickupsFilter
+      <DataTableFilter
         filterFields={FILTER_FIELDS}
         totalItems={totalItems}
         field={field}

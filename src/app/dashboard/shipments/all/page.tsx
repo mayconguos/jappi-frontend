@@ -13,7 +13,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { Select } from '@/components/ui/select';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
-import ShipmentsFilter from '@/components/filters/ShipmentsFilter';
+import DataTableFilter from '@/components/filters/DataTableFilter';
 import ShipmentsTable from '@/components/tables/ShipmentsTable';
 
 // ─── Constantes ───────────────────────────────────────────────
@@ -296,7 +296,7 @@ export default function AllShipmentsPage() {
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
-      <ShipmentsFilter
+      <DataTableFilter
         filterFields={FILTER_FIELDS}
         totalItems={totalItems}
         field={field}
