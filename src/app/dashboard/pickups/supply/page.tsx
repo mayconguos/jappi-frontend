@@ -1,15 +1,20 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import PickupsFilter from '@/components/filters/PickupsFilter';
-import SupplyPickupsTable from '@/components/tables/SupplyPickupsTable';
-import { Pagination } from '@/components/ui/pagination';
+
+import { CheckCircle, AlertTriangle } from 'lucide-react';
+
 import { useApi } from '@/hooks';
-import { Modal, ModalFooter } from '@/components/ui/modal';
+
 import { Button } from '@/components/ui/button';
-import { CheckCircle, AlertTriangle, Truck, ShieldCheck } from 'lucide-react';
+import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Pagination } from '@/components/ui/pagination';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
+import DataTableFilter from '@/components/filters/DataTableFilter';
+import SupplyPickupsTable from '@/components/tables/SupplyPickupsTable';
+
+import { Pickup, ApiPickup, PickupStatus } from '@/types/pickup';
 
 // ─── Constantes ───────────────────────────────────────────────
 const STATUS_LABELS: Record<PickupStatus, string> = {
@@ -19,56 +24,17 @@ const STATUS_LABELS: Record<PickupStatus, string> = {
   received: 'Validado en Almacén',
 };
 
-// ─── Tipos ────────────────────────────────────────────────────
-export type PickupStatus = 'pending' | 'scheduled' | 'picked_up' | 'received';
-
-export interface Pickup {
-  id: number;
-  created_at: string;
-  pickup_date: string;
-  seller: string;
-  carrier: string;
-  district: string;
-  address: string;
-  packages: number;
-  status: PickupStatus;
-  observation?: string;
-  request_id?: number;
-}
-
-export interface ApiPickup {
-  id: number;
-  status: PickupStatus;
-  pickup_date: string;
-  company_name: string;
-  phone: string;
-  address: string;
-  district_name: string;
-  items: {
-    product_name: string;
-    quantity: number;
-  }[];
-  driver_name: string | null;
-  request_id?: number;
-}
-
-export interface Courier {
-  id: number;
-  // ... resto de propiedades abreviadas por simplicidad
-  first_name: string;
-  last_name: string | null;
-}
-
 // ─── Helper de Mapeo ───────────────────────────────────────────
 const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
   const date = apiPickup.pickup_date ? new Date(apiPickup.pickup_date) : new Date();
   const dateStr = !isNaN(date.getTime())
-    ? date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    ? date.toISOString().split('T')[0].split('-').reverse().join('/')
     : 'Fecha inválida';
 
   const items = apiPickup.items || [];
   return {
     id: apiPickup.id,
+    id_driver: apiPickup.id_driver || null,
     created_at: dateStr,
     pickup_date: dateStr,
     seller: apiPickup.company_name || 'Empresa Emisora',
@@ -77,10 +43,12 @@ const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
     address: apiPickup.address || 'Dirección',
     packages: Array.isArray(items) ? items.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0,
     status: apiPickup.status || 'pending',
-    request_id: apiPickup.request_id || Math.floor(Math.random() * 1000) + 100
+    phone: apiPickup.phone || 'Sin teléfono',
+    origin: 'warehouse',
   };
 };
 
+// ─── Data estática ─────────────────────────────────────────────
 const ITEMS_PER_PAGE = 10;
 const FILTER_FIELDS = [
   { value: 'all', label: 'Todos los campos' },
@@ -222,9 +190,9 @@ export default function SupplyPickupsPage() {
   // Initial early return block for loading is moved to component body
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-2 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
 
-      <PickupsFilter
+      <DataTableFilter
         field={field}
         setField={setField}
         value={value}
@@ -295,7 +263,7 @@ export default function SupplyPickupsPage() {
           </p>
           <div className="bg-gray-50 p-3 rounded-lg text-sm text-left w-full space-y-1 mb-2">
             <p><span className="text-gray-500">Empresa:</span> {pickupToValidate?.seller}</p>
-            <p><span className="text-gray-500">Solicitud base:</span> #{pickupToValidate?.request_id}</p>
+            <p><span className="text-gray-500">Solicitud base:</span> #{pickupToValidate?.id}</p>
           </div>
 
           <div className="w-full mt-2 text-left space-y-1.5 bg-white p-3 rounded-lg border border-gray-200">

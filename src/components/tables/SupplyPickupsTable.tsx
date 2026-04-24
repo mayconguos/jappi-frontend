@@ -1,8 +1,10 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { ShieldCheck, Truck, Package, Clock, FileText, MapPin } from 'lucide-react';
-import { Pickup } from '@/app/dashboard/pickups/supply/page';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+import { Pickup } from '@/types/pickup';
 
 interface SupplyPickupsTableProps {
   pickups: Pickup[];
@@ -51,7 +53,7 @@ export default function SupplyPickupsTable({
                   <div className="flex flex-col gap-1">
                     <span className="text-sm font-semibold text-gray-900">{pickup.seller}</span>
                     <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-flex items-center gap-1 w-max">
-                      <FileText size={10} /> Solicitud base #{pickup.request_id}
+                      <FileText size={10} /> Solicitud base #{pickup.id}
                     </span>
                   </div>
                 </TableCell>

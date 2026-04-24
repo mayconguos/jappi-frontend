@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
-import { Loader2, Package, MapPin, Phone, Calendar, BadgeDollarSign, Info } from 'lucide-react';
+import { AlertTriangle, BadgeDollarSign, Calendar, CheckCircle, Info, Loader2, MapPin, Package, Phone, RefreshCw, Truck } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/context/AuthContext';
@@ -245,6 +245,23 @@ export default function AllShipmentsPage() {
     setIsConfirmStatusModalOpen(true);
   };
 
+  const handleConfirmStatusUpdate = async () => {
+    if (!pendingStatusChange) return;
+    setIsUpdatingStatus(true);
+
+    // Simular golpe a API
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    setShipments(prev => prev.map(s =>
+      s.id === pendingStatusChange.shipmentId ? { ...s, status: pendingStatusChange.status } : s
+    ));
+
+    setIsUpdatingStatus(false);
+    setIsConfirmStatusModalOpen(false);
+    setPendingStatusChange(null);
+    setSuccessModal('El estado del recojo ha sido actualizado correctamente.');
+  };
+
   const handleCarrierSelect = (id: number, driverIdStr: string) => {
     const shipment = shipments.find(s => s.id === id);
     if (!shipment) return;
@@ -275,8 +292,63 @@ export default function AllShipmentsPage() {
     setIsConfirmModalOpen(true);
   };
 
+  const handleConfirmCarrierUpdate = async () => {
+    if (!selectedChange) return;
+    setIsUpdatingCarrier(true);
+
+    const driverId = selectedChange.courierId;
+
+    try {
+      const payload = {
+        assignments: [
+          {
+            id_shipment: selectedChange.shipmentId,
+            id_driver: driverId
+          }
+        ]
+      };
+
+      const response = await put('/shipment/assign', payload);
+      if (!response) {
+        throw new Error('Hubo un error comunicándose con el servidor.');
+      }
+
+      const isUnassigning = driverId === 0;
+
+      setShipments(prev => prev.map(s =>
+        s.id === selectedChange.shipmentId
+          ? {
+            ...s,
+            carrier: selectedChange.courierName,
+            id_driver: driverId === 0 ? null : driverId,
+            status: !isUnassigning ? 'scheduled' : s.status
+          }
+          : s
+      ));
+
+      setSuccessModal('El transportista ha sido asignado correctamente.');
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error de Asignación',
+        message: err.message || 'Ocurrió un error al intentar asignar el transportista.'
+      });
+    } finally {
+      setIsUpdatingCarrier(false);
+      setIsConfirmModalOpen(false);
+      setSelectedChange(null);
+    }
+  };
+
   const handleCancel = (id: number) => {
     setShipmentToCancel(id);
+  };
+
+  const confirmCancel = () => {
+    if (shipmentToCancel !== null) {
+      setShipments(prev => prev.filter(s => s.id !== shipmentToCancel));
+      setShipmentToCancel(null);
+      setSuccessModal('El envio ha sido cancelado exitosamente.');
+    }
   };
 
   // --- Multi-select Handlers ---
@@ -292,6 +364,72 @@ export default function AllShipmentsPage() {
     } else {
       setSelectedIds(ids);
     }
+  };
+
+  const handleBatchCarrierUpdate = async () => {
+    if (!batchCarrier || selectedIds.length === 0) return;
+    setIsUpdatingCarrier(true);
+
+    const driverId = parseInt(batchCarrier);
+    const courier = couriers.find(c => c.id === driverId);
+    const courierName = courier ? `${courier.first_name} ${courier.last_name || ''}`.trim() : 'Sin asignar';
+
+    try {
+      const payload = {
+        assignments: selectedIds.map(id => ({
+          id_pickup: id,
+          id_driver: driverId
+        }))
+      };
+
+      const response = await put('/shipping/assign', payload);
+      if (!response) {
+        throw new Error('No se pudo completar la asignación masiva en el servidor.');
+      }
+
+      const isUnassigning = driverId === 0;
+
+      setShipments(prev => prev.map(s =>
+        selectedIds.includes(s.id)
+          ? {
+            ...s,
+            carrier: courierName,
+            id_driver: driverId === 0 ? null : driverId,
+            status: !isUnassigning ? 'scheduled' : s.status
+          }
+          : s
+      ));
+
+      setSuccessModal(`Se ha asignado correctamente a ${courierName} para los ${selectedIds.length} envíos seleccionados.`);
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error de Asignación Masiva',
+        message: err.message || 'Ocurrió un error al intentar realizar la asignación masiva.'
+      });
+    } finally {
+      setIsUpdatingCarrier(false);
+      setIsBatchModalOpen(false);
+      setSelectedIds([]);
+      setBatchCarrier('');
+    }
+  };
+
+  const handleBatchStatusUpdate = async () => {
+    if (!batchStatus || selectedIds.length === 0) return;
+    setIsUpdatingStatus(true);
+
+    // Simular golpe a API para múltiples IDs
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    setShipments(prev => prev.map(s =>
+      selectedIds.includes(s.id) ? { ...s, status: batchStatus as ShipmentStatus } : s
+    ));
+
+    setIsUpdatingStatus(false);
+    setIsBatchStatusModalOpen(false);
+    setSelectedIds([]);
+    setBatchStatus('');
+    setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus as ShipmentStatus]} para los ${selectedIds.length} envíos seleccionados.`);
   };
 
   return (
@@ -347,7 +485,7 @@ export default function AllShipmentsPage() {
         isOpen={viewDetails.isOpen}
         onClose={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}
         size="md"
-        title={`Detalle de Envío #${viewDetails.shipment?.id}`}
+        title={`Detalle del Envío #${viewDetails.shipment?.id}`}
         footer={
           <ModalFooter>
             <div className="flex justify-end pt-2">
@@ -475,6 +613,295 @@ export default function AllShipmentsPage() {
           ) : (<div></div>)}
         </div>
       </Modal>
+
+      {/* Confirmation Cancel Modal */}
+      <Modal
+        isOpen={shipmentToCancel !== null}
+        onClose={() => setShipmentToCancel(null)}
+        size="sm"
+        title="Cancelar Envío"
+        footer={
+          <ModalFooter className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setShipmentToCancel(null)}
+            >
+              Cerrar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmCancel}
+            >
+              Cancelar Recojo
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+            <AlertTriangle className="w-6 h-6 text-red-600" />
+          </div>
+          <p className="text-slate-600 font-medium mb-1">
+            ¿Estás seguro que deseas cancelar este recojo?
+          </p>
+          <p className="text-sm text-slate-400">Esta acción removerá el recojo de la lista permanentemente.</p>
+        </div>
+      </Modal>
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={isConfirmModalOpen}
+        onClose={() => !isUpdatingCarrier && setIsConfirmModalOpen(false)}
+        size="sm"
+        title="Confirmar Asignación"
+        footer={
+          <ModalFooter className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsConfirmModalOpen(false)}
+              disabled={isUpdatingCarrier}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="bg-[#02997d] hover:bg-[#027d66] text-white"
+              onClick={handleConfirmCarrierUpdate}
+              disabled={isUpdatingCarrier}
+            >
+              Asignar
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-4">
+          {isUpdatingCarrier ? (
+            <DeliveryLoader message="Actualizando transportista..." />
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-4">
+                <Truck className="w-6 h-6 text-blue-600" />
+              </div>
+              <p className="text-slate-600 font-medium mb-1">
+                ¿Estás seguro que deseas asignar a <span className="font-bold text-slate-900">"{selectedChange?.courierName}"</span> para este envío?
+              </p>
+              <p className="text-sm text-slate-400">Esta acción actualizará la asignación del motorizado en el sistema.</p>
+            </>
+          )}
+        </div>
+      </Modal>
+
+      {/* Confirmation Status Modal */}
+      <Modal
+        isOpen={isConfirmStatusModalOpen}
+        onClose={() => !isUpdatingStatus && setIsConfirmStatusModalOpen(false)}
+        size="sm"
+        title="Confirmar Cambio de Estado"
+        footer={
+          <ModalFooter className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsConfirmStatusModalOpen(false)}
+              disabled={isUpdatingStatus}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="bg-[#02997d] hover:bg-[#027d66] text-white"
+              onClick={handleConfirmStatusUpdate}
+              disabled={isUpdatingStatus}
+            >
+              Confirmar
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-4">
+          {isUpdatingStatus ? (
+            <DeliveryLoader message="Actualizando estado..." />
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+                <RefreshCw className="w-6 h-6 text-amber-600" />
+              </div>
+              <p className="text-slate-600 font-medium mb-1">
+                ¿Estás seguro que deseas cambiar el estado a <span className="font-bold text-slate-900">"{pendingStatusChange ? STATUS_LABELS[pendingStatusChange.status] : ''}"</span>?
+              </p>
+              <p className="text-sm text-slate-400">Esta acción actualizará el flujo logístico del recojo.</p>
+            </>
+          )}
+        </div>
+      </Modal>
+
+      {/* Success Modal */}
+      {successModal && (
+        <Modal
+          isOpen={!!successModal}
+          onClose={() => setSuccessModal(null)}
+          size="sm"
+          title="Operación Exitosa"
+          footer={
+            <ModalFooter className="justify-center">
+              <Button onClick={() => setSuccessModal(null)} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto">
+                Aceptar
+              </Button>
+            </ModalFooter>
+          }
+        >
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-4">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-slate-600 font-medium">
+              {successModal}
+            </p>
+          </div>
+        </Modal>
+      )}
+
+      {/* Batch Assignment Modal */}
+      <Modal
+        isOpen={isBatchModalOpen}
+        onClose={() => !isUpdatingCarrier && setIsBatchModalOpen(false)}
+        size="sm"
+        title="Asignación Masiva"
+        footer={
+          <ModalFooter className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsBatchModalOpen(false)}
+              disabled={isUpdatingCarrier}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={handleBatchCarrierUpdate}
+              disabled={isUpdatingCarrier || !batchCarrier}
+            >
+              Confirmar Asignación
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-4 space-y-4">
+          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+            <Truck className="w-6 h-6 text-emerald-600" />
+          </div>
+          <div>
+            <p className="text-slate-600 font-medium">
+              Asignar un transportista a los <span className="font-bold text-slate-900">{selectedIds.length}</span> envíos seleccionados.
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Los envíos pasarán automáticamente a estado "Programado".</p>
+          </div>
+          <div className="w-full pt-2">
+            <Select
+              label="Seleccionar Transportista"
+              value={batchCarrier}
+              onChange={setBatchCarrier}
+              options={couriers.map(c => ({
+                label: `${c.first_name} ${c.last_name || ''}`.trim(),
+                value: c.id.toString(),
+              }))}
+              placeholder="Elegir motorizado..."
+              className="w-full"
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Batch Status Modal */}
+      <Modal
+        isOpen={isBatchStatusModalOpen}
+        onClose={() => !isUpdatingStatus && setIsBatchStatusModalOpen(false)}
+        size="sm"
+        title="Cambio de Estado Masivo"
+        footer={
+          <ModalFooter className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsBatchStatusModalOpen(false)}
+              disabled={isUpdatingStatus}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={handleBatchStatusUpdate}
+              disabled={isUpdatingStatus || !batchStatus}
+            >
+              Confirmar cambio
+            </Button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-4 space-y-4">
+          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+            <RefreshCw className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-slate-600 font-medium">
+              Cambiar el estado de los <span className="font-bold text-slate-900">{selectedIds.length}</span> envíos seleccionados.
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Este cambio afectará el flujo logístico de todos los pedidos seleccionados.</p>
+          </div>
+          <div className="w-full pt-2">
+            <Select
+              label="Nuevo Estado"
+              value={batchStatus}
+              onChange={(val) => setBatchStatus(val as ShipmentStatus)}
+              options={Object.entries(STATUS_LABELS)
+                .filter(([key]) => key !== 'picked_up') // El admin no puede marcar como recogido masivamente (es algo del motorizado)
+                .map(([key, label]) => ({
+                  label,
+                  value: key,
+                }))}
+              placeholder="Elegir estado..."
+              className="w-full"
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Floating Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+          <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 border border-slate-700/50 backdrop-blur-md">
+            <div className="flex items-center gap-3 pr-6 border-r border-slate-700">
+              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center font-bold text-sm">
+                {selectedIds.length}
+              </div>
+              <span className="text-sm font-medium text-slate-300">Seleccionados</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={() => {
+                  fetchCouriers();
+                  setIsBatchModalOpen(true);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-widest px-5 h-10"
+              >
+                <Truck size={14} className="mr-2" />
+                Asignar Courier
+              </Button>
+              <Button
+                onClick={() => setIsBatchStatusModalOpen(true)}
+                className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-widest px-5 h-10 border border-slate-700"
+              >
+                <RefreshCw size={14} className="mr-2" />
+                Cambiar Estado
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedIds([])}
+                className="text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-bold uppercase tracking-widest h-10"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -702,6 +702,7 @@ export default function PickupsPage() {
           </div>
         </Modal>
       )}
+      
       {/* Batch Assignment Modal */}
       <Modal
         isOpen={isBatchModalOpen}

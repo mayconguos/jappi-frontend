@@ -127,11 +127,11 @@ export default function ShipmentsTable({
             <TableHead className="text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Ubicación</TableHead>
             <TableHead className="w-[110px] text-xs font-bold text-slate-400 uppercase tracking-widest">Modo</TableHead>
             {!isCompanyMode && (
-              <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Transportista</TableHead>
+              <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Courier</TableHead>
             )}
-            {!isCompanyMode && (
+            {/* {!isCompanyMode && (
               <TableHead className="w-[80px] text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Pedidos</TableHead>
-            )}
+            )} */}
             {isCompanyMode && (
               <TableHead className="w-[120px] text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Monto</TableHead>
             )}
@@ -252,13 +252,13 @@ export default function ShipmentsTable({
                 )}
 
                 {/* Pedidos */}
-                {!isCompanyMode && (
+                {/* {!isCompanyMode && (
                   <TableCell className="py-4 text-center">
                     <div className="inline-flex flex-col items-center justify-center min-w-[32px] h-8 rounded-xl bg-slate-50 text-xs font-black text-slate-800 border border-slate-200/60 shadow-inner">
                       {shipment.packages}
                     </div>
                   </TableCell>
-                )}
+                )} */}
 
                 {/* Monto */}
                 {isCompanyMode && (
