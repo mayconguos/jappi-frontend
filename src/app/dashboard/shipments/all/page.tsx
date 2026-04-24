@@ -16,6 +16,9 @@ import DeliveryLoader from '@/components/ui/delivery-loader';
 import DataTableFilter from '@/components/filters/DataTableFilter';
 import ShipmentsTable from '@/components/tables/ShipmentsTable';
 
+import { Shipment, ApiShipment, ShipmentStatus } from '@/types/shipment';
+import { Courier } from '@/types/courier';
+
 // ─── Constantes ───────────────────────────────────────────────
 const STATUS_LABELS: Record<ShipmentStatus, string> = {
   pending: 'Pendiente',
@@ -27,9 +30,6 @@ const STATUS_LABELS: Record<ShipmentStatus, string> = {
   cancelled: 'Cancelado',
   returned: 'Devuelto',
 };
-
-import { Shipment, ApiShipment, ShipmentStatus } from '@/types/shipment';
-import { Courier } from '@/types/courier';
 
 const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
   const date = apiShipment.shipping_date ? new Date(apiShipment.shipping_date) : new Date();
@@ -52,6 +52,7 @@ const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
     status: apiShipment.status,
     customer_name: apiShipment.customer_name,
     phone: apiShipment.phone,
+    total_amount: apiShipment.total_amount,
   };
 };
 
@@ -277,7 +278,6 @@ export default function AllShipmentsPage() {
   const handleCancel = (id: number) => {
     setShipmentToCancel(id);
   };
-
 
   // --- Multi-select Handlers ---
   const handleSelectOne = (id: number) => {

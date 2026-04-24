@@ -15,6 +15,7 @@ export interface Shipment {
   status: string;
   customer_name: string;
   phone: string;
+  total_amount: number;
 }
 
 export interface ApiShipment {

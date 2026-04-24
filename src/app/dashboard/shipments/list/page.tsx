@@ -1,45 +1,103 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+
+import { Loader2, Package, MapPin, Phone, Calendar, BadgeDollarSign, Info } from 'lucide-react';
+
+import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+
 import { Button } from '@/components/ui/button';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 import { Pagination } from '@/components/ui/pagination';
-import { Loader2, Package, MapPin, Phone, Calendar, BadgeDollarSign, Info } from 'lucide-react';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 
-// Hooks & Context
-import { useAuth } from '@/context/AuthContext';
-import { useApi } from '@/hooks/useApi';
-
-// Components
 import DataTableFilter from '@/components/filters/DataTableFilter';
 import ShipmentsTable from '@/components/tables/ShipmentsTable';
-import { Shipment } from '@/types/shipment';
+
+import { Shipment, ApiShipment, ShipmentStatus } from '@/types/shipment';
+
+const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
+  const date = apiShipment.shipping_date ? new Date(apiShipment.shipping_date) : new Date();
+  const dateStr = !isNaN(date.getTime())
+    ? date.toISOString().split('T')[0].split('-').reverse().join('/')
+    : 'Fecha inválida';
+
+  return {
+    id: apiShipment.id,
+    id_driver: apiShipment.id_driver || null,
+    address: apiShipment.address,
+    carrier: apiShipment.driver_name || 'Sin asignar',
+    district: apiShipment.district_name,
+    observation: undefined,
+    origin: apiShipment.shipping_mode === 'supply' ? 'warehouse' : 'pickup',
+    shipment_mode: apiShipment.shipping_mode,
+    packages: apiShipment.package_count || 0,
+    shipment_date: dateStr,
+    seller: apiShipment.company_name,
+    status: apiShipment.status,
+    customer_name: apiShipment.customer_name,
+    phone: apiShipment.phone,
+    total_amount: apiShipment.total_amount,
+  };
+};
+
+// ─── Data estática ─────────────────────────────────────────────
+const ITEMS_PER_PAGE = 10;
+const FILTER_FIELDS = [
+  { value: 'all', label: 'Todos los campos' },
+  { value: 'seller', label: 'Vendedor' },
+  { value: 'carrier', label: 'Transportista' },
+  { value: 'district', label: 'Distrito' },
+];
 
 export default function ShipmentsPage() {
-  const { user } = useAuth();
-  const { get, loading } = useApi<Shipment[]>();
   const [shipments, setShipments] = useState<Shipment[]>([]);
+  const { user } = useAuth();
   const [field, setField] = useState('all');
   const [value, setValue] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  // Default to today for both from and to
+  const todayDate = new Date().toISOString().split('T')[0];
+  const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({
+    from: todayDate,
+    to: todayDate
+  });
+
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [searchValue, setSearchValue] = useState('');
-  const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({ from: undefined, to: undefined });
+
+  const { get, loading } = useApi<Shipment[]>();
 
   // Fetch Data
   useEffect(() => {
     const fetchShipments = async () => {
-      const idCompany = user?.id_company || user?.id; // Fallback to user ID if company ID is not available
-      if (idCompany) {
-        const data = await get(`/shipping/${idCompany}`);
-        if (data) {
-          setShipments(data);
+      setIsInitialLoading(true);
+      try {
+        const idCompany = user?.id_company;
+        if (idCompany) {
+          console.log('Fetching shipments from /shipping/${idCompany...');
+          const resp = await get(`/shipping/${idCompany}`);
+
+          const data = Array.isArray(resp) ? resp : (resp as any)?.data;
+
+          if (data && Array.isArray(data)) {
+            console.log(`Mapping ${data.length} shipments...`);
+            const mapped = data.map(mapApiShipmentToShipment);
+            setShipments(mapped);
+          } else {
+            console.warn('API Response is not an array or does not contain a "data" array:', resp);
+          }
         }
+      } catch (error) {
+        console.error('Error fetching shipments:', error);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
-
-    if (user) {
-      fetchShipments();
-    }
+    if (user) { fetchShipments(); }
   }, [user, get]);
 
   const handleOpenModal = (shipment: Shipment) => {
@@ -50,7 +108,11 @@ export default function ShipmentsPage() {
     setSelectedShipment(null);
   };
 
-  // Filter Logic
+  // --- Reset page on filter change ---
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [field, value, dateRange]);
+
   const filteredShipments = useMemo(() => {
     let filtered = shipments;
 
@@ -94,27 +156,16 @@ export default function ShipmentsPage() {
     });
   }, [field, value, shipments, dateRange]);
 
-  // ─── Data estática ─────────────────────────────────────────────
-  const ITEMS_PER_PAGE = 10;
-  const FILTER_FIELDS = [
-    { value: 'all', label: 'Todos los campos' },
-    { value: 'seller', label: 'Vendedor' },
-    { value: 'carrier', label: 'Transportista' },
-    { value: 'district', label: 'Distrito' },
-  ];
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchValue, value, dateRange]);
-
   const totalItems = filteredShipments.length;
-  const currentItems = filteredShipments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const currentItems = filteredShipments.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handleExportExcel = () => console.log('Exporting Excel...');
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
-
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
       <div className="space-y-6">
         {/* Filters */}
         <DataTableFilter
@@ -126,7 +177,7 @@ export default function ShipmentsPage() {
           setField={setField}
           setValue={setValue}
           setDateRange={setDateRange}
-          onExportExcel={() => { }}
+          onExportExcel={handleExportExcel}
         />
 
         {/* Table Area */}

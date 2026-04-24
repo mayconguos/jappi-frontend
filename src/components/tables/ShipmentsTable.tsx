@@ -75,6 +75,7 @@ export default function ShipmentsTable({
   const isAdmin = mode === 'admin';
   const canEdit = mode === 'admin';
   const canView = mode !== 'readonly';
+  const isCompanyMode = mode === 'company' || mode === 'readonly';
 
   // ── Opciones de status para el select de admin ─────────────────────────────
   const statusOptions = Object.entries(STATUS_META)
@@ -125,8 +126,15 @@ export default function ShipmentsTable({
             <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Cliente</TableHead>
             <TableHead className="text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Ubicación</TableHead>
             <TableHead className="w-[110px] text-xs font-bold text-slate-400 uppercase tracking-widest">Modo</TableHead>
-            <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Transportista</TableHead>
-            <TableHead className="w-[80px] text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Pedidos</TableHead>
+            {!isCompanyMode && (
+              <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Transportista</TableHead>
+            )}
+            {!isCompanyMode && (
+              <TableHead className="w-[80px] text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Pedidos</TableHead>
+            )}
+            {isCompanyMode && (
+              <TableHead className="w-[120px] text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Monto</TableHead>
+            )}
             <TableHead className="w-[160px] text-xs font-bold text-slate-400 uppercase tracking-widest">Estado</TableHead>
 
             {/* Columna acciones — solo si hay algo que mostrar */}
@@ -210,43 +218,56 @@ export default function ShipmentsTable({
                   </span>
                 </TableCell>
 
-                {/* Transportista — dropdown (admin) o texto (company/readonly) */}
-                <TableCell className="py-4">
-                  {canEdit ? (
-                    <div
-                      className="flex items-center gap-2 relative"
-                      onClick={() => (couriers.length === 0 && shipment.status !== 'received' && shipment.status !== 'picked_up') && onFetchCouriers?.()}
-                    >
-                      <Select
-                        size="compact"
-                        value={shipment.id_driver?.toString() || '0'}
-                        onChange={(val) => onCarrierChange?.(shipment.id, val)}
-                        options={carrierOptions}
-                        className="w-full min-w-[160px] border-slate-200 shadow-sm"
-                        disabled={isFetchingCouriers || shipment.status === 'received' || shipment.status === 'picked_up'}
-                      />
-                      {isFetchingCouriers && (shipment.status === 'pending' || shipment.status === 'scheduled') && (
-                        <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                          <Loader2 size={13} className="animate-spin text-slate-400" />
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-sm text-slate-600 font-medium">
-                      {shipment.carrier !== 'Sin asignar'
-                        ? shipment.carrier
-                        : <span className="text-slate-300 italic text-xs">Sin asignar</span>
-                      }
-                    </span>
-                  )}
-                </TableCell>
+                {/* Transportista */}
+                {!isCompanyMode && (
+                  <TableCell className="py-4">
+                    {canEdit ? (
+                      <div
+                        className="flex items-center gap-2 relative"
+                        onClick={() => (couriers.length === 0 && shipment.status !== 'received' && shipment.status !== 'picked_up') && onFetchCouriers?.()}
+                      >
+                        <Select
+                          size="compact"
+                          value={shipment.id_driver?.toString() || '0'}
+                          onChange={(val) => onCarrierChange?.(shipment.id, val)}
+                          options={carrierOptions}
+                          className="w-full min-w-[160px] border-slate-200 shadow-sm"
+                          disabled={isFetchingCouriers || shipment.status === 'received' || shipment.status === 'picked_up'}
+                        />
+                        {isFetchingCouriers && (shipment.status === 'pending' || shipment.status === 'scheduled') && (
+                          <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                            <Loader2 size={13} className="animate-spin text-slate-400" />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-slate-600 font-medium">
+                        {shipment.carrier !== 'Sin asignar'
+                          ? shipment.carrier
+                          : <span className="text-slate-300 italic text-xs">Sin asignar</span>
+                        }
+                      </span>
+                    )}
+                  </TableCell>
+                )}
 
                 {/* Pedidos */}
-                <TableCell className="py-4 text-center">
-                  <div className="inline-flex flex-col items-center justify-center min-w-[32px] h-8 rounded-xl bg-slate-50 text-xs font-black text-slate-800 border border-slate-200/60 shadow-inner">
-                    {shipment.packages}
-                  </div>
-                </TableCell>
+                {!isCompanyMode && (
+                  <TableCell className="py-4 text-center">
+                    <div className="inline-flex flex-col items-center justify-center min-w-[32px] h-8 rounded-xl bg-slate-50 text-xs font-black text-slate-800 border border-slate-200/60 shadow-inner">
+                      {shipment.packages}
+                    </div>
+                  </TableCell>
+                )}
+
+                {/* Monto */}
+                {isCompanyMode && (
+                  <TableCell className="py-4 text-right">
+                    <span className="text-sm font-semibold text-slate-900 bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md border border-emerald-100/50 shadow-sm">
+                      S/ {Number(shipment.total_amount || 0).toFixed(2)}
+                    </span>
+                  </TableCell>
+                )}
 
                 {/* Estado — dropdown (admin) o badge (company/readonly) */}
                 <TableCell className="py-4">
