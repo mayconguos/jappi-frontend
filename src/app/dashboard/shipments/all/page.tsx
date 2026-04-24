@@ -72,7 +72,7 @@ export default function AllShipmentsPage() {
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   // Default to today for both from and to
-  const todayDate = new Date().toISOString().split('T')[0];
+  const todayDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima', });
   const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({
     from: todayDate,
     to: todayDate
@@ -211,6 +211,17 @@ export default function AllShipmentsPage() {
   );
 
   const handleExportExcel = () => console.log('Exporting Excel...');
+
+  const handleWiewShipment = async (shipment: Shipment) => {
+    setViewDetails({ isOpen: true, shipment, items: [], loading: true, error: null });
+    try {
+      const resp = await get(`/shipment/detail/${shipment.id}`);
+      const items = Array.isArray(resp) ? resp : (resp?.data || []);
+      setViewDetails(prev => ({ ...prev, loading: false, items }));
+    } catch (err: any) {
+      setViewDetails(prev => ({ ...prev, loading: false, error: err.message || 'Error al cargar los detalles' }));
+    }
+  };
 
   const handleStatusChange = (id: number, status: ShipmentStatus) => {
     const shipment = shipments.find(s => s.id === id);
@@ -489,7 +500,7 @@ export default function AllShipmentsPage() {
             selectedIds={selectedIds}
             onSelectOne={handleSelectOne}
             onSelectAll={handleSelectAll}
-            onView={(shipment) => console.log(shipment)}
+            onView={handleWiewShipment}
             onStatusChange={handleStatusChange}
             onCarrierChange={handleCarrierSelect}
             onCancel={handleCancel}
@@ -528,119 +539,58 @@ export default function AllShipmentsPage() {
       >
         <div className="py-2 space-y-6">
           {viewDetails.loading ? (
-            <div className="flex flex-col gap-6">
-
-              {/* Primera Fila: Cliente & Producto */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Client Info Card */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                    Información del Cliente
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                        <Package className="w-4 h-4 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold">Cliente</p>
-                        {/* <p className="font-semibold text-gray-900 text-sm leading-tight">{selectedShipment.customer_name}</p> */}
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                        <Phone className="w-4 h-4 text-emerald-500" />
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold">Teléfono</p>
-                        {/* <p className="font-semibold text-gray-900 text-sm">{selectedShipment.phone}</p> */}
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-                        <MapPin className="w-4 h-4 text-amber-500" />
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold">Dirección de Entrega</p>
-                        {/* <p className="font-medium text-gray-700 text-sm leading-snug">{selectedShipment.address}</p> */}
-                      </div>
-                    </div>
-                  </div>
+            <div className="h-40 flex items-center justify-center">
+              <DeliveryLoader message="Cargando detalles..." />
+            </div>
+          ) : viewDetails.error ? (
+            <div className="flex flex-col items-center justify-center py-8 text-red-500">
+              <AlertTriangle size={32} className="mb-3" />
+              <p className="font-medium text-red-800">{viewDetails.error}</p>
+            </div>
+          ) : (
+            <div className="animate-in fade-in duration-300 space-y-5">
+              <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div className="col-span-2">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Vendedor / Tienda</span>
+                  <span className="font-semibold text-slate-900 block mt-1.5">{viewDetails.shipment?.seller}</span>
                 </div>
-
-                {/* Order Detail Card */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                    Detalles del Pedido
-                  </h4>
-                  <div className="space-y-4 flex-1">
-                    <div>
-                      <p className="text-gray-400 text-[11px] uppercase tracking-wide font-bold mb-2">Producto(s)</p>
-                      <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p className="text-sm font-medium text-gray-800 leading-relaxed italic">
-                          {/* "{selectedShipment.product_name}" */}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <p className="text-gray-400 text-[10px] uppercase tracking-wide font-bold mb-1">Fecha Programada</p>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <p className="font-bold text-slate-700 text-sm">
-                            {/* {selectedShipment.shipping_date ? selectedShipment.shipping_date.split('T')[0].split('-').reverse().join('/') : ''} */}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <p className="text-gray-400 text-[10px] uppercase tracking-wide font-bold mb-1">Costo Envío</p>
-                        <div className="flex items-center gap-2">
-                          <BadgeDollarSign className="w-3.5 h-3.5 text-emerald-500" />
-                          {/* <p className="font-bold text-emerald-700 text-sm">S/ {Number(selectedShipment.delivery_amount).toFixed(2)}</p> */}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="col-span-2">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Dirección de Recojo</span>
+                  <span className="font-medium text-slate-700 block mt-1.5">{viewDetails.shipment?.address}</span>
                 </div>
               </div>
 
-              {/* Segunda Fila: Monto Total & Observación */}
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg shadow-emerald-500/20">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                      <BadgeDollarSign className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-white/70 text-[11px] uppercase tracking-widest font-bold">Total a Cobrar</p>
-                      {/* <p className="text-3xl font-black tabular-nums">S/ {Number(selectedShipment.total_amount).toFixed(2)}</p> */}
-                    </div>
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                  Productos a Enviar
+                </h4>
+                {viewDetails.items.length > 0 ? (
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                        <tr>
+                          <th className="px-4 py-2 border-b border-slate-200">Producto</th>
+                          <th className="px-4 py-2 border-b border-slate-200 text-center w-24">Cant.</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {viewDetails.items.map(item => (
+                          <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-4 py-3 font-medium text-slate-800 break-words">{item.product_name}</td>
+                            <td className="px-4 py-3 text-center text-slate-900 font-bold bg-slate-50/30">{item.quantity}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-
-                  <div className="h-px w-full md:h-12 md:w-px bg-white/20"></div>
-
-                  <div className="flex-1 w-full">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shrink-0">
-                        <Info className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="w-full">
-                        <p className="text-white/70 text-[11px] uppercase tracking-widest font-bold mb-1">Observaciones</p>
-                        <p className="text-sm font-medium leading-normal line-clamp-2">
-                          {/* {selectedShipment.observation || 'Sin observaciones adicionales para este envío.'} */}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    No se encontraron productos asociados al envío.
+                  </p>
+                )}
               </div>
             </div>
-          ) : (<div></div>)}
+          )}
         </div>
       </Modal>
 

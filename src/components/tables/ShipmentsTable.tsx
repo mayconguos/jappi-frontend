@@ -339,7 +339,7 @@ export default function ShipmentsTable({
                 <div className="flex flex-col items-center justify-center gap-2">
                   <span className="text-gray-300 text-6xl">📦</span>
                   <p className="text-sm font-medium">No hay envíos registrados.</p>
-                  <p className="text-xs text-gray-400">Tus envíos aparecerán aquí una vez que los registres.</p>
+                  <p className="text-xs text-gray-400">Tus envíos aparecerán aquí una vez registrados.</p>
                 </div>
               </TableCell>
             </TableRow>

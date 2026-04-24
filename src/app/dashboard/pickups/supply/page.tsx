@@ -65,17 +65,15 @@ export default function SupplyPickupsPage() {
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   // Default to today for both from and to
-  const todayDate = new Date().toISOString().split('T')[0];
-  const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({ 
-    from: todayDate, 
-    to: todayDate 
+  const todayDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima', });
+  const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({
+    from: todayDate,
+    to: todayDate
   });
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const { get, put } = useApi<any>();
-
-
 
   const [isConfirmValidationOpen, setIsConfirmValidationOpen] = useState(false);
   const [isFinalConfirmOpen, setIsFinalConfirmOpen] = useState(false);

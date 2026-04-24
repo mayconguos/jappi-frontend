@@ -58,7 +58,7 @@ export default function ShipmentsPage() {
   const [value, setValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   // Default to today for both from and to
-  const todayDate = new Date().toISOString().split('T')[0];
+  const todayDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima', });
   const [dateRange, setDateRange] = useState<{ from: string | undefined; to: string | undefined }>({
     from: todayDate,
     to: todayDate
