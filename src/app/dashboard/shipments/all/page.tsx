@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
-import { AlertTriangle, BadgeDollarSign, Calendar, CheckCircle, Info, Loader2, MapPin, Package, Phone, RefreshCw, Truck } from 'lucide-react';
+import { AlertTriangle, BadgeDollarSign, Calendar, CheckCircle, Info, MapPin, Package, Phone, RefreshCw, Truck } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/context/AuthContext';
@@ -249,17 +249,32 @@ export default function AllShipmentsPage() {
     if (!pendingStatusChange) return;
     setIsUpdatingStatus(true);
 
-    // Simular golpe a API
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const payload = [{
+        id_shipping: pendingStatusChange.shipmentId,
+        status: pendingStatusChange.status
+      }];
 
-    setShipments(prev => prev.map(s =>
-      s.id === pendingStatusChange.shipmentId ? { ...s, status: pendingStatusChange.status } : s
-    ));
+      const response = await put('/shipping/status', payload);
+      if (!response) {
+        throw new Error('Hubo un error comunicándose con el servidor.');
+      }
 
-    setIsUpdatingStatus(false);
-    setIsConfirmStatusModalOpen(false);
-    setPendingStatusChange(null);
-    setSuccessModal('El estado del recojo ha sido actualizado correctamente.');
+      setShipments(prev => prev.map(s =>
+        s.id === pendingStatusChange.shipmentId ? { ...s, status: pendingStatusChange.status } : s
+      ));
+
+      setSuccessModal('El estado del envío ha sido actualizado correctamente.');
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error al cambiar estado',
+        message: err.message || 'Ocurrió un error al intentar cambiar el estado.'
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+      setIsConfirmStatusModalOpen(false);
+      setPendingStatusChange(null);
+    }
   };
 
   const handleCarrierSelect = (id: number, driverIdStr: string) => {
@@ -418,18 +433,33 @@ export default function AllShipmentsPage() {
     if (!batchStatus || selectedIds.length === 0) return;
     setIsUpdatingStatus(true);
 
-    // Simular golpe a API para múltiples IDs
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const payload = selectedIds.map(id => ({
+        id_shipping: id,
+        status: batchStatus
+      }));
 
-    setShipments(prev => prev.map(s =>
-      selectedIds.includes(s.id) ? { ...s, status: batchStatus as ShipmentStatus } : s
-    ));
+      const response = await put('/shipping/status', payload);
+      if (!response) {
+        throw new Error('No se pudo completar el cambio de estado masivo en el servidor.');
+      }
 
-    setIsUpdatingStatus(false);
-    setIsBatchStatusModalOpen(false);
-    setSelectedIds([]);
-    setBatchStatus('');
-    setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus as ShipmentStatus]} para los ${selectedIds.length} envíos seleccionados.`);
+      setShipments(prev => prev.map(s =>
+        selectedIds.includes(s.id) ? { ...s, status: batchStatus as ShipmentStatus } : s
+      ));
+
+      setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus as ShipmentStatus]} para los ${selectedIds.length} envíos seleccionados.`);
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error de Cambio de Estado Masivo',
+        message: err.message || 'Ocurrió un error al intentar cambiar el estado masivamente.'
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+      setIsBatchStatusModalOpen(false);
+      setSelectedIds([]);
+      setBatchStatus('');
+    }
   };
 
   return (

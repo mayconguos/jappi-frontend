@@ -257,17 +257,32 @@ export default function PickupsPage() {
     if (!pendingStatusChange) return;
     setIsUpdatingStatus(true);
 
-    // Simular golpe a API
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const payload = [{
+        id_pickup: pendingStatusChange.pickupId,
+        status: pendingStatusChange.status
+      }];
 
-    setPickups(prev => prev.map(p =>
-      p.id === pendingStatusChange.pickupId ? { ...p, status: pendingStatusChange.status } : p
-    ));
+      const response = await put('/pickup/status', payload);
+      if (!response) {
+        throw new Error('Hubo un error comunicándose con el servidor.');
+      }
 
-    setIsUpdatingStatus(false);
-    setIsConfirmStatusModalOpen(false);
-    setPendingStatusChange(null);
-    setSuccessModal('El estado del recojo ha sido actualizado correctamente.');
+      setPickups(prev => prev.map(p =>
+        p.id === pendingStatusChange.pickupId ? { ...p, status: pendingStatusChange.status } : p
+      ));
+
+      setSuccessModal('El estado del recojo ha sido actualizado correctamente.');
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error al cambiar estado',
+        message: err.message || 'Ocurrió un error al intentar cambiar el estado.'
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+      setIsConfirmStatusModalOpen(false);
+      setPendingStatusChange(null);
+    }
   };
 
   const handleCarrierSelect = (id: number, driverIdStr: string) => {
@@ -426,18 +441,33 @@ export default function PickupsPage() {
     if (!batchStatus || selectedIds.length === 0) return;
     setIsUpdatingStatus(true);
 
-    // Simular golpe a API para múltiples IDs
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const payload = selectedIds.map(id => ({
+        id_pickup: id,
+        status: batchStatus
+      }));
 
-    setPickups(prev => prev.map(p =>
-      selectedIds.includes(p.id) ? { ...p, status: batchStatus as PickupStatus } : p
-    ));
+      const response = await put('/pickup/status', payload);
+      if (!response) {
+        throw new Error('No se pudo completar el cambio de estado masivo en el servidor.');
+      }
 
-    setIsUpdatingStatus(false);
-    setIsBatchStatusModalOpen(false);
-    setSelectedIds([]);
-    setBatchStatus('');
-    setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus as PickupStatus]} para los ${selectedIds.length} recojos seleccionados.`);
+      setPickups(prev => prev.map(p =>
+        selectedIds.includes(p.id) ? { ...p, status: batchStatus as PickupStatus } : p
+      ));
+
+      setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus as PickupStatus]} para los ${selectedIds.length} recojos seleccionados.`);
+    } catch (err: any) {
+      setWarningModal({
+        title: 'Error de Cambio de Estado Masivo',
+        message: err.message || 'Ocurrió un error al intentar cambiar el estado masivamente.'
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+      setIsBatchStatusModalOpen(false);
+      setSelectedIds([]);
+      setBatchStatus('');
+    }
   };
 
   return (
