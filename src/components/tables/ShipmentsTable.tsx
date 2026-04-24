@@ -83,8 +83,8 @@ export default function ShipmentsTable({
 
   // ── Lista de couriers combinada (asignados + cargados) ─────────────────────
   const assignedCouriers = shipments
-    .filter(s => s.id_driver !== null && s.carrier !== 'Sin asignar')
-    .map(s => ({ label: s.carrier, value: s.id_driver!.toString() }));
+    .filter(s => s.id_driver != null && s.carrier !== 'Sin asignar')
+    .map(s => ({ label: s.carrier, value: String(s.id_driver) }));
 
   const fetchedCouriers = couriers.map(c => ({
     label: `${c.first_name} ${c.last_name || ''}`.trim(),

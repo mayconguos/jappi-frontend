@@ -380,7 +380,7 @@ export default function CreateShipmentPage() {
 
         ...(data.service.origin_type === 'pickup' ? {
           pickup: {
-            id_address: data.sender.address.id_address || 0,
+            id_address: data.sender?.address?.id_address || 0,
             phone: data.sender.phone
           }
         } : {}),

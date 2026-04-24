@@ -27,7 +27,7 @@ const addressSchema = z.object({
     .optional()
 });
 
-// Schema para persona (remitente/destinatario)
+// Schema para persona estrictamente validada (usada para destinatario, y remitente si es pickup)
 const personSchema = z.object({
   full_name: z
     .string()
@@ -42,7 +42,19 @@ const personSchema = z.object({
   address: addressSchema
 });
 
-
+// Schema flexible para remitente (se valida estrictamente solo si es pickup)
+const loosePersonSchema = z.object({
+  full_name: z.string().optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
+  address: z.object({
+    id_address: z.number().optional().or(z.literal(0)),
+    address: z.string().optional().or(z.literal('')),
+    id_region: z.number().int().optional().or(z.literal(0)),
+    id_district: z.number().int().optional().or(z.literal(0)),
+    id_sector: z.number().int().optional().or(z.literal(0)),
+    reference: z.string().optional().or(z.literal(''))
+  }).optional()
+});
 
 // Schema para el servicio
 const serviceSchema = z.object({
@@ -89,10 +101,23 @@ const serviceSchema = z.object({
 
 // Schema principal del envío
 export const shipmentSchema = z.object({
-  sender: personSchema,
+  sender: loosePersonSchema,
   recipient: personSchema,
   service: serviceSchema
 }).superRefine((data, ctx) => {
+
+  // Validar remitente solo si el origen es pickup
+  if (data.service.origin_type === 'pickup') {
+    const parsed = personSchema.safeParse(data.sender);
+    if (!parsed.success) {
+      parsed.error.issues.forEach(issue => {
+        ctx.addIssue({
+          ...issue,
+          path: ['sender', ...issue.path],
+        });
+      });
+    }
+  }
 
   // Validar que si collect_on_delivery es true, cod_amount debe ser mayor a 0
   if (data.service.collect_on_delivery && (!data.service.cod_amount || data.service.cod_amount <= 0)) {
