@@ -45,7 +45,25 @@ export default function ProductModal({ isOpen, onClose, onSubmit, editingProduct
     }
   });
 
-  // ... (useEffect remains same)
+  useEffect(() => {
+    if (isOpen) {
+      if (editingProduct) {
+        reset({
+          sku: editingProduct.sku,
+          product_name: editingProduct.product_name,
+          description: editingProduct.description || '',
+          status: editingProduct.status,
+        });
+      } else {
+        reset({
+          sku: '',
+          product_name: '',
+          description: '',
+          status: 'active',
+        });
+      }
+    }
+  }, [isOpen, editingProduct, reset]);
 
   const onFormSubmit = (data: ProductFormData) => {
     onSubmit(data);
@@ -75,9 +93,10 @@ export default function ProductModal({ isOpen, onClose, onSubmit, editingProduct
               const filtered = value.replace(/[^A-Z0-9_-]/g, '').slice(0, 20);
               setValue('sku', filtered, { shouldValidate: true });
             }}
-            className="uppercase font-mono disabled:bg-gray-100 disabled:text-gray-500"
+            className={`uppercase font-mono ${!!editingProduct ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} disabled:bg-gray-100 disabled:text-gray-500`}
             autoFocus
-            disabled={!!editingProduct || isLoading}
+            readOnly={!!editingProduct}
+            disabled={isLoading}
           />
           <p className="text-xs text-gray-400">Identificador único para tu inventario.</p>
         </div>
@@ -88,8 +107,9 @@ export default function ProductModal({ isOpen, onClose, onSubmit, editingProduct
             placeholder="Ej. Camiseta Algodón Roja Talla S"
             error={errors.product_name?.message}
             {...register('product_name')}
-            className="disabled:bg-gray-100 disabled:text-gray-500"
-            disabled={!!editingProduct || isLoading}
+            className={`${!!editingProduct ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} disabled:bg-gray-100 disabled:text-gray-500`}
+            readOnly={!!editingProduct}
+            disabled={isLoading}
           />
         </div>
 

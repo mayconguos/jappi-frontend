@@ -143,6 +143,7 @@ export default function CompanyProductsTable({
   
                 <td className="px-4 py-3 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-1">
+                    {/* TODO: Botón de edición comentado temporalmente porque el endpoint backend (PUT /products) aún no está disponible.
                     <Button
                       onClick={() => onEdit(item)}
                       variant="ghost"
@@ -152,6 +153,7 @@ export default function CompanyProductsTable({
                     >
                       <Edit2 size={16} />
                     </Button>
+                    */}
                     <Button
                       onClick={() => onDelete(item)}
                       variant="ghost"

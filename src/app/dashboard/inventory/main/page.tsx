@@ -79,8 +79,9 @@ export default function GeneralWarehousePage() {
   };
 
   const handleEdit = (product: CatalogProduct) => {
-    setEditingProduct(product);
-    setIsModalOpen(true);
+    // TODO: Acción de editar comentada temporalmente porque el endpoint backend (PUT /products) aún no está disponible.
+    // setEditingProduct(product);
+    // setIsModalOpen(true);
   };
 
   const handleDelete = (product: CatalogProduct) => {
@@ -107,9 +108,10 @@ export default function GeneralWarehousePage() {
     setIsLoading(true);
     try {
       if (editingProduct) {
-        updateProduct({ ...editingProduct, ...data });
-        setIsModalOpen(false);
-        setSuccessModal('El producto ha sido actualizado correctamente.');
+        // TODO: Acción de editar comentada temporalmente porque el endpoint backend (PUT /products) aún no está disponible.
+        // updateProduct({ ...editingProduct, ...data });
+        // setIsModalOpen(false);
+        // setSuccessModal('El producto ha sido actualizado correctamente.');
       } else {
         await addProduct({ stock: 0, ...data });
         setIsModalOpen(false);
