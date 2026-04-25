@@ -10,3 +10,4 @@ export { useStepper } from './useStepper';
 export { useApi } from './useApi';
 export { useFilterAndPagination } from './useFilterAndPagination';
 export { useLocationCatalog } from './useLocationCatalog';
+export { useTableActions } from './useTableActions';
