@@ -107,7 +107,7 @@ export default function DataTableFilter({
         <div className="w-px h-8 bg-slate-200 hidden sm:block" />
 
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-400 hidden sm:block mr-1">Exportar:</span>
+          {/* <span className="text-sm font-medium text-gray-400 hidden sm:block mr-1">Exportar:</span> */}
           <Button
             variant="secondary"
             onClick={onExportExcel}

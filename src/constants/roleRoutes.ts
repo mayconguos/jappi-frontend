@@ -35,7 +35,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
     { path: '/dashboard/shipments/all', label: 'Envíos', icon: Calendar },
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
     // { path: '/dashboard/shipments/assigned', label: 'Entregas', icon: Package },
-    // { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
     { path: '/dashboard/accounts/companies', label: 'Empresas clientes', icon: Users },
     { path: '/dashboard/accounts/carriers', label: 'Transportistas', icon: Bike },
@@ -88,7 +88,7 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
   ],
 
   despacho: [
-    // { path: '/dashboard/inventory/dispatches', label: 'Despachos desde almacén', icon: ClipboardCheck },
+    { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
     { path: '/dashboard/inventory/kardex', label: 'Kardex', icon: ClipboardCheck },
   ],
 };

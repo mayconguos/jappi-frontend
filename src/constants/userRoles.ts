@@ -9,7 +9,7 @@ export const USER_ROLES: UserRole[] = [
   { value: 3, label: 'Transportista' },
   { value: 4, label: 'Almacén' },
   { value: 5, label: 'Coordinación' },
-  { value: 6, label: 'Finanzas' }
+  { value: 6, label: 'Despacho' }
 ];
 
 // Constante para el rol de usuario por defecto

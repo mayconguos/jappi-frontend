@@ -335,11 +335,13 @@ export default function ShipmentsTable({
           {/* Empty state */}
           {shipments.length === 0 && (
             <TableRow>
-              <TableCell colSpan={isAdmin ? 10 : 9} className="h-48 text-center text-gray-500">
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <span className="text-gray-300 text-6xl">📦</span>
-                  <p className="text-sm font-medium">No hay envíos registrados.</p>
-                  <p className="text-xs text-gray-400">Tus envíos aparecerán aquí una vez registrados.</p>
+              <TableCell colSpan={isAdmin ? 10 : 9} className="h-64 text-center">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                    <Package className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-700 mb-1">No hay envíos</h3>
+                  <p className="text-slate-500">No se encontraron envíos con los filtros actuales.</p>
                 </div>
               </TableCell>
             </TableRow>
