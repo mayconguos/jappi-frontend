@@ -52,7 +52,7 @@ export default function DispatchesTable({
         <table className="w-full text-sm text-left">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
             <tr>
-              <th className="px-4 py-3 text-center w-8">ID</th>
+              <th className="px-4 py-3 text-center w-8">#</th>
               <th className="px-4 py-3">Producto</th>
               <th className="px-4 py-3">Empresa</th>
               <th className="px-4 py-3">Origen</th>
@@ -62,15 +62,14 @@ export default function DispatchesTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {dispatches.map((dispatch) => (
+            {dispatches.map((dispatch, index) => (
               <tr
                 key={dispatch.id}
                 className="hover:bg-slate-50/50 transition-colors group"
               >
                 <td className="px-2 py-3 whitespace-nowrap text-center">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="font-mono text-slate-400 text-[10px]">#</span>
-                    <span className="font-bold text-slate-700">{dispatch.id}</span>
+                    <span className="font-mono text-slate-400 text-[10px]"> {(currentPage - 1) * 10 + index + 1}</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">

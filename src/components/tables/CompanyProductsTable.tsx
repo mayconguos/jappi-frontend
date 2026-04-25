@@ -1,5 +1,4 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, Box, Info, Edit2 } from 'lucide-react';
+import { Trash2, Info, Edit2, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clsx } from 'clsx';
 import { useAuth } from '@/context/AuthContext';
@@ -29,9 +28,9 @@ const getStatusBadge = (status: string) => {
     case 'active':
       return 'bg-emerald-50 text-emerald-700 border-emerald-100';
     case 'inactive':
-      return 'bg-gray-50 text-gray-700 border-gray-100';
+      return 'bg-slate-50 text-slate-700 border-slate-100';
     default:
-      return 'bg-gray-50 text-gray-700 border-gray-100';
+      return 'bg-slate-50 text-slate-700 border-slate-100';
   }
 };
 
@@ -68,86 +67,87 @@ export default function CompanyProductsTable({
   const colSpanCount = showCompanyNameColumn ? 8 : 7;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="w-[50px] pl-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">#</TableHead>
-            <TableHead className="w-[120px] text-xs font-semibold text-slate-500 uppercase tracking-wider">SKU</TableHead>
-            {showCompanyNameColumn && (
-              <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Empresa</TableHead>
-            )}
-            <TableHead className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Producto</TableHead>
-            <TableHead className="w-[120px] text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Stock</TableHead>
-            <TableHead className="w-[120px] text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado</TableHead>
-            <TableHead className="w-[120px] text-right text-xs font-semibold text-slate-500 uppercase tracking-wider pr-4">Rotación</TableHead>
-            <TableHead className="text-right pr-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Opciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+            <tr>
+              <th className="px-2 py-3 text-center w-8">#</th>
+              <th className="px-4 py-3 w-[120px]">SKU</th>
+              {showCompanyNameColumn && (
+                <th className="px-4 py-3">Empresa</th>
+              )}
+              <th className="px-4 py-3 text-left">Producto</th>
+              <th className="px-4 py-3 text-center w-[120px]">Stock</th>
+              <th className="px-4 py-3 text-center w-[120px]">Estado</th>
+              <th className="px-4 py-3 text-right w-[120px]">Rotación</th>
+              <th className="px-4 py-3 text-right">Opciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
           {products.map((item, index) => {
              const rotStyle = getRotationStyle(item.last_updated);
              return (
-              <TableRow
+              <tr
                 key={item.id}
-                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
+                className="hover:bg-slate-50/50 transition-colors group"
               >
-                <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+                <td className="px-2 py-3 whitespace-nowrap text-center font-mono text-[11px] font-bold text-slate-300">
                   {(currentPage - 1) * itemsPerPage + index + 1}
-                </TableCell>
-                <TableCell className="py-4 font-mono text-xs font-bold text-gray-900 tracking-tight">
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap font-mono text-sm font-semibold text-slate-700 tracking-tight">
                   {item.sku}
-                </TableCell>
+                </td>
                 {showCompanyNameColumn && (
-                  <TableCell className="py-4">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-tight">{item.company_name || 'Sin empresa'}</span>
-                  </TableCell>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-tight">{item.company_name || 'Sin empresa'}</span>
+                  </td>
                 )}
-                <TableCell className="py-4 text-left">
+                <td className="px-4 py-3">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-bold text-gray-900 leading-tight">{item.product_name}</span>
+                    <span className="text-sm font-semibold text-slate-900 leading-tight">{item.product_name}</span>
                     {item.description && (
-                      <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight truncate max-w-[200px] italic">{item.description}</span>
+                      <span className="text-xs text-slate-400 font-medium truncate max-w-[250px]">{item.description}</span>
                     )}
                   </div>
-                </TableCell>
+                </td>
   
-                <TableCell className="py-4 text-center">
+                <td className="px-4 py-3 whitespace-nowrap text-center">
                   <span className={clsx(
-                    "inline-flex items-center px-2 py-0.5 rounded-lg border text-[11px] font-bold",
+                    "inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold",
                     item.quantity < 10 
                       ? "bg-red-50 text-red-700 border-red-100" 
                       : "bg-slate-100 text-slate-700 border-slate-200"
                   )}>
                     {item.quantity} und.
                   </span>
-                </TableCell>
+                </td>
   
-                <TableCell className="py-4 text-center">
+                <td className="px-4 py-3 whitespace-nowrap text-center">
                   <span className={clsx(
                     "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
                     getStatusBadge(item.status)
                   )}>
                     {getStatusLabel(item.status)}
                   </span>
-                </TableCell>
+                </td>
   
-                <TableCell className="py-4 text-right pr-4">
+                <td className="px-4 py-3 whitespace-nowrap text-right">
                   <div className={clsx(
-                    "inline-flex flex-col items-end px-2 py-1 rounded-lg border shadow-sm transition-all text-[11px] font-bold",
+                    "inline-flex flex-col items-end px-2.5 py-0.5 rounded-md border shadow-sm transition-all text-xs font-medium",
                     rotStyle
                   )}>
                     {new Date(item.last_updated).toLocaleDateString()}
                   </div>
-                </TableCell>
+                </td>
   
-                <TableCell className="text-right pr-6 py-4">
+                <td className="px-4 py-3 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Button
                       onClick={() => onEdit(item)}
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
+                      className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
                       title="Editar"
                     >
                       <Edit2 size={16} />
@@ -156,29 +156,32 @@ export default function CompanyProductsTable({
                       onClick={() => onDelete(item)}
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                      className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                       title="Eliminar"
                     >
                       <Trash2 size={16} />
                     </Button>
                   </div>
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
              );
           })}
           {products.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpanCount} className="h-48 text-center text-gray-500">
-                <div className="flex flex-col items-center justify-center gap-2">
-                   <Box className="text-gray-200" size={32} />
-                  <p className="font-bold text-slate-400 uppercase tracking-widest text-xs">Sin Productos</p>
-                  <p className="text-xs text-gray-400">Verifica los filtros o agrega productos para comenzar.</p>
+            <tr>
+              <td colSpan={colSpanCount} className="h-64 text-center">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                    <Package className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-700 mb-1">Sin Productos</h3>
+                  <p className="text-slate-500">Verifica los filtros o agrega productos para comenzar.</p>
                 </div>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           )}
-        </TableBody>
-      </Table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
