@@ -1,4 +1,3 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Eye, Trash2, Building2, MapPin, Phone, Mail, MoreHorizontal } from 'lucide-react';
 import { Company } from '@/app/dashboard/accounts/companies/page';
@@ -18,65 +17,60 @@ export default function CompaniesTable({
 }: CompaniesTableProps) {
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-b border-gray-100 hover:bg-transparent">
-            <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</TableHead>
-            <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contacto</TableHead>
-            <TableHead className="hidden md:table-cell text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
-            <TableHead className="w-[100px] text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+            <tr>
+              <th className="px-2 py-3 text-center w-8">#</th>
+              <th className="px-4 py-3">Empresa</th>
+              <th className="px-4 py-3">Contacto</th>
+              <th className="hidden md:table-cell px-4 py-3">Dirección</th>
+              <th className="px-4 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
           {companies.map((company, index) => (
-            <TableRow
+            <tr
               key={company.id}
-              className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group"
+              className="hover:bg-slate-50/50 transition-colors group"
             >
-              <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
+              <td className="px-2 py-3 whitespace-nowrap text-center font-mono text-[11px] font-bold text-slate-300">
                 {(currentPage - 1) * 10 + index + 1}
-              </TableCell>
+              </td>
 
-              <TableCell className="py-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-900">{company.company_name}</span>
-                  </div>
-                </div>
-              </TableCell>
+              <td className="px-4 py-3 whitespace-nowrap">
+                <span className="text-sm font-semibold text-slate-900">{company.company_name}</span>
+              </td>
 
-              <TableCell className="py-4">
+              <td className="px-4 py-3 whitespace-nowrap">
                 <div className="flex flex-col gap-1">
-                  <span className="text-sm text-gray-900">{company.first_name} {company.last_name}</span>
-                  <div className="flex flex-col gap-0.5">
-                    {company.phone_number && (
-                      <div className="flex items-center gap-1.5 text-gray-500">
-                        <Phone size={12} />
-                        <span className="text-xs font-mono">{company.phone_number}</span>
-                      </div>
-                    )}
-                  </div>
+                  <span className="text-sm font-semibold text-slate-900">{company.first_name} {company.last_name}</span>
+                  {company.phone_number && (
+                    <div className="flex items-center gap-1.5 text-slate-500">
+                      <Phone size={12} />
+                      <span className="text-xs font-mono">{company.phone_number}</span>
+                    </div>
+                  )}
                 </div>
-              </TableCell>
+              </td>
 
-              <TableCell className="hidden md:table-cell py-4">
+              <td className="hidden md:table-cell px-4 py-3">
                 <div className="flex items-start gap-2 max-w-[250px]">
-                  <MapPin size={14} className="text-gray-400 shrink-0 mt-0.5" />
-                  <p className="text-sm text-gray-500 leading-snug line-clamp-2" title={company.address}>
+                  <MapPin size={14} className="text-slate-400 shrink-0 mt-0.5" />
+                  <p className="text-xs font-medium text-slate-500 leading-snug line-clamp-2" title={company.address}>
                     {company.address}
                   </p>
                 </div>
-              </TableCell>
+              </td>
 
-              <TableCell className="text-right pr-6 py-4">
-                <div className="flex items-center justify-end gap-2 transition-opacity">
+              <td className="px-4 py-3 whitespace-nowrap text-right">
+                <div className="flex items-center justify-end gap-1 transition-opacity">
                   <Button
                     size="icon"
                     variant="ghost"
                     onClick={() => onView(company)}
-                    className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                    className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
                   >
                     <Eye size={16} />
                     <span className="sr-only">Ver Detalle</span>
@@ -85,27 +79,31 @@ export default function CompaniesTable({
                     size="icon"
                     variant="ghost"
                     onClick={() => onDelete(company)}
-                    className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                   >
                     <Trash2 size={16} />
                     <span className="sr-only">Eliminar</span>
                   </Button>
                 </div>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ))}
           {companies.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={5} className="h-48 text-center text-gray-500">
-                <div className="flex flex-col items-center gap-2">
-                  <Building2 size={32} className="text-gray-300" />
-                  <p className="text-sm">No se encontraron empresas</p>
+            <tr>
+              <td colSpan={5} className="h-64 text-center">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                    <Building2 className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-700 mb-1">Sin Empresas</h3>
+                  <p className="text-slate-500">No se encontraron empresas registradas.</p>
                 </div>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           )}
-        </TableBody>
-      </Table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
