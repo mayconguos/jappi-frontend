@@ -66,7 +66,6 @@ const FILTER_FIELDS = [
   { value: 'company_name', label: 'Empresa' },
   { value: 'first_name', label: 'Nombre Contacto' },
   { value: 'last_name', label: 'Apellido Contacto' },
-  { value: 'email', label: 'Correo electrónico' },
 ];
 
 export default function CompaniesPage() {

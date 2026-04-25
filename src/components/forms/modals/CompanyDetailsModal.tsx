@@ -75,7 +75,7 @@ export default function CompanyDetailsModal({
               <dl className="divide-y divide-gray-100">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4">
                   <dt className="text-sm font-medium text-gray-500">Nombre Completo</dt>
-                  <dd className="text-sm text-gray-900 sm:col-span-2 font-medium capitalize">{data.user.first_name.toLowerCase()} {data.user.last_name.toLowerCase()}</dd>
+                  <dd className="text-sm text-gray-900 sm:col-span-2 font-medium capitalize">{data.user.first_name.toLowerCase()} {data.user.last_name?.toLowerCase()}</dd>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4">
                   <dt className="text-sm font-medium text-gray-500">Documento</dt>

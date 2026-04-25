@@ -47,10 +47,10 @@ const getRotationStyle = (dateStr: string) => {
   const now = new Date();
   const diffDays = (now.getTime() - lastUpdate.getTime()) / (1000 * 3600 * 24);
 
-  if (diffDays > 365) return 'text-red-700 bg-red-50 border-red-200';
-  if (diffDays > 180) return 'text-orange-700 bg-orange-50 border-orange-200';
-  if (diffDays > 30) return 'text-amber-700 bg-amber-50 border-amber-200';
-  return 'text-slate-700 bg-white border-slate-200';
+  if (diffDays > 365) return 'text-red-700 bg-red-50';
+  if (diffDays > 180) return 'text-orange-700 bg-orange-50';
+  if (diffDays > 30) return 'text-amber-700 bg-amber-50';
+  return 'text-slate-600 bg-slate-50';
 };
 
 export default function CompanyProductsTable({
@@ -92,20 +92,20 @@ export default function CompanyProductsTable({
                 key={item.id}
                 className="hover:bg-slate-50/50 transition-colors group"
               >
-                <td className="px-2 py-3 whitespace-nowrap text-center font-mono text-[11px] font-bold text-slate-300">
+                <td className="px-2 py-3 whitespace-nowrap text-center text-xs font-medium text-slate-400">
                   {(currentPage - 1) * itemsPerPage + index + 1}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap font-mono text-sm font-semibold text-slate-700 tracking-tight">
+                <td className="px-4 py-3 whitespace-nowrap font-mono text-xs font-medium text-slate-500">
                   {item.sku}
                 </td>
                 {showCompanyNameColumn && (
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-tight">{item.company_name || 'Sin empresa'}</span>
+                    <span className="text-xs font-medium text-slate-600">{item.company_name || 'Sin empresa'}</span>
                   </td>
                 )}
                 <td className="px-4 py-3">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-semibold text-slate-900 leading-tight">{item.product_name}</span>
+                    <span className="text-sm font-semibold text-slate-800 leading-tight">{item.product_name}</span>
                     {item.description && (
                       <span className="text-xs text-slate-400 font-medium truncate max-w-[250px]">{item.description}</span>
                     )}
@@ -114,10 +114,10 @@ export default function CompanyProductsTable({
   
                 <td className="px-4 py-3 whitespace-nowrap text-center">
                   <span className={clsx(
-                    "inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold",
+                    "inline-flex items-center px-2 py-1 rounded text-xs font-medium",
                     item.quantity < 10 
-                      ? "bg-red-50 text-red-700 border-red-100" 
-                      : "bg-slate-100 text-slate-700 border-slate-200"
+                      ? "bg-red-50 text-red-700" 
+                      : "text-slate-700"
                   )}>
                     {item.quantity} und.
                   </span>
@@ -125,7 +125,7 @@ export default function CompanyProductsTable({
   
                 <td className="px-4 py-3 whitespace-nowrap text-center">
                   <span className={clsx(
-                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                    "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider",
                     getStatusBadge(item.status)
                   )}>
                     {getStatusLabel(item.status)}
@@ -134,7 +134,7 @@ export default function CompanyProductsTable({
   
                 <td className="px-4 py-3 whitespace-nowrap text-right">
                   <div className={clsx(
-                    "inline-flex flex-col items-end px-2.5 py-0.5 rounded-md border shadow-sm transition-all text-xs font-medium",
+                    "inline-flex items-center justify-center px-2 py-1 rounded text-xs font-medium",
                     rotStyle
                   )}>
                     {new Date(item.last_updated).toLocaleDateString()}
