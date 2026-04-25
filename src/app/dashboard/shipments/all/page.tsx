@@ -36,9 +36,9 @@ const STATUS_LABELS: Record<ShipmentStatus, string> = {
 // ─── Helper de Mapeo ───────────────────────────────────────────
 const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
   const date = apiShipment.shipping_date ? new Date(apiShipment.shipping_date) : new Date();
-  const dateStr = !isNaN(date.getTime())
-    ? date.toISOString().split('T')[0].split('-').reverse().join('/')
-    : 'Fecha inválida';
+  const dateStr = Number.isNaN(date.getTime())
+    ? 'Fecha inválida'
+    : date.toISOString().split('T')[0].split('-').reverse().join('/');
 
   return {
     id: apiShipment.id,
@@ -207,7 +207,7 @@ export default function AllShipmentsPage() {
     if (driverIdStr === currentDriverStr) return;
     const courier = couriers.find(c => c.id.toString() === driverIdStr);
     const courierName = courier ? `${courier.first_name} ${courier.last_name || ''}`.trim() : 'Sin asignar';
-    setSelectedChange({ entityId: id, courierId: parseInt(driverIdStr), courierName });
+    setSelectedChange({ entityId: id, courierId: Number.parseInt(driverIdStr), courierName });
     setIsConfirmModalOpen(true);
   };
 
@@ -219,7 +219,7 @@ export default function AllShipmentsPage() {
       const response = await put('/shipment/assign', { assignments: [{ id_shipment: selectedChange.entityId, id_driver: driverId }] });
       if (!response) throw new Error('Hubo un error comunicándose con el servidor.');
       const isUnassigning = driverId === 0;
-      setShipments(prev => prev.map(s => s.id === selectedChange.entityId ? { ...s, carrier: selectedChange.courierName, id_driver: driverId === 0 ? null : driverId, status: !isUnassigning ? 'scheduled' : s.status } : s));
+      setShipments(prev => prev.map(s => s.id === selectedChange.entityId ? { ...s, carrier: selectedChange.courierName, id_driver: driverId === 0 ? null : driverId, status: isUnassigning ? s.status : 'scheduled' } : s));
       setSuccessModal('El transportista ha sido asignado correctamente.');
     } catch (err: any) {
       setWarningModal({ title: 'Error de Asignación', message: err.message || 'Ocurrió un error al intentar asignar el transportista.' });
@@ -233,14 +233,14 @@ export default function AllShipmentsPage() {
   const handleBatchCarrierUpdate = async () => {
     if (!batchCarrier || selectedIds.length === 0) return;
     setIsUpdatingCarrier(true);
-    const driverId = parseInt(batchCarrier);
+    const driverId = Number.parseInt(batchCarrier);
     const courier = couriers.find(c => c.id === driverId);
     const courierName = courier ? `${courier.first_name} ${courier.last_name || ''}`.trim() : 'Sin asignar';
     try {
       const response = await put('/shipping/assign', { assignments: selectedIds.map(id => ({ id_shipping: id, id_driver: driverId })) });
       if (!response) throw new Error('No se pudo completar la asignación masiva en el servidor.');
       const isUnassigning = driverId === 0;
-      setShipments(prev => prev.map(s => selectedIds.includes(s.id) ? { ...s, carrier: courierName, id_driver: driverId === 0 ? null : driverId, status: !isUnassigning ? 'scheduled' : s.status } : s));
+      setShipments(prev => prev.map(s => selectedIds.includes(s.id) ? { ...s, carrier: courierName, id_driver: driverId === 0 ? null : driverId, status: isUnassigning ? s.status : 'scheduled' } : s));
       setSuccessModal(`Se ha asignado correctamente a ${courierName} para los ${selectedIds.length} envíos seleccionados.`);
     } catch (err: any) {
       setWarningModal({ title: 'Error de Asignación Masiva', message: err.message || 'Ocurrió un error al intentar realizar la asignación masiva.' });
@@ -258,8 +258,8 @@ export default function AllShipmentsPage() {
     try {
       const response = await put('/shipping/status', selectedIds.map(id => ({ id_shipping: id, status: batchStatus })));
       if (!response) throw new Error('No se pudo completar el cambio de estado masivo en el servidor.');
-      setShipments(prev => prev.map(s => selectedIds.includes(s.id) ? { ...s, status: batchStatus as ShipmentStatus } : s));
-      setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus as ShipmentStatus]} para los ${selectedIds.length} envíos seleccionados.`);
+      setShipments(prev => prev.map(s => selectedIds.includes(s.id) ? { ...s, status: batchStatus } : s));
+      setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus]} para los ${selectedIds.length} envíos seleccionados.`);
     } catch (err: any) {
       setWarningModal({ title: 'Error de Cambio de Estado Masivo', message: err.message || 'Ocurrió un error al intentar cambiar el estado masivamente.' });
     } finally {
@@ -276,6 +276,67 @@ export default function AllShipmentsPage() {
       setShipmentToCancel(null);
       setSuccessModal('El envío ha sido cancelado exitosamente.');
     }
+  };
+
+  const renderModalContent = () => {
+    if (viewDetails.loading) {
+      return (
+        <div className="h-40 flex items-center justify-center">
+          <DeliveryLoader message="Cargando detalles..." />
+        </div>
+      );
+    }
+
+    if (viewDetails.error) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8 text-red-500">
+          <AlertTriangle size={32} className="mb-3" />
+          <p className="font-medium text-red-800">{viewDetails.error}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="animate-in fade-in duration-300 space-y-5">
+        <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div className="col-span-2">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Vendedor / Tienda</span>
+            <span className="font-semibold text-slate-900 block mt-1.5">{viewDetails.shipment?.seller}</span>
+          </div>
+          <div className="col-span-2">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Dirección de Recojo</span>
+            <span className="font-medium text-slate-700 block mt-1.5">{viewDetails.shipment?.address}</span>
+          </div>
+        </div>
+        <div>
+          <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Productos a Enviar</h4>
+          {viewDetails.items.length > 0 ? (
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="px-4 py-2 border-b border-slate-200">Producto</th>
+                    <th className="px-4 py-2 border-b border-slate-200 text-center w-24">Cant.</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {viewDetails.items.map(item => (
+                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-3 font-medium text-slate-800 break-words">{item.product_name}</td>
+                      <td className="px-4 py-3 text-center text-slate-900 font-bold bg-slate-50/30">{item.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500 italic text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              No se encontraron productos asociados al envío.
+            </p>
+          )}
+        </div>
+      </div>
+    );
   };
 
   // ─── Render ───────────────────────────────────────────────────
@@ -331,54 +392,7 @@ export default function AllShipmentsPage() {
         footer={<ModalFooter><div className="flex justify-end pt-2"><Button onClick={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}>Cerrar</Button></div></ModalFooter>}
       >
         <div className="py-2 space-y-6">
-          {viewDetails.loading ? (
-            <div className="h-40 flex items-center justify-center"><DeliveryLoader message="Cargando detalles..." /></div>
-          ) : viewDetails.error ? (
-            <div className="flex flex-col items-center justify-center py-8 text-red-500">
-              <AlertTriangle size={32} className="mb-3" />
-              <p className="font-medium text-red-800">{viewDetails.error}</p>
-            </div>
-          ) : (
-            <div className="animate-in fade-in duration-300 space-y-5">
-              <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <div className="col-span-2">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Vendedor / Tienda</span>
-                  <span className="font-semibold text-slate-900 block mt-1.5">{viewDetails.shipment?.seller}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Dirección de Recojo</span>
-                  <span className="font-medium text-slate-700 block mt-1.5">{viewDetails.shipment?.address}</span>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Productos a Enviar</h4>
-                {viewDetails.items.length > 0 ? (
-                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                        <tr>
-                          <th className="px-4 py-2 border-b border-slate-200">Producto</th>
-                          <th className="px-4 py-2 border-b border-slate-200 text-center w-24">Cant.</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {viewDetails.items.map(item => (
-                          <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="px-4 py-3 font-medium text-slate-800 break-words">{item.product_name}</td>
-                            <td className="px-4 py-3 text-center text-slate-900 font-bold bg-slate-50/30">{item.quantity}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-500 italic text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    No se encontraron productos asociados al envío.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+          {renderModalContent()}
         </div>
       </Modal>
 
