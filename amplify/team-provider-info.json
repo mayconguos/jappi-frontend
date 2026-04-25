@@ -19,5 +19,26 @@
         }
       }
     }
+  },
+  "japidev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-jappifrontend-japidev-73940-authRole",
+      "UnauthRoleArn": "arn:aws:iam::120569599552:role/amplify-jappifrontend-japidev-73940-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::120569599552:role/amplify-jappifrontend-japidev-73940-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-jappifrontend-japidev-73940-deployment",
+      "UnauthRoleName": "amplify-jappifrontend-japidev-73940-unauthRole",
+      "StackName": "amplify-jappifrontend-japidev-73940",
+      "StackId": "arn:aws:cloudformation:us-east-1:120569599552:stack/amplify-jappifrontend-japidev-73940/a9a22f70-40db-11f1-a54f-12bc8aa3685f",
+      "AmplifyAppId": "d2o1sqm0rpe3ak"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2o1sqm0rpe3ak",
+          "type": "manual"
+        }
+      }
+    }
   }
 }
