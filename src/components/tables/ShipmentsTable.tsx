@@ -1,7 +1,7 @@
 import { Eye, MapPin, Package, MessageSquareWarning, XCircle, Loader2, Phone } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import { Select } from '@/components/ui/select';
 
 import { Shipment, ShipmentStatus } from '@/types/shipment';
@@ -103,83 +103,76 @@ export default function ShipmentsTable({
   const allSelected = shipments.length > 0 && selectedIds.length === shipments.length;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden relative transition-all">
-      <Table>
-        {/* ── HEADER ── */}
-        <TableHeader className="bg-slate-50/50">
-          <TableRow className="border-b border-gray-100 hover:bg-transparent">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+            <tr>
+              {/* Checkbox multi-select — solo admin */}
+              {isAdmin && (
+                <th className="pl-4 pr-2 py-3 w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={() => onSelectAll?.(shipments.map(s => s.id))}
+                    className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
+                  />
+                </th>
+              )}
 
-            {/* Checkbox multi-select — solo admin */}
-            {isAdmin && (
-              <TableHead className="w-[45px] pl-6 pr-0">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={() => onSelectAll?.(shipments.map(s => s.id))}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
-                />
-              </TableHead>
-            )}
+              <th className="px-2 py-3 text-center w-8">#</th>
+              <th className="px-4 py-3">Fecha</th>
+              <th className="px-4 py-3">Cliente</th>
+              <th className="px-4 py-3">Ubicación</th>
+              <th className="px-4 py-3">Modo</th>
+              {!isCompanyMode && (
+                <th className="px-4 py-3">Courier</th>
+              )}
+              {isCompanyMode && (
+                <th className="px-4 py-3 text-right">Monto</th>
+              )}
+              <th className="px-4 py-3">Estado</th>
 
-            <TableHead className="w-[30px] px-1 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</TableHead>
-            <TableHead className="w-[90px] px-2 text-xs font-bold text-slate-400 uppercase tracking-widest text-left">Fecha</TableHead>
-            <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Cliente</TableHead>
-            <TableHead className="text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Ubicación</TableHead>
-            <TableHead className="w-[110px] text-xs font-bold text-slate-400 uppercase tracking-widest">Modo</TableHead>
-            {!isCompanyMode && (
-              <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Courier</TableHead>
-            )}
-            {/* {!isCompanyMode && (
-              <TableHead className="w-[80px] text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Pedidos</TableHead>
-            )} */}
-            {isCompanyMode && (
-              <TableHead className="w-[120px] text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Monto</TableHead>
-            )}
-            <TableHead className="w-[160px] text-xs font-bold text-slate-400 uppercase tracking-widest">Estado</TableHead>
-
-            {/* Columna acciones — solo si hay algo que mostrar */}
-            {(canView || isAdmin) && (
-              <TableHead className="w-[100px] text-right pr-6 text-xs font-bold text-slate-400 uppercase tracking-widest">Acciones</TableHead>
-            )}
-          </TableRow>
-        </TableHeader>
-
-        {/* ── BODY ── */}
-        <TableBody>
+              {/* Columna acciones — solo si hay algo que mostrar */}
+              {(canView || isAdmin) && (
+                <th className="px-4 py-3 text-right">Acciones</th>
+              )}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
           {shipments.map((shipment, index) => {
             const isSelected = selectedIds.includes(shipment.id);
             return (
-              <TableRow
+              <tr
                 key={shipment.id}
-                className={`border-b border-gray-50 hover:bg-slate-50/50 transition-all group ${isSelected ? 'bg-emerald-50/40 border-emerald-100' : ''
-                  }`}
+                className={`hover:bg-slate-50/50 transition-colors group ${isSelected ? 'bg-emerald-50/40' : ''}`}
               >
                 {/* Checkbox — solo admin */}
                 {isAdmin && (
-                  <TableCell className="pl-6 pr-0 py-4">
+                  <td className="pl-4 pr-2 py-3 whitespace-nowrap">
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => onSelectOne?.(shipment.id)}
                       className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
                     />
-                  </TableCell>
+                  </td>
                 )}
 
                 {/* Número correlativo */}
-                <TableCell className="py-4 px-1 text-center font-mono text-[11px] font-bold text-slate-300">
+                <td className="px-2 py-3 whitespace-nowrap text-center font-mono text-[11px] font-bold text-slate-300">
                   {(currentPage - 1) * 10 + index + 1}
-                </TableCell>
+                </td>
 
                 {/* Fecha */}
-                <TableCell className="py-4 px-2 text-left">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
                     {shipment.shipment_date}
                   </span>
-                </TableCell>
+                </td>
 
                 {/* Cliente */}
-                <TableCell className="py-4">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-sm font-semibold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">
                       {shipment.customer_name}
@@ -191,10 +184,10 @@ export default function ShipmentsTable({
                       </span>
                     </div>
                   </div>
-                </TableCell>
+                </td>
 
                 {/* Ubicación */}
-                <TableCell className="py-4">
+                <td className="px-4 py-3">
                   <div className="flex flex-col gap-1.5 max-w-[340px]">
                     <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-widest bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm">
                       {shipment.district}
@@ -206,21 +199,21 @@ export default function ShipmentsTable({
                       </p>
                     </div>
                   </div>
-                </TableCell>
+                </td>
 
                 {/* Modo de envío */}
-                <TableCell className="py-4">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-sm ${shipment.shipment_mode === 'delivery_only'
                     ? 'bg-slate-50 text-slate-600 border-slate-100'
                     : 'bg-white text-emerald-600 border-emerald-100'
                     }`}>
                     {shipment.shipment_mode === 'delivery_only' ? 'Solo Entrega' : 'Contraentrega'}
                   </span>
-                </TableCell>
+                </td>
 
                 {/* Transportista */}
                 {!isCompanyMode && (
-                  <TableCell className="py-4">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     {canEdit ? (
                       <div
                         className="flex items-center gap-2 relative"
@@ -248,7 +241,7 @@ export default function ShipmentsTable({
                         }
                       </span>
                     )}
-                  </TableCell>
+                  </td>
                 )}
 
                 {/* Pedidos */}
@@ -262,15 +255,15 @@ export default function ShipmentsTable({
 
                 {/* Monto */}
                 {isCompanyMode && (
-                  <TableCell className="py-4 text-right">
+                  <td className="px-4 py-3 whitespace-nowrap text-right">
                     <span className="text-sm font-semibold text-slate-900 bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md border border-emerald-100/50 shadow-sm">
                       S/ {Number(shipment.total_amount || 0).toFixed(2)}
                     </span>
-                  </TableCell>
+                  </td>
                 )}
 
                 {/* Estado — dropdown (admin) o badge (company/readonly) */}
-                <TableCell className="py-4">
+                <td className="px-4 py-3 whitespace-nowrap">
                   {canEdit ? (
                     <div className="flex items-center gap-2">
                       <Select
@@ -297,11 +290,11 @@ export default function ShipmentsTable({
                       )}
                     </div>
                   )}
-                </TableCell>
+                </td>
 
                 {/* Acciones */}
                 {(canView || isAdmin) && (
-                  <TableCell className="text-right pr-6 py-4">
+                  <td className="px-4 py-3 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-1.5 opacity-40 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                       {canView && (
                         <Button
@@ -326,16 +319,16 @@ export default function ShipmentsTable({
                         </Button>
                       )}
                     </div>
-                  </TableCell>
+                  </td>
                 )}
-              </TableRow>
+              </tr>
             );
           })}
 
           {/* Empty state */}
           {shipments.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={isAdmin ? 10 : 9} className="h-64 text-center">
+            <tr>
+              <td colSpan={isAdmin ? 10 : 9} className="h-64 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
                     <Package className="w-8 h-8 text-slate-300" />
@@ -343,11 +336,12 @@ export default function ShipmentsTable({
                   <h3 className="text-lg font-bold text-slate-700 mb-1">No hay envíos</h3>
                   <p className="text-slate-500">No se encontraron envíos con los filtros actuales.</p>
                 </div>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           )}
-        </TableBody>
-      </Table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

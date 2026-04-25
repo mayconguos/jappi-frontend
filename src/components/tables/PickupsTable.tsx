@@ -1,7 +1,7 @@
 import { Eye, MapPin, Package, MessageSquareWarning, XCircle, Loader2, Phone } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import { Select } from '@/components/ui/select';
 
 import { Pickup, PickupStatus } from '@/types/pickup';
@@ -85,78 +85,70 @@ export default function PickupsTable({
   const allSelected = pickups.length > 0 && selectedIds.length === pickups.length;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden relative transition-all">
-      <Table>
-        {/* ── HEADER ── */}
-        <TableHeader className="bg-slate-50/50">
-          <TableRow className="border-b border-gray-100 hover:bg-transparent">
-
-            {/* Checkbox multi-select — solo admin */}
-            {isAdmin && (
-              <TableHead className="w-[45px] pl-6 pr-0">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={() => onSelectAll?.(pickups.map(s => s.id))}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
-                />
-              </TableHead>
-            )}
-            <TableHead className="w-[30px] px-1 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</TableHead>
-            <TableHead className="w-[90px] px-2 text-xs font-bold text-slate-400 uppercase tracking-widest text-left">Fecha</TableHead>
-            <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Vendedor</TableHead>
-            <TableHead className="text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Ubicación</TableHead>
-            <TableHead className="w-[110px] text-xs font-bold text-slate-400 uppercase tracking-widest">Origen</TableHead>
-            {!isCompanyMode && (
-              <TableHead className="w-[180px] text-xs font-bold text-slate-400 uppercase tracking-widest">Transportista</TableHead>
-            )}
-            {/* {!isCompanyMode && (
-              <TableHead className="w-[80px] text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Pedidos</TableHead>
-            )} */}
-            <TableHead className="w-[160px] text-xs font-bold text-slate-400 uppercase tracking-widest">Estado</TableHead>
-            {/* Columna acciones — solo si hay algo que mostrar */}
-            {(canView || isAdmin) && (
-              <TableHead className="w-[100px] text-right pr-6 text-xs font-bold text-slate-400 uppercase tracking-widest">Acciones</TableHead>
-            )}
-          </TableRow>
-        </TableHeader>
-
-        {/* ── BODY ── */}
-        <TableBody>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+            <tr>
+              {/* Checkbox multi-select — solo admin */}
+              {isAdmin && (
+                <th className="pl-4 pr-2 py-3 w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={() => onSelectAll?.(pickups.map(s => s.id))}
+                    className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
+                  />
+                </th>
+              )}
+              <th className="px-2 py-3 text-center w-8">#</th>
+              <th className="px-4 py-3">Fecha</th>
+              <th className="px-4 py-3">Vendedor</th>
+              <th className="px-4 py-3">Ubicación</th>
+              <th className="px-4 py-3">Origen</th>
+              {!isCompanyMode && (
+                <th className="px-4 py-3">Transportista</th>
+              )}
+              <th className="px-4 py-3">Estado</th>
+              {(canView || isAdmin) && (
+                <th className="px-4 py-3 text-right">Acciones</th>
+              )}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
           {pickups.map((pickup, index) => {
             const isSelected = selectedIds.includes(pickup.id);
             return (
-              <TableRow
+              <tr
                 key={pickup.id}
-                className={`border-b border-gray-50 hover:bg-slate-50/50 transition-all group ${isSelected ? 'bg-emerald-50/40 border-emerald-100' : ''
-                  }`}
+                className={`hover:bg-slate-50/50 transition-colors group ${isSelected ? 'bg-emerald-50/40' : ''}`}
               >
                 {/* Checkbox — solo admin */}
                 {isAdmin && (
-                  <TableCell className="pl-6 pr-0 py-4">
+                  <td className="pl-4 pr-2 py-3 whitespace-nowrap">
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => onSelectOne?.(pickup.id)}
                       className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
                     />
-                  </TableCell>
+                  </td>
                 )}
 
                 {/* Número correlativo */}
-                <TableCell className="py-4 px-1 text-center font-mono text-[11px] font-bold text-slate-300">
+                <td className="px-2 py-3 whitespace-nowrap text-center font-mono text-[11px] font-bold text-slate-300">
                   {(currentPage - 1) * 10 + index + 1}
-                </TableCell>
+                </td>
 
                 {/* Fecha */}
-                <TableCell className="py-4 px-2 text-left">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
                     {pickup.pickup_date}
                   </span>
-                </TableCell>
+                </td>
 
                 {/* Vendedor */}
-                <TableCell className="py-4">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-sm font-semibold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">
                       {pickup.seller}
@@ -168,10 +160,10 @@ export default function PickupsTable({
                       </span>
                     </div>
                   </div>
-                </TableCell>
+                </td>
 
                 {/* Ubicación */}
-                <TableCell className="py-4">
+                <td className="px-4 py-3">
                   <div className="flex flex-col gap-1.5 max-w-[340px]">
                     <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-widest bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm">
                       {pickup.district}
@@ -183,21 +175,21 @@ export default function PickupsTable({
                       </p>
                     </div>
                   </div>
-                </TableCell>
+                </td>
 
                 {/* Origen */}
-                <TableCell className="py-4">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-sm ${pickup.origin === 'warehouse'
                     ? 'bg-slate-50 text-slate-600 border-slate-100'
                     : 'bg-white text-emerald-600 border-emerald-100'
                     }`}>
                     {pickup.origin === 'warehouse' ? 'Sol. Abast.' : 'Envío'}
                   </span>
-                </TableCell>
+                </td>
 
                 {/* Transportista (solo admin) */}
                 {!isCompanyMode && (
-                  <TableCell className="py-4">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div
                       className="flex items-center gap-2 relative group-select"
                       onClick={() => (couriers.length === 0 && pickup.status !== 'received' && pickup.status !== 'picked_up') && onFetchCouriers?.()}
@@ -216,7 +208,7 @@ export default function PickupsTable({
                         </div>
                       )}
                     </div>
-                  </TableCell>
+                  </td>
                 )}
 
                 {/* Pedidos */}
@@ -228,7 +220,7 @@ export default function PickupsTable({
                   </TableCell>
                 )} */}
 
-                <TableCell className="py-4">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <Select
                       size="compact"
@@ -244,11 +236,11 @@ export default function PickupsTable({
                       </span>
                     )}
                   </div>
-                </TableCell>
+                </td>
 
                 {/* Acciones */}
                 {(canView || isAdmin) && (
-                  <TableCell className="text-right pr-6 py-4">
+                  <td className="px-4 py-3 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-1.5 opacity-40 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                       {canView && (
                         <Button
@@ -273,16 +265,16 @@ export default function PickupsTable({
                         </Button>
                       )}
                     </div>
-                  </TableCell>
+                  </td>
                 )}
-              </TableRow>
+              </tr>
             );
           })}
 
           {/* Empty state */}
           {pickups.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={isAdmin ? 10 : 9} className="h-64 text-center">
+            <tr>
+              <td colSpan={isAdmin ? 10 : 9} className="h-64 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
                     <Package className="w-8 h-8 text-slate-300" />
@@ -290,11 +282,12 @@ export default function PickupsTable({
                   <h3 className="text-lg font-bold text-slate-700 mb-1">No hay recojos</h3>
                   <p className="text-slate-500">No se encontraron recojos con los filtros actuales.</p>
                 </div>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           )}
-        </TableBody>
-      </Table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

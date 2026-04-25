@@ -352,12 +352,13 @@ export default function CreateShipmentPage() {
         totalToCollect = includesDelivery ? baseAmount : baseAmount + deliveryAmount;
       }
 
-      const requestBody = {
+      const shipmentRequest = {
         id_company: idCompany,
         origin_type: data.service.origin_type, // pickup / stock
         service_type: data.service.type, // regular / express
         shipping_mode: data.service.delivery_mode, // delivery_only / pay_on_delivery
         date: data.service.delivery_date,
+        observation: data.service.notes || '',
 
         delivery_amount: deliveryAmount,
         total_amount: totalToCollect,
@@ -388,8 +389,8 @@ export default function CreateShipmentPage() {
         products: parsedProducts
       };
 
-      // Llamada real a la API
-      await api.post('/shipping', requestBody);
+      // Llamada real a la API con un array de envíos (Bulk Support)
+      await api.post('/shipping', [shipmentRequest]);
 
       // Resetear la vista para prevenir envíos duplicados (UX Best Practice)
       form.reset();

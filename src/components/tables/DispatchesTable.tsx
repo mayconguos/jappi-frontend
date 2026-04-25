@@ -52,36 +52,36 @@ export default function DispatchesTable({
         <table className="w-full text-sm text-left">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
             <tr>
-              <th className="px-6 py-4">ID Envío</th>
-              <th className="px-6 py-4">Producto</th>
-              <th className="px-6 py-4">Empresa (ID)</th>
-              <th className="px-6 py-4">Origen</th>
-              <th className="px-6 py-4">Estado Despacho</th>
-              <th className="px-6 py-4">Estado General</th>
-              <th className="px-6 py-4">Fecha</th>
+              <th className="px-4 py-3 text-center w-8">ID</th>
+              <th className="px-4 py-3">Producto</th>
+              <th className="px-4 py-3">Empresa</th>
+              <th className="px-4 py-3">Origen</th>
+              <th className="px-4 py-3">Estado Despacho</th>
+              <th className="px-4 py-3">Estado General</th>
+              <th className="px-4 py-3">Fecha</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {dispatches.map((dispatch) => (
-              <tr 
-                key={dispatch.id} 
+              <tr
+                key={dispatch.id}
                 className="hover:bg-slate-50/50 transition-colors group"
               >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-slate-400 text-xs">#</span>
+                <td className="px-2 py-3 whitespace-nowrap text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="font-mono text-slate-400 text-[10px]">#</span>
                     <span className="font-bold text-slate-700">{dispatch.id}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3">
                   <span className="font-medium text-slate-800">{dispatch.product_name}</span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <span className="text-slate-600 font-medium">
-                    {dispatch.company_name || `Empresa #${dispatch.id_company}`}
+                    {dispatch.company_name}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-3 whitespace-nowrap">
                   {getOriginBadge(dispatch.origin_type)}
                   {dispatch.id_pickup && (
                     <div className="text-[10px] text-slate-400 mt-1 font-mono">
@@ -89,17 +89,16 @@ export default function DispatchesTable({
                     </div>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-3 whitespace-nowrap">
                   {getStatusDispatchBadge(dispatch.status_dispatch)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <Badge variant="secondary" className="capitalize">
                     {dispatch.status}
                   </Badge>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-1.5 text-slate-600">
-                    <Calendar size={14} className="text-slate-400" />
                     <span className="font-medium">{dispatch.shipping_date}</span>
                   </div>
                 </td>
