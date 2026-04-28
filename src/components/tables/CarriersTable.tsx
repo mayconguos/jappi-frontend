@@ -21,7 +21,7 @@ export default function CarriersTable({
   onEdit,
   onDelete,
   onReactivate
-}: CarriersTableProps) {
+}: Readonly<CarriersTableProps>) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden relative transition-all">
       <Table>

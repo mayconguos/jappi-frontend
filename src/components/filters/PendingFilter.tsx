@@ -11,7 +11,7 @@ export default function PendingFilter({
     value,
     setValue,
     totalItems,
-}: PendingFilterProps) {
+}: Readonly<PendingFilterProps>) {
     return (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
             {/* Background decoration */}

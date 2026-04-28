@@ -10,7 +10,7 @@ interface SuccessModalProps {
   onClose: () => void;
 }
 
-export function SuccessModal({ message, onClose }: SuccessModalProps) {
+export function SuccessModal({ message, onClose }: Readonly<SuccessModalProps>) {
   return (
     <Modal
       isOpen={!!message}
@@ -40,7 +40,7 @@ interface WarningModalProps {
   onClose: () => void;
 }
 
-export function WarningModal({ modal, onClose }: WarningModalProps) {
+export function WarningModal({ modal, onClose }: Readonly<WarningModalProps>) {
   return (
     <Modal
       isOpen={!!modal}

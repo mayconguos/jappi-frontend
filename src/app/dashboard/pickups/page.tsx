@@ -30,11 +30,9 @@ const STATUS_LABELS: Record<PickupStatus, string> = {
 // ─── Helper de Mapeo ───────────────────────────────────────────
 const mapApiPickupToPickup = (apiPickup: ApiPickup): Pickup => {
   const date = apiPickup.pickup_date ? new Date(apiPickup.pickup_date) : new Date();
-  const dateStr = !isNaN(date.getTime())
-    ? date.toISOString().split('T')[0].split('-').reverse().join('/')
-    : 'Fecha inválida';
-
-  const items = apiPickup.items || (apiPickup as any).details || (apiPickup as any).shipping_items || [];
+  const dateStr = Number.isNaN(date.getTime())
+    ? 'Fecha inválida'
+    : date.toISOString().split('T')[0].split('-').reverse().join('/');
 
   return {
     id: apiPickup.id,
@@ -205,7 +203,7 @@ export default function PickupsPage() {
     if (driverIdStr === currentDriverStr) return;
     const courier = couriers.find(c => c.id.toString() === driverIdStr);
     const courierName = courier ? `${courier.first_name} ${courier.last_name || ''}`.trim() : 'Sin asignar';
-    setSelectedChange({ entityId: id, courierId: parseInt(driverIdStr), courierName });
+    setSelectedChange({ entityId: id, courierId: Number.parseInt(driverIdStr), courierName });
     setIsConfirmModalOpen(true);
   };
 
@@ -217,7 +215,7 @@ export default function PickupsPage() {
       const response = await put('/pickup/assign', { assignments: [{ id_pickup: selectedChange.entityId, id_driver: driverId }] });
       if (!response) throw new Error('Hubo un error comunicándose con el servidor.');
       const isUnassigning = driverId === 0;
-      setPickups(prev => prev.map(p => p.id === selectedChange.entityId ? { ...p, carrier: selectedChange.courierName, id_driver: driverId === 0 ? null : driverId, status: !isUnassigning ? 'scheduled' : p.status } : p));
+      setPickups(prev => prev.map(p => p.id === selectedChange.entityId ? { ...p, carrier: selectedChange.courierName, id_driver: driverId === 0 ? null : driverId, status: isUnassigning ? p.status : 'scheduled' } : p));
       setSuccessModal('El transportista ha sido asignado correctamente.');
     } catch (err: any) {
       setWarningModal({ title: 'Error de Asignación', message: err.message || 'Ocurrió un error al intentar asignar el transportista.' });
@@ -231,14 +229,14 @@ export default function PickupsPage() {
   const handleBatchCarrierUpdate = async () => {
     if (!batchCarrier || selectedIds.length === 0) return;
     setIsUpdatingCarrier(true);
-    const driverId = parseInt(batchCarrier);
+    const driverId = Number.parseInt(batchCarrier);
     const courier = couriers.find(c => c.id === driverId);
     const courierName = courier ? `${courier.first_name} ${courier.last_name || ''}`.trim() : 'Sin asignar';
     try {
       const response = await put('/pickup/assign', { assignments: selectedIds.map(id => ({ id_pickup: id, id_driver: driverId })) });
       if (!response) throw new Error('No se pudo completar la asignación masiva en el servidor.');
       const isUnassigning = driverId === 0;
-      setPickups(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, carrier: courierName, id_driver: driverId === 0 ? null : driverId, status: !isUnassigning ? 'scheduled' : p.status } : p));
+      setPickups(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, carrier: courierName, id_driver: driverId === 0 ? null : driverId, status: isUnassigning ? p.status : 'scheduled' } : p));
       setSuccessModal(`Se ha asignado correctamente a ${courierName} para los ${selectedIds.length} recojos seleccionados.`);
     } catch (err: any) {
       setWarningModal({ title: 'Error de Asignación Masiva', message: err.message || 'Ocurrió un error al intentar realizar la asignación masiva.' });
@@ -256,8 +254,8 @@ export default function PickupsPage() {
     try {
       const response = await put('/pickup/status', selectedIds.map(id => ({ id_pickup: id, status: batchStatus })));
       if (!response) throw new Error('No se pudo completar el cambio de estado masivo en el servidor.');
-      setPickups(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: batchStatus as PickupStatus } : p));
-      setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus as PickupStatus]} para los ${selectedIds.length} recojos seleccionados.`);
+      setPickups(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: batchStatus } : p));
+      setSuccessModal(`Se ha actualizado el estado a ${STATUS_LABELS[batchStatus]} para los ${selectedIds.length} recojos seleccionados.`);
     } catch (err: any) {
       setWarningModal({ title: 'Error de Cambio de Estado Masivo', message: err.message || 'Ocurrió un error al intentar cambiar el estado masivamente.' });
     } finally {
@@ -274,6 +272,67 @@ export default function PickupsPage() {
       setPickupToCancel(null);
       setSuccessModal('El recojo ha sido cancelado exitosamente.');
     }
+  };
+
+  const renderModalContent = () => {
+    if (viewDetails.loading) {
+      return (
+        <div className="h-40 flex items-center justify-center">
+          <DeliveryLoader message="Cargando detalles..." />
+        </div>
+      );
+    }
+
+    if (viewDetails.error) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8 text-red-500">
+          <AlertTriangle size={32} className="mb-3" />
+          <p className="font-medium text-red-800">{viewDetails.error}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="animate-in fade-in duration-300 space-y-5">
+        <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div className="col-span-2">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Vendedor / Tienda</span>
+            <span className="font-semibold text-slate-900 block mt-1.5">{viewDetails.pickup?.seller}</span>
+          </div>
+          <div className="col-span-2">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Dirección de Recojo</span>
+            <span className="font-medium text-slate-700 block mt-1.5">{viewDetails.pickup?.address}</span>
+          </div>
+        </div>
+        <div>
+          <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Productos a Recoger</h4>
+          {viewDetails.items.length > 0 ? (
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="px-4 py-2 border-b border-slate-200">Producto</th>
+                    <th className="px-4 py-2 border-b border-slate-200 text-center w-24">Cant.</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {viewDetails.items.map(item => (
+                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-3 font-medium text-slate-800 break-words">{item.product_name}</td>
+                      <td className="px-4 py-3 text-center text-slate-900 font-bold bg-slate-50/30">{item.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500 italic text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              No se encontraron productos asociados al recojo.
+            </p>
+          )}
+        </div>
+      </div>
+    );
   };
 
   // ─── Render ───────────────────────────────────────────────────
@@ -328,56 +387,10 @@ export default function PickupsPage() {
         footer={<ModalFooter className="flex justify-end pt-2"><Button onClick={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}>Cerrar</Button></ModalFooter>}
       >
         <div className="py-2 space-y-6">
-          {viewDetails.loading ? (
-            <div className="h-40 flex items-center justify-center"><DeliveryLoader message="Cargando detalles..." /></div>
-          ) : viewDetails.error ? (
-            <div className="flex flex-col items-center justify-center py-8 text-red-500">
-              <AlertTriangle size={32} className="mb-3" />
-              <p className="font-medium text-red-800">{viewDetails.error}</p>
-            </div>
-          ) : (
-            <div className="animate-in fade-in duration-300 space-y-5">
-              <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <div className="col-span-2">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Vendedor / Tienda</span>
-                  <span className="font-semibold text-slate-900 block mt-1.5">{viewDetails.pickup?.seller}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 border-b border-slate-200 pb-1">Dirección de Recojo</span>
-                  <span className="font-medium text-slate-700 block mt-1.5">{viewDetails.pickup?.address}</span>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Productos a Recoger</h4>
-                {viewDetails.items.length > 0 ? (
-                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                        <tr>
-                          <th className="px-4 py-2 border-b border-slate-200">Producto</th>
-                          <th className="px-4 py-2 border-b border-slate-200 text-center w-24">Cant.</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {viewDetails.items.map(item => (
-                          <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="px-4 py-3 font-medium text-slate-800 break-words">{item.product_name}</td>
-                            <td className="px-4 py-3 text-center text-slate-900 font-bold bg-slate-50/30">{item.quantity}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-500 italic text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    No se encontraron productos asociados al recojo.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+          {renderModalContent()}
         </div>
       </Modal>
+
 
       {/* Shared Modals */}
       <CancelConfirmModal isOpen={pickupToCancel !== null} entityLabel="Recojo" onConfirm={confirmCancel} onClose={() => setPickupToCancel(null)} />

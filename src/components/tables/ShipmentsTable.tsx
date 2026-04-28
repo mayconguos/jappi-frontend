@@ -71,7 +71,7 @@ export default function ShipmentsTable({
   couriers = [],
   isFetchingCouriers = false,
   onFetchCouriers,
-}: ShipmentsTableProps) {
+}: Readonly<ShipmentsTableProps>) {
   const isAdmin = mode === 'admin';
   const canEdit = mode === 'admin';
   const canView = mode !== 'readonly';

@@ -53,9 +53,8 @@ export default function PickupsTable({
   couriers = [],
   isFetchingCouriers = false,
   onFetchCouriers,
-}: PickupsTableProps) {
+}: Readonly<PickupsTableProps>) {
   const isAdmin = mode === 'admin';
-  const canEdit = mode === 'admin';
   const canView = mode !== 'readonly';
   const isCompanyMode = mode === 'company' || mode === 'readonly';
 
@@ -190,14 +189,12 @@ export default function PickupsTable({
                 {/* Transportista (solo admin) */}
                 {!isCompanyMode && (
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div
-                      className="flex items-center gap-2 relative group-select"
-                      onClick={() => (couriers.length === 0 && pickup.status !== 'received' && pickup.status !== 'picked_up') && onFetchCouriers?.()}
-                    >
+                    <div className="flex items-center gap-2 relative group-select w-full">
                       <Select
                         size="compact"
                         value={pickup.id_driver?.toString() || '0'}
                         onChange={(val) => onCarrierChange?.(pickup.id, val)}
+                        onClick={() => (couriers.length === 0 && pickup.status !== 'received' && pickup.status !== 'picked_up') && onFetchCouriers?.()}
                         options={carrierOptions}
                         className="w-full min-w-[160px] border-slate-200 shadow-sm"
                         disabled={isFetchingCouriers || pickup.status === 'received' || pickup.status === 'picked_up'}
@@ -210,16 +207,6 @@ export default function PickupsTable({
                     </div>
                   </td>
                 )}
-
-                {/* Pedidos */}
-                {/* {!isCompanyMode && (
-                  <TableCell className="py-4 text-center">
-                    <div className="inline-flex flex-col items-center justify-center min-w-[32px] h-8 rounded-xl bg-slate-50 text-xs font-black text-slate-800 border border-slate-200/60 shadow-inner">
-                      {pickup.packages}
-                    </div>
-                  </TableCell>
-                )} */}
-
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <Select

@@ -14,7 +14,7 @@ export default function CompaniesTable({
   currentPage,
   onView,
   onDelete,
-}: CompaniesTableProps) {
+}: Readonly<CompaniesTableProps>) {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">

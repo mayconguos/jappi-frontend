@@ -14,7 +14,7 @@ interface SidebarProps {
   onMobileClose: () => void;
 }
 
-export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ isMobileOpen, onMobileClose }: Readonly<SidebarProps>) {
   const pathname = usePathname();
   const { logout, user } = useAuth();
   const { routes } = useUserRoutes();

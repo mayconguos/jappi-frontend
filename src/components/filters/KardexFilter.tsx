@@ -24,7 +24,7 @@ export default function KardexFilter({
   onExportExcel,
   onExportPdf,
   totalItems
-}: KardexFilterProps) {
+}: Readonly<KardexFilterProps>) {
 
   return (
     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-5 relative overflow-hidden">

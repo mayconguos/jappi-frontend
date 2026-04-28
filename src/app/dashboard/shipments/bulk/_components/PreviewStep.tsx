@@ -152,11 +152,10 @@ function RowPreview({
     <>
       <tr
         className={`
-          border-b border-gray-50 transition-colors cursor-pointer
+          border-b border-gray-50 transition-colors
           ${row.isValid ? 'border-l-2 border-l-emerald-400' : 'border-l-2 border-l-red-400'}
           ${rowBg}
         `}
-        onClick={onToggle}
       >
         <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">{row.rowIndex}</td>
         <td className="px-4 py-3">
@@ -191,11 +190,19 @@ function RowPreview({
         <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">{row.date || '—'}</td>
         <td className="px-4 py-3 text-gray-500 truncate max-w-[120px] text-[11px]">{row.product_name || '—'}</td>
         <td className="px-4 py-3 text-center">
-          {isExpanded ? (
-            <ChevronUp className="w-3.5 h-3.5 text-gray-400 mx-auto" />
-          ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-gray-300 mx-auto" />
-          )}
+          <button
+            type="button"
+            onClick={onToggle}
+            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors mx-auto focus:ring-2 focus:ring-blue-400 outline-none"
+            title={isExpanded ? "Contraer" : "Ver detalles"}
+            aria-expanded={isExpanded}
+          >
+            {isExpanded ? (
+              <ChevronUp className="w-4 h-4 text-gray-500" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-gray-400" />
+            )}
+          </button>
         </td>
       </tr>
 

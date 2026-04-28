@@ -28,7 +28,7 @@ export default function ProductsFilter({
   onImport,
   totalItems,
   hideActions = false,
-}: ProductsFilterProps) {
+}: Readonly<ProductsFilterProps>) {
   const rotationOptions = [
     { value: 'all', label: 'Todos' },
     { value: 'stale_1m', label: '> 1 Mes' },

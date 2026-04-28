@@ -7,7 +7,7 @@ interface SaveButtonProps {
   className?: string;
 }
 
-export function SaveButton({ onSave, className = "" }: SaveButtonProps) {
+export function SaveButton({ onSave, className = "" }: Readonly<SaveButtonProps>) {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {

@@ -23,7 +23,7 @@ export default function CourierZonesFilter({
   setValue,
   filterFields,
   totalItems
-}: CourierZonesFilterProps) {
+}: Readonly<CourierZonesFilterProps>) {
   return (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
       {/* Background decoration */}

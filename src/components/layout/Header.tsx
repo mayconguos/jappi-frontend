@@ -10,7 +10,7 @@ interface HeaderProps {
   onOpenSidebarMobile?: () => void;
 }
 
-export default function Header({ onOpenSidebarMobile }: HeaderProps) {
+export default function Header({ onOpenSidebarMobile }: Readonly<HeaderProps>) {
   const { user, logout } = useAuth();
   const { pageTitle } = useUserRoutes();
   const { isOpen: showMenu, setIsOpen: setShowMenu, ref: menuRef } = useClickOutside<HTMLDivElement>();

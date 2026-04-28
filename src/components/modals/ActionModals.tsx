@@ -24,7 +24,7 @@ export function AssignCarrierModal({
   entityLabel = 'registro',
   onConfirm,
   onClose,
-}: AssignCarrierModalProps) {
+}: Readonly<AssignCarrierModalProps>) {
   return (
     <Modal
       isOpen={isOpen}
@@ -75,7 +75,7 @@ export function ChangeStatusModal({
   statusLabel,
   onConfirm,
   onClose,
-}: ChangeStatusModalProps) {
+}: Readonly<ChangeStatusModalProps>) {
   return (
     <Modal
       isOpen={isOpen}
@@ -124,7 +124,7 @@ export function CancelConfirmModal({
   entityLabel = 'registro',
   onConfirm,
   onClose,
-}: CancelConfirmModalProps) {
+}: Readonly<CancelConfirmModalProps>) {
   return (
     <Modal
       isOpen={isOpen}
@@ -173,7 +173,7 @@ export function BatchAssignModal({
   onChange,
   onConfirm,
   onClose,
-}: BatchAssignModalProps) {
+}: Readonly<BatchAssignModalProps>) {
   return (
     <Modal
       isOpen={isOpen}
@@ -241,7 +241,7 @@ export function BatchStatusModal({
   onChange,
   onConfirm,
   onClose,
-}: BatchStatusModalProps) {
+}: Readonly<BatchStatusModalProps>) {
   return (
     <Modal
       isOpen={isOpen}

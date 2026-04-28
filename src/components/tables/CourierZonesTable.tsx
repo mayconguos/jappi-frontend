@@ -15,7 +15,7 @@ export default function CourierZonesTable({
   currentPage,
   itemsPerPage = 10,
   onManageZones,
-}: CourierZonesTableProps) {
+}: Readonly<CourierZonesTableProps>) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <Table>

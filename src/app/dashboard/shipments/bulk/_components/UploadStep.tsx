@@ -81,12 +81,10 @@ export default function UploadStep({ onBack, onParsed, catalogLoading, catalog }
         onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
-        onClick={() => !file && inputRef.current?.click()}
         className={`
-          relative border-2 border-dashed rounded-2xl p-12 text-center
-          transition-all duration-300 cursor-pointer group
+          relative border-2 border-dashed rounded-2xl transition-all duration-300
           ${file
-            ? 'border-emerald-300 bg-emerald-50 cursor-default'
+            ? 'border-emerald-300 bg-emerald-50'
             : dragActive
               ? 'border-blue-400 bg-blue-50 scale-[1.01]'
               : 'border-gray-200 bg-gray-50/50 hover:border-gray-300 hover:bg-gray-50'
@@ -103,7 +101,7 @@ export default function UploadStep({ onBack, onParsed, catalogLoading, catalog }
 
         {file ? (
           /* Archivo seleccionado */
-          <div className="flex flex-col items-center gap-3">
+          <div className="p-12 flex flex-col items-center gap-3">
             <div className="w-16 h-16 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center">
               <FileSpreadsheet className="w-8 h-8 text-emerald-600" />
             </div>
@@ -120,8 +118,12 @@ export default function UploadStep({ onBack, onParsed, catalogLoading, catalog }
             </button>
           </div>
         ) : (
-          /* Estado vacío */
-          <div className="flex flex-col items-center gap-4">
+          /* Estado vacío - Botón nativo para clic */
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="w-full p-12 flex flex-col items-center gap-4 group outline-none focus:ring-2 focus:ring-blue-400 rounded-2xl"
+          >
             <div
               className={`
                 w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300
@@ -135,7 +137,7 @@ export default function UploadStep({ onBack, onParsed, catalogLoading, catalog }
                 className={`w-8 h-8 transition-colors ${dragActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-600'}`}
               />
             </div>
-            <div>
+            <div className="text-center">
               <p className="text-lg font-semibold text-slate-700">
                 {dragActive ? 'Suelta el archivo aquí' : 'Arrastra tu archivo Excel'}
               </p>
@@ -144,7 +146,7 @@ export default function UploadStep({ onBack, onParsed, catalogLoading, catalog }
               </p>
               <p className="text-xs text-gray-300 mt-3">Formatos aceptados: .xlsx, .xls</p>
             </div>
-          </div>
+          </button>
         )}
       </div>
 

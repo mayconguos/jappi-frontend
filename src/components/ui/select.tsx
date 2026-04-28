@@ -26,6 +26,7 @@ interface SelectProps {
   size?: 'default' | 'compact';
   placeholder?: string;
   icon?: LucideIcon;
+  onClick?: () => void;
 }
 
 export const Select = ({
@@ -38,8 +39,9 @@ export const Select = ({
   disabled,
   size = 'default',
   placeholder = 'Seleccionar...',
-  icon: Icon
-}: SelectProps) => {
+  icon: Icon,
+  onClick
+}: Readonly<SelectProps>) => {
   const selectedOption = options.find((o) => o.value === value);
 
   return (
@@ -53,6 +55,7 @@ export const Select = ({
           )}
 
           <ListboxButton
+            onClick={onClick}
             className={cn(
               'relative w-full cursor-default rounded-lg border bg-white text-left shadow-sm transition-all duration-200 ease-in-out',
               'focus:outline-none focus:ring-2 focus:ring-[#02997d]/20 focus:border-[#02997d]',

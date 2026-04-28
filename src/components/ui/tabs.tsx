@@ -20,7 +20,7 @@ interface TabsProps {
   onChange?: (tabId: string) => void;
 }
 
-export const Tabs: React.FC<TabsProps> = ({
+export const Tabs: React.FC<Readonly<TabsProps>> = ({
   tabs,
   defaultTab,
   className = '',

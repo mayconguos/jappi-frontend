@@ -24,7 +24,7 @@ export default function RequestsFilter({
   onExport,
   totalItems,
   showNewRequest = true,
-}: RequestsFilterProps) {
+}: Readonly<RequestsFilterProps>) {
   return (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative">
       {/* Background decoration */}

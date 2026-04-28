@@ -14,7 +14,7 @@ interface DeliveryDetailModalProps {
   onStatusChange: (id: string, newStatus: string) => void;
 }
 
-export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatusChange }: DeliveryDetailModalProps) {
+export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatusChange }: Readonly<DeliveryDetailModalProps>) {
   const [isUploading, setIsUploading] = useState(false);
   const [showProofScreen, setShowProofScreen] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);

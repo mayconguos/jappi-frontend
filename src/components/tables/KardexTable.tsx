@@ -34,7 +34,7 @@ interface KardexTableProps {
   currentPage: number;
 }
 
-export default function KardexTable({ movements, currentPage }: KardexTableProps) {
+export default function KardexTable({ movements, currentPage }: Readonly<KardexTableProps>) {
 
   const getMovementIcon = (baseType: 'IN' | 'OUT' | 'ADJUSTMENT') => {
     switch (baseType) {

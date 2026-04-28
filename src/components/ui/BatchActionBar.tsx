@@ -13,7 +13,7 @@ export default function BatchActionBar({
   onAssignCarrier,
   onChangeStatus,
   onClear,
-}: BatchActionBarProps) {
+}: Readonly<BatchActionBarProps>) {
   if (selectedCount === 0) return null;
 
   return (

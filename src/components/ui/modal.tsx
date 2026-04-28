@@ -69,7 +69,7 @@ export function Modal({
   className = '',
   showCloseButton = true,
   footer
-}: ModalProps & { footer?: React.ReactNode }) {
+}: Readonly<ModalProps & { footer?: React.ReactNode }>) {
   // Manejar el cierre con ESC
   React.useEffect(() => {
     if (!isOpen || !closeOnEscape) return;
@@ -194,7 +194,7 @@ interface ModalFooterProps {
   className?: string;
 }
 
-export function ModalFooter({ children, className = '' }: ModalFooterProps) {
+export function ModalFooter({ children, className = '' }: Readonly<ModalFooterProps>) {
   return (
     <div className={`flex items-center justify-end gap-3 ${className}`}>
       {children}
