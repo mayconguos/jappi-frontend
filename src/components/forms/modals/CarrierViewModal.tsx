@@ -1,22 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
+
+import { User, Mail, Truck, Fingerprint, Gauge, Car, Shield, CreditCard, Activity, IdCard } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Modal, { ModalFooter } from '@/components/ui/modal';
-import { 
-  User, 
-  Mail, 
-  Truck, 
-  Fingerprint, 
-  Gauge, 
-  Car, 
-  Shield,
-  CreditCard,
-  Hash,
-  Activity,
-  IdCard
-} from 'lucide-react';
+
+import { getDocumentTypeLabel } from '@/constants/documentTypes';
 
 interface Carrier {
   id: number;
@@ -40,7 +32,7 @@ interface CarrierViewModalProps {
   carrier?: Carrier | null;
 }
 
-export default function CarrierViewModal({ isOpen, onClose, carrier }: CarrierViewModalProps) {
+export default function CarrierViewModal({ isOpen, onClose, carrier }: Readonly<CarrierViewModalProps>) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -65,7 +57,6 @@ export default function CarrierViewModal({ isOpen, onClose, carrier }: CarrierVi
       showCloseButton
     >
       <div className="space-y-4">
-        
         {/* Información Personal */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
           <div className="md:col-span-2">
@@ -85,7 +76,7 @@ export default function CarrierViewModal({ isOpen, onClose, carrier }: CarrierVi
             readOnly
             className="bg-gray-50 border-gray-200"
           />
-          
+
           <Input
             label="Apellidos"
             size="compact"
@@ -101,7 +92,7 @@ export default function CarrierViewModal({ isOpen, onClose, carrier }: CarrierVi
                 label="Tipo de documento"
                 size="compact"
                 icon={IdCard}
-                value={carrier.document_type}
+                value={getDocumentTypeLabel(carrier.document_type)}
                 readOnly
                 className="bg-gray-50 border-gray-200"
               />
@@ -123,15 +114,6 @@ export default function CarrierViewModal({ isOpen, onClose, carrier }: CarrierVi
             size="compact"
             icon={Mail}
             value={carrier.email || ''}
-            readOnly
-            className="bg-gray-50 border-gray-200"
-          />
-
-          <Input
-            label="ID transportista"
-            size="compact"
-            icon={Hash}
-            value={carrier.id.toString()}
             readOnly
             className="bg-gray-50 border-gray-200"
           />

@@ -1,8 +1,6 @@
-
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
 import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -17,8 +15,7 @@ import CarrierViewModal from '@/components/forms/modals/CarrierViewModal';
 
 import { useApi, useModal } from '@/hooks';
 
-
-// --- Tipos --- 
+// ─── Tipos ───────────────────────────────────────────────────
 export interface Carrier {
   id: number;
   document_number: string;
@@ -36,18 +33,28 @@ export interface Carrier {
   password: string;
 }
 
-
-// --- Constantes ---
+// ─── Constantes ───────────────────────────────────────────────
 const ITEMS_PER_PAGE = 10;
-const filterFields = [
+const FILTER_FIELDS = [
   { value: 'first_name', label: 'Nombre' },
   { value: 'last_name', label: 'Apellido' },
   { value: 'email', label: 'Correo electrónico' },
 ];
 
+// ─── Helpers Externos ─────────────────────────────────────────
+const getFilteredCarriers = (carriers: Carrier[], showInactive: boolean, field: string, value: string) => {
+  const statusFiltered = carriers.filter(c => showInactive ? c.status === 2 : c.status === 1 || c.status === 0);
+  if (!field || !value) return statusFiltered;
+
+  const val = value.toLowerCase();
+  return statusFiltered.filter((carrier) => {
+    const fieldValue = carrier[field as keyof Carrier];
+    return fieldValue?.toString().toLowerCase().includes(val);
+  });
+};
 
 export default function CarriersPage() {
-  // --- State ---
+  // ─── State ──────────────────────────────────────────────────
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [field, setField] = useState('');
   const [value, setValue] = useState('');
@@ -55,32 +62,21 @@ export default function CarriersPage() {
   const [loading, setLoading] = useState(false);
   const [successModal, setSuccessModal] = useState<string | boolean>(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
-  const [confirmModal, setConfirmModal] = useState<{
-    isOpen: boolean;
-    data: Carrier | null;
-  }>({ isOpen: false, data: null });
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; data: Carrier | null }>({ isOpen: false, data: null });
   const [deleting, setDeleting] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
 
-  // --- Hooks ---
+  // ─── Hooks ──────────────────────────────────────────────────
   const { get, del, put, error: apiError } = useApi<any>();
   const carrierModal = useModal<Carrier>();
   const carrierViewModal = useModal<Carrier>();
 
-  // --- Effects ---
-  // Resetear paginación al cambiar filtro, valor o toggle de inactivos
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [field, value, showInactive]);
-
-  // --- Data Fetching ---
+  // ─── Fetching ───────────────────────────────────────────────
   const fetchCarriers = useCallback(async () => {
     const response = await get('/user?type=couriers');
     if (response) {
       const data = Array.isArray(response) ? response : [];
-      // Ordenar por ID descendente (más recientes primero)
-      const sortedData = [...data].sort((a, b) => b.id - a.id);
-      setCarriers(sortedData);
+      setCarriers([...data].sort((a, b) => b.id - a.id));
     } else {
       setCarriers([]);
     }
@@ -91,40 +87,16 @@ export default function CarriersPage() {
     fetchCarriers().finally(() => setLoading(false));
   }, [fetchCarriers]);
 
-  // Mostrar error de carga de API si ocurre
-  const showApiError = !loading && apiError && carriers.length === 0;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [field, value, showInactive]);
 
-  // --- Derived Data ---
-  const filtered = useMemo(() => {
-    // 1. Filtrar por estado (Inactivo=2 / Activo!=2)
-    const statusFiltered = carriers.filter(c => showInactive ? c.status === 2 : c.status !== 2);
-
-    if (!field || !value) return statusFiltered;
-    const val = value.toLowerCase();
-    return statusFiltered.filter((carrier) => {
-      const fieldValue = carrier[field as keyof Carrier];
-      return fieldValue ? fieldValue.toString().toLowerCase().includes(val) : false;
-    });
-  }, [carriers, field, value, showInactive]);
-
+  // ─── Data Derivada ──────────────────────────────────────────
+  const filtered = useMemo(() => getFilteredCarriers(carriers, showInactive, field, value), [carriers, field, value, showInactive]);
+  const currentItems = useMemo(() => filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [filtered, currentPage]);
   const totalItems = filtered.length;
-  const currentItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  // --- Handlers ---
-  const handlePageChange: (page: number) => void = (page) => setCurrentPage(page);
-
-  const handleDeleteCarrier: (carrier: Carrier) => void = (carrier) => setConfirmModal({ isOpen: true, data: carrier });
-
-  const handleViewCarrier: (carrier: Carrier) => void = (carrier) => {
-    carrierViewModal.openModal(carrier);
-  };
-
-  const handleEditCarrier: (carrier: Carrier) => void = (carrier) => carrierModal.openModal(carrier);
-
-  const handleAddCarrier: () => void = () => {
-    carrierModal.openModal();
-  };
-
+  // ─── Handlers ───────────────────────────────────────────────
   const handleReactivateCarrier = async (carrier: Carrier) => {
     const response = await put(`/user/update/${carrier.id}`, { status: 1 });
     if (response) {
@@ -135,237 +107,137 @@ export default function CarriersPage() {
     }
   };
 
-  const handleCarrierSubmit: (carrier: Omit<Carrier, 'id'>, editingCarrier?: Carrier | null) => void = (carrier, editingCarrier) => {
-    if (editingCarrier) {
-      const updatedCarrier = { ...editingCarrier, ...carrier, id: editingCarrier.id };
-      setCarriers(prev => prev.map(c => c.id === updatedCarrier.id ? updatedCarrier : c));
+  const handleCarrierSubmit = async (carrier: Omit<Carrier, 'id'>) => {
+    const isEditing = !!carrierModal.data;
+    if (isEditing) {
+      const updated = { ...carrierModal.data, ...carrier, id: carrierModal.data!.id } as Carrier;
+      setCarriers(prev => prev.map(c => c.id === updated.id ? updated : c));
     } else {
-      const carrierWithId = { ...carrier, id: Date.now() };
-      setCarriers(prev => [...prev, carrierWithId]);
+      setCarriers(prev => [{ ...carrier, id: Date.now() } as Carrier, ...prev]);
     }
-  };
-
-  const handleCarrierModalSubmit = async (carrier: Omit<Carrier, 'id'>) => {
-    try {
-      const isEditing = !!carrierModal.data;
-      await handleCarrierSubmit(carrier, carrierModal.data);
-      setSuccessModal(isEditing ? 'El transportista ha sido actualizado correctamente.' : 'El transportista ha sido creado correctamente.');
-    } catch {
-      setErrorModal('Hubo un error al procesar la solicitud.');
-    } finally {
-      carrierModal.closeModal();
-    }
+    setSuccessModal(isEditing ? 'El transportista ha sido actualizado.' : 'El transportista ha sido creado.');
+    carrierModal.closeModal();
   };
 
   const confirmDeleteCarrier = async () => {
-    if (confirmModal.data) {
-      setDeleting(true);
-      const carrierId = confirmModal.data.id;
-      const response = await del(`/user/${carrierId}`);
-      setDeleting(false);
-      closeConfirmModal();
-      if (response !== null) {
-        setCarriers(prev => prev.filter(c => c.id !== carrierId));
-        setSuccessModal('El transportista ha sido eliminado correctamente.');
+    if (!confirmModal.data) return;
+    setDeleting(true);
+    try {
+      const response = await del(`/user/${confirmModal.data.id}`);
+      if (response) {
+        setCarriers(prev => prev.filter(c => c.id !== confirmModal.data!.id));
+        setSuccessModal('Eliminado correctamente.');
       } else {
-        setErrorModal('No se pudo eliminar el transportista.');
+        setErrorModal('No se pudo eliminar.');
       }
+    } catch {
+      setErrorModal('Error inesperado.');
+    } finally {
+      setDeleting(false);
+      setConfirmModal({ isOpen: false, data: null });
     }
   };
 
-  const closeConfirmModal = () => setConfirmModal({ isOpen: false, data: null });
-
-  const closeStatusModals = () => {
-    setSuccessModal(false);
-    setErrorModal(null);
-  };
-
-  // --- Render ---
+  // ─── Render ───────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
+      <CarriersFilter
+        field={field} setField={setField} value={value} setValue={setValue}
+        filterFields={FILTER_FIELDS} onAdd={() => carrierModal.openModal()}
+        totalItems={totalItems} showInactive={showInactive} setShowInactive={setShowInactive}
+      />
 
-      <div className="space-y-6">
-        {/* Filtros carrier */}
-        <CarriersFilter
-          {...{
-            field,
-            setField,
-            value,
-            setValue,
-            filterFields,
-            onAdd: handleAddCarrier,
-            totalItems,
-            showInactive,
-            setShowInactive
-          }}
-        />
+      <TableSection
+        loading={loading} error={apiError && carriers.length === 0 ? apiError : null}
+        carriers={currentItems} totalItems={totalItems} currentPage={currentPage}
+        onPageChange={setCurrentPage} onFetch={fetchCarriers}
+        onView={carrierViewModal.openModal} onEdit={carrierModal.openModal} onDelete={(c: any) => setConfirmModal({ isOpen: true, data: c })}
+        onReactivate={handleReactivateCarrier}
+      />
 
-        {/* Lógica de Renderizado (Loader / Error / Tabla) */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <DeliveryLoader message="Cargando transportistas..." />
-          </div>
-        ) : showApiError ? (
-          <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
-            <p className="font-medium">Error al cargar: {apiError}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <CarriersTable
-              {...{
-                carriers: currentItems,
-                currentPage,
-                itemsPerPage: ITEMS_PER_PAGE,
-                onView: handleViewCarrier,
-                onEdit: handleEditCarrier,
-                onDelete: handleDeleteCarrier,
-                onReactivate: handleReactivateCarrier
-              }}
-            />
+      <CarrierViewModal isOpen={carrierViewModal.isOpen} onClose={carrierViewModal.closeModal} carrier={carrierViewModal.data} />
+      <CarrierModal isOpen={carrierModal.isOpen} onClose={carrierModal.closeModal} onSubmit={handleCarrierSubmit} editingCarrier={carrierModal.data} />
 
-            {totalItems > 0 ? (
-              <Pagination
-                {...{
-                  currentPage,
-                  totalItems,
-                  itemsPerPage: ITEMS_PER_PAGE,
-                  onPageChange: handlePageChange,
-                }}
-              />
-            ) : (
-              <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">
-                <p>No se encontraron resultados.</p>
-              </div>
-            )}
-          </div>
-        )}
+      <DeleteModal
+        isOpen={confirmModal.isOpen} deleting={deleting} carrierName={`${confirmModal.data?.first_name} ${confirmModal.data?.last_name || ''}`}
+        onClose={() => setConfirmModal({ isOpen: false, data: null })} onConfirm={confirmDeleteCarrier}
+      />
+
+      <FeedbackModals success={successModal} error={errorModal} onClose={() => { setSuccessModal(false); setErrorModal(null); }} />
+    </div>
+  );
+}
+
+// ─── Sub-componentes ───────────────────────────────────────────
+
+function TableSection({ loading, error, carriers, totalItems, currentPage, onPageChange, onFetch, onView, onEdit, onDelete, onReactivate }: Readonly<any>) {
+  if (loading) return <div className="flex justify-center items-center h-64"><DeliveryLoader message="Cargando..." /></div>;
+  if (error) return (
+    <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
+      <AlertTriangle className="w-8 h-8 text-red-400" />
+      <p className="font-medium">Error: {error}</p>
+      <Button variant="secondary" size="sm" onClick={onFetch} className="mt-2">Reintentar</Button>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col gap-6">
+      <CarriersTable carriers={carriers} currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} onView={onView} onEdit={onEdit} onDelete={onDelete} onReactivate={onReactivate} />
+      {totalItems > 0 && (
+        <div className="flex justify-center sm:justify-end">
+          <Pagination currentPage={currentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} onPageChange={onPageChange} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeleteModal({ isOpen, deleting, carrierName, onClose, onConfirm }: Readonly<any>) {
+  return (
+    <Modal isOpen={isOpen} onClose={deleting ? () => { } : onClose} size="sm" title={deleting ? "Eliminando..." : "Confirmar"}
+      footer={
+        <ModalFooter>
+          {deleting ? null : <Button variant="secondary" size="sm" onClick={onClose}>Cancelar</Button>}
+          <Button onClick={onConfirm} disabled={deleting} className="bg-red-600 hover:bg-red-700 text-white shadow-lg min-w-[100px]">
+            {deleting ? "Eliminando..." : "Eliminar"}
+          </Button>
+        </ModalFooter>
+      }
+    >
+      <div className="flex flex-col items-center text-center">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
+          {deleting ? <DeliveryLoader size="sm" /> : <XCircle className="w-6 h-6 text-red-600" />}
+        </div>
+        <p className="text-gray-600">{deleting ? "Procesando..." : `¿Deseas eliminar a ${carrierName}?`}</p>
       </div>
+    </Modal>
+  );
+}
 
-      {/* Confirmación para eliminar */}
-      <Modal
-        isOpen={confirmModal.isOpen}
-        onClose={deleting ? () => { } : closeConfirmModal}
-        size="sm"
-        title={deleting ? "Eliminando transportista..." : "Confirmar eliminación"}
+function FeedbackModals({ success, error, onClose }: Readonly<{ success: string | boolean; error: string | null; onClose: () => void }>) {
+  if (!success && !error) return null;
+  const isSuccess = !!success;
+    let message = error;
+    if (isSuccess) {
+      message = typeof success === 'string' ? success : 'Completado.';
+    }
+
+    return (
+      <Modal isOpen={true} onClose={onClose} size="sm" title={isSuccess ? "¡Éxito!" : "Error"}
         footer={
-          <ModalFooter>
-            {!deleting && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={closeConfirmModal}
-                className="bg-white border-dashed border-gray-300 text-gray-600 hover:border-[#02997d] hover:text-[#02997d]"
-              >
-                Cancelar
-              </Button>
-            )}
-            <Button
-              onClick={confirmDeleteCarrier}
-              disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg min-w-[100px]"
-            >
-              {deleting ? "Eliminando..." : "Eliminar"}
+          <ModalFooter className="justify-center">
+            <Button onClick={onClose} className={`${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white shadow-lg min-w-[100px]`}>
+              {isSuccess ? 'Aceptar' : 'Cerrar'}
             </Button>
           </ModalFooter>
         }
       >
         <div className="flex flex-col items-center text-center">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
-            {deleting ? (
-              <DeliveryLoader size="sm" />
-            ) : (
-              <XCircle className="w-6 h-6 text-red-600" />
-            )}
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isSuccess ? 'bg-green-50' : 'bg-red-50'}`}>
+            {isSuccess ? <CheckCircle className="w-6 h-6 text-green-600" /> : <AlertTriangle className="w-6 h-6 text-red-600" />}
           </div>
-          <p className="text-gray-600 text-base leading-relaxed">
-            {deleting
-              ? "Por favor, espera un momento mientras procesamos la solicitud."
-              : `¿Estás seguro de que deseas eliminar a ${confirmModal.data?.first_name} ${confirmModal.data?.last_name}? Esta acción no se puede deshacer.`}
-          </p>
+          <p className="text-gray-600 font-medium">{message}</p>
         </div>
       </Modal>
-
-      {/* Loader de eliminación global (overlay) */}
-      {deleting && (
-        <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
-          <div className="bg-white rounded-lg p-16 shadow-lg flex flex-col items-center">
-            <DeliveryLoader message="Eliminando transportista..." />
-          </div>
-        </div>
-      )}
-
-      {/* Modal para añadir o editar usuario */}
-      <CarrierModal
-        {...{
-          isOpen: carrierModal.isOpen,
-          onClose: carrierModal.closeModal,
-          onSubmit: handleCarrierModalSubmit,
-          editingCarrier: carrierModal.data,
-        }}
-      />
-
-      {/* Modal para ver detalles del transportista */}
-      <CarrierViewModal
-        isOpen={carrierViewModal.isOpen}
-        onClose={carrierViewModal.closeModal}
-        carrier={carrierViewModal.data}
-      />
-
-      {/* Modales de Éxito / Error */}
-      {successModal && (
-        <Modal
-          isOpen={!!successModal}
-          onClose={closeStatusModals}
-          size="sm"
-          title="¡Éxito!"
-          footer={
-            <ModalFooter className="justify-center">
-              <Button
-                onClick={closeStatusModals}
-                className="bg-green-600 hover:bg-green-700 text-white shadow-green-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
-              >
-                Aceptar
-              </Button>
-            </ModalFooter>
-          }
-        >
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-green-50">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <p className="text-gray-600 text-base font-medium">
-              {typeof successModal === 'string' ? successModal : 'La operación se completó correctamente.'}
-            </p>
-          </div>
-        </Modal>
-      )}
-
-      {errorModal && (
-        <Modal
-          isOpen={!!errorModal}
-          onClose={closeStatusModals}
-          size="sm"
-          title="Error"
-          footer={
-            <ModalFooter className="justify-center">
-              <Button
-                onClick={closeStatusModals}
-                className="bg-red-600 hover:bg-red-700 text-white shadow-red-500/20 shadow-lg w-full sm:w-auto min-w-[100px]"
-              >
-                Cerrar
-              </Button>
-            </ModalFooter>
-          }
-        >
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-50">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
-            </div>
-            <p className="text-gray-600 text-base font-medium">{errorModal}</p>
-          </div>
-        </Modal>
-      )}
-
-    </div>
-  );
+    );
 }

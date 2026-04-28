@@ -1,4 +1,4 @@
-import { Search, Filter, Map } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
@@ -57,16 +57,10 @@ export default function CourierZonesFilter({
 
       <div className="flex items-center gap-4 relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100 flex-wrap justify-between sm:justify-end w-full xl:w-auto">
         <div className="bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100 text-sm font-medium text-emerald-700 shadow-sm flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-          Total: <span className="text-emerald-900 font-bold">{totalItems}</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />Total: <span className="text-emerald-900 font-bold">{totalItems}</span>
         </div>
 
         <div className="w-px h-8 bg-slate-200 hidden sm:block" />
-
-        <div className="flex items-center gap-2 text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-           <Map size={16} />
-           <span className="text-xs font-bold uppercase tracking-wider">Gestión Territorial</span>
-        </div>
       </div>
     </div>
   );

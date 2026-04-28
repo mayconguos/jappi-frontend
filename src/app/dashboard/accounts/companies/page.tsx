@@ -16,7 +16,7 @@ import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Pagination } from '@/components/ui/pagination';
 import CompanyDetailsModal from '@/components/forms/modals/CompanyDetailsModal';
 
-import { useApi, useModal } from '@/hooks';
+import { useApi } from '@/hooks';
 
 export interface Company {
   id: number;
@@ -91,9 +91,6 @@ export default function CompaniesPage() {
 
   const { get: getDetail } = useApi<CompanyDetail>();
 
-  const companyModal = useModal<Company>();
-
-
   const fetchCompanies = useCallback(async () => {
     try {
       const response = await get('/user?type=companies');
@@ -155,12 +152,12 @@ export default function CompaniesPage() {
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
+    const url = globalThis.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `empresas_${new Date().toISOString().split('T')[0]}.xlsx`;
     link.click();
-    window.URL.revokeObjectURL(url);
+    globalThis.URL.revokeObjectURL(url);
   };
 
   const handleExportPdf = () => {
@@ -242,9 +239,49 @@ export default function CompaniesPage() {
     }
   };
 
-  return (
-    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
+  const renderTableContent = () => {
+    if (loading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+          <DeliveryLoader message="Cargando empresas..." />
+        </div>
+      );
+    }
 
+    if (apiError && companies.length === 0) {
+      return (
+        <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
+          <AlertTriangle size={32} />
+          <p className="font-medium">Error al cargar datos: {apiError}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-6">
+        <CompaniesTable
+          companies={currentItems}
+          currentPage={currentPage}
+          onView={handleViewCompany}
+          onDelete={handleDeleteClick}
+        />
+
+        {totalItems > 0 && (
+          <div className="flex justify-center sm:justify-end">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
       <CompaniesFilter
         field={field}
         setField={setField}
@@ -256,36 +293,9 @@ export default function CompaniesPage() {
         totalItems={totalItems}
       />
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <DeliveryLoader message="Cargando empresas..." />
-        </div>
-      ) : apiError && companies.length === 0 ? (
-        <div className="p-8 rounded-xl border border-red-100 bg-red-50 text-center text-red-600 flex flex-col items-center gap-2">
-          <AlertTriangle size={32} />
-          <p className="font-medium">Error al cargar datos: {apiError}</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-6">
-          <CompaniesTable
-            companies={currentItems}
-            currentPage={currentPage}
-            onView={handleViewCompany}
-            onDelete={handleDeleteClick}
-          />
+      {renderTableContent()}
 
-          {totalItems > 0 && (
-            <div className="flex justify-center sm:justify-end">
-              <Pagination
-                currentPage={currentPage}
-                totalItems={totalItems}
-                itemsPerPage={ITEMS_PER_PAGE}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* --- Modals are outside the flow anyway if null --- */}
       {successModal && (

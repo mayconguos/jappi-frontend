@@ -24,17 +24,17 @@ export default function CarriersTable({
   onReactivate
 }: Readonly<CarriersTableProps>) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
             <tr>
-              <th className="w-[60px] pl-6 py-3 text-slate-400">#</th>
+              <th className="px-2 py-3 text-center w-8">#</th>
               <th className="px-4 py-3">Transportista</th>
               <th className="px-4 py-3">Vehículo</th>
-              <th className="w-[120px] px-4 py-3 text-center">Placa</th>
-              <th className="w-[140px] px-4 py-3">Estado</th>
-              <th className="w-[140px] px-4 py-3 text-right pr-6">Acciones</th>
+              <th className="px-4 py-3">Placa</th>
+              <th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3 text-right pr-6">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -49,12 +49,12 @@ export default function CarriersTable({
                     }`}
                 >
                   {/* Número correlativo */}
-                  <td className="pl-6 py-4 font-mono text-[11px] font-bold text-slate-300">
+                  <td className="px-2 py-3 whitespace-nowrap text-center font-mono text-[11px] font-bold text-slate-300">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
 
                   {/* Nombre / Correo */}
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
                         <User size={14} className={`shrink-0 ${isSoftDeleted ? 'text-slate-300' : 'text-emerald-600'}`} />
@@ -71,7 +71,7 @@ export default function CarriersTable({
                   </td>
 
                   {/* Vehículo / Marca */}
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex flex-col gap-1.5">
                       <span className={`inline-flex items-center w-fit px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-sm ${isSoftDeleted ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-indigo-50 text-indigo-700 border-indigo-100'
                         }`}>
@@ -85,7 +85,7 @@ export default function CarriersTable({
                   </td>
 
                   {/* Placa */}
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded-lg text-[11px] font-bold text-slate-700 border border-slate-200 shadow-sm">
                       <Hash size={10} className="text-slate-400" />
                       {carrier.plate_number || 'S/P'}
@@ -93,7 +93,7 @@ export default function CarriersTable({
                   </td>
 
                   {/* Estado */}
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-3">
                     {isSoftDeleted ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-slate-100 text-slate-500 border-slate-200">
                         Eliminado
@@ -111,7 +111,7 @@ export default function CarriersTable({
                   </td>
 
                   {/* Acciones */}
-                  <td className="px-4 py-4 text-right pr-6">
+                  <td className="px-4 py-3 text-right pr-6">
                     <div className="flex items-center justify-end gap-1.5">
                       {isSoftDeleted ? (
                         <Button
