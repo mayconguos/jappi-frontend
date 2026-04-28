@@ -4,16 +4,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import ExcelJS from 'exceljs';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { CheckCircle, AlertTriangle, Trash2 } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import DeliveryLoader from '@/components/ui/delivery-loader';
+import { Modal, ModalFooter } from '@/components/ui/modal';
+import { Pagination } from '@/components/ui/pagination';
 
 import CompaniesFilter from '@/components/filters/CompaniesFilter';
 import CompaniesTable from '@/components/tables/CompaniesTable';
-import { Modal, ModalFooter } from '@/components/ui/modal';
-import { Button } from '@/components/ui/button';
-import DeliveryLoader from '@/components/ui/delivery-loader';
-import { Pagination } from '@/components/ui/pagination';
+
 import CompanyDetailsModal from '@/components/forms/modals/CompanyDetailsModal';
 
 import { useApi } from '@/hooks';
@@ -160,34 +160,6 @@ export default function CompaniesPage() {
     globalThis.URL.revokeObjectURL(url);
   };
 
-  const handleExportPdf = () => {
-    const doc = new jsPDF();
-    const columns = [
-      { header: 'ID', dataKey: 'id' },
-      { header: 'Empresa', dataKey: 'company_name' },
-      { header: 'Contacto', dataKey: 'full_name' },
-      { header: 'Correo', dataKey: 'email' },
-      { header: 'Teléfono', dataKey: 'phone_number' },
-    ];
-
-    const rows = filteredCompanies.map((c) => ({
-      ...c,
-      full_name: `${c.first_name} ${c.last_name}`
-    }));
-
-    autoTable(doc, {
-      columns,
-      body: rows,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [71, 85, 105] },
-      margin: { top: 20 },
-      didDrawPage: () => {
-        doc.text('Reporte de Empresas', 14, 15);
-      },
-    });
-    doc.save(`empresas_${new Date().toISOString().split('T')[0]}.pdf`);
-  };
-
   const closeStatusModals = () => {
     setSuccessModal(false);
     setErrorModal(null);
@@ -289,13 +261,10 @@ export default function CompaniesPage() {
         setValue={setValue}
         filterFields={FILTER_FIELDS}
         onExportExcel={handleExportExcel}
-        onExportPdf={handleExportPdf}
         totalItems={totalItems}
       />
 
       {renderTableContent()}
-
-
 
       {/* --- Modals are outside the flow anyway if null --- */}
       {successModal && (

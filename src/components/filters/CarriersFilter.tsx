@@ -65,9 +65,9 @@ export default function CarriersFilter({
       <div className="flex items-center gap-4 relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100 flex-wrap justify-between sm:justify-end w-full xl:w-auto">
         {/* Toggle Ver Inactivos */}
         <label className="flex items-center gap-2 cursor-pointer select-none group border border-slate-200 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
-          <input 
-            type="checkbox" 
-            checked={showInactive} 
+          <input
+            type="checkbox"
+            checked={showInactive}
             onChange={(e) => setShowInactive(e.target.checked)}
             className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
           />
@@ -80,8 +80,7 @@ export default function CarriersFilter({
         </label>
 
         <div className="bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100 text-sm font-medium text-emerald-700 shadow-sm flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-          Total: <span className="text-emerald-900 font-bold">{totalItems}</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />Total: <span className="text-emerald-900 font-bold">{totalItems}</span>
         </div>
 
         <div className="w-px h-8 bg-slate-200 hidden sm:block" />

@@ -16,7 +16,6 @@ interface CompaniesFilterProps {
   setValue: (value: string) => void;
   filterFields: FilterField[];
   onExportExcel: () => void;
-  onExportPdf: () => void;
   totalItems: number;
 }
 
@@ -27,7 +26,6 @@ export default function CompaniesFilter({
   setValue,
   filterFields,
   onExportExcel,
-  onExportPdf,
   totalItems
 }: Readonly<CompaniesFilterProps>) {
   return (

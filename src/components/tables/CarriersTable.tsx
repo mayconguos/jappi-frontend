@@ -55,17 +55,20 @@ export default function CarriersTable({
 
                   {/* Nombre / Correo */}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <User size={14} className={`shrink-0 ${isSoftDeleted ? 'text-slate-300' : 'text-emerald-600'}`} />
+                    <div className="flex items-center gap-3">
+                      <div className={`h-9 w-9 rounded-full flex items-center justify-center border shadow-sm shrink-0 ${isSoftDeleted ? 'bg-slate-100 border-slate-200 text-slate-400' : 'bg-slate-50 border-slate-100 text-emerald-600'
+                        }`}>
+                        <User size={16} />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
                         <span className={`text-sm font-semibold leading-tight group-hover:text-emerald-700 transition-colors ${isSoftDeleted ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-900'
                           }`}>
                           {carrier.first_name} {carrier.last_name || ''}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-400 mt-1">
-                        <Mail size={12} className="shrink-0" />
-                        <span className="text-[10px] font-bold uppercase tracking-tight italic">{carrier.email}</span>
+                        <div className="flex items-center gap-1.5 text-slate-400 mt-0.5">
+                          <Mail size={12} className="shrink-0" />
+                          <span className="text-[10px] font-bold uppercase tracking-tight italic">{carrier.email}</span>
+                        </div>
                       </div>
                     </div>
                   </td>
