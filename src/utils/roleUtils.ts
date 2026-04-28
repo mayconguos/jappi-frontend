@@ -38,3 +38,13 @@ export const getRedirectPathForUser = (roleNumber: number): string => {
       return '/dashboard';
   }
 };
+export const isPathAllowed = (path: string, userType: number): boolean => {
+  // El dashboard base siempre está permitido
+  if (path === '/dashboard') return true;
+
+  const userRoutes = getUserRoutes(userType);
+  // Verificamos si la ruta actual coincide exactamente o es una subruta de una permitida
+  return userRoutes.some(route =>
+    path === route.path || path.startsWith(`${route.path}/`)
+  );
+};

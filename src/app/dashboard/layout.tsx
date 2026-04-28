@@ -1,25 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 import { useAuth } from '@/context/AuthContext';
-
+import { isPathAllowed, getRedirectPathForUser } from '@/utils/roleUtils';
 
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter();
-  const { isLoading, isAuthenticated } = useAuth();
+  const pathname = usePathname();
+  const { isLoading, isAuthenticated, user } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/login');
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.replace('/login');
+      } else if (user && !isPathAllowed(pathname, user.id_role)) {
+        // Redirigir a la ruta por defecto de su rol si intenta entrar a una prohibida
+        const redirectPath = getRedirectPathForUser(user.id_role);
+        router.replace(redirectPath);
+      }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, pathname, router]);
 
   if (isLoading) {
     return (
@@ -31,6 +39,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!isAuthenticated) return null;
 
+  const isAuthorized = isAuthenticated && user && isPathAllowed(pathname, user.id_role);
+
   return (
     <div className='h-screen w-full flex overflow-hidden bg-white'>
       <Sidebar
@@ -40,7 +50,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className='flex-1 flex flex-col min-w-0 h-full overflow-hidden'>
         <Header onOpenSidebarMobile={() => setIsMobileSidebarOpen(true)} />
         <main className='flex-1 overflow-y-auto bg-slate-50/50 relative custom-scrollbar'>
-          {children}
+          {isAuthorized ? children : (
+            <div className='flex items-center justify-center h-full'>
+              <DeliveryLoader message="Verificando acceso..." />
+            </div>
+          )}
         </main>
       </div>
     </div>
