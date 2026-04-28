@@ -197,7 +197,7 @@ export default function WorkerModal({ isOpen, onClose, onSubmit, editingWorker }
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
           {/* SECCIÓN 1: INFORMACIÓN PERSONAL */}
           <div className="md:col-span-2">
             <h4 className="text-xs font-bold text-[#02997d] mb-2 flex items-center gap-2 uppercase tracking-wider">

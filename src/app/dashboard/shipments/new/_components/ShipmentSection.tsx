@@ -1,22 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
 import { UseFormReturn } from 'react-hook-form';
 import { CheckCircle2, Edit2 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
 import { clsx } from 'clsx';
-import { Card } from '@/components/ui/card';
-import { Select } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { type ShipmentFormData } from '@/lib/validations/shipment';
-import api from '@/app/services/api';
-import { DELIVERY_MODES } from '@/constants/formOptions';
 
-// Import new dumb components
+import { useAuth } from '@/context/AuthContext';
+
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
+import { type ShipmentFormData } from '@/lib/validations/shipment';
+
+import api from '@/app/services/api';
+
 import ShipmentOriginSelector from '@/components/shipment/ShipmentOriginSelector';
 import ServiceLevelSelector from '@/components/shipment/ServiceLevelSelector';
 import PickupDetailsForm from '@/components/shipment/PickupDetailsForm';
 import PackageListForm from '@/components/shipment/PackageListForm';
+
+type OriginType = 'pickup' | 'stock' | undefined;
+type ServiceType = 'express' | 'regular' | 'change' | undefined;
 
 interface ShipmentSectionProps {
   form: UseFormReturn<ShipmentFormData>;
@@ -30,8 +35,8 @@ interface ShipmentSectionProps {
   onEdit?: () => void;
 }
 
-export default function ShipmentSection({ form, onProductsChange, isActive, isCompleted, onContinue, onEdit }: ShipmentSectionProps) {
-  const { formState: { errors }, watch, setValue, trigger, register } = form;
+export default function ShipmentSection({ form, onProductsChange, isActive, isCompleted, onContinue, onEdit }: Readonly<ShipmentSectionProps>) {
+  const { formState: { errors }, watch, setValue, trigger } = form;
   const watchedValues = watch();
   const { user } = useAuth();
 
@@ -124,7 +129,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
       try {
         const token = localStorage.getItem('token');
 
-        if (!user || !user.id) {
+        if (!user?.id) {
           return;
         }
 
@@ -151,7 +156,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
       try {
         const token = localStorage.getItem('token');
 
-        if (!user || !user.id_company) {
+        if (!user?.id_company) {
           console.error('User or Company ID not found');
           return;
         }
@@ -199,10 +204,16 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
     value: phone
   }));
 
+  const getSectionStatusClassName = () => {
+    if (isActive) return "opacity-100 translate-y-0";
+    if (isCompleted) return "opacity-60";
+    return "opacity-40 translate-y-4 pointer-events-none";
+  };
+
   return (
     <div className={clsx(
       "transition-all duration-500 ease-in-out",
-      isActive ? "opacity-100 translate-y-0" : (isCompleted ? "opacity-60" : "opacity-40 translate-y-4 pointer-events-none")
+      getSectionStatusClassName()
     )}>
       <Card className="overflow-hidden border-gray-200 shadow-sm bg-white">
 
@@ -241,13 +252,13 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
 
         <div className={clsx(
           "transition-all duration-500",
-          !isActive ? "max-h-0 py-0 opacity-0 overflow-hidden" : "max-h-[2000px] opacity-100"
+          isActive ? "max-h-[2000px] opacity-100" : "max-h-0 py-0 opacity-0 overflow-hidden"
         )}>
           <div className="p-6 space-y-8">
 
             {/* Sección A: Datos Generales y Origen (Combinados) */}
             <div className="space-y-6">
-              <div className={clsx("grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4", isCompleted && "pointer-events-none grayscale-[0.1]")}>
+              <div className={clsx("grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3", isCompleted && "pointer-events-none grayscale-[0.1]")}>
                 {/* Fila 1 */}
                 <div className="md:col-span-2">
                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Datos del Servicio</h4>
@@ -255,7 +266,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
 
                 {/* 1. Origin Selector */}
                 <ShipmentOriginSelector
-                  value={watchedValues.service?.origin_type as 'pickup' | 'stock' | undefined}
+                  value={watchedValues.service?.origin_type as OriginType}
                   onChange={async (val) => {
                     setValue('service.origin_type', val);
                     await trigger('service.origin_type');
@@ -270,7 +281,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
                 {selectedOriginType === 'pickup' && (
                   <div className="md:col-span-2">
                     <PickupDetailsForm
-                      originType={selectedOriginType as 'pickup' | 'stock' | undefined}
+                      originType={selectedOriginType as OriginType}
                       addresses={addressOptions}
                       phones={phoneOptions}
                       addressValue={watchedValues.sender?.address?.id_address?.toString() || ''}
@@ -306,7 +317,7 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
 
               {/* 5. Package List Form */}
               <PackageListForm
-                originType={selectedOriginType as 'pickup' | 'stock' | undefined}
+                originType={selectedOriginType as OriginType}
                 items={productsList}
                 onAdd={addProduct}
                 onRemove={removeProduct}
@@ -320,10 +331,10 @@ export default function ShipmentSection({ form, onProductsChange, isActive, isCo
               />
 
               {/* Grid separado para mantener la estructura de columnas si se quiere aplicar en general, o directo como div */}
-              <div className={clsx("grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4", isCompleted && "pointer-events-none grayscale-[0.1]")}>
+              <div className={clsx("grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3", isCompleted && "pointer-events-none grayscale-[0.1]")}>
                 {/* 2. Service Level Selector (Movido aquí) */}
                 <ServiceLevelSelector
-                  value={watchedValues.service?.type as 'express' | 'regular' | 'change' | undefined}
+                  value={watchedValues.service?.type as ServiceType}
                   onChange={handleServiceTypeChange}
                   error={errors.service?.type?.message}
                 />
