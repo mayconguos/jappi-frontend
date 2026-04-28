@@ -1,201 +1,93 @@
-'use client'
+'use client';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useState } from 'react';
+
+import { MapPin, MessageCircle, Phone, Map, Navigation } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { MapPin, Package, ArrowRight, Eye, MessageCircle, Phone, Map, Navigation } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import PickupDetailModal from '@/components/forms/modals/PickupDetailModal';
-import { Pagination } from '@/components/ui/pagination';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-interface Pickup {
-  id: string;
-  sender: string;
-  sender_phone: string;
-  origin: string;
-  destination: string;
-  district: string;
-  status: 'pending' | 'completed';
-  date: string;
-  items_count: number;
-}
+import CarrierPickupDetailModal from '@/components/forms/modals/CarrierPickupDetailModal';
 
-const MOCK_PICKUPS: Pickup[] = [
-  {
-    id: 'TRK-9821-JP',
-    sender: 'Tech Solutions SAC',
-    sender_phone: '+51 976 548 966',
-    origin: 'Av. Javier Prado 123, San Isidro',
-    destination: 'Jr. Unión 456, Lima',
-    district: 'San Isidro',
-    status: 'pending',
-    date: '2024-02-06',
-    items_count: 5
-  },
-  {
-    id: 'TRK-9822-JP',
-    sender: 'Moda Express',
-    sender_phone: '+51 976 548 966',
-    origin: 'Ca. Los Pinos 789, Miraflores',
-    destination: 'Av. Arequipa 1020, Lince',
-    district: 'Miraflores',
-    status: 'pending',
-    date: '2024-02-06',
-    items_count: 3
-  },
-  {
-    id: 'TRK-9823-JP',
-    sender: 'Distribuidora Norte',
-    sender_phone: '+51 976 548 966',
-    origin: 'Av. Túpac Amaru 340, Independencia',
-    destination: 'Ca. Colón 88, Jesús María',
-    district: 'Independencia',
-    status: 'pending',
-    date: '2024-02-06',
-    items_count: 2
-  },
-  {
-    id: 'TRK-9824-JP',
-    sender: 'Electro Perú SAC',
-    sender_phone: '+51 976 548 966',
-    origin: 'Jr. Lampa 570, Cercado de Lima',
-    destination: 'Av. Universitaria 1800, San Miguel',
-    district: 'Lima',
-    status: 'pending',
-    date: '2024-02-06',
-    items_count: 7
-  },
-  {
-    id: 'TRK-9816-JP',
-    sender: 'Confecciones Textil JP',
-    sender_phone: '+51 976 548 966',
-    origin: 'Jr. Gamarra 240, La Victoria',
-    destination: 'Av. Primavera 1100, Surco',
-    district: 'La Victoria',
-    status: 'completed',
-    date: '2024-02-04',
-    items_count: 12
-  },
-  {
-    id: 'TRK-9810-JP',
-    sender: 'Insumos Industriales SA',
-    sender_phone: '+51 976 548 966',
-    origin: 'Av. Colonial 2400, Pueblo Libre',
-    destination: 'Ca. Loreto 55, Barranco',
-    district: 'Pueblo Libre',
-    status: 'completed',
-    date: '2024-02-04',
-    items_count: 3
-  },
-  {
-    id: 'TRK-9825-JP',
-    sender: 'Grupo Andino Logistic',
-    sender_phone: '+51 976 548 966',
-    origin: 'Av. Separadora Industrial 1200, Ate',
-    destination: 'Ca. Los Álamos 45, La Molina',
-    district: 'Ate',
-    status: 'pending',
-    date: '2024-02-06',
-    items_count: 1
-  },
-  {
-    id: 'TRK-9820-JP',
-    sender: 'Importaciones Lima',
-    sender_phone: '+51 976 548 966',
-    origin: 'Av. Argentina 500, Callao',
-    destination: 'Av. Brasil 300, Magdalena',
-    district: 'Callao',
-    status: 'completed',
-    date: '2024-02-05',
-    items_count: 4
-  },
-  {
-    id: 'TRK-9818-JP',
-    sender: 'Farmacéutica del Sur',
-    sender_phone: '+51 976 548 966',
-    origin: 'Av. Benavides 3200, Surco',
-    destination: 'Av. Angamos 900, Miraflores',
-    district: 'Surco',
-    status: 'completed',
-    date: '2024-02-05',
-    items_count: 6
-  },
-  {
-    id: 'TRK-9807-JP',
-    sender: 'Agro Export Peru',
-    sender_phone: '+51 976 548 966',
-    origin: 'Av. La Marina 2000, San Miguel',
-    destination: 'Jr. Ica 320, Cercado de Lima',
-    district: 'San Miguel',
-    status: 'completed',
-    date: '2024-02-03',
-    items_count: 8
-  }
-];
+import { CarrierPickup, CarrierPickupStatus } from '@/app/dashboard/carrier/pickups/page';
 
-const getStatusBadge = (status: Pickup['status']) => {
+// ─── Helpers de UI ─────────────────────────────────────────────
+const getStatusBadge = (status: CarrierPickupStatus) => {
   switch (status) {
-    case 'pending':
-      return <Badge variant="warning">Por recoger</Badge>;
-    case 'completed':
-      return <Badge variant="success">Entregado</Badge>;
-    default:
-      return <Badge variant="outline">Desconocido</Badge>;
+    case 'pending':   return <Badge variant="warning">Por recoger</Badge>;
+    case 'scheduled': return <Badge variant="info">Programado</Badge>;
+    case 'picked_up': return <Badge variant="success">Recogido</Badge>;
+    case 'received':  return <Badge variant="outline">Recibido</Badge>;
+    default:          return <Badge variant="outline">Desconocido</Badge>;
   }
 };
 
-const STATUS_ORDER: Record<Pickup['status'], number> = { pending: 0, completed: 1 };
+const STATUS_ORDER: Record<CarrierPickupStatus, number> = {
+  pending: 0, scheduled: 1, picked_up: 2, received: 3,
+};
 
-export default function CarrierPickupsTable() {
-  const [pickups, setPickups] = useState<Pickup[]>(MOCK_PICKUPS);
-  const [selectedPickup, setSelectedPickup] = useState<Pickup | null>(null);
+// ─── Adaptador de CarrierPickup → formato esperado por PickupDetailModal ─
+const toModalPickup = (p: CarrierPickup) => ({
+  id: p.id,
+  status: p.status,
+  sender: p.company_name,
+  sender_phone: p.phone,
+  origin: p.address,
+  district: p.district_name,
+  items_count: 0,       // la API aún no devuelve este dato
+  date: p.pickup_date,
+});
+
+interface CarrierPickupsTableProps {
+  pickups: CarrierPickup[];
+  isConfirming: boolean;
+  onConfirmPickup: (pickupId: number) => Promise<void>;
+}
+
+export default function CarrierPickupsTable({ pickups, isConfirming, onConfirmPickup }: Readonly<CarrierPickupsTableProps>) {
+  const [selectedPickup, setSelectedPickup] = useState<CarrierPickup | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
 
-  // Derivar distritos únicos
   const districtsWithPending = Array.from(
-    new Set(pickups.filter(p => p.status === 'pending').map(p => p.district))
-  ).sort();
+    new Set(pickups.filter(p => p.status === 'pending').map(p => p.district_name).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
   const districts = ['all', ...districtsWithPending];
 
-  const filtered = pickups.filter(p => selectedDistrict === 'all' || p.district === selectedDistrict);
-
-  const handleOpenDetail = (pickup: Pickup) => {
-    setSelectedPickup(pickup);
-    setIsModalOpen(true);
-  };
-
-  const handleStatusChange = (id: string, newStatus: string) => {
-    const s = newStatus as Pickup['status'];
-    setPickups(prev => prev.map(p => p.id === id ? { ...p, status: s } : p));
-    if (selectedPickup?.id === id) {
-      setSelectedPickup({ ...selectedPickup, status: s });
-    }
-  };
+  const filtered = selectedDistrict === 'all'
+    ? pickups
+    : pickups.filter(p => p.district_name === selectedDistrict);
 
   const sortedPickups = [...filtered].sort(
     (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
   );
 
-  const ITEMS_PER_PAGE = 10;
-  const [currentPage, setCurrentPage] = useState(1);
+  const handleOpenDetail = (pickup: CarrierPickup) => {
+    setSelectedPickup(pickup);
+    setIsModalOpen(true);
+  };
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedDistrict]);
+  const handleStatusChange = async (pickupId: number) => {
+    await onConfirmPickup(pickupId);
+  };
 
-  const totalItems = sortedPickups.length;
-  const currentItems = sortedPickups.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const getMapsUrl = (pickup: CarrierPickup) => {
+    const query = `${pickup.address}, ${pickup.district_name}, Lima`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  };
+
+  const getWaText = (pickup: CarrierPickup) =>
+    encodeURIComponent(`Hola, soy el motorizado de Jappi Express. Estoy en camino para recoger tu pedido en ${pickup.address}, ${pickup.district_name}.`);
 
   return (
     <>
       {/* Filtro por Distrito (Chips) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none mb-4">
-        {districts.map((district) => {
+        {districts.map(district => {
           const isActive = selectedDistrict === district;
           const count = district === 'all'
             ? pickups.length
-            : pickups.filter(p => p.district === district).length;
+            : pickups.filter(p => p.district_name === district).length;
           return (
             <button
               key={district}
@@ -221,49 +113,50 @@ export default function CarrierPickupsTable() {
           );
         })}
       </div>
+
       {/* Desktop View */}
       <div className="hidden md:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
               <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
-              <TableHead className="w-[140px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Remitente</TableHead>
-              <TableHead className="w-[110px] text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Fecha</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contacto</TableHead>
-              <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Paquetes</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ruta (Origen - Destino)</TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ruta (Origen)</TableHead>
               <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
               <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentItems.map((pickup, index) => (
+            {sortedPickups.map((pickup, index) => (
               <TableRow
-                key={pickup.id}
+                key={`${pickup.id}-${index}`}
                 className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                 onClick={() => handleOpenDetail(pickup)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOpenDetail(pickup);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
-                  {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
-                </TableCell>
-                <TableCell className="py-4 font-mono text-xs text-emerald-700 font-medium h-16">
-                  {pickup.id}
+                  {index + 1}
                 </TableCell>
                 <TableCell className="py-4">
-                  <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[180px]" title={pickup.sender}>
-                    {pickup.sender}
-                  </span>
-                </TableCell>
-                <TableCell className="py-4 text-center">
-                  <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-2 py-1 rounded">
-                    {pickup.date}
-                  </span>
+                  <div>
+                    <span className="text-sm font-medium text-gray-900 line-clamp-1">
+                      {pickup.company_name}
+                    </span>
+                    <span className="text-[11px] text-gray-400">{pickup.origin}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="py-4">
                   <div className="flex items-center gap-2">
                     <a
-                      href={`https://wa.me/${pickup.sender_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${pickup.sender}, te saluda el motorizado de Jappi Express. Estoy en camino para recoger tu pedido ${pickup.id} en ${pickup.origin}.`)}`}
+                      href={`https://wa.me/51${pickup.phone.replaceAll(/\D/g, '')}?text=${getWaText(pickup)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -274,32 +167,28 @@ export default function CarrierPickupsTable() {
                       WhatsApp
                     </a>
                     <a
-                      href={`tel:${pickup.sender_phone.replace(/\D/g, '')}`}
+                      href={`tel:${pickup.phone.replaceAll(/\D/g, '')}`}
                       onClick={(e) => e.stopPropagation()}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
                       title="Llamar"
                     >
                       <Phone size={14} className="fill-blue-700/10" />
-                      Llamar
+                      {pickup.phone}
                     </a>
-                  </div>
-                </TableCell>
-                <TableCell className="py-4 text-center">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-50 border border-gray-100">
-                    <Package size={12} className="text-gray-400" />
-                    <span className="text-xs font-medium text-gray-700">{pickup.items_count}</span>
                   </div>
                 </TableCell>
                 <TableCell className="py-4">
                   <div className="flex flex-col gap-1.5 max-w-[280px]">
                     <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
-                      <span className="truncate" title={pickup.origin}>{pickup.origin}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                      <span className="truncate" title={pickup.destination}>{pickup.destination}</span>
+                      <span className="truncate" title={pickup.address}>{pickup.address}</span>
                     </div>
+                    {pickup.district_name && (
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <MapPin size={10} className="shrink-0" />
+                        <span>{pickup.district_name}{pickup.sector_name ? ` · ${pickup.sector_name}` : ''}</span>
+                      </div>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="py-4 text-center">
@@ -308,7 +197,7 @@ export default function CarrierPickupsTable() {
                 <TableCell className="text-right pr-6 py-4">
                   <div className="flex items-center justify-end gap-2">
                     <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pickup.origin}, ${pickup.district}, Lima`)}`}
+                      href={getMapsUrl(pickup)}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -317,14 +206,6 @@ export default function CarrierPickupsTable() {
                     >
                       <Map size={16} />
                     </a>
-                    <Button
-                      variant="ghost" size="sm"
-                      className="h-8 gap-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all font-normal"
-                      onClick={(e) => { e.stopPropagation(); handleOpenDetail(pickup); }}
-                    >
-                      <Eye size={16} />
-                      <span className="text-xs">Ver</span>
-                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -335,82 +216,98 @@ export default function CarrierPickupsTable() {
 
       {/* Vista Móvil (Cards compactas) */}
       <div className="md:hidden space-y-2">
-        {currentItems.map((pickup) => (
-          <div
-            key={pickup.id}
-            className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
-            onClick={() => handleOpenDetail(pickup)}
-          >
-            {/* Franja de estado izquierda */}
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${pickup.status === 'pending' ? 'bg-amber-400' : 'bg-emerald-500'}`} />
+        {sortedPickups.map((pickup, index) => {
+          const getStatusColor = (status: CarrierPickupStatus) => {
+            switch (status) {
+              case 'pending':   return 'bg-amber-400';
+              case 'scheduled': return 'bg-blue-400';
+              case 'picked_up': return 'bg-emerald-500';
+              default:          return 'bg-slate-300';
+            }
+          };
 
-            <div className="pl-3">
-              {/* Remitente */}
-              <div className="flex justify-between items-start gap-2 mb-1">
-                <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{pickup.sender}</p>
-                <div className="flex gap-1.5">
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pickup.origin}, ${pickup.district}, Lima`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex h-7 px-2 items-center justify-center gap-1 rounded-full bg-emerald-100 text-emerald-700 shadow-sm active:scale-90 transition-transform text-[10px] font-bold border border-emerald-200"
-                  >
-                    <Navigation size={12} className="fill-emerald-700/10" />
-                    MAPS
-                  </a>
-                  <a
-                    href={`tel:${pickup.sender_phone.replace(/\D/g, '')}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm active:scale-90 transition-transform"
-                  >
-                    <Phone size={14} />
-                  </a>
-                  <a
-                    href={`https://wa.me/${pickup.sender_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${pickup.sender}, te saluda el motorizado de Jappi Express. Estoy en camino a recoger tu pedido ${pickup.id}.`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm active:scale-90 transition-transform"
-                  >
-                    <MessageCircle size={14} />
-                  </a>
+          const statusColor = getStatusColor(pickup.status);
+
+          return (
+            <div
+              key={`${pickup.id}-${index}`}
+              className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
+            >
+              {/* Botón invisible que cubre toda la card para el detalle */}
+              <button
+                type="button"
+                className="absolute inset-0 z-0 w-full h-full text-left cursor-pointer"
+                onClick={() => handleOpenDetail(pickup)}
+                aria-label={`Ver detalle de recojo de ${pickup.company_name}`}
+              />
+
+              {/* Franja de estado izquierda */}
+              <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusColor} z-10`} />
+
+              <div className="pl-3 relative z-10 pointer-events-none">
+                {/* Empresa + Acciones rápidas */}
+                <div className="flex justify-between items-start gap-2 mb-1">
+                  <p className="text-sm font-semibold text-gray-900 leading-tight truncate">
+                    {pickup.company_name}
+                  </p>
+                  <div className="flex gap-1.5 pointer-events-auto">
+                    <a
+                      href={getMapsUrl(pickup)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex h-7 px-2 items-center justify-center gap-1 rounded-full bg-emerald-100 text-emerald-700 shadow-sm active:scale-90 transition-transform text-[10px] font-bold border border-emerald-200"
+                    >
+                      <Navigation size={12} className="fill-emerald-700/10" />
+                      MAPS
+                    </a>
+                    <a
+                      href={`tel:${pickup.phone.replaceAll(/\D/g, '')}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm active:scale-90 transition-transform"
+                    >
+                      <Phone size={14} />
+                    </a>
+                    <a
+                      href={`https://wa.me/51${pickup.phone.replaceAll(/\D/g, '')}?text=${getWaText(pickup)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm active:scale-90 transition-transform"
+                    >
+                      <MessageCircle size={14} />
+                    </a>
+                  </div>
                 </div>
-              </div>
 
-              {/* Dirección de Origen */}
-              <div className="flex items-start gap-1.5 text-[11px] text-gray-600 mb-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1" />
-                <span className="line-clamp-1 italic">{pickup.origin}</span>
-              </div>
+                {/* Dirección */}
+                <div className="flex items-start gap-1.5 text-[11px] text-gray-600 mb-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1" />
+                  <span className="line-clamp-1 italic">{pickup.address}</span>
+                </div>
 
-              {/* Distrito */}
-              <div className="flex items-start gap-1.5 text-[10px] text-gray-400 font-medium">
-                <MapPin size={10} className="text-gray-400 shrink-0 mt-0.5" />
-                <span className="truncate uppercase tracking-tight">{pickup.district}</span>
+                {/* Distrito */}
+                {pickup.district_name && (
+                  <div className="flex items-start gap-1.5 text-[10px] text-gray-400 font-medium">
+                    <MapPin size={10} className="text-gray-400 shrink-0 mt-0.5" />
+                    <span className="truncate uppercase tracking-tight">
+                      {pickup.district_name}{pickup.sector_name ? ` · ${pickup.sector_name}` : ''}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {totalItems > 0 && (
-        <div className="flex justify-center sm:justify-end mt-4 pb-4 px-4">
-          <Pagination
-            currentPage={currentPage}
-            totalItems={totalItems}
-            itemsPerPage={ITEMS_PER_PAGE}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-      )}
-
-      {/* Modal de Detalle de Recojo */}
-      <PickupDetailModal
+      {/* Modal de Detalle */}
+      <CarrierPickupDetailModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
         pickup={selectedPickup}
-        onStatusChange={handleStatusChange}
+        isConfirming={isConfirming}
+        onClose={() => setIsModalOpen(false)}
+        onConfirmPickup={handleStatusChange}
       />
     </>
   );
