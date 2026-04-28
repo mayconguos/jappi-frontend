@@ -212,21 +212,18 @@ export default function CourierZonesPage() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8 animate-in fade-in duration-500">
+      <CourierZonesFilter
+        field={field}
+        setField={setField}
+        value={value}
+        setValue={setValue}
+        filterFields={filterFields}
+        onExportExcel={handleExportExcel}
+        totalItems={totalItems}
+      />
 
-      <div className="space-y-6">
-        <CourierZonesFilter
-          field={field}
-          setField={setField}
-          value={value}
-          setValue={setValue}
-          filterFields={filterFields}
-          onExportExcel={handleExportExcel}
-          totalItems={totalItems}
-        />
-
-        {renderTableContent()}
-      </div>
+      {renderTableContent()}
 
       <CourierZoneAssignmentModal
         isOpen={manageModal.isOpen}
