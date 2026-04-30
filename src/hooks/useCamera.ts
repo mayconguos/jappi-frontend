@@ -4,17 +4,22 @@ import { useState, useRef, useCallback } from 'react';
 export const useCamera = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
 
   const startCamera = useCallback(async () => {
     try {
-      // Preferencia por la cámara trasera ('environment')
-      // fallback a cualquier cámara si no hay trasera
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
         audio: false
       });
+      
+      streamRef.current = mediaStream;
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -23,7 +28,6 @@ export const useCamera = () => {
       setError(null);
     } catch (err: any) {
       console.error(err);
-      // Manejo básico de errores
       if (err.name === 'NotAllowedError') {
         setError('Permiso de cámara denegado. Por favor, habilite el acceso.');
       } else if (err.name === 'NotFoundError') {
@@ -36,12 +40,13 @@ export const useCamera = () => {
   }, []);
 
   const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
       setStream(null);
       setIsStreaming(false);
     }
-  }, [stream]);
+  }, []);
 
   const takePhoto = useCallback((): string | null => {
     if (!videoRef.current || !stream) return null;

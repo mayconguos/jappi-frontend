@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useCamera } from '@/hooks/useCamera';
+
+import { X, RotateCcw, Check } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { X, Camera as CameraIcon, RotateCcw, Check } from 'lucide-react';
+
+import { useCamera } from '@/hooks/useCamera';
 
 interface CameraCaptureProps {
   onCapture: (imageSrc: string) => void;
   onClose: () => void;
 }
 
-export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
+export default function CameraCapture({ onCapture, onClose }: Readonly<CameraCaptureProps>) {
   const { videoRef, startCamera, stopCamera, takePhoto, error, isStreaming } = useCamera();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
@@ -37,6 +40,43 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
     }
   };
 
+  const renderMainArea = () => {
+    if (error) {
+      return (
+        <div className="text-white text-center p-6">
+          <p className="text-red-400 mb-2 font-medium">Error de Cámara</p>
+          <p className="text-sm text-gray-300">{error}</p>
+          <Button
+            variant="secondary"
+            className="mt-4"
+            onClick={onClose}
+          >
+            Cerrar
+          </Button>
+        </div>
+      );
+    }
+
+    if (capturedImage) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-black">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={capturedImage} alt="Preview" className="max-w-full max-h-full object-contain" />
+        </div>
+      );
+    }
+
+    return (
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="w-full h-full object-cover"
+      />
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-[60] bg-black flex flex-col items-center justify-center animate-in fade-in duration-300">
       {/* Header / Controls */}
@@ -54,62 +94,51 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
 
       {/* Main Area */}
       <div className="flex-1 w-full h-full relative flex items-center justify-center bg-black">
-        {error ? (
-          <div className="text-white text-center p-6">
-            <p className="text-red-400 mb-2 font-medium">Error de Cámara</p>
-            <p className="text-sm text-gray-300">{error}</p>
-            <Button
-              variant="secondary"
-              className="mt-4"
-              onClick={onClose}
-            >
-              Cerrar
-            </Button>
-          </div>
-        ) : capturedImage ? (
-          // Preview Mode
-          <div className="w-full h-full flex items-center justify-center bg-black">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={capturedImage} alt="Preview" className="max-w-full max-h-full object-contain" />
-          </div>
-        ) : (
-          // Viewfinder Mode
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full h-full object-cover"
-          />
-        )}
+        {renderMainArea()}
       </div>
 
       {/* Footer / Trigger */}
-      <div className="absolute bottom-0 left-0 right-0 p-8 pb-12 bg-gradient-to-t from-black/80 to-transparent flex justify-center items-center gap-8">
+      <div className="absolute bottom-0 left-0 right-0 p-8 pb-12 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex justify-center items-center gap-10">
         {capturedImage ? (
           <>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="h-14 w-14 rounded-full bg-gray-700 text-white hover:bg-gray-600 border border-gray-500"
-              onClick={handleRetake}
-            >
-              <RotateCcw size={24} />
-            </Button>
-            <Button
-              size="lg"
-              className="h-16 w-16 rounded-full bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-900/20"
-              onClick={handleConfirm}
-            >
-              <Check size={32} />
-            </Button>
+            {/* Botón Reintentar - Secundario para el repartidor */}
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-xl text-white hover:bg-white/20 border border-white/10 transition-all active:scale-90 shadow-xl"
+                onClick={handleRetake}
+              >
+                <RotateCcw size={22} />
+              </Button>
+              <span className="text-[10px] font-bold text-white/60 tracking-widest uppercase">Repetir</span>
+            </div>
+
+            {/* Botón Aceptar - Primario y Extra Grande para facilitar el toque rápido del repartidor */}
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                size="icon"
+                className="h-20 w-20 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_0_40px_rgba(16,185,129,0.5)] transition-all active:scale-90 border-4 border-emerald-300/30"
+                onClick={handleConfirm}
+              >
+                <Check size={44} strokeWidth={4} />
+              </Button>
+              <span className="text-[10px] font-bold text-emerald-400 tracking-widest uppercase">Confirmar</span>
+            </div>
           </>
         ) : (
+          /* Botón Disparador Premium */
           <button
             onClick={handleCapture}
             disabled={!isStreaming}
-            className="h-16 w-16 rounded-full bg-white border-4 border-gray-300 ring-4 ring-white/30 active:scale-95 transition-all shadow-lg shadow-black/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Tomar foto"
-          />
+          >
+            <div className="absolute inset-0 rounded-full bg-white/20 scale-125 blur-sm group-active:scale-100 transition-transform" />
+            <div className="h-20 w-20 rounded-full border-4 border-white flex items-center justify-center p-1 shadow-2xl">
+              <div className="h-full w-full rounded-full bg-white group-active:scale-90 transition-transform shadow-inner" />
+            </div>
+          </button>
         )}
       </div>
     </div>
