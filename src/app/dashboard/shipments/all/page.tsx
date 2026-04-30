@@ -61,12 +61,14 @@ const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
 
 // ─── Data estática ─────────────────────────────────────────────
 const ITEMS_PER_PAGE = 10;
+
 const FILTER_FIELDS = [
   { value: 'all', label: 'Todos los campos' },
   { value: 'seller', label: 'Vendedor' },
   { value: 'carrier', label: 'Transportista' },
   { value: 'district', label: 'Distrito' },
 ];
+
 const STATUS_OPTIONS = Object.entries(STATUS_LABELS)
   .filter(([key]) => key !== 'picked_up')
   .map(([value, label]) => ({ label, value }));
@@ -118,7 +120,12 @@ export default function AllShipmentsPage() {
       try {
         const resp = await get('/shipping');
         const data = Array.isArray(resp) ? resp : (resp as any)?.data;
-        if (data && Array.isArray(data)) setShipments(data.map(mapApiShipmentToShipment));
+        if (data && Array.isArray(data)) {
+          const mapped = data.map(mapApiShipmentToShipment);
+          setShipments(mapped);
+        } else {
+          console.warn('API Response is not an array or does not contain a "data" array:', resp);
+        }
       } catch (err) {
         console.error('Error fetching shipments:', err);
       } finally {
@@ -151,12 +158,23 @@ export default function AllShipmentsPage() {
         return sDate <= tDate;
       });
     }
+
     if (!value) return filtered;
+
     const searchTerm = value.toLowerCase();
     return filtered.filter(s => {
-      if (field === 'all') return s.seller.toLowerCase().includes(searchTerm) || s.carrier.toLowerCase().includes(searchTerm) || s.district.toLowerCase().includes(searchTerm);
+      if (field === 'all') {
+        return (
+          s.seller.toLowerCase().includes(searchTerm) ||
+          s.carrier.toLowerCase().includes(searchTerm) ||
+          s.district.toLowerCase().includes(searchTerm)
+        );
+      }
+
       const fieldValue = s[field as keyof Shipment];
-      return fieldValue ? String(fieldValue).toLowerCase().includes(searchTerm) : false;
+      return fieldValue
+        ? String(fieldValue).toLowerCase().includes(searchTerm)
+        : false;
     });
   }, [field, value, shipments, dateRange]);
 
@@ -164,11 +182,10 @@ export default function AllShipmentsPage() {
   const currentItems = filteredShipments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // ─── Handlers ────────────────────────────────────────────────
-
   const handleViewShipment = async (shipment: Shipment) => {
     setViewDetails({ isOpen: true, shipment, items: [], loading: true, error: null });
     try {
-      const resp = await get(`/shipment/detail/${shipment.id}`);
+      const resp = await get(`/shipping/detail/${shipment.id}`);
       const items = Array.isArray(resp) ? resp : ((resp as any)?.data || []);
       setViewDetails(prev => ({ ...prev, loading: false, items }));
     } catch (err: any) {
@@ -377,7 +394,12 @@ export default function AllShipmentsPage() {
           />
           {totalItems > 0 && (
             <div className="flex justify-center sm:justify-end">
-              <Pagination currentPage={currentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setCurrentPage} />
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </div>
@@ -388,8 +410,15 @@ export default function AllShipmentsPage() {
         isOpen={viewDetails.isOpen}
         onClose={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}
         size="md"
-        title={`Detalle del Envío #${viewDetails.shipment?.id}`}
-        footer={<ModalFooter><div className="flex justify-end pt-2"><Button onClick={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}>Cerrar</Button></div></ModalFooter>}
+        title={`Detalle de Envío #${viewDetails.shipment?.id.toString().padStart(5, '0')}`}
+        footer={
+          <ModalFooter>
+            <div className="flex justify-end pt-2">
+              <Button onClick={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}>
+                Cerrar
+              </Button>
+            </div>
+          </ModalFooter>}
       >
         <div className="py-2 space-y-6">
           {renderModalContent()}
