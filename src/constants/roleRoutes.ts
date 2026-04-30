@@ -89,6 +89,6 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
 
   despacho: [
     { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
-    { path: '/dashboard/inventory/kardex', label: 'Kardex', icon: ClipboardCheck },
+    // { path: '/dashboard/inventory/kardex', label: 'Kardex', icon: ClipboardCheck },
   ],
 };

@@ -43,9 +43,10 @@ export default function DataTableFilter({
         {/* Date Group */}
         <div className="flex items-end gap-2 w-full sm:w-auto">
           <div className="w-full flex justify-start sm:w-auto flex-col">
-            <label className="block mb-1.5 text-sm font-medium text-gray-700">Fecha</label>
+            <label htmlFor="date-from" className="block mb-1.5 text-sm font-medium text-gray-700">Fecha</label>
             <div className="flex items-center border border-gray-300 rounded-lg p-1 h-10 bg-white relative shadow-sm transition-all duration-200 ease-in-out focus-within:border-[#02997d] focus-within:ring-2 focus-within:ring-[#02997d]/20">
               <input
+                id="date-from"
                 type="date"
                 value={dateRange.from || ''}
                 onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
@@ -100,8 +101,7 @@ export default function DataTableFilter({
       <div className="flex items-center gap-4 relative z-10 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-100 flex-wrap justify-between sm:justify-end w-full xl:w-auto">
         {/* Total Badge */}
         <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 shadow-sm flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-          Total: <span className="text-slate-900 font-bold">{totalItems}</span>
+          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />Total: <span className="text-slate-900 font-bold">{totalItems}</span>
         </div>
 
         <div className="w-px h-8 bg-slate-200 hidden sm:block" />

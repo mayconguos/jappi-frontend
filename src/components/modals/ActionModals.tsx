@@ -1,10 +1,11 @@
-import { Truck } from 'lucide-react';
+import { Truck, RefreshCw } from 'lucide-react';
+
+import { Courier } from '@/types/courier';
+
 import { Button } from '@/components/ui/button';
+import DeliveryLoader from '@/components/ui/delivery-loader';
 import { Modal, ModalFooter } from '@/components/ui/modal';
 import { Select } from '@/components/ui/select';
-import { RefreshCw } from 'lucide-react';
-import DeliveryLoader from '@/components/ui/delivery-loader';
-import { Courier } from '@/types/courier';
 
 // ─── AssignCarrierModal ─────────────────────────────────────────────────────
 

@@ -2,14 +2,22 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useApi } from '@/hooks';
 
 import { Pagination } from '@/components/ui/pagination';
 import DeliveryLoader from '@/components/ui/delivery-loader';
 import DataTableFilter from '@/components/filters/DataTableFilter';
 import DispatchesTable from '@/components/tables/DispatchesTable';
 
-import { Dispatch, ApiDispatch, mapApiDispatchToDispatch } from '@/types/dispatch';
+import { ChangeStatusModal } from '@/components/modals/ActionModals';
+import { SuccessModal, WarningModal } from '@/components/modals/FeedbackModals';
+
+import { Dispatch, mapApiDispatchToDispatch } from '@/types/dispatch';
+import { useTableActions } from '@/hooks/useTableActions';
+
+const STATUS_LABELS: Record<string, string> = {
+  to_dispatch: 'Pendiente',
+  dispatched: 'Despachado/Preparado',
+};
 
 const ITEMS_PER_PAGE = 10;
 const FILTER_FIELDS = [
@@ -20,8 +28,6 @@ const FILTER_FIELDS = [
 
 export default function DispatchesPage() {
   const { user } = useAuth();
-  const { get } = useApi<any>();
-  
   const [dispatches, setDispatches] = useState<Dispatch[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -34,6 +40,16 @@ export default function DispatchesPage() {
     from: todayDate,
     to: todayDate,
   });
+
+  const {
+    setSelectedIds,
+    isConfirmStatusModalOpen, setIsConfirmStatusModalOpen,
+    isUpdatingStatus, setIsUpdatingStatus,
+    pendingStatusChange, setPendingStatusChange,
+    successModal, setSuccessModal,
+    warningModal, setWarningModal,
+    put, get
+  } = useTableActions<string>();
 
   // Fetch inicial
   useEffect(() => {
@@ -85,7 +101,7 @@ export default function DispatchesPage() {
 
     // Filtro por texto
     if (!value) return filtered;
-    
+
     const searchTerm = value.toLowerCase();
     return filtered.filter(d => {
       if (field === 'all') {
@@ -105,6 +121,30 @@ export default function DispatchesPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  // ─── Handlers ────────────────────────────────────────────────
+  const handleStatusChange = (id: number, status: string) => {
+    setPendingStatusChange({ entityId: id, status });
+    setIsConfirmStatusModalOpen(true);
+  };
+
+  const handleConfirmStatusUpdate = async () => {
+    if (!pendingStatusChange) return;
+    setIsUpdatingStatus(true);
+    try {
+      const response = await put('/shipping/dispatch', [{ id_shipping: pendingStatusChange.entityId, status: pendingStatusChange.status }]);
+      if (!response) throw new Error('Hubo un error comunicándose con el servidor.');
+      setDispatches(prev => prev.map(d => d.id === pendingStatusChange.entityId ? { ...d, status_dispatch: pendingStatusChange.status } : d));
+      setSuccessModal('El estado del despacho ha sido actualizado correctamente.');
+      setSelectedIds([]);
+    } catch (err: any) {
+      setWarningModal({ title: 'Error al cambiar estado', message: err.message || 'Ocurrió un error al intentar cambiar el estado.' });
+    } finally {
+      setIsUpdatingStatus(false);
+      setIsConfirmStatusModalOpen(false);
+      setPendingStatusChange(null);
+    }
+  };
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 flex flex-col gap-8">
@@ -129,21 +169,34 @@ export default function DispatchesPage() {
           <DispatchesTable
             dispatches={currentItems}
             currentPage={currentPage}
-            itemsPerPage={ITEMS_PER_PAGE}
+            onStatusChange={handleStatusChange}
           />
-          
+
           {totalItems > 0 && (
             <div className="flex justify-center sm:justify-end">
-              <Pagination 
-                currentPage={currentPage} 
-                totalItems={totalItems} 
-                itemsPerPage={ITEMS_PER_PAGE} 
-                onPageChange={setCurrentPage} 
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
               />
             </div>
           )}
         </div>
       )}
+
+      {/* Modals */}
+      {/* Modals */}
+      <ChangeStatusModal
+        isOpen={isConfirmStatusModalOpen}
+        isLoading={isUpdatingStatus}
+        statusLabel={pendingStatusChange ? STATUS_LABELS[pendingStatusChange.status] : ''}
+        onConfirm={handleConfirmStatusUpdate}
+        onClose={() => setIsConfirmStatusModalOpen(false)}
+      />
+
+      <SuccessModal message={successModal} onClose={() => setSuccessModal(null)} />
+      <WarningModal modal={warningModal} onClose={() => setWarningModal(null)} />
     </div>
   );
 }
