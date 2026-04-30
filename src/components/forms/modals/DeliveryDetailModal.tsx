@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import CameraCapture from '@/components/ui/camera-capture';
 import Modal, { ModalFooter } from '@/components/ui/modal';
 
+import api from '@/app/services/api';
+
 import { CarrierDelivery } from '@/app/dashboard/carrier/deliveries/page';
 
 interface DeliveryDetailModalProps {
@@ -78,19 +80,38 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
     setActiveCameraSlot(null); // Close camera
   };
 
-  const handleConfirmDelivery = () => {
-    if (photos.filter(Boolean).length < 1) return;
+  const handleConfirmDelivery = async () => {
+    const validPhotos = photos.filter(Boolean);
+    if (validPhotos.length < 1) return;
 
     setIsUploading(true);
-    // Simula llamada API
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      
+      // Convertir base64 a Blobs/Files
+      for (let i = 0; i < validPhotos.length; i++) {
+        const response = await fetch(validPhotos[i]);
+        const blob = await response.blob();
+        formData.append('files', blob, `photo_${i}.jpg`);
+      }
+
+      await api.post(`/courier/upload?id_shipping=${delivery.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       onStatusChange(delivery.id, 'completed');
-      setIsUploading(false);
       setShowProofScreen(false);
       setPhotoSlots(1);
       setPhotos([]);
       onClose();
-    }, 2000);
+    } catch (error) {
+      console.error('Error uploading proof:', error);
+      // Aquí podrías mostrar un toast de error si tuvieras uno disponible
+    } finally {
+      setIsUploading(false);
+    }
   };
 
 
