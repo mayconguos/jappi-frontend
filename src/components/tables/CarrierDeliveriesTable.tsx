@@ -1,169 +1,48 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pagination } from '@/components/ui/pagination';
+
+import { Eye, MapPin, User, MessageCircle, Phone, Map, Navigation } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, MapPin, User, MessageCircle, Phone, Map, Navigation } from 'lucide-react';
+import { Pagination } from '@/components/ui/pagination';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import DeliveryDetailModal from '@/components/forms/modals/DeliveryDetailModal';
 
-interface Delivery {
-  id: string;
-  date: string;
-  recipient: string;
-  recipient_phone: string;
-  recipient_address: string;
-  origin: string;
-  destination: string;
-  district: string;
-  items_count: number;
-  status: 'pending' | 'completed';
+import { CarrierDelivery } from '@/app/dashboard/carrier/deliveries/page';
+
+interface CarrierDeliveriesTableProps {
+  deliveries: CarrierDelivery[];
+  onStatusChange: (id: string, status: string) => void;
 }
 
-const INITIAL_DELIVERIES: Delivery[] = [
-  {
-    id: 'TRK-9901-JP',
-    date: '2024-02-06',
-    recipient: 'Juan Pérez',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Av. Larco 101, Miraflores',
-    origin: 'Almacén Central Japi',
-    destination: 'Av. Larco 101, Miraflores',
-    district: 'Miraflores',
-    items_count: 1,
-    status: 'pending',
-  },
-  {
-    id: 'TRK-9902-JP',
-    date: '2024-02-06',
-    recipient: 'Empresa ABC S.A.C.',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Jr. Camaná 500, Lima',
-    origin: 'Almacén Central Japi',
-    destination: 'Jr. Camaná 500, Lima',
-    district: 'Lima',
-    items_count: 3,
-    status: 'pending',
-  },
-  {
-    id: 'TRK-9903-JP',
-    date: '2024-02-06',
-    recipient: 'Sofía Mendoza',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Av. Benavides 1200, Surco',
-    origin: 'Almacén Central Japi',
-    destination: 'Av. Benavides 1200, Surco',
-    district: 'Surco',
-    items_count: 2,
-    status: 'pending',
-  },
-  {
-    id: 'TRK-9904-JP',
-    date: '2024-02-06',
-    recipient: 'Tech Park SAC',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Calle Monte Bello 340, San Isidro',
-    origin: 'Almacén Central Japi',
-    destination: 'Calle Monte Bello 340, San Isidro',
-    district: 'San Isidro',
-    items_count: 5,
-    status: 'pending',
-  },
-  {
-    id: 'TRK-9905-JP',
-    date: '2024-02-06',
-    recipient: 'Luis Herrera',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Jr. Ucayali 280, Lima',
-    origin: 'Almacén Central Japi',
-    destination: 'Jr. Ucayali 280, Lima',
-    district: 'Lima',
-    items_count: 1,
-    status: 'pending',
-  },
-  {
-    id: 'TRK-9906-JP',
-    date: '2024-02-06',
-    recipient: 'Distribuidora Sur',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Av. Tomás Marsano 900, Surquillo',
-    origin: 'Almacén Central Japi',
-    destination: 'Av. Tomás Marsano 900, Surquillo',
-    district: 'Surquillo',
-    items_count: 4,
-    status: 'pending',
-  },
-  {
-    id: 'TRK-9907-JP',
-    date: '2024-02-06',
-    recipient: 'Ana Rojas',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Ca. Los Ficus 67, La Molina',
-    origin: 'Almacén Central Japi',
-    destination: 'Ca. Los Ficus 67, La Molina',
-    district: 'La Molina',
-    items_count: 2,
-    status: 'pending',
-  },
-  {
-    id: 'TRK-9890-JP',
-    date: '2024-02-05',
-    recipient: 'María Lopez',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Av. Salaverry 2020, Jesús María',
-    origin: 'Almacén Central Japi',
-    destination: 'Av. Salaverry 2020, Jesús María',
-    district: 'Jesús María',
-    items_count: 2,
-    status: 'completed',
-  },
-  {
-    id: 'TRK-9885-JP',
-    date: '2024-02-04',
-    recipient: 'Carlos Ruiz',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Calle Los Pinos 123, San Isidro',
-    origin: 'Almacén Central Japi',
-    destination: 'Calle Los Pinos 123, San Isidro',
-    district: 'San Isidro',
-    items_count: 1,
-    status: 'completed',
-  },
-  {
-    id: 'TRK-9880-JP',
-    date: '2024-02-04',
-    recipient: 'Importex Peru',
-    recipient_phone: '+51 976 548 966',
-    recipient_address: 'Av. Argentina 800, Callao',
-    origin: 'Almacén Central Japi',
-    destination: 'Av. Argentina 800, Callao',
-    district: 'Callao',
-    items_count: 6,
-    status: 'completed',
-  },
-];
-
-const STATUS_ORDER: Record<Delivery['status'], number> = { pending: 0, completed: 1 };
-
-const getStatusBadge = (status: Delivery['status']) => {
-  switch (status) {
-    case 'completed': return <Badge variant="success">Entregado</Badge>;
-    default: return <Badge variant="info">En Ruta</Badge>;
-  }
+const STATUS_ORDER: Record<CarrierDelivery['status'], number> = {
+  pending: 0,
+  scheduled: 0,
+  completed: 1,
+  failed: 2
 };
 
-export default function CarrierDeliveriesTable() {
-  const [deliveries, setDeliveries] = useState(INITIAL_DELIVERIES);
-  const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
+const getStatusBadge = (status: CarrierDelivery['status']) => {
+  if (status === 'completed') {
+    return <Badge variant="success">Entregado</Badge>;
+  }
+  if (status === 'failed') {
+    return <Badge variant="destructive">Fallido</Badge>;
+  }
+  return <Badge variant="info">En Ruta</Badge>;
+};
+
+export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: Readonly<CarrierDeliveriesTableProps>) {
+  const [selectedDelivery, setSelectedDelivery] = useState<CarrierDelivery | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
 
-  // Derivar distritos únicos dinámicamente del array de datos
-  // Solo mostrar distritos con al menos 1 entrega pendiente
   const districtsWithPending = Array.from(
-    new Set(deliveries.filter(d => d.status === 'pending').map(d => d.district))
-  ).sort();
+    new Set(deliveries.filter(d => d.status === 'pending' || d.status === 'scheduled').map(d => d.district))
+  ).sort((a, b) => a.localeCompare(b));
   const districts = ['all', ...districtsWithPending];
 
   const sorted = [...deliveries]
@@ -181,7 +60,7 @@ export default function CarrierDeliveriesTable() {
   const totalItems = sorted.length;
   const currentItems = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  const getWhatsappMessage = (delivery: Delivery) => {
+  const getWhatsappMessage = (delivery: CarrierDelivery) => {
     return [
       `Buen día, le saludamos de Japi Express ${String.fromCodePoint(0x1F4E6)}`,
       `Empresa Courier oficial de la tienda *${delivery.origin}* donde realizó su compra.`,
@@ -191,16 +70,15 @@ export default function CarrierDeliveriesTable() {
     ].join('\n');
   };
 
-  const handleOpenDetail = (delivery: Delivery) => {
+  const handleOpenDetail = (delivery: CarrierDelivery) => {
     setSelectedDelivery(delivery);
     setIsModalOpen(true);
   };
 
   const handleStatusChange = (id: string, newStatus: string) => {
-    const s = newStatus as Delivery['status'];
-    setDeliveries(prev => prev.map(d => d.id === id ? { ...d, status: s } : d));
+    onStatusChange(id, newStatus);
     if (selectedDelivery?.id === id) {
-      setSelectedDelivery({ ...selectedDelivery, status: s });
+      setSelectedDelivery({ ...selectedDelivery, status: newStatus as any });
     }
   };
 
@@ -256,7 +134,7 @@ export default function CarrierDeliveriesTable() {
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-12 text-center text-sm text-gray-400">
+                <TableCell colSpan={7} className="py-12 text-center text-sm text-gray-400">
                   No hay entregas en <span className="font-medium text-gray-500">{selectedDistrict}</span>
                 </TableCell>
               </TableRow>
@@ -286,7 +164,7 @@ export default function CarrierDeliveriesTable() {
                   <TableCell className="py-4">
                     <div className="flex items-center gap-2">
                       <a
-                        href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
+                        href={`https://wa.me/${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
@@ -297,7 +175,7 @@ export default function CarrierDeliveriesTable() {
                         WhatsApp
                       </a>
                       <a
-                        href={`tel:${delivery.recipient_phone.replace(/\D/g, '')}`}
+                        href={`tel:${delivery.recipient_phone.replaceAll(/\D/g, '')}`}
                         onClick={(e) => e.stopPropagation()}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
                         title="Llamar"
@@ -319,7 +197,7 @@ export default function CarrierDeliveriesTable() {
                   <TableCell className="text-right pr-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${delivery.destination}, ${delivery.district}, Lima`)}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.destination + ', ' + delivery.district + ', Lima')}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
@@ -356,18 +234,25 @@ export default function CarrierDeliveriesTable() {
             <div
               key={delivery.id}
               className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
-              onClick={() => handleOpenDetail(delivery)}
             >
-              {/* Franja de estado izquierda */}
-              <div className={`absolute left-0 top-0 bottom-0 w-1 ${delivery.status === 'pending' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+              {/* Botón invisible que cubre toda la card para el detalle */}
+              <button
+                type="button"
+                className="absolute inset-0 z-0 w-full h-full text-left cursor-pointer"
+                onClick={() => handleOpenDetail(delivery)}
+                aria-label={`Ver detalle de entrega para ${delivery.recipient}`}
+              />
 
-              <div className="pl-3">
+              {/* Franja de estado izquierda */}
+              <div className={`absolute left-0 top-0 bottom-0 w-1 ${delivery.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'} z-10`} />
+
+              <div className="pl-3 relative z-10 pointer-events-none">
                 {/* Destinatario */}
                 <div className="flex justify-between items-start gap-2 mb-1">
                   <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{delivery.recipient}</p>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1.5 pointer-events-auto">
                     <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${delivery.destination}, ${delivery.district}, Lima`)}`}
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.destination + ', ' + delivery.district + ', Lima')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -377,14 +262,14 @@ export default function CarrierDeliveriesTable() {
                       MAPS
                     </a>
                     <a
-                      href={`tel:${delivery.recipient_phone.replace(/\D/g, '')}`}
+                      href={`tel:${delivery.recipient_phone.replaceAll(/\D/g, '')}`}
                       onClick={(e) => e.stopPropagation()}
                       className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm active:scale-90 transition-transform"
                     >
                       <Phone size={14} />
                     </a>
                     <a
-                      href={`https://wa.me/${delivery.recipient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
+                      href={`https://wa.me/${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -433,3 +318,4 @@ export default function CarrierDeliveriesTable() {
     </>
   );
 }
+

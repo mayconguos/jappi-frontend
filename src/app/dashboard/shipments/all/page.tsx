@@ -216,7 +216,7 @@ export default function AllShipmentsPage() {
     setIsUpdatingCarrier(true);
     const driverId = selectedChange.courierId;
     try {
-      const response = await put('/shipping/assign', { assignments: [{ id_shipment: selectedChange.entityId, id_driver: driverId }] });
+      const response = await put('/shipping/assign', { assignments: [{ id_shipping: selectedChange.entityId, id_driver: driverId }] });
       if (!response) throw new Error('Hubo un error comunicándose con el servidor.');
       const isUnassigning = driverId === 0;
       setShipments(prev => prev.map(s => s.id === selectedChange.entityId ? { ...s, carrier: selectedChange.courierName, id_driver: driverId === 0 ? null : driverId, status: isUnassigning ? s.status : 'scheduled' } : s));

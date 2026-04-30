@@ -130,7 +130,7 @@ export default function CarrierPickupsTable({ pickups, isConfirming, onConfirmPi
           <TableBody>
             {sortedPickups.map((pickup, index) => (
               <TableRow
-                key={`${pickup.id}-${index}`}
+                key={pickup.id}
                 className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                 onClick={() => handleOpenDetail(pickup)}
                 onKeyDown={(e) => {
@@ -216,7 +216,7 @@ export default function CarrierPickupsTable({ pickups, isConfirming, onConfirmPi
 
       {/* Vista Móvil (Cards compactas) */}
       <div className="md:hidden space-y-2">
-        {sortedPickups.map((pickup, index) => {
+        {sortedPickups.map((pickup) => {
           const getStatusColor = (status: CarrierPickupStatus) => {
             switch (status) {
               case 'pending':   return 'bg-amber-400';
@@ -230,7 +230,7 @@ export default function CarrierPickupsTable({ pickups, isConfirming, onConfirmPi
 
           return (
             <div
-              key={`${pickup.id}-${index}`}
+              key={pickup.id}
               className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform"
             >
               {/* Botón invisible que cubre toda la card para el detalle */}
