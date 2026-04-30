@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import FullScreenDeliveryLoader from '@/components/ui/fullscreen-delivery-loader';
 
+import ForgotPasswordModal from '@/components/forms/modals/ForgotPasswordModal';
+
 export default function LoginForm() {
   const {
     handleSubmit,
@@ -44,6 +46,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -126,12 +129,13 @@ export default function LoginForm() {
               autoComplete="current-password"
             />
             <div className="flex justify-end mt-2">
-              <a
-                href="#"
-                className="text-sm font-medium text-[#02997d] hover:text-[#027d66] hover:underline transition-colors"
+              <Button
+                type="button"
+                onClick={() => setIsForgotPasswordOpen(true)}
+                variant={'link'}
               >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </Button>
             </div>
           </div>
         </div>
@@ -172,18 +176,22 @@ export default function LoginForm() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
               ¿No tienes cuenta?{' '}
-              <button
+              <Button
                 type="button"
                 onClick={() => router.push('/register')}
-                className="font-medium text-[#02997d] hover:text-[#027d66] hover:underline transition-colors"
+                variant='link'
               >
                 Regístrate
-              </button>
+              </Button>
             </p>
           </div>
         </div>
       </form>
 
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </div>
   );
 }

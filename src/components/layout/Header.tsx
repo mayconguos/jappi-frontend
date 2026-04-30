@@ -1,16 +1,18 @@
 'use client';
 
-import { Shield, Building, Bike, Boxes, Workflow, Menu, User, LogOut } from 'lucide-react';
+import { Shield, Building, Bike, Boxes, Workflow, Menu, User, LogOut, KeyRound } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { clsx } from 'clsx';
+import { Button } from '@headlessui/react';
 
 interface HeaderProps {
   onOpenSidebarMobile?: () => void;
+  onOpenChangePassword?: () => void;
 }
 
-export default function Header({ onOpenSidebarMobile }: Readonly<HeaderProps>) {
+export default function Header({ onOpenSidebarMobile, onOpenChangePassword }: Readonly<HeaderProps>) {
   const { user, logout } = useAuth();
   const { pageTitle } = useUserRoutes();
   const { isOpen: showMenu, setIsOpen: setShowMenu, ref: menuRef } = useClickOutside<HTMLDivElement>();
@@ -79,22 +81,32 @@ export default function Header({ onOpenSidebarMobile }: Readonly<HeaderProps>) {
               </div>
 
               {/* Menu Items */}
-              <div className="p-2">
-                {/* Here we can add Link to Profile later */}
+                <div className="p-2 space-y-1">
+                  {/* Here we can add Link to Profile later */}
+                  
+                  <Button
+                    onClick={() => {
+                      onOpenChangePassword?.();
+                      setShowMenu(false);
+                    }}
+                    className='w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors'
+                  >
+                    <KeyRound size={16} />
+                    <span>Cambiar contraseña</span>
+                  </Button>
 
-                <div className="px-2 py-2">
                   <div className="h-px bg-gray-100 my-1" />
                 </div>
 
-                <button
+                <Button
                   onClick={logout}
+                  color="destructive"
                   className='w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                 >
                   <LogOut size={16} />
                   <span>Cerrar sesión</span>
-                </button>
+                </Button>
               </div>
-            </div>
           )}
         </div>
       </div>

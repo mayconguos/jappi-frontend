@@ -9,6 +9,8 @@ import { isPathAllowed, getRedirectPathForUser } from '@/utils/roleUtils';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 
+import ChangePasswordModal from '@/components/forms/modals/ChangePasswordModal';
+
 import DeliveryLoader from '@/components/ui/delivery-loader';
 
 export default function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -16,6 +18,7 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
   const pathname = usePathname();
   const { isLoading, isAuthenticated, user } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -48,7 +51,10 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
         onMobileClose={() => setIsMobileSidebarOpen(false)}
       />
       <div className='flex-1 flex flex-col min-w-0 h-full overflow-hidden'>
-        <Header onOpenSidebarMobile={() => setIsMobileSidebarOpen(true)} />
+        <Header
+          onOpenSidebarMobile={() => setIsMobileSidebarOpen(true)}
+          onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+        />
         <main className='flex-1 overflow-y-auto bg-slate-50/50 relative custom-scrollbar'>
           {isAuthorized ? children : (
             <div className='flex items-center justify-center h-full'>
@@ -57,6 +63,11 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
           )}
         </main>
       </div>
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        userEmail={user?.email}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
     </div>
   );
 }
