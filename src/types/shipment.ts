@@ -1,4 +1,11 @@
-export type ShipmentStatus = 'pending' | 'scheduled' | 'picked_up' | 'received' | 'in_transit' | 'delivered' | 'cancelled' | 'returned';
+export type ShipmentStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'received'
+  | 'in_transit'
+  | 'delivered'
+  | 'cancelled'
+  | 'returned';
 
 export interface Shipment {
   id: number;

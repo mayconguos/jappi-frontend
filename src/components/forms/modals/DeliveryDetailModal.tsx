@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle, MessageCircle, Phone, Copy, Check } from 'lucide-react';
+import { Camera, MapPin, User, Package, CheckCircle2, AlertCircle, MessageCircle, Phone, Copy, Check, Eye } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import Modal, { ModalFooter } from '@/components/ui/modal';
 
 import api from '@/app/services/api';
 
-import { CarrierDelivery } from '@/app/dashboard/carrier/deliveries/page';
+import { CarrierDelivery } from '@/types/courier';
 
 interface DeliveryDetailModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ interface CopyButtonProps {
   isCopied: boolean;
 }
 
-const CopyButton = ({ text, fieldId, onCopy, isCopied }: CopyButtonProps) => (
+const CopyButton = ({ text, fieldId, onCopy, isCopied }: Readonly<CopyButtonProps>) => (
   <button
     onClick={() => onCopy(text, fieldId)}
     className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors ml-1"
@@ -38,10 +38,20 @@ const CopyButton = ({ text, fieldId, onCopy, isCopied }: CopyButtonProps) => (
 );
 
 const getStatusBadge = (status: string) => {
-  if (status === 'completed') {
-    return <Badge variant="success">Entregado</Badge>;
+  switch (status) {
+    case 'delivered':
+      return <Badge variant="success">Enviado</Badge>;
+    case 'in_transit':
+      return <Badge variant="info">En Ruta</Badge>;
+    case 'cancelled':
+      return <Badge variant="destructive">Cancelado</Badge>;
+    case 'returned':
+      return <Badge variant="destructive">Devuelto</Badge>;
+    case 'scheduled':
+    case 'pending':
+    default:
+      return <Badge variant="info">Pendiente</Badge>;
   }
-  return <Badge variant="info">En Ruta</Badge>;
 };
 
 export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatusChange }: Readonly<DeliveryDetailModalProps>) {
@@ -101,7 +111,7 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
         },
       });
 
-      onStatusChange(delivery.id, 'completed');
+      onStatusChange(delivery.id, 'delivered');
       setShowProofScreen(false);
       setPhotoSlots(1);
       setPhotos([]);
@@ -115,8 +125,7 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
   };
 
 
-  const isPending = delivery.status === 'pending' || delivery.status === 'scheduled';
-  const isCompleted = delivery.status === 'completed';
+  const isFinished = ['delivered', 'cancelled', 'returned'].includes(delivery.status);
 
   return (
     <>
@@ -237,24 +246,26 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <p className="text-sm text-gray-500">{delivery.recipient_phone}</p>
-                      <div className="flex gap-1.5">
-                        <a
-                          href={`tel:${delivery.recipient_phone.replaceAll(/\D/g, '')}`}
-                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
-                        >
-                          <Phone size={12} className="fill-blue-700/10" />
-                          Llamar
-                        </a>
-                        <a
-                          href={`https://wa.me/${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent('Hola ' + delivery.recipient + ', te saluda el motorizado de Japi Express. Estoy por entregar tu pedido ' + delivery.id + ' en ' + delivery.recipient_address + '.')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-xs font-medium border border-emerald-100"
-                        >
-                          <MessageCircle size={12} className="fill-emerald-700/10" />
-                          Chat
-                        </a>
-                      </div>
+                      {!isFinished && (
+                        <div className="flex gap-1.5">
+                          <a
+                            href={`tel:${delivery.recipient_phone.replaceAll(/\D/g, '')}`}
+                            className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
+                          >
+                            <Phone size={12} className="fill-blue-700/10" />
+                            Llamar
+                          </a>
+                          <a
+                            href={`https://wa.me/${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent('Hola ' + delivery.recipient + ', te saluda el motorizado de Japi Express. Estoy por entregar tu pedido ' + delivery.id + ' en ' + delivery.recipient_address + '.')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-xs font-medium border border-emerald-100"
+                          >
+                            <MessageCircle size={12} className="fill-emerald-700/10" />
+                            Chat
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -289,6 +300,35 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                     </p>
                   </div>
                 </div>
+
+                {/* Sección Fotos de Entrega (si existen) */}
+                {delivery.signed_urls && delivery.signed_urls.length > 0 && (
+                  <div className="col-span-full mt-2">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                      <Camera size={16} className="text-blue-600" /> Fotos de Entrega
+                    </h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {delivery.signed_urls.map((url, idx) => (
+                        <a 
+                          key={url} 
+                          href={url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="block aspect-square rounded-lg overflow-hidden border border-gray-200 group relative"
+                        >
+                          <img 
+                            src={url} 
+                            alt={`Prueba ${idx + 1}`} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
+                          />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Eye size={16} className="text-white" />
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -311,7 +351,7 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
           ) : (
             <>
               <Button variant="ghost" onClick={onClose}>Cerrar</Button>
-              {(isPending || !isCompleted) && (
+              {!isFinished && (
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2" onClick={handleFinishClick}>
                   <CheckCircle2 size={16} /> Finalizar Entrega
                 </Button>

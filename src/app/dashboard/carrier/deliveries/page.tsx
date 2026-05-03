@@ -10,21 +10,7 @@ import DeliveryLoader from '@/components/ui/delivery-loader';
 
 import CarrierDeliveriesTable from '@/components/tables/CarrierDeliveriesTable';
 
-// ─── Tipos ─────────────────────────────────────────────────────
-export type CarrierDeliveryStatus = 'pending' | 'scheduled' | 'completed' | 'failed';
-
-export interface CarrierDelivery {
-  id: string;
-  status: CarrierDeliveryStatus;
-  date: string;
-  recipient: string;
-  recipient_phone: string;
-  recipient_address: string;
-  origin: string;
-  destination: string;
-  district: string;
-  items_count: number;
-}
+import { CarrierDelivery, CarrierDeliveryStatus } from '@/types/courier';
 
 // ─── Helper de Mapeo ───────────────────────────────────────────
 const mapApiDelivery = (raw: any): CarrierDelivery => ({
@@ -39,7 +25,8 @@ const mapApiDelivery = (raw: any): CarrierDelivery => ({
   origin: raw.company_name || 'Japi Express',
   destination: raw.address || 'Sin dirección',
   district: raw.district_name || 'Sin distrito',
-  items_count: 1, // El API actual no devuelve items_count, ponemos 1 por defecto
+  items_count: 1,
+  signed_urls: raw.signed_urls || [],
 });
 
 export default function CarrierDeliveriesPage() {
@@ -71,7 +58,7 @@ export default function CarrierDeliveriesPage() {
 
   // ─── KPIs ──────────────────────────────────────────────────
   const totalDeliveries = deliveries.length;
-  const completedDeliveries = deliveries.filter(d => d.status === 'completed').length;
+  const completedDeliveries = deliveries.filter(d => d.status === 'delivered').length;
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 space-y-6 animate-in fade-in duration-500">

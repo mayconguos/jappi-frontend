@@ -25,7 +25,6 @@ import { useTableActions } from '@/hooks/useTableActions';
 const STATUS_LABELS: Record<ShipmentStatus, string> = {
   pending: 'Pendiente',
   scheduled: 'Programado',
-  picked_up: 'Recogido',
   received: 'Recibido',
   in_transit: 'En tránsito',
   delivered: 'Entregado',

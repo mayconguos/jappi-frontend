@@ -36,7 +36,6 @@ interface ShipmentsTableProps {
 const STATUS_META: Record<ShipmentStatus, { label: string; badge: string; dot: string }> = {
   pending: { label: 'Pendiente', badge: 'bg-amber-50  text-amber-700  border-amber-100', dot: 'bg-amber-400' },
   scheduled: { label: 'Programado', badge: 'bg-blue-50   text-blue-700   border-blue-100', dot: 'bg-blue-400' },
-  picked_up: { label: 'Recogido', badge: 'bg-indigo-50 text-indigo-700 border-indigo-100', dot: 'bg-indigo-400' },
   received: { label: 'Recibido', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
   in_transit: { label: 'En tránsito', badge: 'bg-cyan-50 text-cyan-700 border-cyan-100', dot: 'bg-cyan-400' },
   delivered: { label: 'Entregado', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
@@ -45,7 +44,7 @@ const STATUS_META: Record<ShipmentStatus, { label: string; badge: string; dot: s
 };
 
 // ─── Sub-componente: Badge de estado (solo lectura) ────────────────────────────
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status }: Readonly<{ status: string }>) {
   const meta = STATUS_META[status as ShipmentStatus];
   if (!meta) return <span className="text-xs text-slate-400">{status}</span>;
   return (
@@ -145,7 +144,8 @@ export default function ShipmentsTable({
             return (
               <tr
                 key={shipment.id}
-                className={`hover:bg-slate-50/50 transition-colors group ${isSelected ? 'bg-emerald-50/40' : ''}`}
+                className={`hover:bg-slate-50/50 transition-colors group cursor-pointer ${isSelected ? 'bg-emerald-50/40' : ''}`}
+                onClick={() => onView?.(shipment)}
               >
                 {/* Checkbox — solo admin */}
                 {isAdmin && (
@@ -153,6 +153,7 @@ export default function ShipmentsTable({
                     <input
                       type="checkbox"
                       checked={isSelected}
+                      onClick={(e) => e.stopPropagation()}
                       onChange={() => onSelectOne?.(shipment.id)}
                       className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-transform active:scale-95 cursor-pointer"
                     />
@@ -215,11 +216,9 @@ export default function ShipmentsTable({
                 {!isCompanyMode && (
                   <td className="px-4 py-3 whitespace-nowrap">
                     {canEdit ? (
-                      <div
-                        className="flex items-center gap-2 relative"
-                        onClick={() => (couriers.length === 0 && shipment.status !== 'received' && shipment.status !== 'picked_up') && onFetchCouriers?.()}
-                      >
+                      <div className="flex items-center gap-2 relative">
                         <Select
+                          onClick={() => (couriers.length === 0 && shipment.status !== 'received' && shipment.status !== 'delivered') && onFetchCouriers?.()}
                           size="compact"
                           value={shipment.id_driver?.toString() || '0'}
                           onChange={(val) => onCarrierChange?.(shipment.id, val)}
@@ -235,23 +234,14 @@ export default function ShipmentsTable({
                       </div>
                     ) : (
                       <span className="text-sm text-slate-600 font-medium">
-                        {shipment.carrier !== 'Sin asignar'
-                          ? shipment.carrier
-                          : <span className="text-slate-300 italic text-xs">Sin asignar</span>
+                        {shipment.carrier === 'Sin asignar'
+                          ? <span className="text-slate-300 italic text-xs">Sin asignar</span>
+                          : shipment.carrier
                         }
                       </span>
                     )}
                   </td>
                 )}
-
-                {/* Pedidos */}
-                {/* {!isCompanyMode && (
-                  <TableCell className="py-4 text-center">
-                    <div className="inline-flex flex-col items-center justify-center min-w-[32px] h-8 rounded-xl bg-slate-50 text-xs font-black text-slate-800 border border-slate-200/60 shadow-inner">
-                      {shipment.packages}
-                    </div>
-                  </TableCell>
-                )} */}
 
                 {/* Monto */}
                 {isCompanyMode && (

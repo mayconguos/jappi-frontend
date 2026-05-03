@@ -11,3 +11,25 @@ export interface Courier {
   plate_number: string;
   brand: string;
 }
+
+export type CarrierDeliveryStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'in_transit'
+  | 'delivered'
+  | 'cancelled'
+  | 'returned';
+
+export interface CarrierDelivery {
+  id: string;
+  status: CarrierDeliveryStatus;
+  date: string;
+  recipient: string;
+  recipient_phone: string;
+  recipient_address: string;
+  origin: string;
+  destination: string;
+  district: string;
+  items_count: number;
+  signed_urls?: string[];
+}
