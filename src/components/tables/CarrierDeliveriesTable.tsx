@@ -37,8 +37,6 @@ const getStatusBadge = (status: CarrierDelivery['status']) => {
       return <Badge variant="destructive">Cancelado</Badge>;
     case 'returned':
       return <Badge variant="destructive">Devuelto</Badge>;
-    case 'scheduled':
-    case 'pending':
     default:
       return <Badge variant="info">Pendiente</Badge>;
   }
@@ -50,12 +48,12 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
 
   const districtsWithPending = Array.from(
-    new Set(deliveries.filter(d => ['pending', 'scheduled', 'in_transit'].includes(d.status)).map(d => d.district))
+    new Set(deliveries.filter(d => ['pending', 'scheduled', 'in_transit'].includes(d.status)).map(d => d.district_name))
   ).sort((a, b) => a.localeCompare(b));
   const districts = ['all', ...districtsWithPending];
 
   const sorted = [...deliveries]
-    .filter(d => selectedDistrict === 'all' || d.district === selectedDistrict)
+    .filter(d => selectedDistrict === 'all' || d.district_name === selectedDistrict)
     .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
 
   const ITEMS_PER_PAGE = 10;
@@ -72,7 +70,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
   const getWhatsappMessage = (delivery: CarrierDelivery) => {
     return [
       `Buen día, le saludamos de Japi Express ${String.fromCodePoint(0x1F4E6)}`,
-      `Empresa Courier oficial de la tienda *${delivery.origin}* donde realizó su compra.`,
+      `Empresa Courier oficial de la tienda *${delivery.company_name}* donde realizó su compra.`,
       `Le escribo por este medio para que me haga llegar su ubicación de mapa ${String.fromCodePoint(0x1F4CD)} y poder realizar la entrega con más efectividad.`,
       `${String.fromCodePoint(0x1F550)} Estaremos visitándolo(a) el día de hoy hasta las 07:00 pm aprox.`,
       `${String.fromCodePoint(0x2B50)} ¡Qué tenga un excelente día! ${String.fromCodePoint(0x2B50)}`
@@ -99,7 +97,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
           const isActive = selectedDistrict === district;
           const count = district === 'all'
             ? deliveries.length
-            : deliveries.filter(d => d.district === district).length;
+            : deliveries.filter(d => d.district_name === district).length;
           return (
             <button
               key={district}
@@ -132,7 +130,6 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
           <TableHeader>
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
               <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
-              <TableHead className="w-[140px] text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking ID</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Destinatario</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Teléfono</TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
@@ -159,16 +156,13 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                     <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
                       {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                     </TableCell>
-                    <TableCell className="py-4 font-mono text-xs text-blue-700 font-medium h-16">
-                      {delivery.id}
-                    </TableCell>
                     <TableCell className="py-4">
                       <div className="flex items-center gap-3">
                         <div className={`h-9 w-9 min-w-[2.25rem] rounded-full flex items-center justify-center ${isFinished ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600 ring-1 ring-blue-100/50'}`}>
                           <User size={16} />
                         </div>
-                        <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[180px]" title={delivery.recipient}>
-                          {delivery.recipient}
+                        <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[180px]" title={delivery.customer_name}>
+                          {delivery.customer_name}
                         </span>
                       </div>
                     </TableCell>
@@ -177,7 +171,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                         {!isFinished && (
                           <>
                             <a
-                              href={`https://wa.me/51${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
+                              href={`https://wa.me/51${delivery.phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
@@ -188,7 +182,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                               WhatsApp
                             </a>
                             <a
-                              href={`tel:${delivery.recipient_phone.replaceAll(/\D/g, '')}`}
+                              href={`tel:${delivery.phone.replaceAll(/\D/g, '')}`}
                               onClick={(e) => e.stopPropagation()}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
                               title="Llamar"
@@ -204,7 +198,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                     <TableCell className="py-4">
                       <div className="flex items-center gap-1.5 text-xs text-gray-600 max-w-[280px]">
                         <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isFinished ? 'bg-gray-300' : 'bg-blue-500'}`} />
-                        <span className="truncate" title={delivery.destination}>{delivery.destination}</span>
+                        <span className="truncate" title={delivery.address}>{delivery.address}</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-4 text-center">
@@ -214,7 +208,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                       <div className="flex items-center justify-end gap-2">
                         {!isFinished && (
                           <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.destination + ', ' + delivery.district + ', Lima')}`}
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.address + ', ' + delivery.district_name + ', Lima')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
@@ -252,12 +246,10 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
           currentItems.map((delivery) => {
             const isFinished = ['delivered', 'cancelled', 'returned'].includes(delivery.status);
 
-            // Determinar color de la franja lateral (UX mejorada)
-            let statusColor = 'bg-blue-500'; // Default (Pendiente/En ruta)
+            let statusColor = 'bg-blue-500';
             if (delivery.status === 'delivered') statusColor = 'bg-emerald-500';
             else if (isFinished) statusColor = 'bg-gray-400';
 
-            // Determinar etiqueta de texto para móviles
             let statusLabel = 'Cancelado';
             if (delivery.status === 'delivered') statusLabel = 'Enviado';
             else if (delivery.status === 'returned') statusLabel = 'Devuelto';
@@ -267,26 +259,23 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                 key={delivery.id}
                 className={`bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform ${isFinished ? 'opacity-60 grayscale-[0.5]' : ''}`}
               >
-                {/* Botón invisible que cubre toda la card para el detalle */}
                 <button
                   type="button"
                   className="absolute inset-0 z-0 w-full h-full text-left cursor-pointer"
                   onClick={() => handleOpenDetail(delivery)}
-                  aria-label={`Ver detalle de entrega para ${delivery.recipient}`}
+                  aria-label={`Ver detalle de entrega para ${delivery.customer_name}`}
                 />
 
-                {/* Franja de estado izquierda */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusColor} z-10`} />
 
                 <div className="pl-3 relative z-10 pointer-events-none">
-                  {/* Destinatario */}
                   <div className="flex justify-between items-start gap-2 mb-1">
-                    <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{delivery.recipient}</p>
+                    <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{delivery.customer_name}</p>
                     <div className="flex gap-1.5 pointer-events-auto">
                       {!isFinished && (
                         <>
                           <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.destination + ', ' + delivery.district + ', Lima')}`}
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.address + ', ' + delivery.district_name + ', Lima')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
@@ -296,14 +285,14 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                             MAPS
                           </a>
                           <a
-                            href={`tel:${delivery.recipient_phone.replaceAll(/\D/g, '')}`}
+                            href={`tel:${delivery.phone.replaceAll(/\D/g, '')}`}
                             onClick={(e) => e.stopPropagation()}
                             className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm active:scale-90 transition-transform"
                           >
                             <Phone size={14} />
                           </a>
                           <a
-                            href={`https://wa.me/51${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
+                            href={`https://wa.me/51${delivery.phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
@@ -321,16 +310,14 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                     </div>
                   </div>
 
-                  {/* Dirección - Agregada entre nombre y distrito */}
                   <div className="flex items-start gap-1.5 text-[11px] text-gray-600 mb-0.5">
                     <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${isFinished ? 'bg-gray-300' : 'bg-blue-500'}`} />
-                    <span className="line-clamp-1 italic">{delivery.destination}</span>
+                    <span className="line-clamp-1 italic">{delivery.address}</span>
                   </div>
 
-                  {/* Distrito */}
                   <div className="flex items-start gap-1.5 text-[10px] text-gray-400 font-medium">
                     <MapPin size={10} className="text-gray-400 shrink-0 mt-0.5" />
-                    <span className="truncate uppercase tracking-tight">{delivery.district}</span>
+                    <span className="truncate uppercase tracking-tight">{delivery.district_name}</span>
                   </div>
                 </div>
               </div>
@@ -350,7 +337,6 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
         </div>
       )}
 
-      {/* Modal de Detalle */}
       <DeliveryDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -360,4 +346,3 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
     </>
   );
 }
-

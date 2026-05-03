@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
 
+import { useAuth } from '@/context/AuthContext';
 
 import api from '@/app/services/api';
 
@@ -16,16 +16,15 @@ import { CarrierDelivery, CarrierDeliveryStatus } from '@/types/courier';
 const mapApiDelivery = (raw: any): CarrierDelivery => ({
   id: String(raw.id),
   status: (raw.status === 'scheduled' ? 'pending' : raw.status) as CarrierDeliveryStatus,
-  date: raw.shipping_date
+  shipping_date: raw.shipping_date
     ? new Date(raw.shipping_date).toISOString().split('T')[0].split('-').reverse().join('/')
     : 'Sin fecha',
-  recipient: raw.customer_name || 'Sin nombre',
-  recipient_phone: raw.phone || 'Sin teléfono',
-  recipient_address: raw.address || 'Sin dirección',
-  origin: raw.company_name || 'Japi Express',
-  destination: raw.address || 'Sin dirección',
-  district: raw.district_name || 'Sin distrito',
-  items_count: 1,
+  customer_name: raw.customer_name || 'Sin nombre',
+  phone: raw.phone || 'Sin teléfono',
+  address: raw.address || 'Sin dirección',
+  company_name: raw.company_name || 'Japi Express',
+  district_name: raw.district_name || 'Sin distrito',
+  sector_name: raw.sector_name || '',
   signed_urls: raw.signed_urls || [],
 });
 
