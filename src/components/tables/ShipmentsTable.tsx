@@ -144,8 +144,7 @@ export default function ShipmentsTable({
             return (
               <tr
                 key={shipment.id}
-                className={`hover:bg-slate-50/50 transition-colors group cursor-pointer ${isSelected ? 'bg-emerald-50/40' : ''}`}
-                onClick={() => onView?.(shipment)}
+                className={`hover:bg-slate-50/50 transition-colors group ${isSelected ? 'bg-emerald-50/40' : ''}`}
               >
                 {/* Checkbox — solo admin */}
                 {isAdmin && (

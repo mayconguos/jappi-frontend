@@ -14,29 +14,17 @@ import { CarrierPickup, CarrierPickupStatus } from '@/app/dashboard/carrier/pick
 // ─── Helpers de UI ─────────────────────────────────────────────
 const getStatusBadge = (status: CarrierPickupStatus) => {
   switch (status) {
-    case 'pending':   return <Badge variant="warning">Por recoger</Badge>;
+    case 'pending': return <Badge variant="warning">Por recoger</Badge>;
     case 'scheduled': return <Badge variant="info">Programado</Badge>;
     case 'picked_up': return <Badge variant="success">Recogido</Badge>;
-    case 'received':  return <Badge variant="outline">Recibido</Badge>;
-    default:          return <Badge variant="outline">Desconocido</Badge>;
+    case 'received': return <Badge variant="outline">Recibido</Badge>;
+    default: return <Badge variant="outline">Desconocido</Badge>;
   }
 };
 
 const STATUS_ORDER: Record<CarrierPickupStatus, number> = {
   pending: 0, scheduled: 1, picked_up: 2, received: 3,
 };
-
-// ─── Adaptador de CarrierPickup → formato esperado por PickupDetailModal ─
-const toModalPickup = (p: CarrierPickup) => ({
-  id: p.id,
-  status: p.status,
-  sender: p.company_name,
-  sender_phone: p.phone,
-  origin: p.address,
-  district: p.district_name,
-  items_count: 0,       // la API aún no devuelve este dato
-  date: p.pickup_date,
-});
 
 interface CarrierPickupsTableProps {
   pickups: CarrierPickup[];
@@ -219,10 +207,10 @@ export default function CarrierPickupsTable({ pickups, isConfirming, onConfirmPi
         {sortedPickups.map((pickup) => {
           const getStatusColor = (status: CarrierPickupStatus) => {
             switch (status) {
-              case 'pending':   return 'bg-amber-400';
+              case 'pending': return 'bg-amber-400';
               case 'scheduled': return 'bg-blue-400';
               case 'picked_up': return 'bg-emerald-500';
-              default:          return 'bg-slate-300';
+              default: return 'bg-slate-300';
             }
           };
 
