@@ -177,7 +177,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                         {!isFinished && (
                           <>
                             <a
-                              href={`https://wa.me/${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
+                              href={`https://wa.me/51${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
@@ -303,7 +303,7 @@ export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: R
                             <Phone size={14} />
                           </a>
                           <a
-                            href={`https://wa.me/${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
+                            href={`https://wa.me/51${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}

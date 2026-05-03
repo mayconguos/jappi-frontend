@@ -256,7 +256,7 @@ export default function DeliveryDetailModal({ isOpen, onClose, delivery, onStatu
                             Llamar
                           </a>
                           <a
-                            href={`https://wa.me/${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent('Hola ' + delivery.recipient + ', te saluda el motorizado de Japi Express. Estoy por entregar tu pedido ' + delivery.id + ' en ' + delivery.recipient_address + '.')}`}
+                            href={`https://wa.me/51${delivery.recipient_phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent('Hola ' + delivery.recipient + ', te saluda el motorizado de Japi Express. Estoy por entregar tu pedido ' + delivery.id + ' en ' + delivery.recipient_address + '.')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-xs font-medium border border-emerald-100"
