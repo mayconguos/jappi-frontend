@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { Download, CheckCircle2, AlertCircle, BookOpen, Loader2 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
+
 import { downloadBulkShipmentTemplate } from '@/lib/bulk-shipment-template';
 import { TEMPLATE_VERSION_LABEL } from '@/lib/template-version';
+
 import type { LocationCatalog } from '@/hooks/useLocationCatalog';
 
 interface TemplateDownloadStepProps {

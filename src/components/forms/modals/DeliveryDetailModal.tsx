@@ -88,13 +88,16 @@ export default function DeliveryDetailModal({
     setIsUploading(true);
     try {
       const formData = new FormData();
+      
+      // Convertimos las capturas (base64) a Blobs para enviarlas como archivos reales
       for (let i = 0; i < validPhotos.length; i++) {
         const response = await fetch(validPhotos[i]);
         const blob = await response.blob();
-        formData.append('photos', blob, `proof_${i}.jpg`);
+        formData.append('files', blob, `entrega_${i}.jpg`);
       }
 
-      await api.post(`/shippings/${delivery.id}/delivered`, formData, {
+      // id_shipping se envía como Query Parameter según Swagger
+      await api.post(`/courier/upload?id_shipping=${delivery.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -108,21 +111,91 @@ export default function DeliveryDetailModal({
     }
   };
 
-  const whatsappMessage = isFinished 
+  const whatsappMessage = isFinished
     ? `Hola ${delivery.customer_name}, le saluda el motorizado de Japi Express. Ya entregamos su pedido de la tienda *${delivery.company_name}*. Me comunico con usted por...`
     : [
-        `Buen día, le saludamos de Japi Express ${String.fromCodePoint(0x1F4E6)}`,
-        `Empresa Courier oficial de la tienda *${delivery.company_name}* donde realizó su compra.`,
-        '',
-        `Le escribo por este medio para me haga llegar su ubicación de mapa ${String.fromCodePoint(0x1F4CD)} y poder realizar la entrega con más efectividad.`,
-        '',
-        `${String.fromCodePoint(0x1F550)} Estaremos visitándolo(a) el día de hoy hasta las 07:00 pm aprox.`,
-        '',
-        `${String.fromCodePoint(0x2B50)} ¡Qué tenga un excelente día! ${String.fromCodePoint(0x2B50)}`
-      ].join('\n');
-  
+      `Buen día, le saludamos de Japi Express ${String.fromCodePoint(0x1F4E6)}`,
+      `Empresa Courier oficial de la tienda *${delivery.company_name}* donde realizó su compra.`,
+      '',
+      `Le escribo por este medio para me haga llegar su ubicación de mapa ${String.fromCodePoint(0x1F4CD)} y poder realizar la entrega con más efectividad.`,
+      '',
+      `${String.fromCodePoint(0x1F550)} Estaremos visitándolo(a) el día de hoy hasta las 07:00 pm aprox.`,
+      '',
+      `${String.fromCodePoint(0x2B50)} ¡Qué tenga un excelente día! ${String.fromCodePoint(0x2B50)}`
+    ].join('\n');
+
   const mapsQuery = `${delivery.address}, ${delivery.district_name}, Lima`;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`;
+
+  const renderFooterButton = () => {
+    if (isFinished) return null;
+
+    if (delivery.status === 'scheduled') {
+      return (
+        <Button
+          className="flex-1 h-14 bg-indigo-600 hover:bg-indigo-700 text-white gap-3 rounded-2xl font-black shadow-xl shadow-indigo-200 active:scale-95 transition-all text-xs tracking-widest"
+          onClick={async () => {
+            try {
+              setIsUploading(true);
+              // Enviamos el array con el id_shipping siguiendo el estándar de AllShipmentsPage
+              await api.put('/shipping/status', [{ 
+                id_shipping: delivery.id, 
+                status: 'in_transit' 
+              }]);
+              onStatusChange(delivery.id, 'in_transit');
+            } catch (error) {
+              console.error('Error al iniciar ruta:', error);
+              alert('No se pudo iniciar la ruta. Por favor reintenta.');
+            } finally {
+              setIsUploading(false);
+            }
+          }}
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            'PROCESANDO...'
+          ) : (
+            <>
+              <Navigation size={24} />
+              INICIAR RUTA
+            </>
+          )}
+        </Button>
+      );
+    }
+
+    if (showProofScreen) {
+      return (
+        <Button
+          className="flex-1 h-14 bg-emerald-600 hover:bg-emerald-700 text-white gap-3 rounded-2xl font-black shadow-xl shadow-emerald-200 active:scale-95 transition-all text-xs tracking-widest"
+          onClick={handleConfirmDelivery}
+          disabled={photos.filter(p => p !== '').length === 0 || isUploading}
+        >
+          {isUploading ? (
+            'PROCESANDO...'
+          ) : (
+            <>
+              <CheckCircle2 size={24} />
+              CONFIRMAR
+            </>
+          )}
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        className="flex-1 h-14 bg-emerald-600 hover:bg-emerald-700 text-white gap-3 rounded-2xl font-black shadow-xl shadow-emerald-200 active:scale-95 transition-all text-xs tracking-widest"
+        onClick={() => {
+          setPhotos(['', '']);
+          setShowProofScreen(true);
+        }}
+      >
+        <CheckCircle2 size={24} />
+        FINALIZAR ENTREGA
+      </Button>
+    );
+  };
 
   return (
     <>
@@ -210,11 +283,11 @@ export default function DeliveryDetailModal({
                       <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight truncate">
                         {delivery.customer_name}
                       </h3>
-                      <CopyButton 
-                        text={delivery.customer_name} 
-                        fieldId="customer" 
-                        isCopied={copiedField === 'customer'} 
-                        onCopy={handleCopy} 
+                      <CopyButton
+                        text={delivery.customer_name}
+                        fieldId="customer"
+                        isCopied={copiedField === 'customer'}
+                        onCopy={handleCopy}
                       />
                     </div>
                     <p className="text-[11px] font-bold text-slate-500 mt-0.5">{delivery.phone}</p>
@@ -231,11 +304,11 @@ export default function DeliveryDetailModal({
                       <h3 className="text-sm font-bold text-slate-900 leading-tight">
                         {delivery.address}
                       </h3>
-                      <CopyButton 
-                        text={delivery.address} 
-                        fieldId="address" 
-                        isCopied={copiedField === 'address'} 
-                        onCopy={handleCopy} 
+                      <CopyButton
+                        text={delivery.address}
+                        fieldId="address"
+                        isCopied={copiedField === 'address'}
+                        onCopy={handleCopy}
                       />
                     </div>
                     <p className="text-[11px] font-bold text-slate-500 uppercase mt-0.5">
@@ -323,35 +396,7 @@ export default function DeliveryDetailModal({
               {showProofScreen ? 'Atrás' : 'Cerrar'}
             </Button>
 
-            {!isFinished && (
-              showProofScreen ? (
-                <Button
-                  className="flex-1 h-14 bg-emerald-600 hover:bg-emerald-700 text-white gap-3 rounded-2xl font-black shadow-xl shadow-emerald-200 active:scale-95 transition-all text-xs tracking-widest"
-                  onClick={handleConfirmDelivery}
-                  disabled={photos.filter(p => p !== '').length === 0 || isUploading}
-                >
-                  {isUploading ? (
-                    'PROCESANDO...'
-                  ) : (
-                    <>
-                      <CheckCircle2 size={24} />
-                      CONFIRMAR
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  className="flex-1 h-14 bg-indigo-600 hover:bg-indigo-700 text-white gap-3 rounded-2xl font-black shadow-xl shadow-indigo-200 active:scale-95 transition-all text-xs tracking-widest"
-                  onClick={() => {
-                    setPhotos(['', '']); 
-                    setShowProofScreen(true);
-                  }}
-                >
-                  <CheckCircle2 size={24} />
-                  FINALIZAR ENTREGA
-                </Button>
-              )
-            )}
+            {renderFooterButton()}
           </div>
         </ModalFooter>
       </Modal>

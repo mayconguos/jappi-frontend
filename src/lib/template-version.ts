@@ -28,10 +28,10 @@
  */
 
 /** Version embedded in every newly generated template file. */
-export const CURRENT_TEMPLATE_VERSION = 10;
+export const CURRENT_TEMPLATE_VERSION = 1;
 
 /** Oldest template version accepted by the parser (inclusive). */
-export const MIN_COMPATIBLE_VERSION = 10;
+export const MIN_COMPATIBLE_VERSION = 1;
 
 /** Human-readable label used in UI messages and the filename. */
 export const TEMPLATE_VERSION_LABEL = `v${CURRENT_TEMPLATE_VERSION}`;

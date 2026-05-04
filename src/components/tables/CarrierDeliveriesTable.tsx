@@ -1,348 +1,363 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-
-import { Eye, MapPin, User, MessageCircle, Phone, Map, Navigation } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Navigation, Phone, MessageCircle, ChevronRight, CheckCircle2, Loader2, CheckSquare, Square } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pagination } from '@/components/ui/pagination';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 import DeliveryDetailModal from '@/components/forms/modals/DeliveryDetailModal';
 
 import { CarrierDelivery } from '@/types/courier';
 
+import api from '@/app/services/api';
+
 interface CarrierDeliveriesTableProps {
   deliveries: CarrierDelivery[];
-  onStatusChange: (id: string, status: string) => void;
+  showFinished: boolean;
+  onStatusChange: (id: string, newStatus: CarrierDelivery['status']) => void;
 }
 
 const STATUS_ORDER: Record<CarrierDelivery['status'], number> = {
-  pending: 0,
-  scheduled: 0,
   in_transit: 0,
-  delivered: 1,
-  cancelled: 2,
-  returned: 2
+  scheduled: 1,
+  pending: 2,
+  delivered: 3,
+  cancelled: 4,
+  returned: 5
 };
 
 const getStatusBadge = (status: CarrierDelivery['status']) => {
   switch (status) {
     case 'delivered':
-      return <Badge variant="success">Enviado</Badge>;
+      return <Badge variant="success" className="rounded-full px-3 py-0.5 text-[10px] uppercase font-bold tracking-wider">Enviado</Badge>;
     case 'in_transit':
-      return <Badge variant="info">En Ruta</Badge>;
+      return <Badge variant="info" className="rounded-full px-3 py-0.5 text-[10px] uppercase font-bold tracking-wider">En Ruta</Badge>;
     case 'cancelled':
-      return <Badge variant="destructive">Cancelado</Badge>;
+      return <Badge variant="destructive" className="rounded-full px-3 py-0.5 text-[10px] uppercase font-bold tracking-wider">Cancelado</Badge>;
     case 'returned':
-      return <Badge variant="destructive">Devuelto</Badge>;
+      return <Badge variant="destructive" className="rounded-full px-3 py-0.5 text-[10px] uppercase font-bold tracking-wider">Devuelto</Badge>;
     default:
-      return <Badge variant="info">Pendiente</Badge>;
+      return <Badge variant="warning" className="rounded-full px-3 py-0.5 text-[10px] uppercase font-bold tracking-wider">Pendiente</Badge>;
   }
 };
 
-export default function CarrierDeliveriesTable({ deliveries, onStatusChange }: Readonly<CarrierDeliveriesTableProps>) {
+export default function CarrierDeliveriesTable({ deliveries, showFinished, onStatusChange }: Readonly<CarrierDeliveriesTableProps>) {
   const [selectedDelivery, setSelectedDelivery] = useState<CarrierDelivery | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
 
-  const districtsWithPending = Array.from(
-    new Set(deliveries.filter(d => ['pending', 'scheduled', 'in_transit'].includes(d.status)).map(d => d.district_name))
-  ).sort((a, b) => a.localeCompare(b));
-  const districts = ['all', ...districtsWithPending];
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isUpdatingBulk, setIsUpdatingBulk] = useState(false);
 
-  const sorted = [...deliveries]
-    .filter(d => selectedDistrict === 'all' || d.district_name === selectedDistrict)
-    .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
+  const visibleDeliveries = useMemo(() => {
+    return deliveries.filter(d => {
+      const isFinished = ['delivered', 'cancelled', 'returned'].includes(d.status);
+      // Filtro exclusivo: si showFinished es true, vemos SOLO los terminados. Si es false, vemos SOLO los activos.
+      return showFinished ? isFinished : !isFinished;
+    });
+  }, [deliveries, showFinished]);
 
-  const ITEMS_PER_PAGE = 10;
-  const [currentPage, setCurrentPage] = useState(1);
+  const districts = useMemo(() => {
+    const d = Array.from(new Set(visibleDeliveries.map(del => del.district_name)));
+    return ['all', ...d.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))];
+  }, [visibleDeliveries]);
 
-  // Restart page on district change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedDistrict]);
+  const filteredItems = useMemo(() => {
+    return visibleDeliveries.filter(d => {
+      return selectedDistrict === 'all' || d.district_name === selectedDistrict;
+    });
+  }, [visibleDeliveries, selectedDistrict]);
 
-  const totalItems = sorted.length;
-  const currentItems = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-
-  const getWhatsappMessage = (delivery: CarrierDelivery) => {
-    return [
-      `Buen día, le saludamos de Japi Express ${String.fromCodePoint(0x1F4E6)}`,
-      `Empresa Courier oficial de la tienda *${delivery.company_name}* donde realizó su compra.`,
-      `Le escribo por este medio para que me haga llegar su ubicación de mapa ${String.fromCodePoint(0x1F4CD)} y poder realizar la entrega con más efectividad.`,
-      `${String.fromCodePoint(0x1F550)} Estaremos visitándolo(a) el día de hoy hasta las 07:00 pm aprox.`,
-      `${String.fromCodePoint(0x2B50)} ¡Qué tenga un excelente día! ${String.fromCodePoint(0x2B50)}`
-    ].join('\n');
-  };
+  const sorted = useMemo(() => {
+    return [...filteredItems].sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
+  }, [filteredItems]);
 
   const handleOpenDetail = (delivery: CarrierDelivery) => {
     setSelectedDelivery(delivery);
-    setIsModalOpen(true);
   };
 
-  const handleStatusChange = (id: string, newStatus: string) => {
-    onStatusChange(id, newStatus);
-    if (selectedDelivery?.id === id) {
-      setSelectedDelivery({ ...selectedDelivery, status: newStatus as any });
+  const getWhatsappMessage = (delivery: CarrierDelivery) => {
+    const isFinished = ['delivered', 'cancelled', 'returned'].includes(delivery.status);
+    return isFinished
+      ? `Hola ${delivery.customer_name}, le saluda el motorizado de Japi Express. Ya entregamos su pedido de la tienda *${delivery.company_name}*.`
+      : `Buen día, le saludamos de Japi Express. Estamos por entregar su pedido de la tienda *${delivery.company_name}*.`;
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const selectableItems = useMemo(() =>
+    filteredItems.filter(item => item.status === 'scheduled' || item.status === 'pending'),
+    [filteredItems]
+  );
+
+  const isAllSelected = selectableItems.length > 0 && selectableItems.every(item => selectedIds.includes(item.id));
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(selectableItems.map(i => i.id));
+    }
+  };
+
+  const handleBulkStartRoute = async () => {
+    if (selectedIds.length === 0) return;
+    setIsUpdatingBulk(true);
+    try {
+      // Usamos el mismo patrón que AllShipmentsPage: PUT /shipping/status con array de id_shipping
+      await api.put('/shipping/status', selectedIds.map(id => ({ 
+        id_shipping: id, 
+        status: 'in_transit' 
+      })));
+      
+      selectedIds.forEach(id => onStatusChange(id, 'in_transit'));
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Error en actualización masiva:', error);
+      alert('Hubo un error al iniciar la ruta.');
+    } finally {
+      setIsUpdatingBulk(false);
     }
   };
 
   return (
-    <>
-      {/* Filtro por Distrito (Chips) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {districts.map((district) => {
-          const isActive = selectedDistrict === district;
-          const count = district === 'all'
-            ? deliveries.length
-            : deliveries.filter(d => d.district_name === district).length;
-          return (
+    <div className="space-y-4 pb-28">
+      {/* Barra de Filtros Minimalista */}
+      <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          {districts.map((district) => {
+            const isActive = selectedDistrict === district;
+            const count = district === 'all'
+              ? visibleDeliveries.length
+              : visibleDeliveries.filter(d => d.district_name === district).length;
+            return (
+              <button
+                key={district}
+                onClick={() => setSelectedDistrict(district)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+              >
+                {district === 'all' ? 'Todos' : district} ({count})
+              </button>
+            );
+          })}
+        </div>
+
+        {selectableItems.length > 1 && (
+          <div className="pt-2 border-t border-gray-50 flex justify-end">
             <button
-              key={district}
-              onClick={() => setSelectedDistrict(district)}
-              className={`
-                flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
-                whitespace-nowrap border transition-all duration-200 shrink-0
-                ${isActive
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50'
-                }
-              `}
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-blue-600 active:scale-95 transition-all"
             >
-              {district === 'all' ? 'Todos' : district}
-              <span className={`
-                inline-flex items-center justify-center rounded-full text-[10px] font-semibold
-                min-w-[16px] h-4 px-1
-                ${isActive ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'}
-              `}>
-                {count}
-              </span>
+              {isAllSelected ? <CheckSquare size={16} /> : <Square size={16} />}
+              Seleccionar Todo
             </button>
-          );
-        })}
+          </div>
+        )}
       </div>
 
-      {/* Vista Desktop */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* Vista Desktop (Simplificada) */}
+      <div className="hidden md:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-gray-100 hover:bg-transparent">
-              <TableHead className="w-[50px] pl-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Destinatario</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Teléfono</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Dirección</TableHead>
-              <TableHead className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</TableHead>
-              <TableHead className="text-right pr-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</TableHead>
+            <TableRow className="border-b border-gray-50 bg-slate-50/50 hover:bg-transparent">
+              <TableHead className="w-[40px] pl-6 text-center"></TableHead>
+              <TableHead className="text-xs font-black text-slate-500 uppercase tracking-widest">Cliente</TableHead>
+              <TableHead className="text-xs font-black text-slate-500 uppercase tracking-widest">Dirección</TableHead>
+              <TableHead className="text-center text-xs font-black text-slate-500 uppercase tracking-widest">Estado</TableHead>
+              <TableHead className="text-right pr-6 text-xs font-black text-slate-500 uppercase tracking-widest">Ver</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sorted.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="py-12 text-center text-sm text-gray-400">
-                  No hay entregas en <span className="font-medium text-gray-500">{selectedDistrict}</span>
-                </TableCell>
-              </TableRow>
-            ) : (
-              currentItems.map((delivery, index) => {
-                const isFinished = ['delivered', 'cancelled', 'returned'].includes(delivery.status);
-                return (
-                  <TableRow
-                    key={delivery.id}
-                    className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer ${isFinished ? 'opacity-60 grayscale-[0.5]' : ''}`}
-                    onClick={() => handleOpenDetail(delivery)}
-                  >
-                    <TableCell className="pl-6 py-4 font-mono text-xs text-gray-400">
-                      {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`h-9 w-9 min-w-[2.25rem] rounded-full flex items-center justify-center ${isFinished ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600 ring-1 ring-blue-100/50'}`}>
-                          <User size={16} />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[180px]" title={delivery.customer_name}>
-                          {delivery.customer_name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="flex items-center gap-2">
-                        {!isFinished && (
-                          <>
-                            <a
-                              href={`https://wa.me/51${delivery.phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-xs font-medium border border-emerald-100"
-                              title="WhatsApp"
-                            >
-                              <MessageCircle size={14} className="fill-emerald-700/10" />
-                              WhatsApp
-                            </a>
-                            <a
-                              href={`tel:${delivery.phone.replaceAll(/\D/g, '')}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs font-medium border border-blue-100"
-                              title="Llamar"
-                            >
-                              <Phone size={14} className="fill-blue-700/10" />
-                              Llamar
-                            </a>
-                          </>
-                        )}
-                        {isFinished && <span className="text-xs text-gray-400 italic">Acciones restringidas</span>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="flex items-center gap-1.5 text-xs text-gray-600 max-w-[280px]">
-                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isFinished ? 'bg-gray-300' : 'bg-blue-500'}`} />
-                        <span className="truncate" title={delivery.address}>{delivery.address}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4 text-center">
-                      {getStatusBadge(delivery.status)}
-                    </TableCell>
-                    <TableCell className="text-right pr-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        {!isFinished && (
-                          <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.address + ', ' + delivery.district_name + ', Lima')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
-                            title="Cómo llegar"
-                          >
-                            <Map size={16} />
-                          </a>
-                        )}
-                        <Button
-                          variant="ghost" size="sm"
-                          className="h-8 gap-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all font-normal"
-                          onClick={(e) => { e.stopPropagation(); handleOpenDetail(delivery); }}
-                        >
-                          <Eye size={16} />
-                          <span className="text-xs">Ver</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
+            {sorted.map((delivery) => {
+              const isSelected = selectedIds.includes(delivery.id);
+              return (
+                <TableRow key={delivery.id} className={`group hover:bg-blue-50/20 border-b border-gray-50 transition-colors ${isSelected ? 'bg-blue-50/50' : ''}`}>
+                  <TableCell className="pl-6 py-4 text-center">
+                    {(delivery.status === 'scheduled' || delivery.status === 'pending') && (
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(delivery.id)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    )}
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <p className="text-sm font-bold text-slate-900">{delivery.customer_name}</p>
+                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-tight">{delivery.company_name}</p>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <p className="text-sm text-slate-600">{delivery.address}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{delivery.district_name}</p>
+                  </TableCell>
+                  <TableCell className="py-4 text-center">
+                    {getStatusBadge(delivery.status)}
+                  </TableCell>
+                  <TableCell className="text-right pr-6 py-4">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleOpenDetail(delivery)}
+                      className="h-8 w-8 text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                    >
+                      <ChevronRight size={18} />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
 
-      {/* Vista Móvil (Cards compactas) */}
-      <div className="md:hidden space-y-2">
-        {sorted.length === 0 ? (
-          <div className="py-10 text-center text-sm text-gray-400">
-            No hay entregas en <span className="font-medium text-gray-500">{selectedDistrict}</span>
-          </div>
-        ) : (
-          currentItems.map((delivery) => {
-            const isFinished = ['delivered', 'cancelled', 'returned'].includes(delivery.status);
+      {/* Vista Mobile (Optimizada) */}
+      <div className="md:hidden space-y-3">
+        {sorted.map((delivery) => {
+          const isFinished = ['delivered', 'cancelled', 'returned'].includes(delivery.status);
+          const isSelected = selectedIds.includes(delivery.id);
+          const canContact = delivery.status === 'in_transit' || delivery.status === 'delivered';
 
-            let statusColor = 'bg-blue-500';
-            if (delivery.status === 'delivered') statusColor = 'bg-emerald-500';
-            else if (isFinished) statusColor = 'bg-gray-400';
+          // Extraemos la lógica compleja de clases para cumplir con SonarQube S3358
+          let statusClasses = '';
+          if (isFinished) {
+            statusClasses = 'opacity-60 bg-gray-50/50';
+          } else if (delivery.status === 'in_transit') {
+            statusClasses = 'border-l-4 border-l-blue-500';
+          }
 
-            let statusLabel = 'Cancelado';
-            if (delivery.status === 'delivered') statusLabel = 'Enviado';
-            else if (delivery.status === 'returned') statusLabel = 'Devuelto';
+          const selectionClasses = isSelected 
+            ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50/10' 
+            : 'border-gray-100 shadow-sm';
 
-            return (
-              <div
-                key={delivery.id}
-                className={`bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden active:scale-[0.99] transition-transform ${isFinished ? 'opacity-60 grayscale-[0.5]' : ''}`}
-              >
-                <button
+          return (
+            <div
+              key={delivery.id}
+              className={`bg-white p-4 rounded-2xl border transition-all duration-300 relative ${selectionClasses} ${statusClasses}`}
+            >
+              <div className="flex justify-between items-start gap-3">
+                <button 
                   type="button"
-                  className="absolute inset-0 z-0 w-full h-full text-left cursor-pointer"
+                  className="flex-1 text-left space-y-3 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl" 
                   onClick={() => handleOpenDetail(delivery)}
-                  aria-label={`Ver detalle de entrega para ${delivery.customer_name}`}
-                />
-
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusColor} z-10`} />
-
-                <div className="pl-3 relative z-10 pointer-events-none">
-                  <div className="flex justify-between items-start gap-2 mb-1">
-                    <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{delivery.customer_name}</p>
-                    <div className="flex gap-1.5 pointer-events-auto">
-                      {!isFinished && (
-                        <>
-                          <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.address + ', ' + delivery.district_name + ', Lima')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex h-7 px-2 items-center justify-center gap-1 rounded-full bg-blue-100 text-blue-700 shadow-sm active:scale-90 transition-transform text-[10px] font-bold border border-blue-200"
-                          >
-                            <Navigation size={12} className="fill-blue-700/10" />
-                            MAPS
-                          </a>
-                          <a
-                            href={`tel:${delivery.phone.replaceAll(/\D/g, '')}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm active:scale-90 transition-transform"
-                          >
-                            <Phone size={14} />
-                          </a>
-                          <a
-                            href={`https://wa.me/51${delivery.phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm active:scale-90 transition-transform"
-                          >
-                            <MessageCircle size={14} />
-                          </a>
-                        </>
-                      )}
-                      {isFinished && (
-                        <Badge variant="secondary" className="text-[10px] py-0 capitalize">
-                          {statusLabel}
-                        </Badge>
-                      )}
-                    </div>
+                  aria-label={`Ver detalles de ${delivery.customer_name}`}
+                >
+                  <div>
+                    <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-0.5">{delivery.company_name}</p>
+                    <h3 className="text-base font-bold text-slate-900 leading-tight">{delivery.customer_name}</h3>
                   </div>
 
-                  <div className="flex items-start gap-1.5 text-[11px] text-gray-600 mb-0.5">
-                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${isFinished ? 'bg-gray-300' : 'bg-blue-500'}`} />
-                    <span className="line-clamp-1 italic">{delivery.address}</span>
+                  <div className="flex items-start gap-2">
+                    <Navigation size={14} className="text-slate-400 mt-0.5 shrink-0" />
+                    <p className="text-xs font-bold text-slate-600 leading-tight">
+                      {delivery.address} <span className="text-slate-300 mx-1">·</span> <span className="text-blue-600/70 font-black uppercase text-[10px] tracking-tight">{delivery.district_name}</span>
+                    </p>
                   </div>
+                </button>
 
-                  <div className="flex items-start gap-1.5 text-[10px] text-gray-400 font-medium">
-                    <MapPin size={10} className="text-gray-400 shrink-0 mt-0.5" />
-                    <span className="truncate uppercase tracking-tight">{delivery.district_name}</span>
-                  </div>
+                <div className="flex flex-col items-end gap-3 shrink-0">
+                  {getStatusBadge(delivery.status)}
+                  {(delivery.status === 'scheduled' || delivery.status === 'pending') && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelect(delivery.id);
+                      }}
+                      className="p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      aria-label={isSelected ? 'Deseleccionar pedido' : 'Seleccionar pedido'}
+                    >
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-300 bg-white shadow-sm'}`}>
+                        {isSelected && <CheckCircle2 size={16} />}
+                      </div>
+                    </button>
+                  )}
                 </div>
               </div>
-            );
-          })
+
+              {canContact && (
+                <div className="pt-3 border-t border-gray-50 flex items-center gap-2">
+                  <a
+                    href={`tel:${delivery.phone.replaceAll(/\D/g, '')}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 text-slate-700 active:scale-95 transition-all text-[10px] font-black tracking-widest uppercase focus:ring-2 focus:ring-slate-300"
+                  >
+                    <Phone size={14} /> Llamar
+                  </a>
+                  <a
+                    href={`https://wa.me/51${delivery.phone.replaceAll(/\D/g, '')}?text=${encodeURIComponent(getWhatsappMessage(delivery))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-50 text-emerald-700 active:scale-95 transition-all text-[10px] font-black tracking-widest uppercase border border-emerald-100 focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <MessageCircle size={14} /> WhatsApp
+                  </a>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {sorted.length === 0 && (
+          <div className="py-20 text-center space-y-2">
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
+              <CheckCircle2 size={32} />
+            </div>
+            <p className="text-sm font-bold text-slate-400">¡Todo despejado! No hay entregas pendientes.</p>
+          </div>
         )}
       </div>
 
-      {totalItems > 0 && (
-        <div className="flex justify-center sm:justify-end mt-4 pb-4 px-4">
-          <Pagination
-            currentPage={currentPage}
-            totalItems={totalItems}
-            itemsPerPage={ITEMS_PER_PAGE}
-            onPageChange={setCurrentPage}
-          />
+      {/* Barra de Acción Masiva (Premium Redesign) */}
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-md z-50 animate-in slide-in-from-bottom-10 duration-500">
+          <div className="bg-slate-900/95 backdrop-blur-xl text-white py-2 pl-4 pr-1.5 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex items-center justify-between border border-white/10 ring-1 ring-black/5">
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-[8px] font-black text-blue-400 uppercase tracking-wider mb-0.5">Seleccionados</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-black tabular-nums leading-none">{selectedIds.length}</span>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Pedidos</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setSelectedIds([])}
+                className="text-[10px] font-extrabold text-slate-400 hover:text-white transition-colors px-2 py-2"
+                disabled={isUpdatingBulk}
+              >
+                Cancelar
+              </button>
+              <Button
+                onClick={handleBulkStartRoute}
+                className="bg-blue-600 hover:bg-blue-500 text-white rounded-[1.4rem] h-14 px-4 font-black text-[10px] shadow-[0_8px_20px_rgba(37,99,235,0.4)] flex items-center gap-2 active:scale-95 transition-all border border-blue-400/20"
+                disabled={isUpdatingBulk}
+              >
+                {isUpdatingBulk ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <>
+                    <Navigation size={14} className="fill-white/20 -rotate-12" />
+                    <span className="tracking-wider uppercase">Iniciar Ruta</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
       <DeliveryDetailModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={!!selectedDelivery}
+        onClose={() => setSelectedDelivery(null)}
         delivery={selectedDelivery}
-        onStatusChange={handleStatusChange}
+        onStatusChange={onStatusChange}
       />
-    </>
+    </div>
   );
 }

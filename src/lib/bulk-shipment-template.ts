@@ -49,48 +49,48 @@ export async function downloadBulkShipmentTemplate(
   const sheet = workbook.addWorksheet('Envíos');
 
   sheet.columns = [
-    { header: 'Nombre Destinatario *', key: 'customer_name',      width: 28 },
-    { header: 'Teléfono *',            key: 'phone',               width: 16 },
-    { header: 'Dirección *',           key: 'address',             width: 32 },
-    { header: 'Ubicación (Nombre) *',  key: 'location_name',       width: 25 },
+    { header: 'Nombre Destinatario *', key: 'customer_name', width: 28 },
+    { header: 'Teléfono *', key: 'phone', width: 16 },
+    { header: 'Dirección *', key: 'address', width: 32 },
+    { header: 'Distrito *', key: 'location_name', width: 25 },
     // ── VLOOKUP helper columns (E, F, G) ──
-    { header: '✔ Nombre Región',   key: '_region_name',   width: 22 },
+    { header: '✔ Nombre Región', key: '_region_name', width: 22 },
     { header: '✔ Nombre Distrito', key: '_district_name', width: 22 },
-    { header: '✔ Nombre Sector',   key: '_sector_name',   width: 22 },
-    { header: 'Referencia',            key: 'reference',           width: 24 },
-    { header: 'Tipo de Servicio *',    key: 'service_type',        width: 20 },
-    { header: 'Modo de Entrega *',     key: 'shipping_mode',       width: 22 },
-    { header: 'Fecha Entrega * (YYYY-MM-DD)', key: 'date',         width: 26 },
-    { header: 'Monto COD',             key: 'total_amount',        width: 14 },
-    { header: 'Método de Pago',        key: 'payment_method',      width: 18 },
-    { header: 'Forma de Pago',         key: 'payment_destination', width: 18 },
-    { header: 'Producto - Nombre *',   key: 'product_name',        width: 26 },
-    { header: 'Producto - Cantidad *', key: 'quantity',            width: 22 },
-    { header: 'Notas',                 key: 'notes',               width: 28 },
+    { header: '✔ Nombre Sector', key: '_sector_name', width: 22 },
+    { header: 'Referencia', key: 'reference', width: 24 },
+    { header: 'Tipo de Servicio *', key: 'service_type', width: 20 },
+    { header: 'Modo de Entrega *', key: 'shipping_mode', width: 22 },
+    { header: 'Fecha Entrega * (YYYY-MM-DD)', key: 'date', width: 26 },
+    { header: 'Monto COD', key: 'total_amount', width: 14 },
+    { header: 'Método de Pago', key: 'payment_method', width: 18 },
+    { header: 'Forma de Pago', key: 'payment_destination', width: 18 },
+    { header: 'Producto - Nombre *', key: 'product_name', width: 26 },
+    { header: 'Producto - Cantidad *', key: 'quantity', width: 22 },
+    { header: 'Notas', key: 'notes', width: 28 },
   ];
 
   // Header row styles
   const headerRow = sheet.getRow(1);
   headerRow.eachCell((cell, colNumber) => {
-    const isHelper   = colNumber >= 5 && colNumber <= 7;
+    const isHelper = colNumber >= 5 && colNumber <= 7;
     const isRequired = !isHelper && cell.value?.toString().includes('*');
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: {
-        argb: isHelper   ? 'FFE8F4FD'
-            : isRequired ? 'FFFFF3CD'
-            :              'FFE9ECEF',
+        argb: isHelper ? 'FFE8F4FD'
+          : isRequired ? 'FFFFF3CD'
+            : 'FFE9ECEF',
       },
     };
     cell.font = {
-      bold:   !isHelper,
-      italic:  isHelper,
-      size:    isHelper ? 10 : 11,
+      bold: !isHelper,
+      italic: isHelper,
+      size: isHelper ? 10 : 11,
       color: {
-        argb: isHelper   ? 'FF1D6FA5'
-            : isRequired ? 'FF856404'
-            :              'FF495057',
+        argb: isHelper ? 'FF1D6FA5'
+          : isRequired ? 'FF856404'
+            : 'FF495057',
       },
     };
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
@@ -98,9 +98,9 @@ export async function downloadBulkShipmentTemplate(
       bottom: {
         style: 'medium',
         color: {
-          argb: isHelper   ? 'FF3A7DC9'
-              : isRequired ? 'FFFFC107'
-              :              'FFADB5BD',
+          argb: isHelper ? 'FF3A7DC9'
+            : isRequired ? 'FFFFC107'
+              : 'FFADB5BD',
         },
       },
     };
@@ -109,20 +109,20 @@ export async function downloadBulkShipmentTemplate(
 
   // Example row
   const exampleRow = sheet.addRow({
-    customer_name:       'Juan Pérez García',
-    phone:               '987654321',
-    address:             'Av. Lima 123, Int. 5',
-    location_name:       'Huaycan',
-    reference:           'Frente al parque central',
-    service_type:        'regular',
-    shipping_mode:       'solo entregar',
-    date:                '2026-05-10',
-    total_amount:        '',
-    payment_method:      '',
+    customer_name: 'Juan Pérez García',
+    phone: '987654321',
+    address: 'Av. Lima 123, Int. 5',
+    location_name: 'Huaycan',
+    reference: 'Frente al parque central',
+    service_type: 'regular',
+    shipping_mode: 'solo entregar',
+    date: '2026-05-10',
+    total_amount: '',
+    payment_method: '',
     payment_destination: '',
-    product_name:        'Zapatillas Nike Air Max',
-    quantity:            2,
-    notes:               'Entregar en horario AM',
+    product_name: 'Zapatillas Nike Air Max',
+    quantity: 2,
+    notes: 'Entregar en horario AM',
   });
 
   exampleRow.eachCell((cell, colNumber) => {
@@ -136,6 +136,14 @@ export async function downloadBulkShipmentTemplate(
 
   // Data validations + VLOOKUP formulas (rows 2 → MAX_DATA_ROWS)
   for (let r = 2; r <= MAX_DATA_ROWS; r++) {
+    // Unlock all editable cells in this row, keep helper columns (5, 6, 7) locked
+    for (let c = 1; c <= 17; c++) {
+      const isHelper = c >= 5 && c <= 7;
+      if (!isHelper) {
+        sheet.getCell(r, c).protection = { locked: false };
+      }
+    }
+
     // Dropdown: Tipo de Servicio (col I)
     sheet.getCell(`I${r}`).dataValidation = {
       type: 'list', allowBlank: false,
@@ -225,6 +233,12 @@ export async function downloadBulkShipmentTemplate(
   // Freeze header row
   sheet.views = [{ state: 'frozen', ySplit: 1 }];
 
+  // Protect the sheet to enforce locked cells (columns E, F, G and headers)
+  sheet.protect('', {
+    selectLockedCells: false,
+    selectUnlockedCells: true,
+  });
+
   // ── Sheet 2: Catálogo (lookup tables) ─────────────────────────────────────
   if (catalog) {
     const catSheet = workbook.addWorksheet('Catálogo');
@@ -276,7 +290,7 @@ export async function downloadBulkShipmentTemplate(
       { col: 'E', val: 'ID Sector', bg: 'FF059669' },
       { col: 'G', val: 'Nombre Sector', bg: 'FF059669' }, // Wait, should be F but I'll use F
     ];
-    
+
     // Re-check column assignments: A,B,C,D,E,F
     const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
     const names = ['ID Región', 'Nombre Región', 'ID Distrito', 'Nombre Distrito', 'ID Sector', 'Nombre Sector'];
@@ -292,7 +306,7 @@ export async function downloadBulkShipmentTemplate(
     flatRows.forEach((item, i) => {
       const row = HEADER_ROW + 1 + i;
       const data = [item.regId, item.regName, item.distId, item.distName, item.secId, item.secName];
-      
+
       cols.forEach((col, j) => {
         const cell = catSheet.getCell(`${col}${row}`);
         cell.value = data[j];

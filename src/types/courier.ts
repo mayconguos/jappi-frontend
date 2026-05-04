@@ -23,6 +23,7 @@ export type CarrierDeliveryStatus =
 export interface CarrierDelivery {
   id: string;
   status: CarrierDeliveryStatus;
+  total_amount: number;
   shipping_date: string;
   customer_name: string;
   phone: string;
@@ -31,4 +32,8 @@ export interface CarrierDelivery {
   district_name: string;
   sector_name: string;
   signed_urls?: string[];
+  url_01?: string;
+  url_02?: string;
+  url_03?: string;
+  
 }

@@ -94,7 +94,7 @@ export async function parseShipmentExcel(
     const phone = get(2);
     const address = get(3);
     const location_name = get(4);
-    
+
     let id_region = 0;
     let id_district = 0;
     let id_sector = 0;
@@ -102,7 +102,7 @@ export async function parseShipmentExcel(
     const reference = get(8);
     const service_type = get(9);
     const shipping_mode = get(10) || 'solo entregar';
-    
+
     // ── Date parsing (Col 10) ──
     const rawDate = values[10];
     let date = '';
@@ -224,7 +224,7 @@ export async function parseShipmentExcel(
         errors.push(`Ubicación "${location_name}" no encontrada en el catálogo (buscado como Sector y Distrito)`);
       }
     } else if (!location_name) {
-      errors.push('Ubicación (Nombre) requerido');
+      errors.push('Distrito requerido');
     } else {
       warnings.push('Catálogo no disponible: no se pudo validar la jerarquía de la ubicación');
     }
@@ -296,21 +296,21 @@ export function rowToApiPayload(row: BulkShipmentRow, idCompany: number | string
     ...(row.notes ? { notes: row.notes } : {}),
     ...(isCod
       ? {
-          total_amount: row.total_amount,
-          payment_method:
-            {
-              Efectivo: 'cash',
-              Tarjeta: 'card',
-              Transferencia: 'transfer',
-              Yape: 'yape',
-              Plin: 'plin',
-            }[row.payment_method] || 'cash',
-          payment_destination:
-            {
-              'Pago a Japi': 'japi_payment',
-              'Pago a vendedor': 'seller_payment',
-            }[row.payment_destination] || 'seller_payment',
-        }
+        total_amount: row.total_amount,
+        payment_method:
+          {
+            Efectivo: 'cash',
+            Tarjeta: 'card',
+            Transferencia: 'transfer',
+            Yape: 'yape',
+            Plin: 'plin',
+          }[row.payment_method] || 'cash',
+        payment_destination:
+          {
+            'Pago a Japi': 'japi_payment',
+            'Pago a vendedor': 'seller_payment',
+          }[row.payment_destination] || 'seller_payment',
+      }
       : {}),
   };
 }
