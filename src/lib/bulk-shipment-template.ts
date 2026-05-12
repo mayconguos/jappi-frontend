@@ -60,7 +60,7 @@ export async function downloadBulkShipmentTemplate(
     { header: 'Referencia', key: 'reference', width: 24 },
     { header: 'Tipo de Servicio *', key: 'service_type', width: 20 },
     { header: 'Modo de Entrega *', key: 'shipping_mode', width: 22 },
-    { header: 'Fecha Entrega * (YYYY-MM-DD)', key: 'date', width: 26 },
+    { header: 'Fecha Entrega * (DD/MM/YYYY)', key: 'date', width: 26 },
     { header: 'Monto COD', key: 'total_amount', width: 14 },
     { header: 'Método de Pago', key: 'payment_method', width: 18 },
     { header: 'Forma de Pago', key: 'payment_destination', width: 18 },
@@ -107,6 +107,9 @@ export async function downloadBulkShipmentTemplate(
   });
   headerRow.height = 40;
 
+  // Set explicit date format for the date column
+  sheet.getColumn(11).numFmt = 'dd/mm/yyyy';
+
   // Example row
   const exampleRow = sheet.addRow({
     customer_name: 'Juan Pérez García',
@@ -116,7 +119,7 @@ export async function downloadBulkShipmentTemplate(
     reference: 'Frente al parque central',
     service_type: 'regular',
     shipping_mode: 'solo entregar',
-    date: '2026-05-10',
+    date: '10/05/2026',
     total_amount: '',
     payment_method: '',
     payment_destination: '',
@@ -136,12 +139,11 @@ export async function downloadBulkShipmentTemplate(
 
   // Data validations + VLOOKUP formulas (rows 2 → MAX_DATA_ROWS)
   for (let r = 2; r <= MAX_DATA_ROWS; r++) {
-    // Unlock all editable cells in this row, keep helper columns (5, 6, 7) locked
+    // Desbloqueamos todas las celdas de la fila de datos (incluyendo E, F, G)
+    // Esto es necesario para que Excel permita copiar y pegar la fila completa.
+    // Aunque pierden la protección estricta, al pegar la fila la fórmula se copia correctamente.
     for (let c = 1; c <= 17; c++) {
-      const isHelper = c >= 5 && c <= 7;
-      if (!isHelper) {
-        sheet.getCell(r, c).protection = { locked: false };
-      }
+      sheet.getCell(r, c).protection = { locked: false };
     }
 
     // Dropdown: Tipo de Servicio (col I)

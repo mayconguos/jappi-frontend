@@ -103,8 +103,8 @@ export async function parseShipmentExcel(
     const service_type = get(9);
     const shipping_mode = get(10) || 'solo entregar';
 
-    // ── Date parsing (Col 10) ──
-    const rawDate = values[10];
+    // ── Date parsing (Col 11) ──
+    const rawDate = values[11];
     let date = '';
     if (rawDate instanceof Date) {
       date = rawDate.toISOString().split('T')[0];
@@ -114,7 +114,16 @@ export async function parseShipmentExcel(
       const d = new Date(excelEpoch.getTime() + rawDate * 86400000);
       date = d.toISOString().split('T')[0];
     } else {
-      date = get(11);
+      const dateStr = get(11);
+      const match = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (match) {
+        const d = match[1].padStart(2, '0');
+        const m = match[2].padStart(2, '0');
+        const y = match[3];
+        date = `${y}-${m}-${d}`;
+      } else {
+        date = dateStr;
+      }
     }
 
     const total_amount = getNum(12);
@@ -160,7 +169,7 @@ export async function parseShipmentExcel(
     if (!date) {
       errors.push('Fecha de entrega requerida');
     } else if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      errors.push(`Formato de fecha inválido: "${date}" (use: YYYY-MM-DD)`);
+      errors.push(`Formato de fecha inválido: "${date}" (use: DD/MM/YYYY)`);
     }
 
     if (!product_name) errors.push('Nombre de producto requerido');
