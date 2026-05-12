@@ -23,6 +23,9 @@ export interface Shipment {
   customer_name: string;
   phone: string;
   total_amount: number;
+  payment_method?: string;
+  payment_destination?: string;
+  signed_urls?: string[];
 }
 
 export interface ApiShipment {
@@ -40,6 +43,7 @@ export interface ApiShipment {
   phone: string;
   shipping_date: string;
   status: string;
+  payment_method?: string;
+  payment_destination?: string;
+  signed_urls?: string[];
 }
-
-

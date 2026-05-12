@@ -409,7 +409,7 @@ export default function AllShipmentsPage() {
         isOpen={viewDetails.isOpen}
         onClose={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}
         size="md"
-        title={`Detalle de Envío #${viewDetails.shipment?.id.toString().padStart(5, '0')}`}
+        title='Detalle de Envío'
         footer={
           <ModalFooter>
             <div className="flex justify-end pt-2">

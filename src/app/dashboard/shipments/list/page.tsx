@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-import { BadgeDollarSign, Info } from 'lucide-react';
+import { BadgeDollarSign, Info, Eye } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/context/AuthContext';
@@ -16,6 +16,7 @@ import DataTableFilter from '@/components/filters/DataTableFilter';
 import ShipmentsTable from '@/components/tables/ShipmentsTable';
 
 import { Shipment, ApiShipment } from '@/types/shipment';
+import { PAYMENT_METHODS, PAYMENT_FORMS } from '@/constants/formOptions';
 
 const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
   const date = apiShipment.shipping_date ? new Date(apiShipment.shipping_date) : new Date();
@@ -39,6 +40,9 @@ const mapApiShipmentToShipment = (apiShipment: ApiShipment): Shipment => {
     customer_name: apiShipment.customer_name,
     phone: apiShipment.phone,
     total_amount: apiShipment.total_amount,
+    payment_method: apiShipment.payment_method,
+    payment_destination: apiShipment.payment_destination,
+    signed_urls: apiShipment.signed_urls || [],
   };
 };
 
@@ -231,26 +235,57 @@ export default function ListShipmentsPage() {
           )}
         </div>
 
-        {/* Total Summary - Simplified & Premium */}
-        <div className="flex items-center justify-between p-5 bg-emerald-50/50 border border-emerald-100/50 rounded-2xl">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
-              <BadgeDollarSign className="w-5 h-5 text-white" />
+        {/* Total Summary - Minimalist Premium */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200 shrink-0">
+                <BadgeDollarSign className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-0.5">Total a Cobrar</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-lg font-bold text-emerald-800">S/</span>
+                  <p className="text-2xl font-black text-emerald-950 tabular-nums leading-none">
+                    {viewDetails.shipment?.total_amount ? Number(viewDetails.shipment.total_amount).toFixed(2) : '0.00'}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-0.5">Total a Cobrar</p>
-              <p className="text-2xl font-black text-emerald-900 tabular-nums">
-                S/ {viewDetails.shipment?.total_amount ? Number(viewDetails.shipment.total_amount).toFixed(2) : '0.00'}
-              </p>
+
+            <div className="text-right">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Estado</p>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase
+                ${viewDetails.shipment?.status === 'delivered'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-amber-100 text-amber-800'}`}
+              >
+                {viewDetails.shipment?.status === 'delivered' ? 'Entregado' : 'Pendiente'}
+              </span>
             </div>
           </div>
 
-          <div className="text-right hidden sm:block">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Estado</p>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-              {viewDetails.shipment?.status === 'delivered' ? 'Entregado' : 'Pendiente'}
-            </span>
-          </div>
+          {/* Payment Details - Subtle */}
+          {(viewDetails.shipment?.payment_method || viewDetails.shipment?.payment_destination) && (
+            <div className="flex items-center gap-2 px-2 py-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Información de pago:</span>
+              <div className="flex items-center gap-1.5">
+                {viewDetails.shipment?.payment_method && (
+                  <span className="text-xs font-semibold text-slate-700">
+                    {PAYMENT_METHODS.find(m => m.value === viewDetails.shipment?.payment_method)?.label || viewDetails.shipment.payment_method}
+                  </span>
+                )}
+                {viewDetails.shipment?.payment_method && viewDetails.shipment?.payment_destination && (
+                  <span className="text-slate-300 text-xs">•</span>
+                )}
+                {viewDetails.shipment?.payment_destination && (
+                  <span className="text-xs font-semibold text-slate-700">
+                    {PAYMENT_FORMS.find(f => f.value === viewDetails.shipment?.payment_destination)?.label || viewDetails.shipment.payment_destination}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Observations */}
@@ -263,6 +298,33 @@ export default function ListShipmentsPage() {
             <p className="text-xs text-slate-600 leading-relaxed italic">
               "{viewDetails.shipment.observation}"
             </p>
+          </div>
+        )}
+
+        {/* Fotos de Entrega */}
+        {viewDetails.shipment?.signed_urls && viewDetails.shipment.signed_urls.length > 0 && (
+          <div>
+            <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1 flex items-center gap-1.5">
+              <Eye size={14} className="text-slate-400" />
+              Fotos de Entrega
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {viewDetails.shipment.signed_urls.map((url, idx) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group"
+                >
+                  <img
+                    src={url}
+                    alt={`Prueba de entrega ${idx + 1}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </a>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -317,7 +379,7 @@ export default function ListShipmentsPage() {
         isOpen={viewDetails.isOpen}
         onClose={() => setViewDetails(prev => ({ ...prev, isOpen: false }))}
         size="md"
-        title={`Detalle de Envío #${viewDetails.shipment?.id.toString().padStart(5, '0')}`}
+        title='Detalle de Envío'
         footer={
           <ModalFooter>
             <div className="flex justify-end pt-2">
