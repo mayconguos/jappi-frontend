@@ -7,6 +7,16 @@ export type ShipmentStatus =
   | 'cancelled'
   | 'returned';
 
+export const STATUS_META: Record<ShipmentStatus, { label: string; badge: string; dot: string }> = {
+  pending: { label: 'Pendiente', badge: 'bg-amber-50  text-amber-700  border-amber-100', dot: 'bg-amber-400' },
+  scheduled: { label: 'Programado', badge: 'bg-blue-50   text-blue-700   border-blue-100', dot: 'bg-blue-400' },
+  received: { label: 'Recibido', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
+  in_transit: { label: 'En tránsito', badge: 'bg-cyan-50 text-cyan-700 border-cyan-100', dot: 'bg-cyan-400' },
+  delivered: { label: 'Entregado', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
+  cancelled: { label: 'Cancelado', badge: 'bg-red-50 text-red-700 border-red-100', dot: 'bg-red-400' },
+  returned: { label: 'Devuelto', badge: 'bg-orange-50 text-orange-700 border-orange-100', dot: 'bg-orange-400' },
+};
+
 export interface Shipment {
   id: number;
   id_driver: number | null;

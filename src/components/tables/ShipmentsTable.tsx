@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 import { Select } from '@/components/ui/select';
 
-import { Shipment, ShipmentStatus } from '@/types/shipment';
+import { Shipment, ShipmentStatus, STATUS_META } from '@/types/shipment';
 import { Courier } from '@/types/courier';
 
 // ─── Mode ──────────────────────────────────────────────────────────────────────
@@ -32,16 +32,6 @@ interface ShipmentsTableProps {
   onFetchCouriers?: () => void;
 }
 
-// ─── Constantes ────────────────────────────────────────────────────────────────
-const STATUS_META: Record<ShipmentStatus, { label: string; badge: string; dot: string }> = {
-  pending: { label: 'Pendiente', badge: 'bg-amber-50  text-amber-700  border-amber-100', dot: 'bg-amber-400' },
-  scheduled: { label: 'Programado', badge: 'bg-blue-50   text-blue-700   border-blue-100', dot: 'bg-blue-400' },
-  received: { label: 'Recibido', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
-  in_transit: { label: 'En tránsito', badge: 'bg-cyan-50 text-cyan-700 border-cyan-100', dot: 'bg-cyan-400' },
-  delivered: { label: 'Entregado', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-400' },
-  cancelled: { label: 'Cancelado', badge: 'bg-red-50 text-red-700 border-red-100', dot: 'bg-red-400' },
-  returned: { label: 'Devuelto', badge: 'bg-orange-50 text-orange-700 border-orange-100', dot: 'bg-orange-400' },
-};
 
 // ─── Sub-componente: Badge de estado (solo lectura) ────────────────────────────
 function StatusBadge({ status }: Readonly<{ status: string }>) {
@@ -222,7 +212,8 @@ export default function ShipmentsTable({
                           value={shipment.id_driver?.toString() || '0'}
                           onChange={(val) => onCarrierChange?.(shipment.id, val)}
                           options={carrierOptions}
-                          className="w-full min-w-[160px] border-slate-200 shadow-sm"
+                          className="w-full min-w-[160px] shadow-sm"
+                          buttonClassName={`border-slate-200 ${STATUS_META[shipment.status as ShipmentStatus]?.badge?.match(/bg-\w+-\d+/)?.[0] || ''}`}
                           disabled={isFetchingCouriers || shipment.status === 'received' || shipment.status === 'picked_up'}
                         />
                         {isFetchingCouriers && (shipment.status === 'pending' || shipment.status === 'scheduled') && (
@@ -260,7 +251,8 @@ export default function ShipmentsTable({
                         value={shipment.status}
                         onChange={(val) => onStatusChange?.(shipment.id, val as ShipmentStatus)}
                         options={statusOptions}
-                        className="w-full min-w-[130px] border-slate-200 shadow-sm"
+                        className="w-full min-w-[130px] shadow-sm"
+                        buttonClassName={STATUS_META[shipment.status as ShipmentStatus]?.badge || 'border-slate-200'}
                         disabled={shipment.status === 'received'}
                       />
                       {shipment.observation && (

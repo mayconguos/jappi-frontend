@@ -22,6 +22,7 @@ interface SelectProps {
   label?: string;
   error?: string;
   className?: string;
+  buttonClassName?: string;
   disabled?: boolean;
   size?: 'default' | 'compact';
   placeholder?: string;
@@ -36,6 +37,7 @@ export const Select = ({
   label,
   error,
   className,
+  buttonClassName,
   disabled,
   size = 'default',
   placeholder = 'Seleccionar...',
@@ -70,7 +72,8 @@ export const Select = ({
               // Disabled State
               disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed border-gray-200',
               // Hover
-              // !error && !disabled && 'hover:border-gray-400'
+              // !error && !disabled && 'hover:border-gray-400',
+              buttonClassName
             )}
           >
             {Icon && (
