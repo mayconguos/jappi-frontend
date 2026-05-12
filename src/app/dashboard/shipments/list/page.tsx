@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import ExcelJS from 'exceljs';
 
 import { BadgeDollarSign, Info, Eye } from 'lucide-react';
 
@@ -152,7 +153,42 @@ export default function ListShipmentsPage() {
     }
   };
 
-  const handleExportExcel = () => console.log('Exporting Excel...');
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Envíos');
+
+    worksheet.columns = [
+      { header: 'Fecha', key: 'shipment_date', width: 15 },
+      { header: 'Destinatario', key: 'customer_name', width: 30 },
+      { header: 'Teléfono', key: 'phone', width: 15 },
+      { header: 'Dirección', key: 'address', width: 40 },
+      { header: 'Distrito', key: 'district', width: 20 },
+      { header: 'Transportista', key: 'carrier', width: 25 },
+      { header: 'Bultos', key: 'packages', width: 10 },
+      { header: 'Total (S/)', key: 'total_amount', width: 15 },
+      { header: 'Estado', key: 'status', width: 15 },
+      { header: 'Método de Pago', key: 'payment_method', width: 20 },
+      { header: 'Destino de Pago', key: 'payment_destination', width: 20 },
+    ];
+
+    filteredShipments.forEach((shipment) => {
+      worksheet.addRow({
+        ...shipment,
+        status: shipment.status === 'delivered' ? 'Entregado' : (shipment.status === 'pending' ? 'Pendiente' : shipment.status),
+        payment_method: PAYMENT_METHODS.find(m => m.value === shipment.payment_method)?.label || shipment.payment_method || '-',
+        payment_destination: PAYMENT_FORMS.find(f => f.value === shipment.payment_destination)?.label || shipment.payment_destination || '-',
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = globalThis.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `envios_${new Date().toISOString().split('T')[0]}.xlsx`;
+    link.click();
+    globalThis.URL.revokeObjectURL(url);
+  };
 
   const renderModalContent = () => {
     if (viewDetails.loading) {

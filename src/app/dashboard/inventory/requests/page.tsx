@@ -121,7 +121,12 @@ export default function WarehouseRequestsPage() {
 
   // Actualiza el estado de la solicitud en la lista local (sin re-fetch)
   const handleStatusChange = (requestId: number, newStatus: InboundRequest['status']) => {
-    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
+    if (newStatus === 'received') {
+      // Si pasa a recibido, lo quitamos de la lista local (el backend solo devuelve pendientes)
+      setRequests(prev => prev.filter(r => r.id !== requestId));
+    } else {
+      setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
+    }
     setSelectedRequest(null);
   };
 
