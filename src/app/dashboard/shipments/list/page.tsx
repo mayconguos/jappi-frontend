@@ -82,11 +82,19 @@ export default function ListShipmentsPage() {
   // ─── Initial Fetch ────────────────────────────────────────────
   useEffect(() => {
     const fetchShipments = async () => {
-      setIsInitialLoading(true);
       try {
         const idCompany = user?.id_company;
         if (idCompany) {
-          const resp = await get(`/shipping/${idCompany}`);
+          let url = `/shipping/${idCompany}`;
+          const queryParams = new URLSearchParams();
+          if (dateRange.from) queryParams.append('start_date', dateRange.from);
+          if (dateRange.to) queryParams.append('end_date', dateRange.to);
+          
+          if (queryParams.toString()) {
+            url += `?${queryParams.toString()}`;
+          }
+
+          const resp = await get(url);
           const data = Array.isArray(resp) ? resp : (resp as any)?.data;
           if (data && Array.isArray(data)) {
             const mapped = data.map(mapApiShipmentToShipment);
@@ -102,32 +110,13 @@ export default function ListShipmentsPage() {
       }
     };
     if (user) { fetchShipments(); }
-  }, [user, get]);
+  }, [user, get, dateRange.from, dateRange.to]);
 
   useEffect(() => { setCurrentPage(1); }, [field, value, dateRange]);
 
   // ─── Filtered & Paginated Data ────────────────────────────────
   const filteredShipments = useMemo(() => {
     let filtered = shipments;
-    if (dateRange.from) {
-      const fDate = new Date(dateRange.from);
-      fDate.setHours(0, 0, 0, 0);
-      filtered = filtered.filter(s => {
-        const sDate = new Date(s.shipment_date.split('/').reverse().join('-')); // DD/MM/YYYY to YYYY-MM-DD
-        sDate.setHours(0, 0, 0, 0);
-        return sDate >= fDate;
-      });
-    }
-
-    if (dateRange.to) {
-      const tDate = new Date(dateRange.to);
-      tDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(s => {
-        const sDate = new Date(s.shipment_date.split('/').reverse().join('-'));
-        sDate.setHours(23, 59, 59, 999);
-        return sDate <= tDate;
-      });
-    }
 
     if (!value) return filtered;
 
@@ -353,7 +342,12 @@ export default function ListShipmentsPage() {
             <DeliveryLoader message="Cargando información de envíos..." />
           </div>
         ) : (
-          <div className='flex flex-col gap-6'>
+          <div className='flex flex-col gap-6 relative'>
+            {loading && !isInitialLoading && (
+              <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex justify-center items-center rounded-2xl transition-all duration-300">
+                <DeliveryLoader message="Actualizando envíos..." />
+              </div>
+            )}
             <ShipmentsTable
               mode="company"
               shipments={currentItems}

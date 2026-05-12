@@ -283,7 +283,7 @@ export function rowToApiPayload(row: BulkShipmentRow, idCompany: number | string
 
   return {
     id_company: idCompany,
-    origin_type: 'bulk',
+    origin_type: 'pickup',
     service_type: row.service_type,
     shipping_mode: row.shipping_mode === 'contraentrega' ? 'pay_on_delivery' : 'delivery_only',
     date: row.date,

@@ -84,6 +84,7 @@ export default function AllShipmentsPage() {
     to: todayDate,
   });
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isFetchingData, setIsFetchingData] = useState(false);
 
   // View details state (specific to this page)
   const [viewDetails, setViewDetails] = useState<{
@@ -115,9 +116,18 @@ export default function AllShipmentsPage() {
   // ─── Initial Fetch ────────────────────────────────────────────
   useEffect(() => {
     const fetchShipments = async () => {
-      setIsInitialLoading(true);
+      if (!isInitialLoading) setIsFetchingData(true);
       try {
-        const resp = await get('/shipping');
+        let url = '/shipping';
+        const queryParams = new URLSearchParams();
+        if (dateRange.from) queryParams.append('start_date', dateRange.from);
+        if (dateRange.to) queryParams.append('end_date', dateRange.to);
+        
+        if (queryParams.toString()) {
+          url += `?${queryParams.toString()}`;
+        }
+
+        const resp = await get(url);
         const data = Array.isArray(resp) ? resp : (resp as any)?.data;
         if (data && Array.isArray(data)) {
           const mapped = data.map(mapApiShipmentToShipment);
@@ -129,34 +139,17 @@ export default function AllShipmentsPage() {
         console.error('Error fetching shipments:', err);
       } finally {
         setIsInitialLoading(false);
+        setIsFetchingData(false);
       }
     };
     fetchShipments();
-  }, [user, get]);
+  }, [user, get, dateRange.from, dateRange.to]);
 
   useEffect(() => { setCurrentPage(1); }, [field, value, dateRange]);
 
   // ─── Filtered & Paginated Data ────────────────────────────────
   const filteredShipments = useMemo(() => {
     let filtered = shipments;
-    if (dateRange.from) {
-      const fDate = new Date(dateRange.from);
-      fDate.setHours(0, 0, 0, 0);
-      filtered = filtered.filter(s => {
-        const sDate = new Date(s.shipment_date.split('/').reverse().join('-'));
-        sDate.setHours(0, 0, 0, 0);
-        return sDate >= fDate;
-      });
-    }
-    if (dateRange.to) {
-      const tDate = new Date(dateRange.to);
-      tDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(s => {
-        const sDate = new Date(s.shipment_date.split('/').reverse().join('-'));
-        sDate.setHours(23, 59, 59, 999);
-        return sDate <= tDate;
-      });
-    }
 
     if (!value) return filtered;
 
@@ -375,7 +368,12 @@ export default function AllShipmentsPage() {
           <DeliveryLoader message="Cargando información de envíos..." />
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 relative">
+          {isFetchingData && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex justify-center items-center rounded-2xl transition-all duration-300">
+              <DeliveryLoader message="Actualizando envíos..." />
+            </div>
+          )}
           <ShipmentsTable
             mode="admin"
             shipments={currentItems}

@@ -32,34 +32,38 @@ export default function ConfirmStep({ result, idCompany, onBack, onFinish }: Con
   const total = validRows.length;
 
   const handleSend = async () => {
-    console.log('handleSend');
-    // setStatus('sending');
-    // setProgress(0);
-    // const results: RowResult[] = [];
+    setStatus('sending');
+    setProgress(0);
+    const results: RowResult[] = [];
 
-    // // Obtener token
-    // const token = localStorage.getItem('token');
-    // const headers = { authorization: `${token}` };
+    // Obtener token
+    const token = localStorage.getItem('token');
+    const headers = { authorization: `${token}` };
 
-    // for (let i = 0; i < validRows.length; i++) {
-    //   const row = validRows[i];
-    //   const payload = rowToApiPayload(row, idCompany);
+    const payloads = validRows.map((row) => rowToApiPayload(row, idCompany));
 
-    //   try {
-    //     await api.post('/shipping', payload, { headers });
-    //     results.push({ rowIndex: row.rowIndex, customer_name: row.customer_name, success: true });
-    //   } catch (err: any) {
-    //     const msg = err?.response?.data?.message || err?.message || 'Error desconocido';
-    //     results.push({ rowIndex: row.rowIndex, customer_name: row.customer_name, success: false, error: msg });
-    //   }
+    try {
+      // Send all payloads in a single request
+      await api.post('/shipping', payloads, { headers });
+      
+      // If successful, all rows succeeded
+      validRows.forEach((row) => {
+        results.push({ rowIndex: row.rowIndex, customer_name: row.customer_name, success: true });
+      });
+      setProgress(validRows.length);
+    } catch (err: any) {
+      // If error, all rows fail or we show a generic error
+      const msg = err?.response?.data?.message || err?.message || 'Error al procesar la carga masiva';
+      validRows.forEach((row) => {
+        results.push({ rowIndex: row.rowIndex, customer_name: row.customer_name, success: false, error: msg });
+      });
+      setProgress(validRows.length);
+    }
 
-    //   setProgress(i + 1);
-    //   setRowResults([...results]);
-    // }
-
+    setRowResults(results);
     setStatus('done');
-    // const successCount = results.filter((r) => r.success).length;
-    // const failCount = results.filter((r) => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failCount = results.filter((r) => !r.success).length;
     onFinish(successCount, failCount);
   };
 

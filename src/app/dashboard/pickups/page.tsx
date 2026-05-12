@@ -74,6 +74,7 @@ export default function PickupsPage() {
     to: todayDate,
   });
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isFetchingData, setIsFetchingData] = useState(false);
 
   // View details state (specific to this page)
   const [viewDetails, setViewDetails] = useState<{
@@ -105,43 +106,36 @@ export default function PickupsPage() {
   // ─── Initial Fetch ────────────────────────────────────────────
   useEffect(() => {
     const fetchPickups = async () => {
-      setIsInitialLoading(true);
+      if (!isInitialLoading) setIsFetchingData(true);
       try {
-        const resp = await get('/pickup');
+        let url = '/pickup';
+        const queryParams = new URLSearchParams();
+        if (dateRange.from) queryParams.append('start_date', dateRange.from);
+        if (dateRange.to) queryParams.append('end_date', dateRange.to);
+        
+        if (queryParams.toString()) {
+          url += `?${queryParams.toString()}`;
+        }
+
+        const resp = await get(url);
         const data = Array.isArray(resp) ? resp : (resp as any)?.data;
         if (data && Array.isArray(data)) setPickups(data.map(mapApiPickupToPickup));
       } catch (err) {
         console.error('Error fetching pickups:', err);
       } finally {
         setIsInitialLoading(false);
+        setIsFetchingData(false);
       }
     };
     fetchPickups();
-  }, [get]);
+  }, [get, dateRange.from, dateRange.to]);
 
   useEffect(() => { setCurrentPage(1); }, [field, value, dateRange]);
 
   // ─── Filtered & Paginated Data ────────────────────────────────
   const filteredPickups = useMemo(() => {
     let filtered = pickups;
-    if (dateRange.from) {
-      const fDate = new Date(dateRange.from);
-      fDate.setHours(0, 0, 0, 0);
-      filtered = filtered.filter(p => {
-        const pDate = new Date(p.pickup_date.split('/').reverse().join('-'));
-        pDate.setHours(0, 0, 0, 0);
-        return pDate >= fDate;
-      });
-    }
-    if (dateRange.to) {
-      const tDate = new Date(dateRange.to);
-      tDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(p => {
-        const pDate = new Date(p.pickup_date.split('/').reverse().join('-'));
-        pDate.setHours(23, 59, 59, 999);
-        return pDate <= tDate;
-      });
-    }
+
     if (!value) return filtered;
     const searchTerm = value.toLowerCase();
     return filtered.filter(p => {
@@ -355,7 +349,12 @@ export default function PickupsPage() {
           <DeliveryLoader message="Cargando información de recojos..." />
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 relative">
+          {isFetchingData && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex justify-center items-center rounded-2xl transition-all duration-300">
+              <DeliveryLoader message="Actualizando recojos..." />
+            </div>
+          )}
           <PickupsTable
             pickups={currentItems}
             currentPage={currentPage}
