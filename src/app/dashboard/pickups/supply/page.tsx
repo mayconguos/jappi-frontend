@@ -204,7 +204,7 @@ export default function SupplyPickupsPage() {
 
       {isInitialLoading ? (
         <div className="flex justify-center items-center h-64">
-          <DeliveryLoader message="Cargando autorizaciones pendientes..." />
+          <DeliveryLoader message="Cargando recojos de abastecimiento..." />
         </div>
       ) : (
         <div className="flex flex-col gap-6">
@@ -218,14 +218,6 @@ export default function SupplyPickupsPage() {
           {totalItems > 0 && (
             <div className="flex justify-center sm:justify-end">
               <Pagination currentPage={currentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setCurrentPage} />
-            </div>
-          )}
-
-          {totalItems === 0 && (
-            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
-              <p className="text-slate-400">
-                {value ? `No se encontraron resultados para "${value}"` : 'No hay autorizaciones pendientes'}
-              </p>
             </div>
           )}
         </div>

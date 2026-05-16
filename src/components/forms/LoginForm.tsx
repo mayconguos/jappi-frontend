@@ -54,7 +54,7 @@ export default function LoginForm() {
 
     try {
       await login(data);
-      // Redirection is handled in AuthContext
+      // Redirection is handled in AuthContext, do not set isLoading(false) here to avoid flash
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { status: number } };
@@ -81,7 +81,6 @@ export default function LoginForm() {
       } else {
         setError('Ocurrió un error inesperado. Por favor, intenta nuevamente.');
       }
-    } finally {
       setIsLoading(false);
     }
   };
