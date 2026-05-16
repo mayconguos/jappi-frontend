@@ -1,17 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import api from '@/app/services/api';
+
 import RequestsFilter from '@/components/filters/RequestsFilter';
-import RequestsTable, { InboundRequest } from '@/components/tables/RequestsTable';
-import { Pagination } from '@/components/ui/pagination';
+
 import NewRequestModal from '@/components/forms/modals/NewRequestModal';
 import RequestDetailModal from '@/components/forms/modals/RequestDetailModal';
-import { useAuth } from '@/context/AuthContext';
-import { getRoleNameFromNumber } from '@/utils/roleUtils';
-import api from '@/app/services/api';
-import StatusModal, { StatusType } from '@/components/ui/status-modal';
-import { useModal } from '@/components/ui/modal';
+
+import RequestsTable, { InboundRequest } from '@/components/tables/RequestsTable';
+
 import DeliveryLoader from '@/components/ui/delivery-loader';
+import { useModal } from '@/components/ui/modal';
+import { Pagination } from '@/components/ui/pagination';
+import StatusModal, { StatusType } from '@/components/ui/status-modal';
+
+import { useAuth } from '@/context/AuthContext';
+
+import { getRoleNameFromNumber } from '@/utils/roleUtils';
 
 export default function WarehouseRequestsPage() {
   const { user } = useAuth();
@@ -169,7 +176,7 @@ export default function WarehouseRequestsPage() {
               isWarehouse={isWarehouse}
             />
 
-            {totalItems > 0 ? (
+            {totalItems > 0 && (
               <div className="w-full pt-4">
                 <Pagination
                   currentPage={currentPage}
@@ -177,12 +184,6 @@ export default function WarehouseRequestsPage() {
                   itemsPerPage={itemsPerPage}
                   onPageChange={setCurrentPage}
                 />
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200 mt-4">
-                <p className="text-slate-400">
-                  {searchValue ? `No se encontraron resultados para "${searchValue}"` : 'No hay solicitudes de abastecimiento registradas'}
-                </p>
               </div>
             )}
           </>

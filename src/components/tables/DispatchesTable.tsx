@@ -11,6 +11,7 @@ interface DispatchesTableProps {
   onSelectAll?: (ids: number[]) => void;
   onStatusChange: (id: number, status: string) => void;
   showSelection?: boolean;
+  isReadOnly?: boolean;
 }
 
 export default function DispatchesTable({
@@ -21,6 +22,7 @@ export default function DispatchesTable({
   onSelectAll,
   onStatusChange,
   showSelection = false,
+  isReadOnly = false,
 }: Readonly<DispatchesTableProps>) {
   const allSelected = dispatches.length > 0 && selectedIds.length === dispatches.length;
 
@@ -77,7 +79,7 @@ export default function DispatchesTable({
               <th className="px-4 py-3">Producto</th>
               <th className="px-4 py-3">Origen</th>
               <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3 text-right">Acciones</th>
+              {!isReadOnly && <th className="px-4 py-3 text-right">Acciones</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -120,29 +122,31 @@ export default function DispatchesTable({
                 <td className="px-4 py-3 whitespace-nowrap">
                   {getStatusDispatchBadge(dispatch.status_dispatch, dispatch.origin_type)}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-right">
-                  {dispatch.status_dispatch === 'to_dispatch' ? (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onStatusChange(dispatch.id, 'dispatched')}
-                      className="h-8 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-lg transition-all"
-                    >
-                      <CheckCircle2 size={14} />
-                      <span className="hidden sm:inline">
-                        {dispatch.origin_type === 'stock' ? 'Confirmar Preparación' : 'Confirmar Despacho'}
-                      </span>
-                    </Button>
-                  ) : (
-                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-2">Completado</span>
-                  )}
-                </td>
+                {!isReadOnly && (
+                  <td className="px-4 py-3 whitespace-nowrap text-right">
+                    {dispatch.status_dispatch === 'to_dispatch' ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onStatusChange(dispatch.id, 'dispatched')}
+                        className="h-8 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-lg transition-all"
+                      >
+                        <CheckCircle2 size={14} />
+                        <span className="hidden sm:inline">
+                          {dispatch.origin_type === 'stock' ? 'Confirmar Preparación' : 'Confirmar Despacho'}
+                        </span>
+                      </Button>
+                    ) : (
+                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-2">Completado</span>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
 
             {dispatches.length === 0 && (
               <tr>
-                <td colSpan={7} className="h-64 text-center">
+                <td colSpan={(showSelection ? 1 : 0) + 6 + (isReadOnly ? 0 : 1)} className="h-64 text-center">
                   <div className="flex flex-col items-center justify-center">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
                       <Package className="w-8 h-8 text-slate-300" />

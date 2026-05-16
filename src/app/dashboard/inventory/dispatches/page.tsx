@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { getRoleNameFromNumber } from '@/utils/roleUtils';
 
 import { Pagination } from '@/components/ui/pagination';
 import DeliveryLoader from '@/components/ui/delivery-loader';
@@ -28,6 +29,10 @@ const FILTER_FIELDS = [
 
 export default function DispatchesPage() {
   const { user } = useAuth();
+  
+  const roleName = getRoleNameFromNumber(user?.id_role ?? 0);
+  const isAdmin = roleName === 'admin';
+  
   const [dispatches, setDispatches] = useState<Dispatch[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -170,6 +175,7 @@ export default function DispatchesPage() {
             dispatches={currentItems}
             currentPage={currentPage}
             onStatusChange={handleStatusChange}
+            isReadOnly={isAdmin}
           />
 
           {totalItems > 0 && (

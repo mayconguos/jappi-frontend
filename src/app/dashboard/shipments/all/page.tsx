@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
+import { getRoleNameFromNumber } from '@/utils/roleUtils';
 
 import { Button } from '@/components/ui/button';
 import { Modal, ModalFooter } from '@/components/ui/modal';
@@ -74,6 +75,10 @@ const STATUS_OPTIONS = Object.entries(STATUS_LABELS)
 
 export default function AllShipmentsPage() {
   const { user } = useAuth();
+  
+  const roleName = getRoleNameFromNumber(user?.id_role ?? 0);
+  const isAlmacen = roleName === 'almacen';
+  const tableMode = isAlmacen ? 'almacen' : 'admin';
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [field, setField] = useState('all');
   const [value, setValue] = useState('');
@@ -375,7 +380,7 @@ export default function AllShipmentsPage() {
             </div>
           )}
           <ShipmentsTable
-            mode="admin"
+            mode={tableMode}
             shipments={currentItems}
             currentPage={currentPage}
             selectedIds={selectedIds}
@@ -431,12 +436,14 @@ export default function AllShipmentsPage() {
       <BatchAssignModal isOpen={isBatchModalOpen} isLoading={isUpdatingCarrier} selectedCount={selectedIds.length} entityLabelPlural="envíos" couriers={couriers} value={batchCarrier} onChange={setBatchCarrier} onConfirm={handleBatchCarrierUpdate} onClose={() => setIsBatchModalOpen(false)} />
       <BatchStatusModal isOpen={isBatchStatusModalOpen} isLoading={isUpdatingStatus} selectedCount={selectedIds.length} entityLabelPlural="envíos" statusOptions={STATUS_OPTIONS} value={batchStatus} onChange={v => setBatchStatus(v as ShipmentStatus)} onConfirm={handleBatchStatusUpdate} onClose={() => setIsBatchStatusModalOpen(false)} />
 
-      <BatchActionBar
-        selectedCount={selectedIds.length}
-        onAssignCarrier={() => { fetchCouriers(); setIsBatchModalOpen(true); }}
-        onChangeStatus={() => setIsBatchStatusModalOpen(true)}
-        onClear={() => setSelectedIds([])}
-      />
+      {!isAlmacen && (
+        <BatchActionBar
+          selectedCount={selectedIds.length}
+          onAssignCarrier={() => { fetchCouriers(); setIsBatchModalOpen(true); }}
+          onChangeStatus={() => setIsBatchStatusModalOpen(true)}
+          onClear={() => setSelectedIds([])}
+        />
+      )}
     </div>
   );
 }

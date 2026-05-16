@@ -11,7 +11,7 @@ import { Courier } from '@/types/courier';
 // 'admin'    → todas las columnas + acciones de admin (select, carrier dropdown, status dropdown, cancelar)
 // 'company'  → vista de empresa: sin select, carrier/status en modo lectura, solo "Ver"
 // 'readonly' → igual que company pero sin ninguna acción
-export type TableMode = 'admin' | 'company' | 'readonly';
+export type TableMode = 'admin' | 'company' | 'readonly' | 'almacen';
 
 // ─── Props ─────────────────────────────────────────────────────────────────────
 interface ShipmentsTableProps {

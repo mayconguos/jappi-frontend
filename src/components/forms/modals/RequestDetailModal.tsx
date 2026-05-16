@@ -1,13 +1,21 @@
+import { useEffect, useState } from 'react';
+
 import clsx from 'clsx';
+import { AlertTriangle, CheckCircle2, Loader2, MessageSquareWarning, XCircle, } from 'lucide-react';
+
+import api from '@/app/services/api';
+
+// Componentes UI
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Modal, ModalFooter } from '@/components/ui/modal';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, Package, CheckCircle2, AlertTriangle, XCircle, MessageSquareWarning } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import api from '@/app/services/api';
-import { useAuth } from '@/context/AuthContext';
+
+
 import { InboundRequest } from '@/components/tables/RequestsTable';
+
+import { useAuth } from '@/context/AuthContext';
+
+import { getRoleNameFromNumber } from '@/utils/roleUtils';
 
 interface RequestDetailModalProps {
   isOpen: boolean;
@@ -140,10 +148,15 @@ export default function RequestDetailModal({
 
   if (!request) return null;
 
-  const totalRequested = items.reduce((acc, i) => acc + i.quantity, 0);
-  const totalReceived = items.reduce((acc, i) => acc + i.received_quantity, 0);
-  const canConfirm = isWarehouse && request.status === 'pending' && !showCancelConfirm;
-  const canCancel = request.status === 'pending'; // ambos roles pueden cancelar
+  const roleName = getRoleNameFromNumber(user?.id_role ?? 0);
+  const isStrictAlmacen = roleName === 'almacen';
+
+  // Sólo almacén puede confirmar
+  const canConfirm = isStrictAlmacen && request.status === 'pending' && !showCancelConfirm;
+
+  // Administradores solo ven, no pueden cancelar/rechazar. Almacén puede rechazar, cliente puede cancelar.
+  const canCancel = request.status === 'pending' && roleName !== 'admin';
+
   const hasDiff = items.some(i => i.received_quantity !== i.quantity);
   const isActing = isConfirming || isCancelling;
 
@@ -293,55 +306,57 @@ export default function RequestDetailModal({
               <p className="text-red-500 text-sm">{error}</p>
             </div>
           ) : (
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50/80 hover:bg-gray-50/80">
-                    <TableHead className="w-[50%]">Producto / SKU</TableHead>
-                    <TableHead className="text-right">Solicitado</TableHead>
-                    {canConfirm && <TableHead className="text-right w-36">Recibido</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={canConfirm ? 3 : 2} className="text-center py-12 text-gray-500">
-                        No hay items en esta solicitud.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    items.map(item => {
-                      const isDiff = item.received_quantity !== item.quantity;
-                      return (
-                        <TableRow key={item.id} className={clsx('hover:bg-gray-50/50', isDiff && canConfirm && 'bg-amber-50/40')}>
-                          <TableCell>
-                            <div className="font-medium text-gray-900">{item.product_name}</div>
-                            {item.SKU && <div className="text-xs text-gray-500 font-mono mt-0.5">{item.SKU}</div>}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className="font-semibold text-gray-900">{item.quantity}</span>
-                            <span className="text-xs text-gray-500 ml-1">unds.</span>
-                          </TableCell>
-                          {canConfirm && (
-                            <TableCell className="text-right">
-                              <input
-                                type="number"
-                                min="0"
-                                value={item.received_quantity}
-                                onChange={e => updateReceivedQty(item.id, e.target.value)}
-                                className={clsx(
-                                  'w-24 text-right px-2 py-1 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-400',
-                                  isDiff ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-gray-200 bg-white text-gray-900'
-                                )}
-                              />
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
+            <div className="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs tracking-wider font-semibold">
+                    <tr>
+                      <th className="px-4 py-3 w-[50%]">Producto / SKU</th>
+                      <th className="px-4 py-3 text-right">Solicitado</th>
+                      {canConfirm && <th className="px-4 py-3 text-right w-36">Recibido</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {items.length === 0 ? (
+                      <tr>
+                        <td colSpan={canConfirm ? 3 : 2} className="text-center py-12 text-slate-500">
+                          No hay items en esta solicitud.
+                        </td>
+                      </tr>
+                    ) : (
+                      items.map(item => {
+                        const isDiff = item.received_quantity !== item.quantity;
+                        return (
+                          <tr key={item.id} className={clsx('hover:bg-slate-50/50 transition-colors', isDiff && canConfirm && 'bg-amber-50/40 hover:bg-amber-50/60')}>
+                            <td className="px-4 py-3">
+                              <div className="font-medium text-slate-900">{item.product_name}</div>
+                              {item.SKU && <div className="text-xs text-slate-500 font-mono mt-0.5">{item.SKU}</div>}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <span className="font-semibold text-slate-900">{item.quantity}</span>
+                              <span className="text-xs text-slate-500 ml-1">unds.</span>
+                            </td>
+                            {canConfirm && (
+                              <td className="px-4 py-3 text-right">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={item.received_quantity}
+                                  onChange={e => updateReceivedQty(item.id, e.target.value)}
+                                  className={clsx(
+                                    'w-24 text-right px-2 py-1 text-sm border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-colors',
+                                    isDiff ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 bg-white text-slate-900'
+                                  )}
+                                />
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
@@ -352,7 +367,7 @@ export default function RequestDetailModal({
               <AlertTriangle size={16} />
               <span>Diferencias detectadas</span>
             </div>
-            
+
             <p className="text-xs text-amber-600 leading-relaxed">
               Hay discrepancias entre lo solicitado y lo recibido. <strong>Debes ingresar una observación</strong> explicando el motivo para poder confirmar la recepción.
             </p>

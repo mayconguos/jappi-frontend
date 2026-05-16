@@ -62,9 +62,10 @@ export const roleRoutes: Record<Role, RouteItem[]> = {
   ],
 
   almacen: [
-    { path: '/dashboard/inventory/requests', label: 'Solicitudes', icon: FileText },
+    { path: '/dashboard/inventory/requests', label: 'Solicitudes de almacén', icon: FileText },
     { path: '/dashboard/inventory/main', label: 'Almacén Japi', icon: Warehouse },
-    // { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
+    { path: '/dashboard/inventory/kardex', label: 'Kardex', icon: ClipboardCheck },
+    { path: '/dashboard/inventory/dispatches', label: 'Despachos', icon: ClipboardCheck },
     { path: '/dashboard/shipments/all', label: 'Envíos', icon: Calendar },
     { path: '/dashboard/pickups', label: 'Recojos', icon: Truck },
     { path: '/dashboard/pickups/supply', label: 'Recojos de abastecimiento', icon: Truck },
